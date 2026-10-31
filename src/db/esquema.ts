@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { ClauEmbolcallada, DadesXifrades } from '../crypto'
+import type { CostatPosicio, Posicio3D } from '../punts/esquema'
 
 /**
  * Registre tal com es guarda a IndexedDB. Només van en clar l'id (UUID),
@@ -19,6 +20,19 @@ export interface RegistreMeta {
   valor: ClauEmbolcallada
 }
 
+/**
+ * Posició d'un punt calibrada a l'app i encara no exportada al catàleg.
+ * NO és dada de pacient: es guarda en clar. `posicio: null` = esborrada.
+ */
+export interface RegistreCalibratge {
+  id: string
+  topologia: string
+  codi: string
+  costat: CostatPosicio
+  posicio: Posicio3D | null
+  modificatAt: string
+}
+
 export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys'
 
 export class QiDB extends Dexie {
@@ -27,6 +41,7 @@ export class QiDB extends Dexie {
   fitxesCliniques!: Table<RegistreXifrat, string>
   /** L'id és la clau del formulari */
   esborranys!: Table<RegistreXifrat, string>
+  calibratge!: Table<RegistreCalibratge, string>
 
   constructor(nom = 'qi') {
     super(nom)
@@ -37,6 +52,9 @@ export class QiDB extends Dexie {
     })
     this.version(2).stores({
       esborranys: 'id, modificatAt',
+    })
+    this.version(3).stores({
+      calibratge: 'id, topologia',
     })
   }
 }

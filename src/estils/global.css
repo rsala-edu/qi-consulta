@@ -492,3 +492,341 @@ fieldset {
   display: flex;
   gap: 8px;
 }
+
+/* --- Navegació --- */
+
+.barra-app {
+  gap: 16px;
+}
+
+.navegacio {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.navegacio a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radi);
+  color: var(--tinta-suau);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navegacio a.active {
+  color: var(--accent);
+  background: var(--accent-suau);
+}
+
+/* --- Mapa del cos --- */
+
+.pantalla-mapa {
+  padding: 8px var(--espai) var(--espai);
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 62px);
+}
+
+.capcalera-mapa {
+  display: flex;
+  align-items: center;
+  gap: 8px 24px;
+  flex-wrap: wrap;
+}
+
+.capcalera-mapa h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.capcalera-mapa .avis,
+.capcalera-mapa .enllac-tornar {
+  margin: 0;
+}
+
+.disseny-mapa {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .pantalla-mapa {
+    height: auto;
+  }
+
+  .disseny-mapa {
+    grid-template-columns: 1fr;
+  }
+
+  .zona-visor {
+    height: 70vh;
+  }
+}
+
+.zona-visor {
+  position: relative;
+  min-height: 0;
+  border-radius: calc(var(--radi) * 1.5);
+  overflow: hidden;
+  background: linear-gradient(#fbfaf7, #efebe3);
+  border: 1px solid var(--linia);
+}
+
+.visor3d {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.visor3d canvas {
+  display: block;
+}
+
+.visor3d-etiquetes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.etiqueta-punt {
+  position: absolute;
+  left: 10px;
+  top: -10px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.85);
+  color: var(--tinta);
+  white-space: nowrap;
+}
+
+.visor3d-vistes {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: max-content;
+  max-width: calc(100% - 24px);
+}
+
+.visor3d-vistes .boto {
+  background: rgb(255 255 255 / 0.9);
+  padding: 0 16px;
+}
+
+.avis-flotant {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  z-index: 1;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: var(--radi);
+  background: rgb(255 255 255 / 0.9);
+  pointer-events: none;
+}
+
+.avis-segon {
+  top: 56px;
+}
+
+.llegenda {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  margin: 0;
+  padding: 8px 12px;
+  list-style: none;
+  font-size: 0.8rem;
+  background: rgb(255 255 255 / 0.85);
+  border-radius: var(--radi);
+  pointer-events: none;
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .llegenda {
+    display: block;
+    top: auto;
+    bottom: 76px;
+  }
+}
+
+.punt-color {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.panell-mapa {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-right: 4px;
+}
+
+.panell-mapa h2 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+
+.panell-mapa p {
+  margin: 0;
+}
+
+.detall {
+  color: var(--tinta-suau);
+  font-size: 0.9rem;
+}
+
+.llista-punts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.llista-punts button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 14px;
+  font: inherit;
+  text-align: left;
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.llista-punts button.actiu {
+  border-color: var(--accent);
+  background: var(--accent-suau);
+}
+
+.codi {
+  font-weight: 600;
+  min-width: 3.2em;
+}
+
+.pinyin {
+  flex: 1;
+}
+
+.estat-costats {
+  display: flex;
+  gap: 4px;
+}
+
+.estat-costats span {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  border: 1px solid var(--linia);
+  color: var(--tinta-suau);
+}
+
+.estat-costats span.fet {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.segmentat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.segmentat button {
+  min-height: 48px;
+  padding: 0 16px;
+  font: inherit;
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.segmentat button[aria-checked='true'] {
+  border-color: var(--accent);
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+  font-weight: 500;
+}
+
+.accions-esquerra {
+  justify-content: flex-start;
+}
+
+.punt-seleccionat,
+.fitxa-punt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  background: var(--superficie);
+}
+
+.llista-marcats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.llista-marcats li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 6px 0 6px 10px;
+  border-bottom: 1px solid var(--linia);
+}
+
+.llista-marcats .boto {
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+/* Al panell, cap bloc s'ha d'encongir (la llista de punts quedava amb alçada 0) */
+.panell-mapa > * {
+  flex-shrink: 0;
+}

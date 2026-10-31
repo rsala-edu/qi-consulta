@@ -27,7 +27,9 @@ export default defineConfig({
       },
       workbox: {
         // Tot el necessari per funcionar sense connexió va dins la precàrrega
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2,glb}'],
+        // El fragment de Three.js i el cos 3D (GLB) han de cabre a la memòria cau
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         navigateFallback: 'index.html',
       },
     }),

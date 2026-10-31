@@ -1,4 +1,5 @@
-import { HashRouter, Navigate, Outlet, Route, Routes } from 'react-router'
+import { lazy, Suspense } from 'react'
+import { HashRouter, Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import { Boto } from './components/Boto'
 import { Indicador } from './components/Indicador'
 import type { QiDB } from './db/esquema'
@@ -9,6 +10,15 @@ import { PantallaFitxaPacient } from './pantalles/fitxa-pacient/PantallaFitxaPac
 import { PantallaDesbloqueig } from './pantalles/desbloqueig/PantallaDesbloqueig'
 import { PantallaNouPacient } from './pantalles/pacients/PantallaNouPacient'
 import { PantallaPacients } from './pantalles/pacients/PantallaPacients'
+import { PantallaAjustos } from './pantalles/ajustos/PantallaAjustos'
+
+// Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
+const PantallaCalibratge = lazy(() =>
+  import('./pantalles/ajustos/PantallaCalibratge').then((m) => ({ default: m.PantallaCalibratge })),
+)
+const PantallaProvaMapa = lazy(() =>
+  import('./pantalles/mapa/PantallaProvaMapa').then((m) => ({ default: m.PantallaProvaMapa })),
+)
 import { DialegEsborranys } from './pantalles/desbloqueig/DialegEsborranys'
 import { ProveidorEsborranys } from './sessio/ContextEsborranys'
 import { ProveidorSessio, useMagatzem, useSessio } from './sessio/ContextSessio'
@@ -20,11 +30,18 @@ function Marc() {
     <ProveidorEsborranys magatzem={magatzem}>
       <header className="barra-app">
         <span className="logotip">{t.app.nom}</span>
+        <nav className="navegacio" aria-label={t.navegacio.principal}>
+          <NavLink to="/pacients">{t.navegacio.pacients}</NavLink>
+          <NavLink to="/mapa">{t.navegacio.mapa}</NavLink>
+          <NavLink to="/ajustos">{t.navegacio.ajustos}</NavLink>
+        </nav>
         <Boto variant="discret" onClick={bloquejar}>
           {t.app.bloquejar}
         </Boto>
       </header>
-      <Outlet />
+      <Suspense fallback={<Indicador text={t.app.carregant} />}>
+        <Outlet />
+      </Suspense>
       <DialegEsborranys />
     </ProveidorEsborranys>
   )
@@ -62,6 +79,9 @@ function Porta() {
               <Route path="dades" element={<PestanyaDades />} />
               <Route path="fitxa-clinica" element={<PestanyaFitxaClinica />} />
             </Route>
+            <Route path="mapa" element={<PantallaProvaMapa />} />
+            <Route path="ajustos" element={<PantallaAjustos />} />
+            <Route path="ajustos/calibratge" element={<PantallaCalibratge />} />
             <Route path="*" element={<Navigate to="/pacients" replace />} />
           </Route>
         </Routes>

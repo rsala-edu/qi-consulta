@@ -21,6 +21,8 @@ export type EstatSessio =
 
 interface ValorSessio {
   estat: EstatSessio
+  /** Base de dades local (per a dades que no són de pacient, com el calibratge) */
+  db: QiDB
   crearContrasenya(contrasenya: string): Promise<void>
   desbloquejar(contrasenya: string): Promise<void>
   bloquejar(): void
@@ -78,8 +80,8 @@ export function ProveidorSessio({
   useAutoBloqueig(estat.tipus === 'desbloquejat', bloquejar, msInactivitat)
 
   const valor = useMemo(
-    () => ({ estat, crearContrasenya, desbloquejar, bloquejar }),
-    [estat, crearContrasenya, desbloquejar, bloquejar],
+    () => ({ estat, db, crearContrasenya, desbloquejar, bloquejar }),
+    [estat, db, crearContrasenya, desbloquejar, bloquejar],
   )
   return <Context.Provider value={valor}>{children}</Context.Provider>
 }

@@ -1,0 +1,1126 @@
+{
+  "versio": 1,
+  "meridians": [
+    {
+      "codi": "LI",
+      "nom": "Intestí gros",
+      "pinyin": "Shou Yangming Dachang Jing",
+      "bilateral": true,
+      "punts": 20
+    },
+    {
+      "codi": "ST",
+      "nom": "Estómac",
+      "pinyin": "Zu Yangming Wei Jing",
+      "bilateral": true,
+      "punts": 45
+    }
+  ],
+  "punts": [
+    {
+      "codi": "LI1",
+      "meridia": "LI",
+      "numero": 1,
+      "pinyin": "Shangyang",
+      "hanzi": "商阳",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI2",
+      "meridia": "LI",
+      "numero": 2,
+      "pinyin": "Erjian",
+      "hanzi": "二间",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI3",
+      "meridia": "LI",
+      "numero": 3,
+      "pinyin": "Sanjian",
+      "hanzi": "三间",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI4",
+      "meridia": "LI",
+      "numero": 4,
+      "pinyin": "Hegu",
+      "hanzi": "合谷",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": true,
+        "nota": "Contraindicat tradicionalment en l'embaràs. Pendent de revisar."
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI5",
+      "meridia": "LI",
+      "numero": 5,
+      "pinyin": "Yangxi",
+      "hanzi": "阳溪",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI6",
+      "meridia": "LI",
+      "numero": 6,
+      "pinyin": "Pianli",
+      "hanzi": "偏历",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI7",
+      "meridia": "LI",
+      "numero": 7,
+      "pinyin": "Wenliu",
+      "hanzi": "温溜",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI8",
+      "meridia": "LI",
+      "numero": 8,
+      "pinyin": "Xialian",
+      "hanzi": "下廉",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI9",
+      "meridia": "LI",
+      "numero": 9,
+      "pinyin": "Shanglian",
+      "hanzi": "上廉",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI10",
+      "meridia": "LI",
+      "numero": 10,
+      "pinyin": "Shousanli",
+      "hanzi": "手三里",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI11",
+      "meridia": "LI",
+      "numero": 11,
+      "pinyin": "Quchi",
+      "hanzi": "曲池",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI12",
+      "meridia": "LI",
+      "numero": 12,
+      "pinyin": "Zhouliao",
+      "hanzi": "肘髎",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI13",
+      "meridia": "LI",
+      "numero": 13,
+      "pinyin": "Shouwuli",
+      "hanzi": "手五里",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI14",
+      "meridia": "LI",
+      "numero": 14,
+      "pinyin": "Binao",
+      "hanzi": "臂臑",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI15",
+      "meridia": "LI",
+      "numero": 15,
+      "pinyin": "Jianyu",
+      "hanzi": "肩髃",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI16",
+      "meridia": "LI",
+      "numero": 16,
+      "pinyin": "Jugu",
+      "hanzi": "巨骨",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI17",
+      "meridia": "LI",
+      "numero": 17,
+      "pinyin": "Tianding",
+      "hanzi": "天鼎",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI18",
+      "meridia": "LI",
+      "numero": 18,
+      "pinyin": "Futu",
+      "hanzi": "扶突",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI19",
+      "meridia": "LI",
+      "numero": 19,
+      "pinyin": "Kouheliao",
+      "hanzi": "口禾髎",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "LI20",
+      "meridia": "LI",
+      "numero": 20,
+      "pinyin": "Yingxiang",
+      "hanzi": "迎香",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST1",
+      "meridia": "ST",
+      "numero": 1,
+      "pinyin": "Chengqi",
+      "hanzi": "承泣",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": "Proximitat del globus ocular. Pendent de revisar."
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST2",
+      "meridia": "ST",
+      "numero": 2,
+      "pinyin": "Sibai",
+      "hanzi": "四白",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST3",
+      "meridia": "ST",
+      "numero": 3,
+      "pinyin": "Juliao",
+      "hanzi": "巨髎",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST4",
+      "meridia": "ST",
+      "numero": 4,
+      "pinyin": "Dicang",
+      "hanzi": "地仓",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST5",
+      "meridia": "ST",
+      "numero": 5,
+      "pinyin": "Daying",
+      "hanzi": "大迎",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST6",
+      "meridia": "ST",
+      "numero": 6,
+      "pinyin": "Jiache",
+      "hanzi": "颊车",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST7",
+      "meridia": "ST",
+      "numero": 7,
+      "pinyin": "Xiaguan",
+      "hanzi": "下关",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST8",
+      "meridia": "ST",
+      "numero": 8,
+      "pinyin": "Touwei",
+      "hanzi": "头维",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST9",
+      "meridia": "ST",
+      "numero": 9,
+      "pinyin": "Renying",
+      "hanzi": "人迎",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": "Proximitat de l'artèria caròtida. Pendent de revisar."
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST10",
+      "meridia": "ST",
+      "numero": 10,
+      "pinyin": "Shuitu",
+      "hanzi": "水突",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST11",
+      "meridia": "ST",
+      "numero": 11,
+      "pinyin": "Qishe",
+      "hanzi": "气舍",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST12",
+      "meridia": "ST",
+      "numero": 12,
+      "pinyin": "Quepen",
+      "hanzi": "缺盆",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST13",
+      "meridia": "ST",
+      "numero": 13,
+      "pinyin": "Qihu",
+      "hanzi": "气户",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST14",
+      "meridia": "ST",
+      "numero": 14,
+      "pinyin": "Kufang",
+      "hanzi": "库房",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST15",
+      "meridia": "ST",
+      "numero": 15,
+      "pinyin": "Wuyi",
+      "hanzi": "屋翳",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST16",
+      "meridia": "ST",
+      "numero": 16,
+      "pinyin": "Yingchuang",
+      "hanzi": "膺窗",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST17",
+      "meridia": "ST",
+      "numero": 17,
+      "pinyin": "Ruzhong",
+      "hanzi": "乳中",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": "Tradicionalment no es punxa ni s'hi aplica moxa; serveix de referència anatòmica. Pendent de revisar."
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST18",
+      "meridia": "ST",
+      "numero": 18,
+      "pinyin": "Rugen",
+      "hanzi": "乳根",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST19",
+      "meridia": "ST",
+      "numero": 19,
+      "pinyin": "Burong",
+      "hanzi": "不容",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST20",
+      "meridia": "ST",
+      "numero": 20,
+      "pinyin": "Chengman",
+      "hanzi": "承满",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST21",
+      "meridia": "ST",
+      "numero": 21,
+      "pinyin": "Liangmen",
+      "hanzi": "梁门",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST22",
+      "meridia": "ST",
+      "numero": 22,
+      "pinyin": "Guanmen",
+      "hanzi": "关门",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST23",
+      "meridia": "ST",
+      "numero": 23,
+      "pinyin": "Taiyi",
+      "hanzi": "太乙",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST24",
+      "meridia": "ST",
+      "numero": 24,
+      "pinyin": "Huaroumen",
+      "hanzi": "滑肉门",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST25",
+      "meridia": "ST",
+      "numero": 25,
+      "pinyin": "Tianshu",
+      "hanzi": "天枢",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST26",
+      "meridia": "ST",
+      "numero": 26,
+      "pinyin": "Wailing",
+      "hanzi": "外陵",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST27",
+      "meridia": "ST",
+      "numero": 27,
+      "pinyin": "Daju",
+      "hanzi": "大巨",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST28",
+      "meridia": "ST",
+      "numero": 28,
+      "pinyin": "Shuidao",
+      "hanzi": "水道",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST29",
+      "meridia": "ST",
+      "numero": 29,
+      "pinyin": "Guilai",
+      "hanzi": "归来",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST30",
+      "meridia": "ST",
+      "numero": 30,
+      "pinyin": "Qichong",
+      "hanzi": "气冲",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST31",
+      "meridia": "ST",
+      "numero": 31,
+      "pinyin": "Biguan",
+      "hanzi": "髀关",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST32",
+      "meridia": "ST",
+      "numero": 32,
+      "pinyin": "Futu",
+      "hanzi": "伏兔",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST33",
+      "meridia": "ST",
+      "numero": 33,
+      "pinyin": "Yinshi",
+      "hanzi": "阴市",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST34",
+      "meridia": "ST",
+      "numero": 34,
+      "pinyin": "Liangqiu",
+      "hanzi": "梁丘",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST35",
+      "meridia": "ST",
+      "numero": 35,
+      "pinyin": "Dubi",
+      "hanzi": "犊鼻",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST36",
+      "meridia": "ST",
+      "numero": 36,
+      "pinyin": "Zusanli",
+      "hanzi": "足三里",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST37",
+      "meridia": "ST",
+      "numero": 37,
+      "pinyin": "Shangjuxu",
+      "hanzi": "上巨虚",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST38",
+      "meridia": "ST",
+      "numero": 38,
+      "pinyin": "Tiaokou",
+      "hanzi": "条口",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST39",
+      "meridia": "ST",
+      "numero": 39,
+      "pinyin": "Xiajuxu",
+      "hanzi": "下巨虚",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST40",
+      "meridia": "ST",
+      "numero": 40,
+      "pinyin": "Fenglong",
+      "hanzi": "丰隆",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST41",
+      "meridia": "ST",
+      "numero": 41,
+      "pinyin": "Jiexi",
+      "hanzi": "解溪",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST42",
+      "meridia": "ST",
+      "numero": 42,
+      "pinyin": "Chongyang",
+      "hanzi": "冲阳",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST43",
+      "meridia": "ST",
+      "numero": 43,
+      "pinyin": "Xiangu",
+      "hanzi": "陷谷",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST44",
+      "meridia": "ST",
+      "numero": 44,
+      "pinyin": "Neiting",
+      "hanzi": "内庭",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    },
+    {
+      "codi": "ST45",
+      "meridia": "ST",
+      "numero": 45,
+      "pinyin": "Lidui",
+      "hanzi": "厉兑",
+      "nomCatala": "",
+      "localitzacio": "",
+      "notes": "",
+      "precaucions": {
+        "embaras": false,
+        "nota": ""
+      },
+      "revisat": false,
+      "posicions": [],
+      "orella": null
+    }
+  ]
+}
