@@ -1,0 +1,430 @@
+/* Estil zen: clar, molt d'espai, botons grans per a la tauleta.
+   Tipografia del sistema (sense cap recurs d'internet). */
+
+:root {
+  --fons: #f7f5f0;
+  --superficie: #ffffff;
+  --tinta: #2b2a27;
+  --tinta-suau: #6b675f;
+  --linia: #e3dfd6;
+  --accent: #3f6b5a;
+  --accent-fosc: #2f5245;
+  --accent-suau: #e6efe9;
+  --error: #a33a2c;
+  --avis: #8a6d1f;
+  --radi: 12px;
+  --toc: 52px;
+  --espai: clamp(16px, 3vw, 32px);
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--tinta);
+  background: var(--fons);
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--fons);
+}
+
+h1 {
+  font-weight: 400;
+  font-size: 1.8rem;
+  letter-spacing: 0.01em;
+  margin: 0 0 var(--espai);
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- Barra i pantalles --- */
+
+.barra-app {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px var(--espai);
+  border-bottom: 1px solid var(--linia);
+  background: var(--superficie);
+}
+
+.logotip {
+  font-size: 1.5rem;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+}
+
+.pantalla {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--espai);
+}
+
+.capcalera-pantalla {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: var(--espai);
+}
+
+.capcalera-pantalla h1 {
+  margin: 0;
+}
+
+.enllac-tornar {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toc);
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+/* --- Botons --- */
+
+.boto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--toc);
+  padding: 0 28px;
+  border-radius: var(--radi);
+  border: 1px solid transparent;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.boto:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.boto-principal {
+  background: var(--accent);
+  color: #fff;
+}
+
+.boto-principal:hover:not(:disabled) {
+  background: var(--accent-fosc);
+}
+
+.boto-secundari {
+  background: var(--superficie);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.boto-discret {
+  background: transparent;
+  color: var(--tinta-suau);
+  border-color: var(--linia);
+}
+
+/* --- Formularis --- */
+
+.formulari {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espai);
+}
+
+.graella {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px 24px;
+}
+
+.camp {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.camp-ample {
+  grid-column: 1 / -1;
+}
+
+.camp label,
+legend {
+  font-size: 0.9rem;
+  color: var(--tinta-suau);
+}
+
+input:not([type='checkbox']),
+select,
+textarea {
+  font: inherit;
+  min-height: var(--toc);
+  padding: 10px 14px;
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  background: var(--superficie);
+  color: var(--tinta);
+  width: 100%;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: var(--error);
+}
+
+.camp-error {
+  color: var(--error);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+fieldset {
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  padding: 16px 20px 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contraindicacions {
+  border-color: var(--avis);
+}
+
+.caselles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+}
+
+.casella {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--toc);
+  cursor: pointer;
+}
+
+.casella input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--accent);
+}
+
+.accions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.avis {
+  color: var(--avis);
+  font-size: 0.95rem;
+}
+
+.avis-desat {
+  color: var(--accent);
+}
+
+.avis-desat-text {
+  animation: esvair 3s forwards;
+}
+
+@keyframes esvair {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.zona-arxiu {
+  margin-top: calc(var(--espai) * 2);
+  padding-top: var(--espai);
+  border-top: 1px solid var(--linia);
+}
+
+/* --- Desbloqueig --- */
+
+.pantalla-desbloqueig {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--espai);
+}
+
+.targeta-desbloqueig {
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--superficie);
+  padding: calc(var(--espai) * 1.5);
+  border-radius: calc(var(--radi) * 2);
+  border: 1px solid var(--linia);
+}
+
+.targeta-desbloqueig h1 {
+  margin: 0;
+  text-align: center;
+}
+
+.targeta-desbloqueig p {
+  margin: 0;
+  color: var(--tinta-suau);
+}
+
+.targeta-desbloqueig .accions {
+  justify-content: center;
+  min-height: var(--toc);
+}
+
+.targeta-desbloqueig .boto {
+  width: 100%;
+}
+
+/* --- Indicador --- */
+
+.indicador {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--tinta-suau);
+}
+
+.indicador-roda {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--accent-suau);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: girar 0.9s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicador-roda {
+    animation-duration: 3s;
+  }
+}
+
+/* --- Llista de pacients --- */
+
+.barra-cerca {
+  display: flex;
+  gap: 16px 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--espai);
+}
+
+.barra-cerca input[type='search'] {
+  flex: 1 1 280px;
+}
+
+.llista-pacients {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.llista-pacients a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+  padding: 12px 20px;
+  background: var(--superficie);
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.llista-pacients a:hover {
+  border-color: var(--accent);
+}
+
+.llista-pacients .nom {
+  flex: 1;
+}
+
+.llista-pacients .detall {
+  color: var(--tinta-suau);
+}
+
+.etiqueta {
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--linia);
+  color: var(--tinta-suau);
+}
+
+.buit {
+  color: var(--tinta-suau);
+  text-align: center;
+  padding: calc(var(--espai) * 2) 0;
+}
+
+/* --- Pestanyes --- */
+
+.pestanyes {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--linia);
+  margin-bottom: var(--espai);
+}
+
+.pestanya {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toc);
+  padding: 0 20px;
+  color: var(--tinta-suau);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.pestanya.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.pestanya.desactivada {
+  opacity: 0.45;
+  cursor: default;
+}
