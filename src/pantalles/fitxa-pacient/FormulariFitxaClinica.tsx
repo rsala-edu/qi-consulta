@@ -6,42 +6,54 @@ import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { esquemaDadesFitxaClinica, type DadesFitxaClinica } from '../../domini/fitxaClinica'
 import { t } from '../../i18n/t'
+import { useEsborrany, type OpcionsEsborrany } from '../../sessio/useEsborrany'
 
 interface Props {
   valorsInicials: DadesFitxaClinica
   onDesar(dades: DadesFitxaClinica): Promise<void>
+  esborrany: OpcionsEsborrany
 }
 
 const CONTRAINDICACIONS = ['anticoagulants', 'embaras', 'marcapassos'] as const
 const HABITS = ['son', 'tabac', 'alcohol', 'exercici'] as const
 
-export function FormulariFitxaClinica({ valorsInicials, onDesar }: Props) {
+export function FormulariFitxaClinica({ valorsInicials, onDesar, esborrany }: Props) {
   const [marcaDesat, setMarcaDesat] = useState(0)
   const [errorDesar, setErrorDesar] = useState(false)
+  const form = useForm<DadesFitxaClinica>({
+    resolver: zodResolver(esquemaDadesFitxaClinica),
+    defaultValues: valorsInicials,
+  })
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<DadesFitxaClinica>({
-    resolver: zodResolver(esquemaDadesFitxaClinica),
-    defaultValues: valorsInicials,
-  })
+  } = form
+  const control = useEsborrany(form, esborrany)
   const c = t.camps.fitxaClinica
 
   async function enviar(dades: DadesFitxaClinica) {
     setErrorDesar(false)
+    control.abansDeDesar()
     try {
       await onDesar(dades)
       reset(dades)
       setMarcaDesat((m) => m + 1)
+      await control.despresDeDesar(true)
     } catch {
       setErrorDesar(true)
+      await control.despresDeDesar(false)
     }
   }
 
   return (
     <form className="formulari" onSubmit={handleSubmit(enviar)} noValidate>
+      {control.recuperat && (
+        <p className="avis" role="status">
+          {t.esborranys.recuperat}
+        </p>
+      )}
       <fieldset className="contraindicacions">
         <legend>{c.contraindicacions}</legend>
         <div className="caselles">

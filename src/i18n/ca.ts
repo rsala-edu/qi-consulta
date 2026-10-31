@@ -84,6 +84,18 @@ export const ca = {
       exercici: 'Exercici',
     },
   },
+  esborranys: {
+    titol: 'Canvis sense desar',
+    intro: 'Hi ha formularis que no es van arribar a desar. Els vols recuperar?',
+    recuperar: 'Recuperar',
+    descartar: 'Descartar',
+    araNo: 'Ara no',
+    darrerCanvi: 'Darrer canvi: {data}',
+    recuperat: 'S\'ha recuperat un esborrany. Revisa\'l i prem «Desar» per guardar-lo.',
+    nouPacient: 'Nou pacient',
+    dadesDe: 'Dades · {nom}',
+    fitxaClinicaDe: 'Fitxa clínica · {nom}',
+  },
   errors: {
     nomObligatori: 'El nom és obligatori.',
     dataInvalida: 'La data no és vàlida.',

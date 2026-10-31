@@ -15,6 +15,7 @@ import {
   type Pacient,
   type PacientGuardat,
 } from '../domini/pacient'
+import { esquemaEsborranyGuardat, type Esborrany, type EsborranyGuardat } from '../domini/esborrany'
 import { araIso, nouId } from '../domini/registre'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
 
@@ -41,6 +42,9 @@ export interface Magatzem {
   arxivarPacient(id: string, arxivat: boolean): Promise<Pacient>
   obtenirFitxaClinica(pacientId: string): Promise<FitxaClinica>
   desarFitxaClinica(pacientId: string, dades: DadesFitxaClinica): Promise<FitxaClinica>
+  llistarEsborranys(): Promise<Esborrany[]>
+  desarEsborrany(clau: string, esborrany: EsborranyGuardat): Promise<void>
+  esborrarEsborrany(clau: string): Promise<void>
 }
 
 export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
@@ -124,6 +128,32 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
         xifrat: await xifrarJson(clau, valid, context('fitxesCliniques', id)),
       })
       return { id, pacientId, creatAt, modificatAt, ...valid }
+    },
+
+    async llistarEsborranys() {
+      const registres = await db.esborranys.orderBy('modificatAt').reverse().toArray()
+      return Promise.all(
+        registres.map(async (r) => ({
+          clau: r.id,
+          modificatAt: r.modificatAt,
+          ...(await obrir(clau, 'esborranys', r, esquemaEsborranyGuardat)),
+        })),
+      )
+    },
+
+    async desarEsborrany(clauFormulari, esborrany) {
+      const existent = await db.esborranys.get(clauFormulari)
+      const ara = araIso()
+      await db.esborranys.put({
+        id: clauFormulari,
+        creatAt: existent?.creatAt ?? ara,
+        modificatAt: ara,
+        xifrat: await xifrarJson(clau, esborrany, context('esborranys', clauFormulari)),
+      })
+    },
+
+    async esborrarEsborrany(clauFormulari) {
+      await db.esborranys.delete(clauFormulari)
     },
   }
   return magatzem

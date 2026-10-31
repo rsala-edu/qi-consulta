@@ -9,12 +9,15 @@ import { PantallaFitxaPacient } from './pantalles/fitxa-pacient/PantallaFitxaPac
 import { PantallaDesbloqueig } from './pantalles/desbloqueig/PantallaDesbloqueig'
 import { PantallaNouPacient } from './pantalles/pacients/PantallaNouPacient'
 import { PantallaPacients } from './pantalles/pacients/PantallaPacients'
-import { ProveidorSessio, useSessio } from './sessio/ContextSessio'
+import { DialegEsborranys } from './pantalles/desbloqueig/DialegEsborranys'
+import { ProveidorEsborranys } from './sessio/ContextEsborranys'
+import { ProveidorSessio, useMagatzem, useSessio } from './sessio/ContextSessio'
 
 function Marc() {
   const { bloquejar } = useSessio()
+  const magatzem = useMagatzem()
   return (
-    <>
+    <ProveidorEsborranys magatzem={magatzem}>
       <header className="barra-app">
         <span className="logotip">{t.app.nom}</span>
         <Boto variant="discret" onClick={bloquejar}>
@@ -22,7 +25,8 @@ function Marc() {
         </Boto>
       </header>
       <Outlet />
-    </>
+      <DialegEsborranys />
+    </ProveidorEsborranys>
   )
 }
 

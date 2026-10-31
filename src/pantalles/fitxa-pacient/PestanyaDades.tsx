@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Boto } from '../../components/Boto'
-import { dadesDePacient } from '../../domini/pacient'
-import { t } from '../../i18n/t'
+import { dadesDePacient, nomComplet } from '../../domini/pacient'
+import { formatar, t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
 import { FormulariPacient } from '../pacients/FormulariPacient'
 import { useFitxaPacient } from './PantallaFitxaPacient'
@@ -28,6 +28,10 @@ export function PestanyaDades() {
       <FormulariPacient
         key={id}
         valorsInicials={dadesDePacient(pacient)}
+        esborrany={{
+          clau: `pacient:${id}:dades`,
+          descripcio: formatar(t.esborranys.dadesDe, { nom: nomComplet(pacient) }),
+        }}
         onDesar={async (noves) => actualitzarPacient(await magatzem.actualitzarPacient(id, noves))}
       />
       <div className="zona-arxiu">

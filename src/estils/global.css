@@ -428,3 +428,67 @@ fieldset {
   opacity: 0.45;
   cursor: default;
 }
+
+/* --- Diàleg d'esborranys --- */
+
+.fons-dialeg {
+  position: fixed;
+  inset: 0;
+  background: rgb(43 42 39 / 0.35);
+  display: grid;
+  place-items: center;
+  padding: var(--espai);
+  z-index: 10;
+}
+
+.dialeg {
+  width: min(640px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--superficie);
+  border-radius: calc(var(--radi) * 2);
+  padding: calc(var(--espai) * 1.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dialeg h2 {
+  font-weight: 400;
+  margin: 0;
+}
+
+.dialeg p {
+  margin: 0;
+  color: var(--tinta-suau);
+}
+
+.llista-esborranys {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.llista-esborranys li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+}
+
+.llista-esborranys .detall {
+  color: var(--tinta-suau);
+  font-size: 0.9rem;
+}
+
+.llista-esborranys .botons {
+  display: flex;
+  gap: 8px;
+}

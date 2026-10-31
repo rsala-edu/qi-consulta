@@ -1,5 +1,6 @@
 import { Indicador } from '../../components/Indicador'
-import { t } from '../../i18n/t'
+import { nomComplet } from '../../domini/pacient'
+import { formatar, t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 import { FormulariFitxaClinica } from './FormulariFitxaClinica'
@@ -19,6 +20,10 @@ export function PestanyaFitxaClinica() {
       <FormulariFitxaClinica
         key={pacient.id}
         valorsInicials={dades}
+        esborrany={{
+          clau: `pacient:${pacient.id}:fitxa-clinica`,
+          descripcio: formatar(t.esborranys.fitxaClinicaDe, { nom: nomComplet(pacient) }),
+        }}
         onDesar={async (noves) => {
           await magatzem.desarFitxaClinica(pacient.id, noves)
         }}

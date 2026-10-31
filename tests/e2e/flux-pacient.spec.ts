@@ -121,3 +121,61 @@ test('arxivar un pacient l\'amaga de la llista sense esborrar-lo', async ({ page
   await page.getByLabel('Mostrar arxivats').check()
   await expect(page.getByRole('link', { name: /Bernat Fictici/ })).toBeVisible()
 })
+
+test('esborrany: els canvis sense desar es recuperen després de tancar l\'app', async ({ page }) => {
+  await page.goto('/qi-consulta/')
+  await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Crear i entrar' }).click()
+
+  await page.getByRole('link', { name: 'Nou pacient' }).click()
+  await page.getByLabel('Nom', { exact: true }).fill('Clara')
+  await page.getByLabel('Llinatges').fill('Esborrany Inventat')
+  await page.getByRole('button', { name: 'Desar' }).click()
+  await expect(page.getByLabel('Al·lèrgies')).toBeVisible()
+
+  // Escriu sense desar i espera que passi l'interval de 5 segons
+  await page.getByLabel('Al·lèrgies').fill('Iode')
+  await page.getByLabel('Embaràs').check()
+  await page.waitForTimeout(5500)
+
+  // Tancar l'app de cop (sense que el formulari es desmunti)
+  await page.reload()
+  await page.getByLabel('Contrasenya').fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+
+  const dialeg = page.getByRole('dialog', { name: 'Canvis sense desar' })
+  await expect(dialeg).toContainText('Fitxa clínica · Clara Esborrany Inventat')
+  await dialeg.getByRole('button', { name: /^Recuperar/ }).click()
+
+  await expect(page.getByLabel('Al·lèrgies')).toHaveValue('Iode')
+  await expect(page.getByLabel('Embaràs')).toBeChecked()
+  await expect(page.getByText(/S'ha recuperat un esborrany/)).toBeVisible()
+  await page.getByRole('button', { name: 'Desar' }).click()
+  await expect(page.getByText('Desat')).toBeVisible()
+
+  // Un cop desat, ja no s'ofereix
+  await page.getByRole('button', { name: 'Bloquejar' }).click()
+  await page.getByLabel('Contrasenya').fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  await expect(page.getByLabel('Al·lèrgies')).toHaveValue('Iode')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('esborrany: en bloquejar es desa al moment', async ({ page }) => {
+  await page.goto('/qi-consulta/')
+  await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Crear i entrar' }).click()
+
+  await page.getByRole('link', { name: 'Nou pacient' }).click()
+  await page.getByLabel('Nom', { exact: true }).fill('Jordi')
+  await page.getByRole('button', { name: 'Bloquejar' }).click()
+
+  await page.getByLabel('Contrasenya').fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  const dialeg = page.getByRole('dialog', { name: 'Canvis sense desar' })
+  await expect(dialeg).toContainText('Nou pacient')
+  await dialeg.getByRole('button', { name: /^Recuperar/ }).click()
+  await expect(page.getByLabel('Nom', { exact: true })).toHaveValue('Jordi')
+})

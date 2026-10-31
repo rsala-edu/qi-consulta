@@ -19,12 +19,14 @@ export interface RegistreMeta {
   valor: ClauEmbolcallada
 }
 
-export type NomTaula = 'pacients' | 'fitxesCliniques'
+export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys'
 
 export class QiDB extends Dexie {
   meta!: Table<RegistreMeta, RegistreMeta['clau']>
   pacients!: Table<RegistreXifrat, string>
   fitxesCliniques!: Table<RegistreXifrat, string>
+  /** L'id és la clau del formulari */
+  esborranys!: Table<RegistreXifrat, string>
 
   constructor(nom = 'qi') {
     super(nom)
@@ -32,6 +34,9 @@ export class QiDB extends Dexie {
       meta: 'clau',
       pacients: 'id, modificatAt',
       fitxesCliniques: 'id, &pacientId',
+    })
+    this.version(2).stores({
+      esborranys: 'id, modificatAt',
     })
   }
 }

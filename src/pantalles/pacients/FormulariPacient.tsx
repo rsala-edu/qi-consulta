@@ -5,41 +5,53 @@ import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { esquemaDadesPacient, SEXES, type DadesPacient } from '../../domini/pacient'
 import { t } from '../../i18n/t'
+import { useEsborrany, type OpcionsEsborrany } from '../../sessio/useEsborrany'
 import { useState } from 'react'
 
 interface Props {
   valorsInicials: DadesPacient
   onDesar(dades: DadesPacient): Promise<void>
+  esborrany: OpcionsEsborrany
   textBoto?: string
 }
 
-export function FormulariPacient({ valorsInicials, onDesar, textBoto = t.app.desar }: Props) {
+export function FormulariPacient({ valorsInicials, onDesar, esborrany, textBoto = t.app.desar }: Props) {
   const [marcaDesat, setMarcaDesat] = useState(0)
   const [errorDesar, setErrorDesar] = useState(false)
+  const form = useForm<DadesPacient>({
+    resolver: zodResolver(esquemaDadesPacient),
+    defaultValues: valorsInicials,
+  })
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<DadesPacient>({
-    resolver: zodResolver(esquemaDadesPacient),
-    defaultValues: valorsInicials,
-  })
+  } = form
+  const control = useEsborrany(form, esborrany)
   const c = t.camps.pacient
 
   async function enviar(dades: DadesPacient) {
     setErrorDesar(false)
+    control.abansDeDesar()
     try {
       await onDesar(dades)
       reset(dades)
       setMarcaDesat((m) => m + 1)
+      await control.despresDeDesar(true)
     } catch {
       setErrorDesar(true)
+      await control.despresDeDesar(false)
     }
   }
 
   return (
     <form className="formulari" onSubmit={handleSubmit(enviar)} noValidate>
+      {control.recuperat && (
+        <p className="avis" role="status">
+          {t.esborranys.recuperat}
+        </p>
+      )}
       <div className="graella">
         <Camp etiqueta={c.nom} error={errors.nom?.message}>
           <input autoComplete="off" {...register('nom')} />

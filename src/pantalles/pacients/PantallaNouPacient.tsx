@@ -16,6 +16,7 @@ export function PantallaNouPacient() {
       <h1>{t.pacients.titolNou}</h1>
       <FormulariPacient
         valorsInicials={dadesPacientBuides()}
+        esborrany={{ clau: 'pacient:nou', descripcio: t.esborranys.nouPacient }}
         onDesar={async (dades) => {
           const p = await magatzem.crearPacient(dades)
           // Primera visita: després de les dades, la fitxa clínica
