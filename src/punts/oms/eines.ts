@@ -283,3 +283,29 @@ export function capInterpolat(c: CosMesurable, r: Referencies, costat: Costat, a
 export function capLateral(c: CosMesurable, costat: Costat, y: number, z: number): Vector3 {
   return c.pellDesDeFora(v(0, y, z), v(signe(costat), 0, 0), 0.25)
 }
+
+/**
+ * Punts a 0,5 cun dins la línia anterior del cabell (GV24, BL4, GB13, GB15,
+ * ST8): la línia del cabell del front és aproximadament horitzontal, així que
+ * tots queden a l'alçada de GV24 i es mesuren horitzontalment al voltant del
+ * front, a `lateralCun` cun de la línia mitja (cun anterior del cap).
+ */
+export function capLiniaCabell(c: CosMesurable, r: Referencies, costat: Costat, lateralCun: number): Vector3 {
+  const y = puntArcCap(r, distanciaArcCap(r, 3.5)).y
+  const objectiu = lateralCun * r.cun.cap
+  const radial = (graus: number) => {
+    const a = (graus * Math.PI) / 180
+    return v(signe(costat) * Math.sin(a), 0, Math.cos(a))
+  }
+  const centre = v(0, y, r.centreCap.z)
+  let anterior = c.pellDesDeFora(centre, radial(0))
+  let recorregut = 0
+  for (let graus = 0.25; graus <= 120; graus += 0.25) {
+    const actual = c.pellDesDeFora(centre, radial(graus))
+    const pas = actual.distanceTo(anterior)
+    if (recorregut + pas >= objectiu) return anterior.lerp(actual, (objectiu - recorregut) / pas)
+    recorregut += pas
+    anterior = actual
+  }
+  throw new Error('El front no és prou ample per a aquesta distància')
+}

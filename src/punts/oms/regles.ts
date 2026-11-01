@@ -13,7 +13,7 @@ import {
   cara,
   coll,
   cuixa,
-  angleDelFront,
+  capLiniaCabell,
   dits,
   pit,
 } from './eines'
@@ -164,11 +164,10 @@ const ST: DefinicioPunt[] = [
   },
   {
     codi: 'ST8',
-    regla: { tipus: 'referencia', descripcio: 'angle del front, 0,5 cun dins la línia anterior del cabell' },
-    calcular: (c, r, k) => {
-      const angle = angleDelFront(c, r, k, r.nivellCabell)
-      return cap(c, r, k, r.nivellCabell + 0.5 * r.cun.cap, angle)
-    },
+    // Angle del front, 0,5 cun dins la línia anterior del cabell i 4,5 cun
+    // de la línia mitja: a la mateixa alçada que GV24, GB15 i GB13
+    regla: { tipus: 'cap', cun: 3.5, lateral: 4.5 },
+    calcular: (c, r, k) => capLiniaCabell(c, r, k, 4.5),
   },
   {
     codi: 'ST9',

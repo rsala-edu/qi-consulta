@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { ambCalibratge, ambPrecaucions, cataleg, cercarPunts, exportarCataleg, nomMeridia, posicioDe, puntsAmbPrecaucio } from './cataleg'
+import {
+  ambCalibratge,
+  ambPrecaucions,
+  cataleg,
+  cercarPunts,
+  exportarCataleg,
+  nomMeridia,
+  ordenarCategories,
+  posicioDe,
+  puntsAmbPrecaucio,
+  puntsDeCategoria,
+  REVISIO_BUIDA,
+} from './cataleg'
 import { esquemaCataleg, type Posicio3D } from './esquema'
 
 describe('catàleg del projecte', () => {
@@ -32,16 +44,25 @@ describe('catàleg del projecte', () => {
       expect(p.pinyin).toMatch(/^[A-Z][a-z]+$/)
       expect(p.hanzi).toMatch(/^\p{Script=Han}{2,3}$/u)
     }
-    expect(cataleg.punts.find((p) => p.codi === 'LI4')).toMatchObject({ pinyin: 'Hegu', hanzi: '合谷' })
-    expect(cataleg.punts.find((p) => p.codi === 'ST36')).toMatchObject({ pinyin: 'Zusanli', hanzi: '足三里' })
+    expect(cataleg.punts.find((p) => p.codi === 'LI4')).toMatchObject({
+      pinyin: 'Hegu',
+      hanzi: '合谷',
+    })
+    expect(cataleg.punts.find((p) => p.codi === 'ST36')).toMatchObject({
+      pinyin: 'Zusanli',
+      hanzi: '足三里',
+    })
   })
 
-  it('cada punt té posició als dos costats sobre el cos definitiu, calculada amb la regla de l\'OMS', () => {
+  it("cada punt té posició als dos costats sobre el cos definitiu, calculada amb la regla de l'OMS", () => {
     for (const p of cataleg.punts) {
       const mh = p.posicions.filter((q) => q.topologia.startsWith('mh-'))
       const bilateral = cataleg.meridians.find((m) => m.codi === p.meridia)!.bilateral
       expect(mh.map((q) => q.costat).sort(), p.codi).toEqual(bilateral ? ['D', 'E'] : ['C'])
-      expect(mh.every((q) => q.origen === 'oms' || q.origen === 'doctora'), p.codi).toBe(true)
+      expect(
+        mh.every((q) => q.origen === 'oms' || q.origen === 'doctora'),
+        p.codi,
+      ).toBe(true)
       expect(p.orella).toBeNull()
     }
   })
@@ -59,8 +80,10 @@ describe('catàleg del projecte', () => {
     const amb = cataleg.punts.filter((p) => p.precaucions.nota !== '')
     expect(amb.length).toBeGreaterThan(10)
     expect(amb.every((p) => p.precaucions.nota.endsWith('.'))).toBe(true)
+    // cada precaució té categoria, i cada punt amb categoria té text
+    for (const p of cataleg.punts) expect(p.precaucions.nota !== '', p.codi).toBe(p.precaucions.categories.length > 0)
     expect(cataleg.punts.every((p) => !p.precaucions.confirmada)).toBe(true)
-    expect(cataleg.punts.find((p) => p.codi === 'LI4')?.precaucions.embaras).toBe(true)
+    expect(cataleg.punts.find((p) => p.codi === 'LI4')?.precaucions.categories).toEqual(['embaras'])
     expect(cataleg.punts.find((p) => p.codi === 'ST9')?.precaucions.nota).toMatch(/caròtida/)
   })
 
@@ -71,7 +94,13 @@ describe('catàleg del projecte', () => {
 
 describe('validació del format', () => {
   const base = () => structuredClone(cataleg)
-  const posicio: Posicio3D = { topologia: 'prova', costat: 'E', triangle: 12, b: [0.2, 0.3, 0.5], origen: 'manual' }
+  const posicio: Posicio3D = {
+    topologia: 'prova',
+    costat: 'E',
+    triangle: 12,
+    b: [0.2, 0.3, 0.5],
+    origen: 'manual',
+  }
 
   it('accepta una posició baricèntrica vàlida', () => {
     const c = base()
@@ -127,7 +156,13 @@ describe('cercador', () => {
 })
 
 describe('calibratge sobre el catàleg', () => {
-  const pos = (costat: 'E' | 'D', triangle: number): Posicio3D => ({ topologia: 'maniqui', costat, triangle, b: [1, 0, 0], origen: 'manual' })
+  const pos = (costat: 'E' | 'D', triangle: number): Posicio3D => ({
+    topologia: 'maniqui',
+    costat,
+    triangle,
+    b: [1, 0, 0],
+    origen: 'manual',
+  })
 
   it('afegeix, substitueix i esborra posicions sense tocar les altres topologies', () => {
     const c1 = ambCalibratge(cataleg, [
@@ -140,7 +175,8 @@ describe('calibratge sobre el catàleg', () => {
     expect(posicioDe(li4, 'una-altra', 'E')).toBeUndefined()
 
     const c2 = ambCalibratge(c1, [{ codi: 'LI4', topologia: 'maniqui', costat: 'E', posicio: null }])
-    const maniqui = (c: typeof c2) => c.punts.find((p) => p.codi === 'LI4')!.posicions.filter((q) => q.topologia === 'maniqui')
+    const maniqui = (c: typeof c2) =>
+      c.punts.find((p) => p.codi === 'LI4')!.posicions.filter((q) => q.topologia === 'maniqui')
     expect(maniqui(c2).map((q) => q.costat)).toEqual(['D'])
     // Les posicions del cos definitiu i el catàleg original no canvien
     expect(c2.punts.find((p) => p.codi === 'LI4')!.posicions.filter((q) => q.topologia !== 'maniqui')).toHaveLength(2)
@@ -155,29 +191,78 @@ describe('calibratge sobre el catàleg', () => {
   })
 })
 
-describe('precaucions revisades per la doctora', () => {
-  it('els punts amb precaució per revisar inclouen els clàssics de l\'embaràs', () => {
-    const codis = puntsAmbPrecaucio(cataleg).map((p) => p.codi)
-    for (const c of ['LI4', 'SP6', 'BL60', 'BL67', 'GB21']) expect(codis).toContain(c)
-    expect(cataleg.punts.filter((p) => p.precaucions.embaras).map((p) => p.codi)).toEqual(
-      expect.arrayContaining(['LI4', 'SP6', 'BL31', 'BL32', 'BL33', 'BL34', 'BL60', 'BL67', 'GB21']),
-    )
+describe('precaucions per categories', () => {
+  it('tots els punts amb precaució en tenen alguna categoria', () => {
+    expect(puntsAmbPrecaucio(cataleg).length).toBe(cataleg.punts.filter((p) => p.precaucions.nota !== '').length)
   })
 
-  it('«D\'acord» la deixa igual però confirmada; «Canviar» la reescriu', () => {
-    const li4 = cataleg.punts.find((p) => p.codi === 'LI4')!
-    const c = ambPrecaucions(cataleg, [
-      { codi: 'LI4', embaras: li4.precaucions.embaras, nota: li4.precaucions.nota },
-      { codi: 'ST9', embaras: false, nota: 'Palpar la caròtida i apartar-la amb el dit.' },
-    ])
-    expect(c.punts.find((p) => p.codi === 'LI4')!.precaucions).toEqual({ ...li4.precaucions, confirmada: true })
+  const de = (codi: string) => cataleg.punts.find((p) => p.codi === codi)!
+  const cats = (codi: string) => de(codi).precaucions.categories
+
+  it('els punts clàssics són a la seva categoria', () => {
+    for (const c of ['LI4', 'SP6', 'BL31', 'BL32', 'BL33', 'BL34', 'BL60', 'BL67', 'GB21'])
+      expect(cats(c), c).toContain('embaras')
+    for (const c of ['ST9', 'LI18', 'SP11', 'LR12', 'BL40', 'KI3']) expect(cats(c), c).toContain('vasos')
+    expect(puntsDeCategoria(cataleg, 'ull', REVISIO_BUIDA).map((p) => p.codi)).toEqual(['ST1', 'BL1'])
+    for (const c of ['LU1', 'ST13', 'BL13', 'GB21', 'ST12']) expect(cats(c), c).toContain('pulmo')
+    expect(
+      puntsDeCategoria(cataleg, 'bulb', REVISIO_BUIDA)
+        .map((p) => p.codi)
+        .sort(),
+    ).toEqual(['BL10', 'GB20', 'GV15', 'GV16'])
+    expect(puntsDeCategoria(cataleg, 'noEsPunxa', REVISIO_BUIDA).map((p) => p.codi)).toEqual(['ST17', 'CV8'])
+    for (const c of ['ST21', 'BL23', 'GB30', 'CV14']) expect(cats(c), c).toEqual(['profunditat'])
+  })
+
+  it("les categories van en l'ordre fix i sense repetir", () => {
+    for (const p of cataleg.punts) expect(p.precaucions.categories).toEqual(ordenarCategories(p.precaucions.categories))
+  })
+
+  it('un punt queda confirmat quan totes les seves categories ho estan', () => {
+    // GB21: embaràs i pulmó
+    expect(cats('GB21')).toEqual(['embaras', 'pulmo'])
+    const nomesEmbaras = ambPrecaucions(cataleg, {
+      categories: ['embaras'],
+      excepcions: [],
+    })
+    const pt = (c: typeof cataleg, codi: string) => c.punts.find((p) => p.codi === codi)!.precaucions
+    expect(pt(nomesEmbaras, 'LI4').confirmada).toBe(true)
+    expect(pt(nomesEmbaras, 'GB21').confirmada).toBe(false)
+    expect(pt(nomesEmbaras, 'ST36').confirmada).toBe(false)
+    const totes = ambPrecaucions(cataleg, {
+      categories: ['embaras', 'pulmo'],
+      excepcions: [],
+    })
+    expect(pt(totes, 'GB21').confirmada).toBe(true)
+    // el catàleg original no canvia
+    expect(pt(cataleg, 'LI4').confirmada).toBe(false)
+  })
+
+  it("una excepció canvia el text i les categories d'un punt i el deixa confirmat", () => {
+    const revisio = {
+      categories: [],
+      excepcions: [
+        {
+          codi: 'ST9',
+          categories: ['profunditat', 'vasos'] as const,
+          nota: 'Palpar la caròtida i apartar-la amb el dit.',
+        },
+      ],
+    }
+    const c = ambPrecaucions(cataleg, revisio)
     expect(c.punts.find((p) => p.codi === 'ST9')!.precaucions).toEqual({
-      embaras: false,
+      categories: ['vasos', 'profunditat'],
       nota: 'Palpar la caròtida i apartar-la amb el dit.',
       confirmada: true,
     })
-    expect(c.punts.find((p) => p.codi === 'ST1')!.precaucions.confirmada).toBe(false)
-    // el catàleg original no canvia
-    expect(cataleg.punts.find((p) => p.codi === 'ST9')!.precaucions.confirmada).toBe(false)
+    // a la llista de la categoria hi surt tant si l'excepció l'hi afegeix…
+    expect(puntsDeCategoria(cataleg, 'profunditat', revisio).map((p) => p.codi)).toContain('ST9')
+    // …com si l'en treu (per poder desfer l'excepció)
+    const fora = {
+      categories: [],
+      excepcions: [{ codi: 'LI4', categories: [], nota: '' }],
+    }
+    expect(puntsDeCategoria(cataleg, 'embaras', fora).map((p) => p.codi)).toContain('LI4')
+    expect(ambPrecaucions(cataleg, fora).punts.find((p) => p.codi === 'LI4')!.precaucions.categories).toEqual([])
   })
 })

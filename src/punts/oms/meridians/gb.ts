@@ -1,10 +1,12 @@
 // Vesícula biliar (GB). Cuixa lateral: del trocànter al plec popliti, 19 cun.
 // Cama lateral: del plec popliti al mal·lèol extern, 16 cun.
 
+import type { Vector3 } from 'three'
 import { AMUNT, DAVANT, dir, signe, v, type Costat } from '../cos'
 import {
   abdomenX,
   capArc,
+  capLiniaCabell,
   capDesDeDins,
   capInterpolat,
   capLateral,
@@ -25,7 +27,11 @@ const ref = (descripcio: string) => ({ tipus: 'referencia' as const, descripcio 
 const lat = (k: Costat) => v(signe(k), 0, 0)
 
 function capCabell(codi: string, dins: number, lateral: number): DefinicioPunt {
-  return { codi, regla: { tipus: 'cap', cun: 3 + dins, lateral }, calcular: (c, r, k) => capArc(c, r, k, 3 + dins, lateral) }
+  return {
+    codi,
+    regla: { tipus: 'cap', cun: 3 + dins, lateral },
+    calcular: (c, r, k) => (dins === 0.5 ? capLiniaCabell(c, r, k, lateral) : capArc(c, r, k, 3 + dins, lateral)),
+  }
 }
 
 /** Distància lateral de la pupil·la mesurada en cun del cap (sobre la pell, aproximada) */
@@ -111,9 +117,18 @@ export const GB: DefinicioPunt[] = [
     codi: 'GB21',
     regla: ref('punt mitjà entre C7 i l\'extrem de l\'acromi'),
     calcular: (c, r, k) => {
+      // A mig camí (en amplada) entre C7 i l'acromi, a dalt de l'espatlla:
+      // a la carena del trapezi, el punt més alt de la pell en aquesta
+      // amplada (ni a la cara de davant ni a la de darrere)
       const c7 = esquena(c, r, k, nivellVertebra(r, 'C7', false), 0)
-      const mig = c7.lerp(r[k].acromi, 0.5)
-      return c.pellDesDeFora(v(mig.x, mig.y, mig.z + 0.01), AMUNT, 0.3)
+      const x = (c7.x + r[k].acromi.x) / 2
+      let millor: Vector3 | null = null
+      for (let z = -0.08; z <= 0.06; z += 0.002) {
+        const q = c.pellOpcional(v(x, r[k].acromi.y + 0.25, z), v(0, -1, 0), 0.3)
+        // (sense l'orella ni el cap, que queden molt més amunt)
+        if (q && q.y < r[k].acromi.y + 0.08 && (!millor || q.y > millor.y)) millor = q
+      }
+      return millor!
     },
   },
   {
@@ -232,7 +247,7 @@ export const GB: DefinicioPunt[] = [
 ]
 
 export const ORDRE_GB: Ordre[] = [
-  { codis: ['GB13', 'GB15', 'GB16', 'GB17', 'GB18', 'GB19', 'GB20'], criteri: 'allunya' },
+  { codis: ['GB15', 'GB16', 'GB17', 'GB18', 'GB19', 'GB20'], criteri: 'allunya' },
   { codis: ['GB22', 'GB24', 'GB25', 'GB27', 'GB29', 'GB31', 'GB32', 'GB33', 'GB34', 'GB36', 'GB37', 'GB38', 'GB39', 'GB40'], criteri: 'baixa' },
   { codis: ['GB40', 'GB41', 'GB42', 'GB43', 'GB44'], criteri: 'allunya' },
   { codis: ['GB8', 'GB7'], criteri: 'baixa' },

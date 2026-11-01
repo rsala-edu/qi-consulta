@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type { ClauEmbolcallada, DadesXifrades } from '../crypto'
-import type { CostatPosicio, Posicio3D } from '../punts/esquema'
+import { cataleg, ordenarCategories } from '../punts/cataleg'
+import type { CategoriaPrecaucio, CostatPosicio, Posicio3D } from '../punts/esquema'
 
 /**
  * Registre tal com es guarda a IndexedDB. Només van en clar l'id (UUID),
@@ -33,11 +34,20 @@ export interface RegistreCalibratge {
   modificatAt: string
 }
 
-/** Precaució d'un punt confirmada (o reescrita) per la doctora. No és dada de pacient. */
+/**
+ * Excepció de la doctora per a la precaució d'un punt concret (categories i
+ * text propis). No és dada de pacient.
+ */
 export interface RegistrePrecaucio {
   codi: string
-  embaras: boolean
+  categories: CategoriaPrecaucio[]
   nota: string
+  confirmadaAt: string
+}
+
+/** Categoria de precaució confirmada per la doctora. No és dada de pacient. */
+export interface RegistreCategoriaPrecaucio {
+  categoria: CategoriaPrecaucio
   confirmadaAt: string
 }
 
@@ -50,7 +60,9 @@ export class QiDB extends Dexie {
   /** L'id és la clau del formulari */
   esborranys!: Table<RegistreXifrat, string>
   calibratge!: Table<RegistreCalibratge, string>
+  /** Excepcions per punt */
   precaucions!: Table<RegistrePrecaucio, string>
+  categoriesPrecaucio!: Table<RegistreCategoriaPrecaucio, string>
 
   constructor(nom = 'qi') {
     super(nom)
@@ -68,5 +80,25 @@ export class QiDB extends Dexie {
     this.version(4).stores({
       precaucions: 'codi',
     })
+    // Les precaucions es revisen per categories. Les que la doctora havia
+    // confirmat punt per punt (amb la marca d'embaràs) passen a ser
+    // excepcions d'aquell punt, amb les categories del catàleg.
+    this.version(5)
+      .stores({
+        categoriesPrecaucio: 'categoria',
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table('precaucions')
+          .toCollection()
+          .modify((r: RegistrePrecaucio & { embaras?: boolean }) => {
+            if (r.categories) return
+            const delCataleg = cataleg.punts.find((p) => p.codi === r.codi)?.precaucions.categories ?? []
+            const senseEmbaras = delCataleg.filter((x) => x !== 'embaras')
+            r.categories = ordenarCategories(r.embaras ? ['embaras', ...senseEmbaras] : senseEmbaras)
+            if (r.categories.length === 0 && r.nota !== '') r.categories = ['profunditat']
+            delete r.embaras
+          })
+      })
   }
 }

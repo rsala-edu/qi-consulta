@@ -9,6 +9,7 @@ import {
   camaMalleol,
   camaPopliti,
   capArc,
+  capLiniaCabell,
   cara,
   cunCuixaPosterior,
   esquena,
@@ -35,7 +36,7 @@ function capCabell(codi: string, dins: number, lateral: number): DefinicioPunt {
   return {
     codi,
     regla: { tipus: 'cap', cun: 3 + dins, lateral },
-    calcular: (c, r, k) => capArc(c, r, k, 3 + dins, lateral),
+    calcular: (c, r, k) => (dins === 0.5 ? capLiniaCabell(c, r, k, lateral) : capArc(c, r, k, 3 + dins, lateral)),
   }
 }
 

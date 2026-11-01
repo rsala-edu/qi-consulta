@@ -1,7 +1,10 @@
-// Col·locació d'etiquetes sense que se superposin. Cada etiqueta prova
-// diverses posicions al voltant del seu punt (dreta, esquerra, dalt, baix);
-// si no en troba cap de lliure, no es mostra. Les primeres de la llista
-// (més importants) trien primer.
+// Col·locació d'etiquetes sense que se superposin entre elles ni tapin cap
+// punt. Cada etiqueta prova diverses posicions al voltant del seu punt,
+// començant pel costat de fora (els punts de la meitat esquerra del grup,
+// a l'esquerra; els de la dreta, a la dreta), perquè les etiquetes de dues
+// columnes properes (BL31–BL35 al sacre) no es barregin. Si no en troba cap
+// de lliure, no es mostra. Les primeres de la llista (més importants) trien
+// primer.
 
 export interface EtiquetaEntrada {
   id: string
@@ -9,6 +12,8 @@ export interface EtiquetaEntrada {
   x: number
   y: number
   text: string
+  /** Text més curt (només el codi) per si el llarg no hi cap */
+  curt?: string
 }
 
 export interface EtiquetaColocada {
@@ -39,6 +44,9 @@ interface Rect {
   y2: number
 }
 
+/** Mida del punt dibuixat (px): les etiquetes no el poden tapar */
+const RADI_PUNT = 5
+
 const solapen = (a: Rect, b: Rect, aire = 2) =>
   a.x1 < b.x2 + aire && b.x1 < a.x2 + aire && a.y1 < b.y2 + aire && b.y1 < a.y2 + aire
 
@@ -48,26 +56,64 @@ export function colocarEtiquetes(
   alcada: number,
   mida: MidaEtiquetes = MIDA_PER_DEFECTE,
 ): EtiquetaColocada[] {
+  // Els punts mateixos també ocupen lloc: cap etiqueta en pot tapar cap
+  const punts: Array<Rect & { id: string }> = entrades.map((e) => ({
+    id: e.id,
+    x1: e.x - RADI_PUNT,
+    y1: e.y - RADI_PUNT,
+    x2: e.x + RADI_PUNT,
+    y2: e.y + RADI_PUNT,
+  }))
+  const centre = entrades.reduce((s, e) => s + e.x, 0) / Math.max(1, entrades.length)
   const ocupats: Rect[] = []
   const resultat: EtiquetaColocada[] = []
   for (const e of entrades) {
-    const w = e.text.length * mida.caracter + mida.marge
-    const h = mida.alt
-    const s = mida.separacio
-    const candidats: Array<[number, number]> = [
-      [e.x + s, e.y - h / 2], // dreta
-      [e.x - s - w, e.y - h / 2], // esquerra
-      [e.x - w / 2, e.y - s - h], // dalt
-      [e.x - w / 2, e.y + s], // baix
-    ]
-    for (const [x, y] of candidats) {
-      const r = { x1: x, y1: y, x2: x + w, y2: y + h }
-      if (r.x1 < 0 || r.y1 < 0 || r.x2 > amplada || r.y2 > alcada) continue
-      if (ocupats.some((o) => solapen(o, r))) continue
+    const textos = e.curt && e.curt !== e.text ? [e.text, e.curt] : [e.text]
+    for (const text of textos) {
+      const r = colocarUna(e, text, centre, punts, ocupats, amplada, alcada, mida)
+      if (!r) continue
       ocupats.push(r)
-      resultat.push({ id: e.id, text: e.text, esquerra: Math.round(x), dalt: Math.round(y) })
+      resultat.push({ id: e.id, text, esquerra: Math.round(r.x1), dalt: Math.round(r.y1) })
       break
     }
   }
   return resultat
+}
+
+function colocarUna(
+  e: EtiquetaEntrada,
+  text: string,
+  centre: number,
+  punts: ReadonlyArray<Rect & { id: string }>,
+  ocupats: readonly Rect[],
+  amplada: number,
+  alcada: number,
+  mida: MidaEtiquetes,
+): Rect | null {
+  const w = text.length * mida.caracter + mida.marge
+  const h = mida.alt
+  const s = mida.separacio
+  const dreta: Array<[number, number]> = [
+    [e.x + s, e.y - h / 2],
+    [e.x + s, e.y - h - 1], // dreta, una mica amunt
+    [e.x + s, e.y + 1], // dreta, una mica avall
+  ]
+  const esquerra: Array<[number, number]> = [
+    [e.x - s - w, e.y - h / 2],
+    [e.x - s - w, e.y - h - 1],
+    [e.x - s - w, e.y + 1],
+  ]
+  const candidats: Array<[number, number]> = [
+    ...(e.x < centre ? [...esquerra, ...dreta] : [...dreta, ...esquerra]),
+    [e.x - w / 2, e.y - s - h], // dalt
+    [e.x - w / 2, e.y + s], // baix
+  ]
+  for (const [x, y] of candidats) {
+    const r = { x1: x, y1: y, x2: x + w, y2: y + h }
+    if (r.x1 < 0 || r.y1 < 0 || r.x2 > amplada || r.y2 > alcada) continue
+    if (ocupats.some((o) => solapen(o, r))) continue
+    if (punts.some((o) => o.id !== e.id && solapen(o, r, 0))) continue
+    return r
+  }
+  return null
 }

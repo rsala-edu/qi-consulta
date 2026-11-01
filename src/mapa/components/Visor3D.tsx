@@ -233,7 +233,7 @@ const Escena = memo(function Escena({
             .slice(0, 80)
             .map((p) => {
               const m = perId.get(p.dada)!
-              return { id: p.dada, x: p.x, y: p.y, text: nivell === 'codi' ? m.etiqueta : m.etiquetaLlarga }
+              return { id: p.dada, x: p.x, y: p.y, text: nivell === 'codi' ? m.etiqueta : m.etiquetaLlarga, curt: m.etiqueta }
             })
     const noves = colocarEtiquetes(ordenades, size.width, size.height)
     const clau = JSON.stringify(noves)

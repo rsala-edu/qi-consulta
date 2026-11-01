@@ -24,7 +24,7 @@ import type { ModelCos } from '../../mapa/model'
 import { useCalibracions } from '../../mapa/useCalibracions'
 import { usePrecaucions } from '../../mapa/usePrecaucions'
 import { useModelCos } from '../../mapa/useModelCos'
-import { ambPrecaucions, cataleg, cercarPunts, nomMeridia, posicioDe } from '../../punts/cataleg'
+import { REVISIO_BUIDA, ambPrecaucions, cataleg, cercarPunts, nomMeridia, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
 
 export function PantallaProvaMapa() {
@@ -51,8 +51,8 @@ interface FitxaOberta {
 function Marcatge({ model }: { model: ModelCos }) {
   const visor = useRef<ControlVisor>(null)
   const { efectiu: calibrat, desar, restablir } = useCalibracions(model.topologia)
-  const { revisions } = usePrecaucions()
-  const efectiu = useMemo(() => ambPrecaucions(calibrat, revisions ?? []), [calibrat, revisions])
+  const { revisio } = usePrecaucions()
+  const efectiu = useMemo(() => ambPrecaucions(calibrat, revisio ?? REVISIO_BUIDA), [calibrat, revisio])
   /** Punt i costat que la doctora està corregint */
   const [correccio, setCorreccio] = useState<{ codi: string; costat: CostatPosicio } | null>(null)
   const [meridia, setMeridia] = useState('')
@@ -239,9 +239,12 @@ function Marcatge({ model }: { model: ModelCos }) {
               {puntFitxa.nomCatala && ` · ${puntFitxa.nomCatala}`}
             </p>
             <p>{puntFitxa.localitzacio || <span className="detall">{t.mapa.localitzacioPendent}</span>}</p>
-            {(puntFitxa.precaucions.embaras || puntFitxa.precaucions.nota) && (
+            {puntFitxa.precaucions.categories.length > 0 && (
               <p className="avis" role="note">
-                {puntFitxa.precaucions.embaras && <strong>{t.mapa.precaucioEmbaras}. </strong>}
+                <strong>
+                  {t.precaucions.precaucio}:{' '}
+                  {puntFitxa.precaucions.categories.map((x) => t.precaucions.categories[x]).join(' · ')}.
+                </strong>{' '}
                 {puntFitxa.precaucions.nota}
                 {puntFitxa.precaucions.confirmada && <span className="detall"> ({t.precaucions.confirmada})</span>}
               </p>

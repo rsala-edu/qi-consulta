@@ -45,3 +45,54 @@ describe('etiquetes sense superposar', () => {
     expect(rect(e!).x2).toBeLessThanOrEqual(795)
   })
 })
+
+describe('etiquetes de dues columnes properes (sacre)', () => {
+  // Com BL27–BL30 i BL31–BL34 als dos costats del sacre: quatre columnes
+  // separades uns 25 px, amb un punt cada 25 px
+  const columnes = [-60, -35, 35, 60]
+  const entrades = columnes.flatMap((dx, c) =>
+    [0, 1, 2, 3].map((i) => ({ id: `C${c}-${i}`, x: 400 + dx, y: 300 + 25 * i, text: `BL${27 + i + 4 * (c % 2)}` })),
+  )
+  const col = colocarEtiquetes(entrades, 800, 600)
+
+  it('cap etiqueta tapa cap punt ni cap altra etiqueta', () => {
+    for (const e of col) {
+      const a = rect(e)
+      for (const p of entrades) {
+        if (p.id === e.id) continue
+        const tapa = a.x1 < p.x + 5 && p.x - 5 < a.x2 && a.y1 < p.y + 5 && p.y - 5 < a.y2
+        expect(tapa, `${e.id} tapa ${p.id}`).toBe(false)
+      }
+      for (const f of col) {
+        if (f === e) continue
+        const b = rect(f)
+        expect(a.x1 < b.x2 && b.x1 < a.x2 && a.y1 < b.y2 && b.y1 < a.y2, `${e.id}/${f.id}`).toBe(false)
+      }
+    }
+  })
+
+  it('les columnes de fora posen l\'etiqueta a fora', () => {
+    for (const e of col.filter((x) => x.id.startsWith('C0'))) expect(rect(e).x2).toBeLessThanOrEqual(340)
+    for (const e of col.filter((x) => x.id.startsWith('C3'))) expect(e.esquerra).toBeGreaterThanOrEqual(460)
+    expect(col.filter((x) => x.id.startsWith('C0') || x.id.startsWith('C3'))).toHaveLength(8)
+  })
+})
+
+describe('etiqueta curta de reserva', () => {
+  it('si el nom llarg no hi cap, es mostra només el codi', () => {
+    const col = colocarEtiquetes(
+      [
+        { id: 'a', x: 100, y: 100, text: 'BL31 · Shangliao', curt: 'BL31' },
+        // punts a 60 px a la dreta i a l'esquerra, i just a sobre i a sota:
+        // el nom llarg no hi cap enlloc
+        { id: 'b', x: 160, y: 100, text: 'x' },
+        { id: 'c', x: 40, y: 100, text: 'y' },
+        { id: 'd', x: 100, y: 75, text: 'z' },
+        { id: 'e', x: 100, y: 125, text: 'w' },
+      ],
+      800,
+      600,
+    )
+    expect(col.find((e) => e.id === 'a')!.text).toBe('BL31')
+  })
+})

@@ -199,7 +199,9 @@
       "localitzacio": "Al pit, a l'altura del primer espai intercostal, 6 cun cap enfora de la línia mitja, 1 cun per sota de LU2.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap enfora.",
         "confirmada": false
       },
@@ -241,7 +243,9 @@
       "localitzacio": "Al clot de sota l'extrem extern de la clavícula (fossa infraclavicular), 6 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap enfora.",
         "confirmada": false
       },
@@ -283,7 +287,7 @@
       "localitzacio": "A la cara anterolateral del braç, a la vora externa del bíceps, 3 cun per sota del plec axil·lar anterior.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -325,7 +329,7 @@
       "localitzacio": "A la cara anterolateral del braç, a la vora externa del bíceps, 4 cun per sota del plec axil·lar anterior.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -367,7 +371,7 @@
       "localitzacio": "Al plec del colze, al costat radial del tendó del bíceps.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -409,7 +413,7 @@
       "localitzacio": "A la cara anterior de l'avantbraç, costat radial, 7 cun per sobre del plec del canell, sobre la línia LU5–LU9.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -451,7 +455,7 @@
       "localitzacio": "A l'avantbraç, costat radial, 1,5 cun per sobre del plec del canell, damunt l'apòfisi estiloide del radi.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -493,7 +497,9 @@
       "localitzacio": "A l'avantbraç, costat radial, 1 cun per sobre del plec del canell, entre l'apòfisi estiloide i l'artèria radial.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria radial: evitar-la.",
         "confirmada": false
       },
@@ -535,7 +541,9 @@
       "localitzacio": "Al plec del canell, costat radial, entre l'apòfisi estiloide i el tendó de l'abductor llarg del polze, on es nota el pols radial.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria radial: evitar-la.",
         "confirmada": false
       },
@@ -577,7 +585,7 @@
       "localitzacio": "A l'eminència tenar, al punt mitjà del 1r metacarpià, a la vora entre la pell del palmell i la del dors.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -619,7 +627,7 @@
       "localitzacio": "Al polze, costat radial, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -661,7 +669,7 @@
       "localitzacio": "Al dit índex, al costat del polze, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -703,7 +711,7 @@
       "localitzacio": "Al costat del polze de l'índex, just davant de l'articulació de la base del dit (2a metacarpofalàngica), on la pell del dors es troba amb la del palmell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -745,7 +753,7 @@
       "localitzacio": "Al costat del polze de la mà, just darrere de la 2a articulació metacarpofalàngica, a la vora entre la pell del dors i la del palmell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -787,7 +795,9 @@
       "localitzacio": "Al dors de la mà, entre el 1r i el 2n metacarpià, a l'alçada del punt mitjà del 2n metacarpià i tocant-ne la vora del costat del polze.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat.",
         "confirmada": false
       },
@@ -829,7 +839,7 @@
       "localitzacio": "Al canell, a l'extrem del plec dorsal del costat del polze, dins el clot que es forma entre els tendons del polze quan s'estira (tabaquera anatòmica).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -871,7 +881,7 @@
       "localitzacio": "A l'avantbraç, sobre la línia que uneix LI5 i LI11, 3 cun per sobre del plec del canell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -913,7 +923,7 @@
       "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 5 cun per sobre del plec del canell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -955,7 +965,7 @@
       "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 4 cun per sota de LI11.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -997,7 +1007,7 @@
       "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 3 cun per sota de LI11.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1039,7 +1049,7 @@
       "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 2 cun per sota de LI11.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1081,7 +1091,7 @@
       "localitzacio": "Amb el colze doblegat, a l'extrem lateral del plec del colze, a mig camí entre el tendó del bíceps i l'epicòndil lateral.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1123,7 +1133,7 @@
       "localitzacio": "A la cara posterolateral del braç, 1 cun per sobre de l'epicòndil lateral, arran de la cresta supracondília.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1165,7 +1175,7 @@
       "localitzacio": "A la cara lateral del braç, 3 cun per sobre de LI11, en direcció a LI15.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1207,7 +1217,7 @@
       "localitzacio": "A la cara lateral del braç, 7 cun per sobre de LI11, just davant de la vora del deltoide, prop d'on s'insereix.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1249,7 +1259,7 @@
       "localitzacio": "A l'espatlla, al clot anterior que apareix sota la punta de l'acromi quan s'aixeca el braç.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1291,7 +1301,7 @@
       "localitzacio": "A la part alta de l'espatlla, al clot entre l'extrem extern de la clavícula i l'espina de l'escàpula.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1333,7 +1343,9 @@
       "localitzacio": "Al coll, a l'alçada del cartílag cricoide, a la vora posterior de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Vasos del coll: no punxar en profunditat.",
         "confirmada": false
       },
@@ -1375,7 +1387,9 @@
       "localitzacio": "Al coll, a l'alçada de la vora superior del cartílag tiroide (la nou), entre els dos caps de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Vasos del coll (caròtida): no punxar en profunditat.",
         "confirmada": false
       },
@@ -1417,7 +1431,7 @@
       "localitzacio": "Al llavi superior, a mitja alçada del filtre, just sota la vora externa de la narina.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1459,7 +1473,7 @@
       "localitzacio": "Al costat del nas, dins el solc nasogenià, a l'alçada del punt mitjà de la vora externa de l'ala del nas.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1501,7 +1515,9 @@
       "localitzacio": "Amb la mirada al davant, just sota la pupil·la, entre el globus ocular i la vora inferior de l'òrbita.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "ull"
+        ],
         "nota": "Ull: punció superficial i sense manipular; risc d'hematoma.",
         "confirmada": false
       },
@@ -1543,7 +1559,9 @@
       "localitzacio": "Sota la pupil·la, una mica més avall que ST1, al petit clot del forat infraorbitari.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Forat infraorbitari: no punxar en profunditat.",
         "confirmada": false
       },
@@ -1585,7 +1603,7 @@
       "localitzacio": "Sota la pupil·la, a l'alçada de la vora inferior de l'ala del nas.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1627,7 +1645,7 @@
       "localitzacio": "Al costat de la comissura de la boca, uns 0,4 cun cap enfora.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1669,7 +1687,9 @@
       "localitzacio": "Davant de l'angle de la mandíbula, al clot de la vora anterior del masseter, on es nota el batec de l'artèria facial.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria facial: evitar-la.",
         "confirmada": false
       },
@@ -1711,7 +1731,7 @@
       "localitzacio": "Un través de dit per sobre i per davant de l'angle de la mandíbula, al punt més prominent del masseter quan es mossega.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1753,7 +1773,7 @@
       "localitzacio": "Davant de l'orella, al clot entre l'arc zigomàtic i l'escotadura de la mandíbula; el clot es tanca en obrir la boca.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1795,7 +1815,7 @@
       "localitzacio": "A l'angle del front, 0,5 cun dins la línia del cabell i 4,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1805,22 +1825,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 23728,
+          "triangle": 14674,
           "b": [
-            0.271985,
-            0.382002,
-            0.346013
+            0.056025,
+            0.508983,
+            0.434992
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 10283,
+          "triangle": 1431,
           "b": [
-            0.271985,
-            0.346012,
-            0.382003
+            0.056025,
+            0.434993,
+            0.508982
           ],
           "origen": "oms"
         }
@@ -1837,7 +1857,9 @@
       "localitzacio": "Al coll, a l'alçada de la vora superior del cartílag tiroide, davant de l'esternocleidomastoidal, sobre el batec de la caròtida.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria caròtida: apartar-la i no punxar en profunditat.",
         "confirmada": false
       },
@@ -1879,7 +1901,7 @@
       "localitzacio": "Al coll, a l'alçada del cartílag cricoide, a la vora anterior de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -1921,7 +1943,10 @@
       "localitzacio": "Just per sobre de l'extrem intern de la clavícula, al clot entre els dos caps de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos",
+          "pulmo"
+        ],
         "nota": "Àpex del pulmó i vasos subclavis: punció superficial.",
         "confirmada": false
       },
@@ -1963,7 +1988,11 @@
       "localitzacio": "Al clot de sobre la clavícula (fossa supraclavicular), 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "vasos",
+          "pulmo"
+        ],
         "nota": "Àpex del pulmó i vasos subclavis: punció superficial. Algunes fonts el contraindiquen en l'embaràs.",
         "confirmada": false
       },
@@ -2005,7 +2034,9 @@
       "localitzacio": "Just sota la clavícula, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -2047,7 +2078,9 @@
       "localitzacio": "Al primer espai intercostal, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -2089,7 +2122,9 @@
       "localitzacio": "Al segon espai intercostal, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -2131,7 +2166,9 @@
       "localitzacio": "Al tercer espai intercostal, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -2173,7 +2210,9 @@
       "localitzacio": "Al centre del mugró (quart espai intercostal). S'utilitza com a referència.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "noEsPunxa"
+        ],
         "nota": "No es punxa ni s'hi aplica moxa: només és una referència.",
         "confirmada": false
       },
@@ -2215,7 +2254,9 @@
       "localitzacio": "Al cinquè espai intercostal, sota el mugró, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -2257,7 +2298,9 @@
       "localitzacio": "A l'abdomen, 6 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
         "confirmada": false
       },
@@ -2299,7 +2342,9 @@
       "localitzacio": "A l'abdomen, 5 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
         "confirmada": false
       },
@@ -2341,7 +2386,9 @@
       "localitzacio": "A l'abdomen, 4 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
         "confirmada": false
       },
@@ -2383,7 +2430,9 @@
       "localitzacio": "A l'abdomen, 3 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
         "confirmada": false
       },
@@ -2425,7 +2474,9 @@
       "localitzacio": "A l'abdomen, 2 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
         "confirmada": false
       },
@@ -2467,7 +2518,9 @@
       "localitzacio": "A l'abdomen, 1 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
         "confirmada": false
       },
@@ -2509,7 +2562,10 @@
       "localitzacio": "A l'abdomen, a l'alçada del centre del melic i 2 cun cap enfora.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; no punxar en profunditat.",
         "confirmada": false
       },
@@ -2551,7 +2607,10 @@
       "localitzacio": "A l'abdomen, 1 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; no punxar en profunditat.",
         "confirmada": false
       },
@@ -2593,7 +2652,10 @@
       "localitzacio": "A l'abdomen, 2 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; no punxar en profunditat.",
         "confirmada": false
       },
@@ -2635,7 +2697,10 @@
       "localitzacio": "A l'abdomen, 3 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
         "confirmada": false
       },
@@ -2677,7 +2742,10 @@
       "localitzacio": "A l'abdomen, 4 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
         "confirmada": false
       },
@@ -2719,7 +2787,10 @@
       "localitzacio": "A l'engonal, a l'alçada de la vora superior de la símfisi del pubis i 2 cun cap enfora, sobre el batec de l'artèria femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "vasos"
+        ],
         "nota": "Artèria femoral: evitar-la. Precaució en l'embaràs.",
         "confirmada": false
       },
@@ -2761,7 +2832,7 @@
       "localitzacio": "A la part alta de la cara anterior de la cuixa, al clot entre el sartori, el tensor de la fàscia lata i el recte femoral, a l'alçada de la vora inferior de la símfisi.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -2803,7 +2874,7 @@
       "localitzacio": "A la cara anterolateral de la cuixa, 6 cun per sobre de la vora superior de la ròtula, sobre la línia que va de l'espina ilíaca anterosuperior a l'angle extern de la ròtula.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -2845,7 +2916,7 @@
       "localitzacio": "A la cara anterolateral de la cuixa, 3 cun per sobre de la ròtula, per fora del tendó del recte femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -2887,7 +2958,7 @@
       "localitzacio": "A la cara anterolateral de la cuixa, 2 cun per sobre de la ròtula, entre el vast extern i la vora externa del tendó del recte femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -2929,7 +3000,7 @@
       "localitzacio": "Al genoll doblegat, al clot que queda per fora del lligament rotulià (ull extern del genoll).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -2971,7 +3042,7 @@
       "localitzacio": "A la cara anterior de la cama, 3 cun per sota de ST35, a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3013,7 +3084,7 @@
       "localitzacio": "A la cara anterior de la cama, 6 cun per sota de ST35, a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3055,7 +3126,7 @@
       "localitzacio": "A la cara anterior de la cama, 8 cun per sota de ST35 (a mitja cama), a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3097,7 +3168,7 @@
       "localitzacio": "A la cara anterior de la cama, 9 cun per sota de ST35, a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3139,7 +3210,7 @@
       "localitzacio": "A la cama, a la mateixa alçada que ST38 i un través de dit més cap enfora, a la vora externa del tibial anterior.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3181,7 +3252,7 @@
       "localitzacio": "Al centre de la cara anterior del turmell, entre els tendons de l'extensor llarg del dit gros i de l'extensor llarg dels dits.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3223,7 +3294,9 @@
       "localitzacio": "Al dors del peu, on la base del 2n metatarsià s'uneix al cuneïforme, sobre el batec de l'artèria pèdia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria pèdia: evitar-la.",
         "confirmada": false
       },
@@ -3265,7 +3338,7 @@
       "localitzacio": "Al dors del peu, entre el 2n i el 3r metatarsià, al clot just darrere de la 2a articulació metatarsofalàngica.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3307,7 +3380,7 @@
       "localitzacio": "Entre el 2n i el 3r dit del peu, just darrere del marge de la membrana que els uneix.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3349,7 +3422,7 @@
       "localitzacio": "Al 2n dit del peu, al costat extern, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3391,7 +3464,7 @@
       "localitzacio": "Al dit gros del peu, costat medial, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3433,7 +3506,7 @@
       "localitzacio": "Al costat medial del dit gros, just davant de la 1a articulació metatarsofalàngica, a la vora entre la pell del dors i la de la planta.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3475,7 +3548,7 @@
       "localitzacio": "Al costat medial del peu, just darrere del cap del 1r metatarsià, a la vora entre la pell del dors i la de la planta.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3517,7 +3590,7 @@
       "localitzacio": "Al costat medial del peu, davant i per sota de la base del 1r metatarsià.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3559,7 +3632,7 @@
       "localitzacio": "Al clot de davant i per sota del mal·lèol intern, a mig camí entre la tuberositat del navicular i la punta del mal·lèol.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3601,7 +3674,9 @@
       "localitzacio": "A la cara medial de la cama, 3 cun per sobre de la punta del mal·lèol intern, just darrere de la vora medial de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat.",
         "confirmada": false
       },
@@ -3643,7 +3718,7 @@
       "localitzacio": "A la cara medial de la cama, 6 cun per sobre de la punta del mal·lèol intern, darrere de la vora medial de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3685,7 +3760,7 @@
       "localitzacio": "A la cara medial de la cama, 3 cun per sota de SP9, darrere de la vora medial de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3727,7 +3802,7 @@
       "localitzacio": "A la cara medial de la cama, al clot de sota el còndil medial de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3769,7 +3844,7 @@
       "localitzacio": "A la cara anteromedial de la cuixa, 2 cun per sobre de l'angle intern de la base de la ròtula, damunt el vast intern.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -3811,7 +3886,9 @@
       "localitzacio": "A la cara medial de la cuixa, a un terç del camí de SP12 a SP10 (comptant des de dalt), entre el sartori i l'adductor llarg.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria femoral: evitar-la.",
         "confirmada": false
       },
@@ -3853,7 +3930,10 @@
       "localitzacio": "A l'engonal, a l'alçada de la vora superior de la símfisi del pubis, 3,5 cun cap enfora de la línia mitja, per fora de l'artèria femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "vasos"
+        ],
         "nota": "Artèria femoral: evitar-la. Precaució en l'embaràs.",
         "confirmada": false
       },
@@ -3895,7 +3975,9 @@
       "localitzacio": "A la part baixa de l'abdomen, 0,7 cun per sobre de SP12, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -3937,7 +4019,9 @@
       "localitzacio": "A l'abdomen, 1,3 cun per sota del centre del melic, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -3979,7 +4063,7 @@
       "localitzacio": "A l'abdomen, a l'alçada del centre del melic, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4021,7 +4105,7 @@
       "localitzacio": "A l'abdomen, 3 cun per sobre del centre del melic, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4063,7 +4147,9 @@
       "localitzacio": "Al pit, al cinquè espai intercostal, 6 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -4105,7 +4191,9 @@
       "localitzacio": "Al pit, al quart espai intercostal, 6 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -4147,7 +4235,9 @@
       "localitzacio": "Al pit, al tercer espai intercostal, 6 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -4189,7 +4279,9 @@
       "localitzacio": "Al pit, al segon espai intercostal, 6 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -4231,7 +4323,9 @@
       "localitzacio": "Al costat del tòrax, al sisè espai intercostal, a la línia axil·lar mitjana.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -4273,7 +4367,9 @@
       "localitzacio": "Al centre de l'aixella, on es nota el batec de l'artèria axil·lar.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria axil·lar: evitar-la.",
         "confirmada": false
       },
@@ -4315,7 +4411,7 @@
       "localitzacio": "A la cara medial del braç, 3 cun per sobre del plec del colze, al solc del costat intern del bíceps.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4357,7 +4453,7 @@
       "localitzacio": "Al colze doblegat, a l'extrem intern del plec del colze, davant de l'epicòndil medial.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4399,7 +4495,7 @@
       "localitzacio": "A la cara anterior de l'avantbraç, 1,5 cun per sobre del plec del canell, al costat radial del tendó del flexor cubital del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4441,7 +4537,7 @@
       "localitzacio": "A la cara anterior de l'avantbraç, 1 cun per sobre del plec del canell, al costat radial del tendó del flexor cubital del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4483,7 +4579,7 @@
       "localitzacio": "A la cara anterior de l'avantbraç, 0,5 cun per sobre del plec del canell, al costat radial del tendó del flexor cubital del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4525,7 +4621,7 @@
       "localitzacio": "Al plec del canell, costat cubital, al costat radial del tendó del flexor cubital del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4567,7 +4663,7 @@
       "localitzacio": "Al palmell, entre el 4t i el 5è metacarpià, on toca la punta del dit petit en tancar el puny.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4609,7 +4705,7 @@
       "localitzacio": "Al dit petit, costat radial, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4651,7 +4747,7 @@
       "localitzacio": "Al dit petit, costat cubital, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4693,7 +4789,7 @@
       "localitzacio": "Al costat cubital del dit petit, just davant de la 5a articulació metacarpofalàngica, a la vora entre la pell del dors i la del palmell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4735,7 +4831,7 @@
       "localitzacio": "Al costat cubital de la mà, just darrere de la 5a articulació metacarpofalàngica, a la vora entre la pell del dors i la del palmell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4777,7 +4873,7 @@
       "localitzacio": "Al costat cubital de la mà, al clot entre la base del 5è metacarpià i el piramidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4819,7 +4915,7 @@
       "localitzacio": "Al canell, costat cubital del plec dorsal, al clot entre l'apòfisi estiloide del cúbit i el piramidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4861,7 +4957,7 @@
       "localitzacio": "Al dors de l'avantbraç, 1 cun per sobre del plec dorsal del canell, al clot del costat radial del cap del cúbit.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4903,7 +4999,7 @@
       "localitzacio": "Al dors de l'avantbraç, costat cubital, 5 cun per sobre del plec del canell, sobre la línia SI5–SI8.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -4945,7 +5041,9 @@
       "localitzacio": "Al colze, al clot entre l'olècranon i l'epicòndil medial (sobre el nervi cubital).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Nervi cubital: no manipular amb força.",
         "confirmada": false
       },
@@ -4987,7 +5085,7 @@
       "localitzacio": "A la part posterior de l'espatlla, 1 cun per sobre del plec axil·lar posterior.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5029,7 +5127,7 @@
       "localitzacio": "A la part posterior de l'espatlla, damunt de SI9, sota la vora inferior de l'espina de l'escàpula.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5071,7 +5169,7 @@
       "localitzacio": "A l'escàpula, al centre de la fossa infraespinosa, a un terç del camí entre el punt mitjà de l'espina de l'escàpula i l'angle inferior.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5113,7 +5211,7 @@
       "localitzacio": "A l'escàpula, al centre de la fossa supraespinosa, just per sobre del punt mitjà de l'espina de l'escàpula.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5155,7 +5253,7 @@
       "localitzacio": "A l'escàpula, a l'extrem intern de la fossa supraespinosa.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5197,7 +5295,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T1, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua.",
         "confirmada": false
       },
@@ -5239,7 +5339,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de C7, 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua.",
         "confirmada": false
       },
@@ -5281,7 +5383,7 @@
       "localitzacio": "Al coll, a l'alçada de la vora superior del cartílag tiroide, a la vora posterior de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5323,7 +5425,9 @@
       "localitzacio": "Al coll, darrere de l'angle de la mandíbula, davant de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Vasos del coll: no punxar en profunditat.",
         "confirmada": false
       },
@@ -5365,7 +5469,7 @@
       "localitzacio": "A la cara, sota l'os zigomàtic, en la vertical del cantó extern de l'ull.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5407,7 +5511,9 @@
       "localitzacio": "Davant del tragus, al clot que es forma en obrir la boca, entre el tragus i el còndil de la mandíbula.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Punxar amb la boca oberta.",
         "confirmada": false
       },
@@ -5449,7 +5555,9 @@
       "localitzacio": "Al costat del nas, just per sobre i per dins del cantó intern de l'ull.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "ull"
+        ],
         "nota": "Ull: punció lenta i superficial, sense manipular; risc d'hematoma.",
         "confirmada": false
       },
@@ -5491,7 +5599,7 @@
       "localitzacio": "Al clot de l'extrem intern de la cella.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5533,7 +5641,7 @@
       "localitzacio": "Al cap, en la vertical de BL2, 0,5 cun dins la línia anterior del cabell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5575,7 +5683,7 @@
       "localitzacio": "Al cap, 0,5 cun dins la línia anterior del cabell, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5585,22 +5693,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 14786,
+          "triangle": 14787,
           "b": [
-            0.389885,
-            0.194334,
-            0.415781
+            0.138247,
+            0.572602,
+            0.289151
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 1545,
+          "triangle": 1544,
           "b": [
-            0.389885,
-            0.41578,
-            0.194335
+            0.138247,
+            0.28915,
+            0.572603
           ],
           "origen": "oms"
         }
@@ -5617,7 +5725,7 @@
       "localitzacio": "Al cap, 1 cun dins la línia anterior del cabell, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5659,7 +5767,7 @@
       "localitzacio": "Al cap, 2,5 cun dins la línia anterior del cabell, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5701,7 +5809,7 @@
       "localitzacio": "Al cap, 4 cun dins la línia anterior del cabell, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5743,7 +5851,7 @@
       "localitzacio": "Al cap, 5,5 cun dins la línia anterior del cabell, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5785,7 +5893,7 @@
       "localitzacio": "Al clatell, a l'alçada de GV17 (protuberància occipital), 1,3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -5827,7 +5935,9 @@
       "localitzacio": "Al clatell, a l'alçada de GV15, a la vora externa del trapezi (1,3 cun cap enfora de la línia mitja).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "bulb"
+        ],
         "nota": "Bulb raquidi: no punxar en profunditat cap amunt ni cap endins.",
         "confirmada": false
       },
@@ -5869,7 +5979,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T1, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -5911,7 +6023,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T2, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -5953,7 +6067,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T3, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -5995,7 +6111,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T4, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -6037,7 +6155,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T5, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -6079,7 +6199,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T6, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -6121,7 +6243,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T7, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -6163,7 +6287,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T9, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -6205,7 +6331,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T10, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -6247,7 +6375,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T11, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -6289,7 +6419,7 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T12, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6331,7 +6461,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de L1, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Ronyó: no punxar en profunditat.",
         "confirmada": false
       },
@@ -6373,7 +6505,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de L2, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Ronyó: no punxar en profunditat.",
         "confirmada": false
       },
@@ -6415,7 +6549,7 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de L3, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6457,7 +6591,7 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de L4, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6499,7 +6633,7 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de L5, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6541,7 +6675,7 @@
       "localitzacio": "A l'esquena, a l'alçada de el primer forat sacre, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6583,7 +6717,7 @@
       "localitzacio": "A l'esquena, a l'alçada de el segon forat sacre, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6625,7 +6759,7 @@
       "localitzacio": "A l'esquena, a l'alçada de el tercer forat sacre, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6667,7 +6801,7 @@
       "localitzacio": "A l'esquena, a l'alçada de el quart forat sacre, 1,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6709,7 +6843,9 @@
       "localitzacio": "Al sacre, dins el primer forat sacre posterior.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat.",
         "confirmada": false
       },
@@ -6751,7 +6887,9 @@
       "localitzacio": "Al sacre, dins el segon forat sacre posterior.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat.",
         "confirmada": false
       },
@@ -6793,7 +6931,9 @@
       "localitzacio": "Al sacre, dins el tercer forat sacre posterior.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat.",
         "confirmada": false
       },
@@ -6835,7 +6975,9 @@
       "localitzacio": "Al sacre, dins el quart forat sacre posterior.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat.",
         "confirmada": false
       },
@@ -6877,7 +7019,7 @@
       "localitzacio": "Al costat de la punta del còccix, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6919,7 +7061,7 @@
       "localitzacio": "A la cara posterior de la cuixa, al punt mitjà del plec gluti.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -6961,7 +7103,7 @@
       "localitzacio": "A la cara posterior de la cuixa, 6 cun per sota del plec gluti, sobre la línia BL36–BL40.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7003,7 +7145,7 @@
       "localitzacio": "Darrere del genoll, 1 cun per sobre de BL39, al costat medial del tendó del bíceps femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7045,7 +7187,7 @@
       "localitzacio": "A l'extrem lateral del plec popliti, al costat medial del tendó del bíceps femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7087,7 +7229,9 @@
       "localitzacio": "Al punt mitjà del plec popliti.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria poplítia: evitar-la.",
         "confirmada": false
       },
@@ -7129,7 +7273,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T2, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7171,7 +7317,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T3, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7213,7 +7361,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T4, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7255,7 +7405,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T5, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7297,7 +7449,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T6, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7339,7 +7493,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T7, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7381,7 +7537,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T9, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7423,7 +7581,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T10, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7465,7 +7625,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T11, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7507,7 +7669,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de T12, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
         "confirmada": false
       },
@@ -7549,7 +7713,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de L1, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Ronyó: no punxar en profunditat.",
         "confirmada": false
       },
@@ -7591,7 +7757,9 @@
       "localitzacio": "A l'esquena, a l'alçada de la depressió de sota l'apòfisi espinosa de L2, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Ronyó: no punxar en profunditat.",
         "confirmada": false
       },
@@ -7633,7 +7801,7 @@
       "localitzacio": "A la natja, a l'alçada del segon forat sacre, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7675,7 +7843,7 @@
       "localitzacio": "A la natja, a l'alçada del quart forat sacre (hiat sacre), 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7717,7 +7885,7 @@
       "localitzacio": "A la cara posterior de la cama, 2 cun per sota del plec popliti, entre els dos caps del bessó.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7759,7 +7927,7 @@
       "localitzacio": "A la cara posterior de la cama, entre BL55 i BL57, al centre del ventre del bessó.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7801,7 +7969,7 @@
       "localitzacio": "A la cara posterior de la cama, on es troben el tendó d'Aquil·les i els dos ventres del bessó, uns 8 cun per sota del plec popliti.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7843,7 +8011,7 @@
       "localitzacio": "A la cara posterolateral de la cama, 7 cun per sobre de BL60, entre la vora del bessó extern i el tendó d'Aquil·les.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7885,7 +8053,7 @@
       "localitzacio": "A la cara posterolateral de la cama, 3 cun per sobre de BL60, entre el peroné i el tendó d'Aquil·les.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -7927,7 +8095,9 @@
       "localitzacio": "Al turmell, al clot entre la punta del mal·lèol extern i el tendó d'Aquil·les.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat.",
         "confirmada": false
       },
@@ -7969,7 +8139,7 @@
       "localitzacio": "Al costat lateral del peu, sota BL60, a la vora lateral del calcani.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8011,7 +8181,7 @@
       "localitzacio": "Al costat lateral del peu, al clot de just a sota de la punta del mal·lèol extern.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8053,7 +8223,7 @@
       "localitzacio": "Al costat lateral del peu, davant i per sota de BL62, al clot de sota el cuboide.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8095,7 +8265,7 @@
       "localitzacio": "Al costat lateral del peu, just davant de la tuberositat del 5è metatarsià, a la vora entre la pell del dors i la de la planta.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8137,7 +8307,7 @@
       "localitzacio": "Al costat lateral del peu, just darrere de la 5a articulació metatarsofalàngica.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8179,7 +8349,7 @@
       "localitzacio": "Al costat lateral del dit petit del peu, just davant de la 5a articulació metatarsofalàngica.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8221,7 +8391,9 @@
       "localitzacio": "Al dit petit del peu, costat lateral, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat (s'hi aplica moxa per a la presentació de natges només sota criteri mèdic).",
         "confirmada": false
       },
@@ -8263,7 +8435,7 @@
       "localitzacio": "A la planta del peu, al clot que es forma en doblegar els dits, a un terç del camí entre la base dels dits 2n i 3r i el taló.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8305,7 +8477,7 @@
       "localitzacio": "Al costat medial del peu, sota la tuberositat del navicular, a la vora entre la pell del dors i la de la planta.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8347,7 +8519,9 @@
       "localitzacio": "Al turmell, al clot entre la punta del mal·lèol intern i el tendó d'Aquil·les.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria tibial posterior: evitar-la.",
         "confirmada": false
       },
@@ -8389,7 +8563,7 @@
       "localitzacio": "Darrere i per sota del mal·lèol intern, per sobre del calcani, just davant de la inserció del tendó d'Aquil·les.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8431,7 +8605,7 @@
       "localitzacio": "1 cun per sota de KI3, al clot de la cara medial del calcani.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8473,7 +8647,7 @@
       "localitzacio": "1 cun per sota de la punta del mal·lèol intern, al clot de sota el mal·lèol.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8515,7 +8689,7 @@
       "localitzacio": "A la cara posteromedial de la cama, 2 cun per sobre de la punta del mal·lèol intern, davant del tendó d'Aquil·les.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8557,7 +8731,7 @@
       "localitzacio": "A la cara medial de la cama, 2 cun per sobre de la punta del mal·lèol intern, darrere de la vora medial de la tíbia (0,5 cun per davant de KI7).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8599,7 +8773,7 @@
       "localitzacio": "A la cara posteromedial de la cama, 5 cun per sobre de la punta del mal·lèol intern, entre el sòli i el tendó d'Aquil·les.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8641,7 +8815,7 @@
       "localitzacio": "Al costat medial del plec popliti, entre els tendons del semitendinós i del semimembranós.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8683,7 +8857,10 @@
       "localitzacio": "A la part baixa de l'abdomen, a l'alçada de la vora superior de la símfisi del pubis, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
         "confirmada": false
       },
@@ -8725,7 +8902,10 @@
       "localitzacio": "A la part baixa de l'abdomen, 4 cun per sota del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
         "confirmada": false
       },
@@ -8767,7 +8947,9 @@
       "localitzacio": "A la part baixa de l'abdomen, 3 cun per sota del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -8809,7 +8991,9 @@
       "localitzacio": "A l'abdomen, 2 cun per sota del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -8851,7 +9035,9 @@
       "localitzacio": "A l'abdomen, 1 cun per sota del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -8893,7 +9079,7 @@
       "localitzacio": "A l'abdomen, 0,5 cun cap enfora del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8935,7 +9121,7 @@
       "localitzacio": "A l'abdomen, 2 cun per sobre del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -8977,7 +9163,7 @@
       "localitzacio": "A l'abdomen, 3 cun per sobre del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9019,7 +9205,7 @@
       "localitzacio": "A l'abdomen, 4 cun per sobre del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9061,7 +9247,7 @@
       "localitzacio": "A l'abdomen, 5 cun per sobre del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9103,7 +9289,9 @@
       "localitzacio": "A l'abdomen, 6 cun per sobre del centre del melic, 0,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Abdomen superior: no punxar en profunditat (fetge).",
         "confirmada": false
       },
@@ -9145,7 +9333,9 @@
       "localitzacio": "Al pit, al cinquè espai intercostal, 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -9187,7 +9377,9 @@
       "localitzacio": "Al pit, al quart espai intercostal, 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -9229,7 +9421,9 @@
       "localitzacio": "Al pit, al tercer espai intercostal, 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -9271,7 +9465,9 @@
       "localitzacio": "Al pit, al segon espai intercostal, 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -9313,7 +9509,9 @@
       "localitzacio": "Al pit, al primer espai intercostal, 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -9355,7 +9553,9 @@
       "localitzacio": "Al pit, just sota la vora inferior de la clavícula, 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -9397,7 +9597,9 @@
       "localitzacio": "Al pit, al quart espai intercostal, 1 cun cap enfora del mugró.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -9439,7 +9641,7 @@
       "localitzacio": "A la cara anterior del braç, 2 cun per sota del plec axil·lar anterior, entre els dos caps del bíceps.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9481,7 +9683,9 @@
       "localitzacio": "Al plec del colze, al costat cubital del tendó del bíceps.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria braquial: evitar-la.",
         "confirmada": false
       },
@@ -9523,7 +9727,7 @@
       "localitzacio": "A la cara anterior de l'avantbraç, 5 cun per sobre del plec del canell, entre els tendons del palmar llarg i del flexor radial del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9565,7 +9769,7 @@
       "localitzacio": "A la cara anterior de l'avantbraç, 3 cun per sobre del plec del canell, entre els tendons del palmar llarg i del flexor radial del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9607,7 +9811,7 @@
       "localitzacio": "A la cara anterior de l'avantbraç, 2 cun per sobre del plec del canell, entre els tendons del palmar llarg i del flexor radial del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9649,7 +9853,7 @@
       "localitzacio": "Al centre del plec del canell, entre els tendons del palmar llarg i del flexor radial del carp.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9691,7 +9895,7 @@
       "localitzacio": "Al palmell, entre el 2n i el 3r metacarpià, on toca la punta del dit del mig en tancar el puny.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9733,7 +9937,7 @@
       "localitzacio": "Al centre de la punta del dit del mig.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9775,7 +9979,7 @@
       "localitzacio": "Al dit anular, costat cubital, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9817,7 +10021,7 @@
       "localitzacio": "Al dors de la mà, entre el 4t i el 5è dit, just darrere del marge de la membrana que els uneix.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9859,7 +10063,7 @@
       "localitzacio": "Al dors de la mà, entre el 4t i el 5è metacarpià, al clot just darrere de la 4a articulació metacarpofalàngica.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9901,7 +10105,7 @@
       "localitzacio": "Al plec dorsal del canell, al clot del costat cubital del tendó de l'extensor comú dels dits.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9943,7 +10147,7 @@
       "localitzacio": "Al dors de l'avantbraç, 2 cun per sobre del plec dorsal del canell, al punt mitjà entre el radi i el cúbit.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -9985,7 +10189,7 @@
       "localitzacio": "Al dors de l'avantbraç, 3 cun per sobre del plec dorsal del canell, al punt mitjà entre el radi i el cúbit.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10027,7 +10231,7 @@
       "localitzacio": "Al dors de l'avantbraç, 3 cun per sobre del plec dorsal del canell, al costat radial del cúbit.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10069,7 +10273,7 @@
       "localitzacio": "Al dors de l'avantbraç, 4 cun per sobre del plec dorsal del canell, al punt mitjà entre el radi i el cúbit.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10111,7 +10315,7 @@
       "localitzacio": "Al dors de l'avantbraç, 5 cun per sota de la punta de l'olècranon, entre el radi i el cúbit.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10153,7 +10357,7 @@
       "localitzacio": "A la cara posterior del braç, al clot 1 cun per sobre de la punta de l'olècranon.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10195,7 +10399,7 @@
       "localitzacio": "A la cara posterior del braç, 2 cun per sobre de la punta de l'olècranon.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10237,7 +10441,7 @@
       "localitzacio": "A la cara posterior del braç, 5 cun per sobre de la punta de l'olècranon, sobre la línia que va cap a l'angle de l'acromi.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10279,7 +10483,7 @@
       "localitzacio": "A la cara posterior del braç, a la vora posterior del deltoide, 3 cun per sota de l'angle de l'acromi.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10321,7 +10525,7 @@
       "localitzacio": "A l'espatlla, al clot posterior que apareix sota l'acromi quan s'aixeca el braç.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10363,7 +10567,9 @@
       "localitzacio": "A la part alta de l'escàpula, a la fossa supraespinosa, a mig camí entre GB21 i SI13.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: punció superficial.",
         "confirmada": false
       },
@@ -10405,7 +10611,7 @@
       "localitzacio": "Al coll, darrere de l'esternocleidomastoidal, a l'alçada de l'angle de la mandíbula.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10447,7 +10653,7 @@
       "localitzacio": "Darrere del lòbul de l'orella, al clot entre la mastoide i la branca de la mandíbula.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10489,7 +10695,7 @@
       "localitzacio": "Darrere de l'orella, a un terç de la corba que va de TE17 a TE20, tocant l'arrel de l'orella.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10531,7 +10737,7 @@
       "localitzacio": "Darrere de l'orella, a dos terços de la corba que va de TE17 a TE20, tocant l'arrel de l'orella.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10573,7 +10779,7 @@
       "localitzacio": "Al cap, just per sobre de la punta de l'orella, a la línia del cabell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10615,7 +10821,9 @@
       "localitzacio": "Davant de l'escotadura de sobre el tragus, al clot que es forma en obrir la boca.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Punxar amb la boca oberta.",
         "confirmada": false
       },
@@ -10628,7 +10836,7 @@
           "triangle": 22888,
           "b": [
             0.075343,
-            0.000085,
+            8.5e-05,
             0.924572
           ],
           "origen": "oms"
@@ -10640,7 +10848,7 @@
           "b": [
             0.075343,
             0.924572,
-            0.000085
+            8.5e-05
           ],
           "origen": "oms"
         }
@@ -10657,7 +10865,9 @@
       "localitzacio": "Davant de la part alta de l'arrel de l'orella, darrere de la línia del cabell de la templa.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria temporal superficial: evitar-la.",
         "confirmada": false
       },
@@ -10699,7 +10909,7 @@
       "localitzacio": "Al clot de l'extrem extern de la cella.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10741,7 +10951,7 @@
       "localitzacio": "A la cara, 0,5 cun cap enfora del cantó extern de l'ull, al clot de la vora externa de l'òrbita.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10783,7 +10993,9 @@
       "localitzacio": "Davant de l'escotadura de sota el tragus (intertràgica), al clot que es forma en obrir la boca.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Punxar amb la boca oberta.",
         "confirmada": false
       },
@@ -10825,7 +11037,7 @@
       "localitzacio": "Davant de l'orella, al clot de sobre el punt mitjà de l'arc zigomàtic, just per sobre de ST7.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10867,7 +11079,7 @@
       "localitzacio": "Al cap, a la templa, a un quart de la corba que va de ST8 a GB7.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10877,22 +11089,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 14614,
+          "triangle": 23719,
           "b": [
-            0.252537,
-            0.552694,
-            0.194769
+            0.802543,
+            0.147049,
+            0.050408
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 1371,
+          "triangle": 10272,
           "b": [
-            0.252537,
-            0.194768,
-            0.552695
+            0.802541,
+            0.050409,
+            0.14705
           ],
           "origen": "oms"
         }
@@ -10909,7 +11121,7 @@
       "localitzacio": "Al cap, a la templa, al punt mitjà de la corba que va de ST8 a GB7.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10919,22 +11131,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 13581,
+          "triangle": 14635,
           "b": [
-            0.233544,
-            0.008656,
-            0.7578
+            0.195012,
+            0.256596,
+            0.548392
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 326,
+          "triangle": 1390,
           "b": [
-            0.233544,
-            0.757801,
-            0.008655
+            0.195013,
+            0.548391,
+            0.256596
           ],
           "origen": "oms"
         }
@@ -10951,7 +11163,7 @@
       "localitzacio": "Al cap, a la templa, a tres quarts de la corba que va de ST8 a GB7.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -10961,22 +11173,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 22879,
+          "triangle": 23472,
           "b": [
-            0.26916,
-            0.606869,
-            0.123971
+            0.403141,
+            0.376493,
+            0.220366
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 9424,
+          "triangle": 10027,
           "b": [
-            0.269161,
-            0.123969,
-            0.60687
+            0.403142,
+            0.220367,
+            0.376491
           ],
           "origen": "oms"
         }
@@ -10993,7 +11205,7 @@
       "localitzacio": "Al cap, on la vora posterior del cabell de la templa es creua amb l'horitzontal de la punta de l'orella.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11035,7 +11247,7 @@
       "localitzacio": "Al cap, just per sobre de la punta de l'orella, 1,5 cun dins la línia del cabell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11077,7 +11289,7 @@
       "localitzacio": "Al cap, per sobre de la vora posterior de l'arrel de l'orella, 2 cun dins la línia del cabell, 0,5 cun per darrere de GB8.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11119,7 +11331,7 @@
       "localitzacio": "Al cap, darrere de l'orella, a un terç de la corba que va de GB9 a GB12.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11161,7 +11373,7 @@
       "localitzacio": "Al cap, darrere de l'orella, a dos terços de la corba que va de GB9 a GB12.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11203,7 +11415,7 @@
       "localitzacio": "Al clot de darrere i per sota de l'apòfisi mastoide.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11245,7 +11457,7 @@
       "localitzacio": "Al cap, 0,5 cun dins la línia anterior del cabell, 3 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11255,22 +11467,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 14615,
+          "triangle": 23723,
           "b": [
-            0.632619,
-            0.201633,
-            0.165748
+            0.083167,
+            0.766315,
+            0.150518
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 1370,
+          "triangle": 10276,
           "b": [
-            0.632619,
-            0.165748,
-            0.201633
+            0.083167,
+            0.150518,
+            0.766315
           ],
           "origen": "oms"
         }
@@ -11287,7 +11499,7 @@
       "localitzacio": "Al front, 1 cun per sobre de la cella, en la vertical de la pupil·la.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11329,7 +11541,7 @@
       "localitzacio": "Al cap, 0,5 cun dins la línia anterior del cabell, en la vertical de la pupil·la.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11339,22 +11551,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 14629,
+          "triangle": 23729,
           "b": [
-            0.379943,
-            0.350614,
-            0.269443
+            0.47481,
+            0.36891,
+            0.15628
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 1384,
+          "triangle": 10282,
           "b": [
-            0.379943,
-            0.269443,
-            0.350614
+            0.47481,
+            0.156279,
+            0.368911
           ],
           "origen": "oms"
         }
@@ -11371,7 +11583,7 @@
       "localitzacio": "Al cap, 1,5 cun dins la línia anterior del cabell, en la vertical de la pupil·la.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11413,7 +11625,7 @@
       "localitzacio": "Al cap, 2,5 cun dins la línia anterior del cabell, en la vertical de la pupil·la.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11455,7 +11667,7 @@
       "localitzacio": "Al cap, 4 cun dins la línia anterior del cabell, en la vertical de la pupil·la.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11497,7 +11709,7 @@
       "localitzacio": "Al cap, a l'alçada de GV17, just per sobre de GB20.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11539,7 +11751,10 @@
       "localitzacio": "Al clatell, sota l'os occipital, al clot entre l'esternocleidomastoidal i el trapezi, a l'alçada de GV16.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos",
+          "bulb"
+        ],
         "nota": "Artèria vertebral i bulb: punxar cap a la punta del nas, no cap amunt ni cap endins.",
         "confirmada": false
       },
@@ -11581,7 +11796,10 @@
       "localitzacio": "A la part alta de l'espatlla, al punt mitjà entre l'apòfisi espinosa de C7 i l'extrem de l'acromi.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "pulmo"
+        ],
         "nota": "Embaràs: tradicionalment contraindicat. Àpex del pulmó: punció superficial.",
         "confirmada": false
       },
@@ -11591,22 +11809,22 @@
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 15623,
+          "triangle": 15626,
           "b": [
-            0.085659,
-            0.812855,
-            0.101486
+            0.197562,
+            0.018265,
+            0.784173
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 2382,
+          "triangle": 2387,
           "b": [
-            0.085659,
-            0.101486,
-            0.812855
+            0.197562,
+            0.784173,
+            0.018265
           ],
           "origen": "oms"
         }
@@ -11623,7 +11841,9 @@
       "localitzacio": "Al costat del tòrax, al quart espai intercostal, a la línia axil·lar mitjana.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -11665,7 +11885,9 @@
       "localitzacio": "Al costat del tòrax, al quart espai intercostal, 1 cun per davant de GB22.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -11707,7 +11929,9 @@
       "localitzacio": "Al pit, al setè espai intercostal, 4 cun cap enfora de la línia mitja (sota el mugró).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -11749,7 +11973,9 @@
       "localitzacio": "Al costat de l'abdomen, sota l'extrem lliure de la dotzena costella.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Ronyó: no punxar en profunditat.",
         "confirmada": false
       },
@@ -11791,7 +12017,7 @@
       "localitzacio": "Al costat de l'abdomen, sota l'extrem lliure de l'onzena costella, a l'alçada del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11833,7 +12059,7 @@
       "localitzacio": "A la part baixa de l'abdomen, davant de l'espina ilíaca anterosuperior, a l'alçada de 3 cun per sota del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11875,7 +12101,7 @@
       "localitzacio": "A la part baixa de l'abdomen, 0,5 cun per davant i per sota de GB27.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11917,7 +12143,7 @@
       "localitzacio": "Al maluc, al punt mitjà entre l'espina ilíaca anterosuperior i el punt més prominent del trocànter major.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -11959,7 +12185,9 @@
       "localitzacio": "A la natja, a un terç del camí entre el trocànter major i l'hiat sacre (comptant des del trocànter).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Nervi ciàtic: no manipular amb força.",
         "confirmada": false
       },
@@ -12001,7 +12229,7 @@
       "localitzacio": "A la cara lateral de la cuixa, darrere de la bandeleta iliotibial, 9 cun per sobre del plec popliti (on arriba la punta del dit del mig amb el braç estirat).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12043,7 +12271,7 @@
       "localitzacio": "A la cara lateral de la cuixa, darrere de la bandeleta iliotibial, 7 cun per sobre del plec popliti.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12085,7 +12313,7 @@
       "localitzacio": "Al costat lateral del genoll, al clot de sobre l'epicòndil lateral del fèmur.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12127,7 +12355,7 @@
       "localitzacio": "A la cara lateral de la cama, al clot de davant i per sota del cap del peroné.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12169,7 +12397,7 @@
       "localitzacio": "A la cara lateral de la cama, 7 cun per sobre de la punta del mal·lèol extern, darrere del peroné.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12211,7 +12439,7 @@
       "localitzacio": "A la cara lateral de la cama, 7 cun per sobre de la punta del mal·lèol extern, davant del peroné.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12253,7 +12481,7 @@
       "localitzacio": "A la cara lateral de la cama, 5 cun per sobre de la punta del mal·lèol extern, davant del peroné.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12295,7 +12523,7 @@
       "localitzacio": "A la cara lateral de la cama, 4 cun per sobre de la punta del mal·lèol extern, davant del peroné.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12337,7 +12565,7 @@
       "localitzacio": "A la cara lateral de la cama, 3 cun per sobre de la punta del mal·lèol extern, davant del peroné.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12379,7 +12607,7 @@
       "localitzacio": "Al turmell, al clot de davant i per sota del mal·lèol extern, per fora del tendó de l'extensor llarg dels dits.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12421,7 +12649,7 @@
       "localitzacio": "Al dors del peu, davant de la unió de les bases del 4t i el 5è metatarsià, per fora del tendó de l'extensor del dit petit.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12463,7 +12691,7 @@
       "localitzacio": "Al dors del peu, entre el 4t i el 5è metatarsià, just darrere de la 4a articulació metatarsofalàngica.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12505,7 +12733,7 @@
       "localitzacio": "Al dors del peu, entre el 4t i el 5è dit, just darrere del marge de la membrana que els uneix.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12547,7 +12775,7 @@
       "localitzacio": "Al 4t dit del peu, costat lateral, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12589,7 +12817,7 @@
       "localitzacio": "Al dit gros del peu, costat lateral, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12631,7 +12859,7 @@
       "localitzacio": "Al dors del peu, entre el 1r i el 2n dit, just darrere del marge de la membrana que els uneix.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12673,7 +12901,7 @@
       "localitzacio": "Al dors del peu, entre el 1r i el 2n metatarsià, al clot de davant de la unió de les seves bases.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12715,7 +12943,7 @@
       "localitzacio": "Davant del mal·lèol intern, al clot del costat medial del tendó del tibial anterior.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12757,7 +12985,7 @@
       "localitzacio": "A la cara medial de la cama, 5 cun per sobre de la punta del mal·lèol intern, al centre de la cara medial de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12799,7 +13027,7 @@
       "localitzacio": "A la cara medial de la cama, 7 cun per sobre de la punta del mal·lèol intern, al centre de la cara medial de la tíbia.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12841,7 +13069,7 @@
       "localitzacio": "A la cara medial de la cama, darrere i per sota del còndil medial de la tíbia, 1 cun per darrere de SP9.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12883,7 +13111,7 @@
       "localitzacio": "Al genoll doblegat, a l'extrem intern del plec popliti, al clot de davant dels tendons del semitendinós i del semimembranós.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12925,7 +13153,7 @@
       "localitzacio": "A la cara medial de la cuixa, 4 cun per sobre de l'epicòndil medial del fèmur, entre el sartori i el vast intern.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -12967,7 +13195,9 @@
       "localitzacio": "A la cara medial de la cuixa, 3 cun per sota de ST30, sobre el batec de l'artèria femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria femoral: evitar-la.",
         "confirmada": false
       },
@@ -13009,7 +13239,9 @@
       "localitzacio": "A la cara medial de la cuixa, 2 cun per sota de ST30.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria femoral: evitar-la.",
         "confirmada": false
       },
@@ -13051,7 +13283,9 @@
       "localitzacio": "A l'engonal, a l'alçada de la vora superior de la símfisi del pubis, 2,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Artèria i vena femorals: evitar-les.",
         "confirmada": false
       },
@@ -13093,7 +13327,9 @@
       "localitzacio": "Al costat de l'abdomen, a sota de l'extrem lliure de l'onzena costella.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Fetge i melsa: no punxar en profunditat.",
         "confirmada": false
       },
@@ -13135,7 +13371,9 @@
       "localitzacio": "Al pit, al sisè espai intercostal, 4 cun cap enfora de la línia mitja (sota el mugró).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "pulmo"
+        ],
         "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
         "confirmada": false
       },
@@ -13177,7 +13415,10 @@
       "localitzacio": "Al perineu, al punt mitjà entre l'anus i els genitals.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Zona íntima: només amb indicació i consentiment explícits.",
         "confirmada": false
       },
@@ -13208,7 +13449,10 @@
       "localitzacio": "A la línia mitja de l'abdomen, a la vora superior de la símfisi del pubis.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
         "confirmada": false
       },
@@ -13239,7 +13483,10 @@
       "localitzacio": "A la línia mitja de l'abdomen, 4 cun per sota del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
         "confirmada": false
       },
@@ -13270,7 +13517,10 @@
       "localitzacio": "A la línia mitja de l'abdomen, 3 cun per sota del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras",
+          "profunditat"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
         "confirmada": false
       },
@@ -13301,7 +13551,9 @@
       "localitzacio": "A la línia mitja de l'abdomen, 2 cun per sota del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -13332,7 +13584,9 @@
       "localitzacio": "A la línia mitja de l'abdomen, 1,5 cun per sota del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -13363,7 +13617,9 @@
       "localitzacio": "A la línia mitja de l'abdomen, 1 cun per sota del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": true,
+        "categories": [
+          "embaras"
+        ],
         "nota": "Abdomen inferior: precaució en l'embaràs.",
         "confirmada": false
       },
@@ -13394,7 +13650,9 @@
       "localitzacio": "Al centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "noEsPunxa"
+        ],
         "nota": "No es punxa: només moxa indirecta.",
         "confirmada": false
       },
@@ -13425,7 +13683,7 @@
       "localitzacio": "A la línia mitja de l'abdomen, 1 cun per sobre del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13456,7 +13714,7 @@
       "localitzacio": "A la línia mitja de l'abdomen, 2 cun per sobre del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13487,7 +13745,7 @@
       "localitzacio": "A la línia mitja de l'abdomen, 3 cun per sobre del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13518,7 +13776,7 @@
       "localitzacio": "A la línia mitja de l'abdomen, 4 cun per sobre del centre del melic (a mig camí entre el melic i la unió xifoesternal).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13549,7 +13807,7 @@
       "localitzacio": "A la línia mitja de l'abdomen, 5 cun per sobre del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13580,7 +13838,9 @@
       "localitzacio": "A la línia mitja de l'abdomen, 6 cun per sobre del centre del melic.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Fetge i cor: no punxar en profunditat ni cap amunt.",
         "confirmada": false
       },
@@ -13611,7 +13871,9 @@
       "localitzacio": "A la línia mitja, 1 cun per sota de la unió xifoesternal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Fetge i cor: no punxar en profunditat ni cap amunt.",
         "confirmada": false
       },
@@ -13642,7 +13904,7 @@
       "localitzacio": "A la línia mitja del tòrax, a la unió xifoesternal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13673,7 +13935,9 @@
       "localitzacio": "A la línia mitja del tòrax, a l'alçada del quart espai intercostal (entre els mugrons).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Estèrnum: punció subcutània (pot haver-hi un forat esternal).",
         "confirmada": false
       },
@@ -13704,7 +13968,7 @@
       "localitzacio": "A la línia mitja del tòrax, a l'alçada del tercer espai intercostal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13735,7 +13999,7 @@
       "localitzacio": "A la línia mitja del tòrax, a l'alçada del segon espai intercostal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13766,7 +14030,7 @@
       "localitzacio": "A la línia mitja del tòrax, a l'alçada del primer espai intercostal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13797,7 +14061,7 @@
       "localitzacio": "A la línia mitja del tòrax, 1 cun per sota de la fossa supraesternal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13828,7 +14092,9 @@
       "localitzacio": "Al centre de la fossa supraesternal.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "vasos"
+        ],
         "nota": "Tràquea i grans vasos: punció primer perpendicular i superficial, després cap avall per darrere l'estèrnum, sense desviar-se.",
         "confirmada": false
       },
@@ -13859,7 +14125,7 @@
       "localitzacio": "A la línia mitja del coll, per sobre de la nou, al clot de sobre l'os hioide.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13890,7 +14156,7 @@
       "localitzacio": "A la cara, al clot del centre del solc mentolabial.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13921,7 +14187,9 @@
       "localitzacio": "Sota la punta del còccix, a mig camí entre la punta del còccix i l'anus.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "Recte: no punxar en profunditat.",
         "confirmada": false
       },
@@ -13952,7 +14220,7 @@
       "localitzacio": "A la línia mitja del sacre, a l'hiat sacre.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -13983,7 +14251,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de L4.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14014,7 +14282,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de L2.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14045,7 +14313,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de L1.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14076,7 +14344,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T11.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14107,7 +14375,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T10.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14138,7 +14406,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T9.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14169,7 +14437,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T7.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14200,7 +14468,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T6.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14231,7 +14499,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T5.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14262,7 +14530,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T3.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14293,7 +14561,7 @@
       "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de T1.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14324,7 +14592,7 @@
       "localitzacio": "A la línia mitja, a la depressió de sota l'apòfisi espinosa de C7.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14355,7 +14623,9 @@
       "localitzacio": "Al clatell, a la línia mitja, 0,5 cun dins la línia posterior del cabell, sota l'apòfisi espinosa de C2 (entre C1 i C2).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "bulb"
+        ],
         "nota": "Bulb raquidi: no punxar en profunditat ni cap amunt.",
         "confirmada": false
       },
@@ -14386,7 +14656,9 @@
       "localitzacio": "Al clatell, a la línia mitja, 1 cun dins la línia posterior del cabell, just sota la protuberància occipital externa.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "bulb"
+        ],
         "nota": "Bulb raquidi: no punxar en profunditat ni cap amunt.",
         "confirmada": false
       },
@@ -14417,7 +14689,7 @@
       "localitzacio": "Al cap, a la línia mitja, al clot de sobre la protuberància occipital externa, 1,5 cun per sobre de GV16.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14448,7 +14720,7 @@
       "localitzacio": "Al cap, a la línia mitja, 4 cun dins la línia posterior del cabell (1,5 cun per sobre de GV17).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14479,7 +14751,7 @@
       "localitzacio": "Al cap, a la línia mitja, 1,5 cun per darrere de GV20.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14510,7 +14782,7 @@
       "localitzacio": "Al cim del cap, a la línia mitja, 5 cun dins la línia anterior del cabell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14541,7 +14813,7 @@
       "localitzacio": "Al cap, a la línia mitja, 3,5 cun dins la línia anterior del cabell (1,5 cun per davant de GV20).",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14572,7 +14844,9 @@
       "localitzacio": "Al cap, a la línia mitja, 2 cun dins la línia anterior del cabell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [
+          "profunditat"
+        ],
         "nota": "En infants, fontanel·la oberta: no punxar.",
         "confirmada": false
       },
@@ -14603,7 +14877,7 @@
       "localitzacio": "Al cap, a la línia mitja, 1 cun dins la línia anterior del cabell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14634,7 +14908,7 @@
       "localitzacio": "Al cap, a la línia mitja, 0,5 cun dins la línia anterior del cabell.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14665,7 +14939,7 @@
       "localitzacio": "Al centre de la punta del nas.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14696,7 +14970,7 @@
       "localitzacio": "Al filtre, a un terç del camí entre la base del nas i el llavi superior.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14727,7 +15001,7 @@
       "localitzacio": "Al centre del tubercle del llavi superior, on la pell es troba amb el vermelló.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },
@@ -14758,7 +15032,7 @@
       "localitzacio": "Dins la boca, al fre del llavi superior, on es troba amb la geniva.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
+        "categories": [],
         "nota": "",
         "confirmada": false
       },

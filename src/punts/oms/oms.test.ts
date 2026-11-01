@@ -286,18 +286,58 @@ describe('referències de la cara i el tòrax', () => {
     }
   })
 
-  it('ST8 és a l\'angle del front, 0,5 cun dins la línia del cabell', () => {
+  it('ST8 és a l\'angle del front, 0,5 cun dins la línia del cabell i a 4,5 cun de la línia mitja', () => {
     for (const k of COSTATS) {
       const st8 = p('ST8', k)
       expect((st8.y - r().nivellCabell) / r().cun.cap).toBeCloseTo(0.5, 0)
-      // a l'angle: la pell mira a mig camí entre davant i el costat
+      // a l'angle: la pell ja s'ha girat cap a la templa (en aquest model el
+      // front és estret i a 4,5 cun la normal mira més al costat que endavant)
       const pos = calcul.perId.get(`ST8|${k}`)!.posicio
       const n = normalTriangle(model.geometria, pos.triangle)
       const graus = (Math.atan2(Math.abs(n.x), n.z) * 180) / Math.PI
-      expect(graus, `ST8 ${k}`).toBeGreaterThan(30)
-      expect(graus, `ST8 ${k}`).toBeLessThan(60)
+      expect(graus, `ST8 ${k}`).toBeGreaterThan(45)
+      expect(graus, `ST8 ${k}`).toBeLessThan(85)
       // davant de l'orella
       expect(st8.z).toBeGreaterThan(r()[k].tragus.z)
+    }
+  })
+})
+
+describe('cap i espatlla', () => {
+  it('ST8, GB15, GB13, BL4 i GV24 (0,5 cun dins la línia anterior del cabell) són a la mateixa alçada', () => {
+    const gv24 = p('GV24', 'E').y
+    for (const k of COSTATS)
+      for (const codi of ['ST8', 'GB15', 'GB13', 'BL4']) {
+        expect(Math.abs(p(codi, k).y - gv24), `${codi} ${k}`).toBeLessThan(0.003)
+      }
+  })
+
+  it('al front, de dins cap a fora: GV24, BL4, GB15, GB13 i ST8', () => {
+    for (const k of COSTATS) {
+      const xs = ['GV24', 'BL4', 'GB15', 'GB13', 'ST8'].map((codi) => Math.abs(p(codi, k).x))
+      for (let i = 1; i < xs.length; i++) expect(xs[i]!, `${k} ${i}`).toBeGreaterThan(xs[i - 1]!)
+    }
+  })
+
+  it('GB21 és simètric i a dalt de l\'espatlla, a mig camí entre C7 i l\'acromi', () => {
+    const r = calcul.referencies
+    const e = p('GB21', 'E')
+    const d = p('GB21', 'D')
+    // simetria: el mateix punt reflectit (x → −x)
+    expect(e.distanceTo(new Vector3(-d.x, d.y, d.z))).toBeLessThan(0.002)
+    for (const k of COSTATS) {
+      const g = p('GB21', k)
+      const gv14 = p('GV14', k)
+      const acromi = r[k].acromi
+      // a mig camí en amplada
+      expect(Math.abs(Math.abs(g.x) - (Math.abs(gv14.x) + Math.abs(acromi.x)) / 2)).toBeLessThan(0.005)
+      // a dalt: no a la cara de davant (darrere de l'acromi) ni a l'esquena
+      expect(g.z, `GB21 ${k}`).toBeLessThan(acromi.z)
+      expect(g.z, `GB21 ${k}`).toBeGreaterThan(gv14.z)
+      expect(g.y).toBeGreaterThan(acromi.y)
+      // a la carena: la normal de la pell mira amunt
+      const n = normalTriangle(model.geometria, calcul.perId.get(`GB21|${k}`)!.posicio.triangle)
+      expect(n.y, `GB21 ${k}`).toBeGreaterThan(0.8)
     }
   })
 })

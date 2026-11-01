@@ -1,6 +1,6 @@
 import { normalitzar } from '../domini/cercaPacients'
 import dades from './cataleg.json'
-import { esquemaCataleg, type Cataleg, type CostatPosicio, type Posicio3D, type PuntCatalog } from './esquema'
+import { CATEGORIES_PRECAUCIO, esquemaCataleg, type Cataleg, type CategoriaPrecaucio, type CostatPosicio, type Posicio3D, type PuntCatalog } from './esquema'
 
 /** El catàleg del projecte, validat en carregar-lo. */
 export const cataleg: Cataleg = esquemaCataleg.parse(dades)
@@ -60,25 +60,65 @@ function ordenarPosicions(posicions: Posicio3D[]): Posicio3D[] {
   return [...posicions].sort((a, b) => a.topologia.localeCompare(b.topologia) || ordre[a.costat] - ordre[b.costat])
 }
 
-/** Aplica les precaucions confirmades per la doctora: queden com a confirmades. */
-export function ambPrecaucions(
-  c: Cataleg,
-  revisions: ReadonlyArray<{ codi: string; embaras: boolean; nota: string }>,
-): Cataleg {
-  if (revisions.length === 0) return c
-  const perCodi = new Map(revisions.map((r) => [r.codi, r]))
+/** Excepció de la doctora per a un punt concret: categories i text propis. */
+export interface ExcepcioPrecaucio {
+  codi: string
+  categories: readonly CategoriaPrecaucio[]
+  nota: string
+}
+
+/** El que la doctora ha revisat: categories confirmades i excepcions per punt. */
+export interface RevisioPrecaucions {
+  categories: readonly CategoriaPrecaucio[]
+  excepcions: readonly ExcepcioPrecaucio[]
+}
+
+export const REVISIO_BUIDA: RevisioPrecaucions = { categories: [], excepcions: [] }
+
+/**
+ * Aplica la revisió de la doctora. Un punt amb excepció pren les categories i
+ * el text de l'excepció i queda confirmat; els altres queden confirmats quan
+ * totes les seves categories estan confirmades.
+ */
+export function ambPrecaucions(c: Cataleg, revisio: RevisioPrecaucions): Cataleg {
+  if (revisio.categories.length === 0 && revisio.excepcions.length === 0) return c
+  const confirmades = new Set(revisio.categories)
+  const excepcions = new Map(revisio.excepcions.map((e) => [e.codi, e]))
   return {
     ...c,
     punts: c.punts.map((p) => {
-      const r = perCodi.get(p.codi)
-      return r ? { ...p, precaucions: { embaras: r.embaras, nota: r.nota, confirmada: true } } : p
+      const e = excepcions.get(p.codi)
+      if (e) return { ...p, precaucions: { categories: ordenarCategories(e.categories), nota: e.nota, confirmada: true } }
+      const cats = p.precaucions.categories
+      const confirmada = cats.length > 0 && cats.every((x) => confirmades.has(x))
+      return confirmada ? { ...p, precaucions: { ...p.precaucions, confirmada } } : p
     }),
   }
 }
 
+export function ordenarCategories(cats: readonly CategoriaPrecaucio[]): CategoriaPrecaucio[] {
+  return CATEGORIES_PRECAUCIO.filter((x) => cats.includes(x))
+}
+
 /** Punts amb alguna precaució proposada al catàleg del projecte (els que la doctora ha de revisar). */
 export function puntsAmbPrecaucio(c: Cataleg): Cataleg['punts'] {
-  return c.punts.filter((p) => p.precaucions.nota !== '' || p.precaucions.embaras)
+  return c.punts.filter((p) => p.precaucions.categories.length > 0)
+}
+
+/**
+ * Punts d'una categoria: els que la tenen al catàleg i els que la doctora hi
+ * ha afegit amb una excepció (els treu d'una categoria també es veuen, per
+ * poder desfer l'excepció).
+ */
+export function puntsDeCategoria(
+  original: Cataleg,
+  categoria: CategoriaPrecaucio,
+  revisio: RevisioPrecaucions,
+): Cataleg['punts'] {
+  const excepcions = new Map(revisio.excepcions.map((e) => [e.codi, e]))
+  return original.punts.filter(
+    (p) => p.precaucions.categories.includes(categoria) || excepcions.get(p.codi)?.categories.includes(categoria),
+  )
 }
 
 /** JSON llest per substituir src/punts/cataleg.json (valida abans d'exportar). */

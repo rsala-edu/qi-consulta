@@ -10,6 +10,14 @@
 
 import { z } from 'zod'
 
+/**
+ * Categories de precaució. La doctora les confirma per categoria (Ajustos →
+ * Precaucions per revisar) i hi pot fer excepcions per a punts concrets.
+ */
+export const CATEGORIES_PRECAUCIO = ['embaras', 'vasos', 'ull', 'pulmo', 'bulb', 'noEsPunxa', 'profunditat'] as const
+export type CategoriaPrecaucio = (typeof CATEGORIES_PRECAUCIO)[number]
+export const esquemaCategoriaPrecaucio = z.enum(CATEGORIES_PRECAUCIO)
+
 export const COSTATS_POSICIO = ['E', 'D', 'C'] as const
 /** E = esquerre del pacient (+X del model), D = dret (−X), C = línia mitja */
 export type CostatPosicio = (typeof COSTATS_POSICIO)[number]
@@ -73,7 +81,8 @@ export const esquemaPuntCatalog = z.object({
   localitzacio: z.string(),
   notes: z.string(),
   precaucions: z.object({
-    embaras: z.boolean(),
+    /** Categories del punt (en l'ordre de CATEGORIES_PRECAUCIO) */
+    categories: z.array(esquemaCategoriaPrecaucio),
     nota: z.string(),
     /** Cert quan la doctora ha confirmat la precaució */
     confirmada: z.boolean(),
