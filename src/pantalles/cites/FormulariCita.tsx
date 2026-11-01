@@ -11,15 +11,17 @@ import { cercarPacients } from '../../domini/cercaPacients'
 import {
   DURADA_PER_DEFECTE,
   ESTATS_CITA,
+  errorSeguiment,
   esquemaDadesCita,
   fiDe,
+  primeraVisita,
   solapaments,
   TIPUS_CITA,
   type Cita,
   type DadesCita,
 } from '../../domini/cita'
 import { dadesPacientBuides, esquemaDadesPacient, nomComplet, type Pacient } from '../../domini/pacient'
-import { formatar, hora as horaDe, t } from '../../i18n/t'
+import { diaLlarg, formatar, hora as horaDe, t } from '../../i18n/t'
 
 const esquemaFormulari = esquemaDadesCita.omit({ inici: true, sessioId: true }).extend({
   dia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t.errors.dataInvalida),
@@ -76,9 +78,9 @@ export function FormulariCita({
       notes: inicial.notes,
     },
   })
-  const [pacientId, dia, hora, durada, estat] = useWatch({
+  const [pacientId, dia, hora, durada, estat, tipus] = useWatch({
     control,
-    name: ['pacientId', 'dia', 'hora', 'durada', 'estat'],
+    name: ['pacientId', 'dia', 'hora', 'durada', 'estat', 'tipus'],
   })
 
   const pacient = tots.find((p) => p.id === pacientId)
@@ -87,6 +89,15 @@ export function FormulariCita({
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(inici) && Number.isFinite(durada) && durada > 0
       ? solapaments({ id, inici, durada, estat }, altres)
       : []
+  // Un seguiment ha de ser posterior a la primera visita del pacient
+  const errorTipus = errorSeguiment({ id, pacientId, inici, tipus, estat }, altres)
+  const primera = errorTipus === 'anteriorAPrimera' ? primeraVisita(pacientId, altres, id) : undefined
+  const [intentat, setIntentat] = useState(false)
+
+  function canviarAPrimera() {
+    setValue('tipus', 'primera', { shouldDirty: true })
+    if (!dirtyFields.durada) setValue('durada', DURADA_PER_DEFECTE.primera)
+  }
   const nomDe = (pid: string) => {
     const p = tots.find((x) => x.id === pid)
     return p ? nomComplet(p) : '—'
@@ -94,6 +105,8 @@ export function FormulariCita({
 
   async function enviar(v: ValorsFormulari) {
     setErrorDesar(false)
+    setIntentat(true)
+    if (errorTipus) return
     const { dia: d, hora: h, ...resta } = v
     try {
       await onDesar({ ...resta, inici: `${d}T${h}`, sessioId: inicial.sessioId })
@@ -175,6 +188,18 @@ export function FormulariCita({
         </Camp>
       </div>
 
+      {errorTipus && (
+        <div className={`avis avis-tipus${intentat ? ' insistent' : ''}`} role="alert">
+          <p>
+            {errorTipus === 'sensePrimera'
+              ? c.errorSensePrimera
+              : formatar(c.errorAnteriorAPrimera, { dia: `${diaLlarg(primera!.inici)}, ${horaDe(primera!.inici)}` })}
+          </p>
+          <Boto variant="secundari" onClick={canviarAPrimera}>
+            {c.canviarAPrimera}
+          </Boto>
+        </div>
+      )}
       {encavalcades.length > 0 && (
         <p className="avis" role="alert">
           {formatar(c.solapa, {

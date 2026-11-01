@@ -65,17 +65,25 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await dialeg.getByLabel('Hora').fill('10:30')
   await dialeg.getByRole('searchbox', { name: 'Cerca el pacient' }).fill('biel')
   await dialeg.getByRole('button', { name: /Biel Prova Inventat/ }).click()
+  // El Biel encara no té cap primera visita: no pot ser de seguiment
+  const avisTipus = dialeg.getByRole('alert').filter({ hasText: 'encara no té cap primera visita' })
+  await expect(avisTipus).toBeVisible()
+  await dialeg.getByRole('button', { name: 'Desar' }).click()
+  await expect(dialeg).toBeVisible()
+  await dialeg.getByRole('button', { name: 'Canviar a «Primera visita»' }).click()
+  await expect(avisTipus).toHaveCount(0)
+  await expect(dialeg.getByLabel('Durada (minuts)')).toHaveValue('60')
   await expect(dialeg.getByRole('alert')).toHaveText('Atenció: se solapa amb Aina Provencal Inventada (10:00–11:00).')
   await dialeg.getByRole('button', { name: 'Desar' }).click()
   await expect(dia.getByRole('button', { name: /Se solapa/ })).toHaveCount(2)
 
   // Moure la del Biel a les 11:00: ja no se solapa
-  await dia.getByRole('button', { name: /10:30–11:10 Biel/ }).click()
+  await dia.getByRole('button', { name: /10:30–11:30 Biel/ }).click()
   dialeg = page.getByRole('dialog', { name: 'Cita de Biel Prova Inventat' })
   await dialeg.getByLabel('Hora').fill('11:00')
   await expect(dialeg.getByRole('alert')).toHaveCount(0)
   await dialeg.getByRole('button', { name: 'Desar' }).click()
-  await expect(dia.getByRole('button', { name: /11:00–11:40 Biel/ })).toBeVisible()
+  await expect(dia.getByRole('button', { name: /11:00–12:00 Biel/ })).toBeVisible()
   await expect(dia.getByRole('button', { name: /Se solapa/ })).toHaveCount(0)
 
   // Vista de setmana: les dues cites el dilluns; el dimarts buit
@@ -111,7 +119,7 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await panell.getByLabel('Hora').fill('09:00')
   await panell.getByRole('button', { name: 'Desar' }).click()
   await expect(historial.getByRole('listitem')).toHaveCount(2)
-  await historial.getByRole('listitem').first().getByRole('button', { name: 'Editar' }).click()
+  await historial.getByRole('listitem').filter({ hasText: '9 de novembre' }).getByRole('button', { name: 'Editar' }).click()
   await page.getByLabel('Estat').selectOption('noPresentat')
   await page.getByRole('button', { name: 'Desar' }).click()
   await expect(page.getByRole('status')).toHaveText('Fetes: 1 · Anul·lades: 0 · No presentat: 1')

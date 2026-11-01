@@ -181,3 +181,41 @@ export function recompteCites(cites: readonly Pick<DadesCita, 'estat'>[]): Recom
 export function properaCita<C extends Pick<DadesCita, 'inici' | 'estat'>>(cites: readonly C[], ara: string): C | undefined {
   return [...cites].filter((c) => c.estat === 'programada' && c.inici >= ara).sort((a, b) => a.inici.localeCompare(b.inici))[0]
 }
+
+// --- Primera visita i seguiment ---------------------------------------------
+
+export type ErrorSeguiment = 'sensePrimera' | 'anteriorAPrimera'
+
+/** La primera visita del pacient: la més antiga de tipus «primera» que no s'ha anul·lat. */
+export function primeraVisita<C extends Pick<Cita, 'id' | 'pacientId' | 'inici' | 'tipus' | 'estat'>>(
+  pacientId: string,
+  cites: readonly C[],
+  excepte?: string,
+): C | undefined {
+  return cites
+    .filter((c) => c.pacientId === pacientId && c.id !== excepte && c.tipus === 'primera' && ocupaHora(c))
+    .sort((a, b) => a.inici.localeCompare(b.inici))[0]
+}
+
+/**
+ * Una cita de seguiment ha de ser posterior a la primera visita del pacient.
+ * Torna el motiu si no ho és (encara no en té cap, o és anterior). Les
+ * cites anul·lades o no presentades no es comproven.
+ */
+export function errorSeguiment(
+  cita: Pick<DadesCita, 'pacientId' | 'inici' | 'tipus'> & { id?: string; estat?: EstatCita },
+  cites: readonly Pick<Cita, 'id' | 'pacientId' | 'inici' | 'tipus' | 'estat'>[],
+): ErrorSeguiment | null {
+  // Una cita anul·lada o no presentada ja no es fa: no cal comprovar-la
+  if (cita.tipus !== 'seguiment' || cita.pacientId === '' || (cita.estat && !ocupaHora({ estat: cita.estat }))) return null
+  const primera = primeraVisita(cita.pacientId, cites, cita.id)
+  if (!primera) return 'sensePrimera'
+  return cita.inici > primera.inici ? null : 'anteriorAPrimera'
+}
+
+/** Historial: primer les pròximes (de la més propera a la més llunyana), després les passades (de la més recent a la més antiga). */
+export function ordenarHistorial<C extends Pick<DadesCita, 'inici'>>(cites: readonly C[], ara: string): C[] {
+  const properes = cites.filter((c) => c.inici >= ara).sort((a, b) => a.inici.localeCompare(b.inici))
+  const passades = cites.filter((c) => c.inici < ara).sort((a, b) => b.inici.localeCompare(a.inici))
+  return [...properes, ...passades]
+}

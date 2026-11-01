@@ -7,13 +7,9 @@ import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
 import { formatar, t } from '../../i18n/t'
+import { BarraVistes } from '../../mapa/components/BarraVistes'
 import { Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
-import {
-  COSTAT_OPOSAT,
-  posicio3D,
-  posicioDesDePunt,
-  posicioMirall,
-} from '../../mapa/geometria/baricentriques'
+import { COSTAT_OPOSAT, posicio3D, posicioDesDePunt, posicioMirall } from '../../mapa/geometria/baricentriques'
 import { idMarcador, puntsSobreModel } from '../../mapa/marcadors'
 import type { ModelCos } from '../../mapa/model'
 import { useCalibracions } from '../../mapa/useCalibracions'
@@ -88,7 +84,9 @@ function Calibratge({ model }: { model: ModelCos }) {
   const n = sobreModel.length
 
   function exportar() {
-    const blob = new Blob([exportarCataleg(ambPrecaucions(efectiu, revisio ?? REVISIO_BUIDA))], { type: 'application/json' })
+    const blob = new Blob([exportarCataleg(ambPrecaucions(efectiu, revisio ?? REVISIO_BUIDA))], {
+      type: 'application/json',
+    })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -105,17 +103,23 @@ function Calibratge({ model }: { model: ModelCos }) {
 
   return (
     <div className="disseny-mapa">
-      <div className="zona-visor">
-        {!model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
-        <Visor3D
-          ref={visor}
-          geometria={model.geometria}
-          marcadors={marcadors}
-          modeToc="pell"
-          onTocarPell={(toc) => colocar(toc, true)}
-          arrossegable={posActual ? idSeleccionat : null}
-          onArrossegar={(toc) => colocar(toc, false)}
-        />
+      <div className="columna-visor">
+        <div className="zona-visor">
+          {!model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
+          <Visor3D
+            ref={visor}
+            geometria={model.geometria}
+            marcadors={marcadors}
+            modeToc="pell"
+            etiquetesSempre
+            onTocarPell={(toc) => colocar(toc, true)}
+            arrossegable={posActual ? idSeleccionat : null}
+            onArrossegar={(toc) => colocar(toc, false)}
+          />
+        </div>
+        <div className="barra-visor">
+          <BarraVistes visor={visor} />
+        </div>
       </div>
 
       <aside className="panell-mapa">
@@ -166,7 +170,13 @@ function Calibratge({ model }: { model: ModelCos }) {
             </h2>
             <div className="segmentat" role="radiogroup" aria-label={t.mapa.costatTitol}>
               {costats.map((c) => (
-                <button key={c} type="button" role="radio" aria-checked={costat === c} onClick={() => triar(punt.codi, c)}>
+                <button
+                  key={c}
+                  type="button"
+                  role="radio"
+                  aria-checked={costat === c}
+                  onClick={() => triar(punt.codi, c)}
+                >
                   {t.mapa.costat[c]}
                 </button>
               ))}

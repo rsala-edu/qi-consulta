@@ -60,6 +60,11 @@ interface Props {
   modeToc: 'pell' | 'marcador'
   onTocarPell?(toc: TocPell): void
   onTocarMarcador?(id: string): void
+  /**
+   * Hi ha un meridià filtrat: les etiquetes es veuen també amb el cos sencer.
+   * Si no, només en ampliar (si no, s'amunteguen i tapen els punts).
+   */
+  etiquetesSempre?: boolean
   /** Id del marcador que es pot arrossegar sobre la pell (calibratge) */
   arrossegable?: string | null
   onArrossegar?(toc: TocPell): void
@@ -111,16 +116,6 @@ export function Visor3D({ ref, ...props }: Props) {
           </span>
         ))}
       </div>
-      <div className="visor3d-vistes" role="toolbar" aria-label={t.mapa.vistes}>
-        {(Object.keys(VISTES) as Vista[]).map((v) => (
-          <button key={v} type="button" className="boto boto-discret" onClick={() => control.current?.vista(v)}>
-            {t.mapa.vista[v]}
-          </button>
-        ))}
-        <button type="button" className="boto boto-discret" onClick={() => control.current?.restablir()}>
-          {t.mapa.totElCos}
-        </button>
-      </div>
     </div>
   )
 }
@@ -133,6 +128,7 @@ const Escena = memo(function Escena({
   geometria,
   marcadors,
   recorreguts = [],
+  etiquetesSempre = false,
   modeToc,
   onTocarPell,
   onTocarMarcador,
@@ -161,12 +157,15 @@ const Escena = memo(function Escena({
     c.dollyToCursor = true
     c.smoothTime = 0.2
     c.draggingSmoothTime = 0.08
-    c.mouseButtons.left = A.ROTATE
+    // Navegació de torn: el botó esquerre i un dit els gestiona el visor
+    // (horitzontal = girar el cos; vertical = pujar-lo i baixar-lo). La roda
+    // i dos dits amplien cap al cursor o cap al centre dels dits.
+    c.mouseButtons.left = A.NONE
     c.mouseButtons.right = A.TRUCK
     c.mouseButtons.middle = A.DOLLY
     c.mouseButtons.wheel = A.DOLLY
-    c.touches.one = A.TOUCH_ROTATE
-    c.touches.two = A.TOUCH_DOLLY_TRUCK
+    c.touches.one = A.NONE
+    c.touches.two = A.TOUCH_DOLLY
     c.touches.three = A.NONE
     c.setBoundary(new Box3(new Vector3(...CAMERA.limits.min), new Vector3(...CAMERA.limits.max)))
     void c.setLookAt(0, CAMERA.alcadaInicial, CAMERA.distanciaInicial, 0, CAMERA.alcadaInicial, 0, false)
@@ -180,7 +179,16 @@ const Escena = memo(function Escena({
     const visor = glEl.closest<HTMLElement>('.visor3d')
     if (!c || !visor) return
     const moure = () => (visor.dataset.moviment = 'si')
-    const aturar = () => (visor.dataset.moviment = 'no')
+    // En aturar-se, també l'estat de la càmera (gir, alçada del punt de mira i
+    // distància), perquè les proves puguin comprovar la navegació
+    const objectiu = new Vector3()
+    const aturar = () => {
+      c.getTarget(objectiu)
+      visor.dataset.azimut = c.azimuthAngle.toFixed(3)
+      visor.dataset.alcada = objectiu.y.toFixed(3)
+      visor.dataset.distancia = c.distance.toFixed(3)
+      visor.dataset.moviment = 'no'
+    }
     c.addEventListener('transitionstart', moure)
     c.addEventListener('controlstart', moure)
     c.addEventListener('sleep', aturar)
@@ -227,7 +235,7 @@ const Escena = memo(function Escena({
   const ultimes = useRef('')
   const actualitzarEtiquetes = useCallback(() => {
     const c = controls.current
-    const nivell = nivellEtiquetes(c ? c.distance : CAMERA.distanciaInicial)
+    const nivell = nivellEtiquetes(c ? c.distance : CAMERA.distanciaInicial, etiquetesSempre)
     const perId = new Map(marcadors.map((m) => [m.id, m]))
     // Primer el punt destacat, després els més propers a la càmera
     const ordenades =
@@ -242,14 +250,20 @@ const Escena = memo(function Escena({
             .slice(0, 80)
             .map((p) => {
               const m = perId.get(p.dada)!
-              return { id: p.dada, x: p.x, y: p.y, text: nivell === 'codi' ? m.etiqueta : m.etiquetaLlarga, curt: m.etiqueta }
+              return {
+                id: p.dada,
+                x: p.x,
+                y: p.y,
+                text: nivell === 'codi' ? m.etiqueta : m.etiquetaLlarga,
+                curt: m.etiqueta,
+              }
             })
     const noves = colocarEtiquetes(ordenades, size.width, size.height)
     const clau = JSON.stringify(noves)
     if (clau === ultimes.current) return
     ultimes.current = clau
     onEtiquetes(noves)
-  }, [marcadors, projectar, onEtiquetes, size])
+  }, [marcadors, projectar, onEtiquetes, size, etiquetesSempre])
 
   // Es recalcula després de cada fotograma dibuixat (només n'hi ha quan canvia res)
   const pendent = useRef(false)
@@ -301,7 +315,19 @@ const Escena = memo(function Escena({
     const canvas = gl.domElement
     const contenidor = canvas.parentElement ?? canvas
     const punters = new Map<number, { x: number; y: number }>()
-    let gest: { x: number; y: number; multitoc: boolean; arrossegant: boolean } | null = null
+    let gest: {
+      x: number
+      y: number
+      /** Última posició, per al torn */
+      ux: number
+      uy: number
+      multitoc: boolean
+      arrossegant: boolean
+      /** Gest de torn (un sol dit o el botó esquerre) */
+      torn: boolean
+      girant: boolean
+    } | null = null
+    const visor = contenidor.closest<HTMLElement>('.visor3d')
 
     const local = (e: PointerEvent) => {
       const r = canvas.getBoundingClientRect()
@@ -314,7 +340,16 @@ const Escena = memo(function Escena({
         if (gest) gest.multitoc = true
         return
       }
-      gest = { x: e.clientX, y: e.clientY, multitoc: false, arrossegant: false }
+      gest = {
+        x: e.clientX,
+        y: e.clientY,
+        ux: e.clientX,
+        uy: e.clientY,
+        multitoc: false,
+        arrossegant: false,
+        torn: e.button === 0,
+        girant: false,
+      }
       const cb = callbacks.current
       if (cb.arrossegable && e.button === 0) {
         const { x, y } = local(e)
@@ -330,9 +365,29 @@ const Escena = memo(function Escena({
     }
 
     const moure = (e: PointerEvent) => {
-      if (!gest?.arrossegant || !punters.has(e.pointerId)) return
-      const toc = callbacks.current.tocarPell(e.clientX, e.clientY, canvas)
-      if (toc) callbacks.current.onArrossegar?.(toc)
+      if (!gest || !punters.has(e.pointerId)) return
+      punters.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      if (gest.arrossegant) {
+        const toc = callbacks.current.tocarPell(e.clientX, e.clientY, canvas)
+        if (toc) callbacks.current.onArrossegar?.(toc)
+        return
+      }
+      // Torn: horitzontal = girar el cos; vertical = pujar-lo o baixar-lo
+      const c = controls.current
+      if (!gest.torn || gest.multitoc || punters.size > 1 || !c || !c.enabled) return
+      if (!gest.girant && Math.hypot(e.clientX - gest.x, e.clientY - gest.y) <= MOVIMENT_MAXIM_TOC) return
+      if (!gest.girant) {
+        gest.girant = true
+        if (visor) visor.dataset.moviment = 'si'
+      }
+      const dx = e.clientX - gest.ux
+      const dy = e.clientY - gest.uy
+      gest.ux = e.clientX
+      gest.uy = e.clientY
+      const alt = canvas.clientHeight || 1
+      const metresPerPixel = (2 * c.distance * Math.tan(((CAMERA.fov / 2) * Math.PI) / 180)) / alt
+      void c.rotate((-dx * Math.PI * 1.4) / alt, 0, true)
+      void c.truck(0, -dy * metresPerPixel, true)
     }
 
     const aixecar = (e: PointerEvent) => {

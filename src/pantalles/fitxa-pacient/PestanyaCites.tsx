@@ -5,7 +5,17 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
-import { diaDe, fiDe, novaCita, properaCita, recompteCites, diaHoraDe, type Cita } from '../../domini/cita'
+import {
+  diaDe,
+  diaHoraDe,
+  errorSeguiment,
+  fiDe,
+  novaCita,
+  ordenarHistorial,
+  properaCita,
+  recompteCites,
+  type Cita,
+} from '../../domini/cita'
 import { diaLlarg, formatar, hora, t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
@@ -39,7 +49,10 @@ export function PestanyaCites() {
   const cites = totes.filter((c) => c.pacientId === pacient.id)
   const propera = properaCita(cites, ara)
   const recompte = recompteCites(cites)
-  const historial = [...cites].sort((a, b) => b.inici.localeCompare(a.inici))
+  const historial = ordenarHistorial(cites, ara)
+  // Cita nova: «Primera visita» si encara no en té cap; si no, seguiment
+  const iniciNova = propostaInici()
+  const tipusNova = errorSeguiment(novaCita(pacient.id, iniciNova), totes) ? 'primera' : 'seguiment'
   const desat = () => {
     setObert(null)
     setVersio((n) => n + 1)
@@ -75,7 +88,7 @@ export function PestanyaCites() {
           <FormulariCita
             key={obert.tipus === 'nova' ? 'nova' : obert.cita.id}
             id={obert.tipus === 'editar' ? obert.cita.id : undefined}
-            inicial={obert.tipus === 'nova' ? novaCita(pacient.id, propostaInici(), cites.length === 0 ? 'primera' : 'seguiment') : obert.cita}
+            inicial={obert.tipus === 'nova' ? novaCita(pacient.id, iniciNova, tipusNova) : obert.cita}
             pacients={pacients}
             pacientFix
             altres={totes}

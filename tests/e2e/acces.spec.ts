@@ -238,6 +238,7 @@ test('Avui: les cites del dia en ordre i «Començar visita» a la següent', as
     await dialeg.getByRole('searchbox', { name: 'Cerca el pacient' }).fill(qui!)
     await dialeg.locator('.resultats-pacient button').first().click()
     await dialeg.getByLabel('Hora').fill(hora!)
+    await dialeg.getByLabel('Tipus').selectOption('primera')
     await dialeg.getByRole('button', { name: 'Desar' }).click()
     await expect(dialeg).toBeHidden()
   }
@@ -245,9 +246,9 @@ test('Avui: les cites del dia en ordre i «Començar visita» a la següent', as
   await menu(page, 'Avui').click()
   const cites = page.getByRole('region', { name: 'Cites d\'avui' }).getByRole('listitem')
   await expect(cites).toHaveCount(2)
-  await expect(cites.nth(0)).toContainText('00:05–00:45')
+  await expect(cites.nth(0)).toContainText('00:05–01:05')
   await expect(cites.nth(0)).toContainText('Aina Provencal Inventada')
-  await expect(cites.nth(1)).toContainText('23:10–23:50')
+  await expect(cites.nth(1)).toContainText('23:10–00:10')
   // La de les 00:05 ja ha passat (si no és just passada la mitjanit): la següent és la del Biel
   await expect(page.getByRole('button', { name: 'Començar visita' })).toHaveCount(1)
   await expect(cites.nth(1).getByRole('button', { name: 'Començar visita' })).toBeVisible()

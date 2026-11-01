@@ -366,6 +366,11 @@ export const ca = {
     tipusNoms: { primera: 'Primera visita', seguiment: 'Seguiment' },
     estats: { programada: 'Programada', feta: 'Feta', anullada: 'Anul·lada', noPresentat: 'No presentat' },
     solapa: 'Atenció: se solapa amb {llista}.',
+    errorSensePrimera:
+      'Aquest pacient encara no té cap primera visita: aquesta cita ha de ser «Primera visita», no de seguiment.',
+    errorAnteriorAPrimera:
+      'Aquesta cita és anterior a la primera visita del pacient ({dia}): no pot ser de seguiment.',
+    canviarAPrimera: 'Canviar a «Primera visita»',
     solapaCurt: 'Se solapa',
     esborrar: 'Esborrar la cita',
     confirmarEsborrar: 'Vols esborrar aquesta cita? Si no s\'ha fet, és millor marcar-la com a anul·lada.',

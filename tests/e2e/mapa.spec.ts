@@ -199,3 +199,75 @@ test('calibratge (Ajustos): moure un punt, copiar-lo a l\'altre costat i exporta
   await page.getByRole('button', { name: 'Descartar els canvis' }).click()
   await expect(page.getByRole('button', { name: 'Descartar els canvis' })).toBeDisabled()
 })
+
+test('navegació de torn: horitzontal gira, vertical puja i baixa, la roda amplia', async ({ page }) => {
+  await entrar(page)
+  await obrirMapa(page)
+  const visor = page.getByTestId('visor3d')
+  // Primer moviment per tenir l'estat de la càmera
+  await page.getByRole('button', { name: 'Davant' }).click()
+  await visorLlest(page)
+  const estat = async () => ({
+    azimut: Number(await visor.getAttribute('data-azimut')),
+    alcada: Number(await visor.getAttribute('data-alcada')),
+    distancia: Number(await visor.getAttribute('data-distancia')),
+  })
+  const arrossegar = async (dx: number, dy: number) => {
+    const c = await centreVisor(page)
+    await page.mouse.move(c.x, c.y)
+    await page.mouse.down()
+    for (let i = 1; i <= 10; i++) await page.mouse.move(c.x + (dx * i) / 10, c.y + (dy * i) / 10)
+    await page.mouse.up()
+    await expect(visor).toHaveAttribute('data-moviment', 'no')
+    await page.waitForTimeout(300)
+    await expect(visor).toHaveAttribute('data-moviment', 'no')
+  }
+
+  const inici = await estat()
+  // Horitzontal: gira el cos, sense canviar l'alçada ni el zoom
+  await arrossegar(160, 0)
+  const girat = await estat()
+  expect(Math.abs(girat.azimut - inici.azimut)).toBeGreaterThan(0.3)
+  expect(girat.alcada).toBeCloseTo(inici.alcada, 2)
+  expect(girat.distancia).toBeCloseTo(inici.distancia, 2)
+
+  // Primer s'amplia amb la roda (cap al cursor)
+  const c = await centreVisor(page)
+  await page.mouse.move(c.x, c.y - 120)
+  await page.mouse.wheel(0, -600)
+  await visorLlest(page)
+  await page.waitForTimeout(300)
+  const ampliat = await estat()
+  expect(ampliat.distancia).toBeLessThan(girat.distancia * 0.8)
+  // cap al cursor, que era per sobre del centre: el punt de mira puja
+  expect(ampliat.alcada).toBeGreaterThan(girat.alcada)
+
+  // Vertical: arrossegar cap amunt fa pujar el cos (es veu més avall), sense desfer el zoom ni girar
+  await arrossegar(0, -150)
+  const baixat = await estat()
+  expect(baixat.alcada).toBeLessThan(ampliat.alcada - 0.05)
+  expect(baixat.azimut).toBeCloseTo(ampliat.azimut, 2)
+  expect(baixat.distancia).toBeCloseTo(ampliat.distancia, 2)
+})
+
+test('les vistes ràpides i la llegenda són fora del dibuix', async ({ page }) => {
+  await entrar(page)
+  await obrirMapa(page)
+  const dibuix = (await page.getByTestId('visor3d').boundingBox())!
+  for (const el of [page.getByRole('toolbar', { name: 'Vistes ràpides' }), page.getByRole('list', { name: 'Tècnica' })]) {
+    const caixa = await el.boundingBox()
+    if (!caixa) continue // la llegenda pot no caber a les pantalles estretes
+    const solapa = caixa.y < dibuix.y + dibuix.height && dibuix.y < caixa.y + caixa.height && caixa.x < dibuix.x + dibuix.width && dibuix.x < caixa.x + caixa.width
+    expect(solapa).toBe(false)
+  }
+})
+
+test('amb tot el cos i sense meridià filtrat no hi ha etiquetes; amb un meridià, sí', async ({ page }) => {
+  await entrar(page)
+  await obrirMapa(page)
+  await page.waitForTimeout(500)
+  await expect(page.locator('.etiqueta-punt')).toHaveCount(0)
+  await page.getByLabel('Meridià').selectOption('ST')
+  await visorLlest(page, 90)
+  await expect(page.locator('.etiqueta-punt').first()).toBeVisible()
+})

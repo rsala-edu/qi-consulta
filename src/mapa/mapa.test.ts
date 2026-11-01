@@ -132,6 +132,10 @@ describe('càmera', () => {
     expect(nivellEtiquetes(4.4)).toBe('cap')
     expect(nivellEtiquetes(1.5)).toBe('codi')
     expect(nivellEtiquetes(0.6)).toBe('pinyin')
+    // amb el cos sencer, només si hi ha un meridià filtrat
+    expect(nivellEtiquetes(4.4, true)).toBe('codi')
+    expect(nivellEtiquetes(2.0)).toBe('cap')
+    expect(nivellEtiquetes(2.0, true)).toBe('codi')
   })
 
   it('per anar a un punt, la càmera es posa davant la pell, a la mateixa alçada', () => {

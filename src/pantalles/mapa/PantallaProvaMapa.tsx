@@ -17,6 +17,7 @@ import {
   type Tecnica,
 } from '../../domini/puntMarcat'
 import { formatar, t } from '../../i18n/t'
+import { BarraVistes } from '../../mapa/components/BarraVistes'
 import { Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
 import { posicio3D, posicioDesDePunt } from '../../mapa/geometria/baricentriques'
 import { idMarcador, llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from '../../mapa/marcadors'
@@ -64,7 +65,8 @@ function Marcatge({ model }: { model: ModelCos }) {
   const tots = useMemo(() => puntsSobreModel(efectiu, model), [efectiu, model])
   const visibles = useMemo(() => (meridia ? tots.filter((p) => p.punt.meridia === meridia) : tots), [tots, meridia])
   const recorreguts = useMemo(
-    () => (meridia ? recorregutsMeridia(tots, meridia, cataleg.meridians.find((m) => m.codi === meridia)?.recorregut) : []),
+    () =>
+      meridia ? recorregutsMeridia(tots, meridia, cataleg.meridians.find((m) => m.codi === meridia)?.recorregut) : [],
     [tots, meridia],
   )
 
@@ -87,7 +89,8 @@ function Marcatge({ model }: { model: ModelCos }) {
 
   function obrirFitxa(codi: string, costatTocat?: CostatPosicio) {
     const existent = marcats.find((m) => m.codi === codi)
-    const costat: CostatMarcat = existent?.costat ?? (costatTocat === 'E' || costatTocat === 'D' ? costatTocat : 'bilateral')
+    const costat: CostatMarcat =
+      existent?.costat ?? (costatTocat === 'E' || costatTocat === 'D' ? costatTocat : 'bilateral')
     setFitxa({ codi, costat, tecnica: existent?.tecnica ?? 'agulla' })
   }
 
@@ -119,31 +122,38 @@ function Marcatge({ model }: { model: ModelCos }) {
 
   return (
     <div className="disseny-mapa">
-      <div className="zona-visor">
-        {!model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
-        {tots.length === 0 && <p className="avis avis-flotant avis-segon">{t.mapa.sensePosicions}</p>}
-        <Visor3D
-          ref={visor}
-          geometria={model.geometria}
-          marcadors={marcadors}
-          recorreguts={recorreguts}
-          modeToc={correccio ? 'pell' : 'marcador'}
-          onTocarMarcador={(id) => {
-            const { codi, costat } = llegirIdMarcador(id)
-            obrirFitxa(codi, costat)
-          }}
-          onTocarPell={(toc) => corregir(toc, true)}
-          arrossegable={correccio ? idMarcador(correccio.codi, correccio.costat) : null}
-          onArrossegar={(toc) => corregir(toc, false)}
-        />
-        <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
-          {TECNIQUES.map((tec) => (
-            <li key={tec}>
-              <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
-              {t.mapa.tecnica[tec]}
-            </li>
-          ))}
-        </ul>
+      <div className="columna-visor">
+        <div className="zona-visor">
+          {!model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
+          {tots.length === 0 && <p className="avis avis-flotant avis-segon">{t.mapa.sensePosicions}</p>}
+          <Visor3D
+            ref={visor}
+            geometria={model.geometria}
+            marcadors={marcadors}
+            recorreguts={recorreguts}
+            etiquetesSempre={meridia !== ''}
+            modeToc={correccio ? 'pell' : 'marcador'}
+            onTocarMarcador={(id) => {
+              const { codi, costat } = llegirIdMarcador(id)
+              obrirFitxa(codi, costat)
+            }}
+            onTocarPell={(toc) => corregir(toc, true)}
+            arrossegable={correccio ? idMarcador(correccio.codi, correccio.costat) : null}
+            onArrossegar={(toc) => corregir(toc, false)}
+          />
+        </div>
+        {/* Fora del dibuix, perquè no tapin el cos */}
+        <div className="barra-visor">
+          <BarraVistes visor={visor} />
+          <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
+            {TECNIQUES.map((tec) => (
+              <li key={tec}>
+                <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
+                {t.mapa.tecnica[tec]}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <aside className="panell-mapa">
@@ -243,7 +253,10 @@ function Marcatge({ model }: { model: ModelCos }) {
             {puntFitxa.precaucions.categories.length > 0 && (
               <div className="avis" role="note">
                 <span className="etiqueta etiqueta-precaucio">
-                  {[t.precaucions.precaucio, ...puntFitxa.precaucions.categories.map((x) => t.precaucions.categories[x])].join(' · ')}
+                  {[
+                    t.precaucions.precaucio,
+                    ...puntFitxa.precaucions.categories.map((x) => t.precaucions.categories[x]),
+                  ].join(' · ')}
                 </span>
                 {puntFitxa.precaucions.nota && (
                   <span>
@@ -274,7 +287,7 @@ function Marcatge({ model }: { model: ModelCos }) {
                 </button>
               ))}
             </div>
-            <div className="segmentat segmentat-ample" role="radiogroup" aria-label={t.mapa.tecnicaTitol}>
+            <div className="segmentat segmentat-graella" role="radiogroup" aria-label={t.mapa.tecnicaTitol}>
               {TECNIQUES.map((tec) => (
                 <button
                   key={tec}
@@ -313,10 +326,7 @@ function Marcatge({ model }: { model: ModelCos }) {
               </Boto>
             </div>
             <div className="accions accions-esquerra">
-              <Boto
-                variant="discret"
-                onClick={() => començarCorreccio(fitxa.codi, fitxa.costat === 'D' ? 'D' : 'E')}
-              >
+              <Boto variant="discret" onClick={() => començarCorreccio(fitxa.codi, fitxa.costat === 'D' ? 'D' : 'E')}>
                 {t.mapa.corregir}
               </Boto>
             </div>

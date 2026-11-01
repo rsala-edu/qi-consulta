@@ -41,9 +41,13 @@ export function azimutMesProper(actual: number, objectiu: number): number {
 
 export type NivellEtiquetes = 'cap' | 'codi' | 'pinyin'
 
-/** A poc zoom només els punts; més a prop el codi; molt a prop també el pinyin. */
-export function nivellEtiquetes(distancia: number): NivellEtiquetes {
-  if (distancia > 2.4) return 'cap'
+/**
+ * Amb el cos sencer, etiquetes només si hi ha un meridià filtrat (si no,
+ * s'amunteguen i tapen els punts). En ampliar, el codi; molt a prop, també
+ * el pinyin.
+ */
+export function nivellEtiquetes(distancia: number, meridiaFiltrat = false): NivellEtiquetes {
+  if (distancia > 1.6) return meridiaFiltrat ? 'codi' : 'cap'
   if (distancia > 1.1) return 'codi'
   return 'pinyin'
 }

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   columnesDelDia,
+  errorSeguiment,
+  ordenarHistorial,
   dillunsDe,
   esquemaDadesCita,
   fiDe,
@@ -121,5 +123,65 @@ describe('dates de l\'agenda en català', async () => {
     expect(diaLlarg('2026-08-30')).toBe('diumenge, 30 d\'agost de 2026')
     expect(diaCurt('2026-11-07')).toBe('ds. 7')
     expect(mesAny('2026-04-15')).toBe('abril de 2026')
+  })
+})
+
+describe('seguiment només després de la primera visita', () => {
+  const amb = (id: string, inici: string, tipus: 'primera' | 'seguiment', estat: EstatCita = 'programada', pacientId = 'p1') => ({
+    ...novaCita(pacientId, inici, tipus),
+    id,
+    estat,
+  })
+
+  it('sense cap primera visita, no hi pot haver seguiment', () => {
+    expect(errorSeguiment(novaCita('p1', '2026-11-02T10:00'), [])).toBe('sensePrimera')
+    // la primera visita d'un altre pacient no compta
+    expect(errorSeguiment(novaCita('p1', '2026-11-02T10:00'), [amb('x', '2026-10-01T10:00', 'primera', 'feta', 'p2')])).toBe(
+      'sensePrimera',
+    )
+    // una primera visita anul·lada o no presentada tampoc
+    expect(errorSeguiment(novaCita('p1', '2026-11-02T10:00'), [amb('a', '2026-10-01T10:00', 'primera', 'anullada')])).toBe(
+      'sensePrimera',
+    )
+    expect(errorSeguiment(novaCita('p1', '2026-11-02T10:00'), [amb('a', '2026-10-01T10:00', 'primera', 'noPresentat')])).toBe(
+      'sensePrimera',
+    )
+  })
+
+  it('un seguiment anterior (o a la mateixa hora) que la primera visita no val', () => {
+    const cites = [amb('a', '2026-11-05T10:00', 'primera')]
+    expect(errorSeguiment(novaCita('p1', '2026-11-02T10:00'), cites)).toBe('anteriorAPrimera')
+    expect(errorSeguiment(novaCita('p1', '2026-11-05T10:00'), cites)).toBe('anteriorAPrimera')
+    expect(errorSeguiment(novaCita('p1', '2026-11-12T10:00'), cites)).toBeNull()
+  })
+
+  it('una primera visita sempre val, i en editar la mateixa primera visita no es compara amb ella', () => {
+    expect(errorSeguiment(novaCita('p1', '2026-11-02T10:00', 'primera'), [])).toBeNull()
+    const cites = [amb('a', '2026-11-05T10:00', 'primera')]
+    // si la primera passa a ser de seguiment, ja no hi ha cap primera visita
+    expect(errorSeguiment({ ...cites[0]!, tipus: 'seguiment' }, cites)).toBe('sensePrimera')
+    // una cita de seguiment anul·lada no es comprova
+    expect(errorSeguiment({ ...novaCita('p1', '2026-11-02T10:00'), estat: 'anullada' }, [])).toBeNull()
+    // sense pacient triat encara no es diu res
+    expect(errorSeguiment(novaCita('', '2026-11-02T10:00'), [])).toBeNull()
+  })
+})
+
+describe('ordre de l\'historial', () => {
+  it('primer les pròximes (la més propera primer), després les passades (la més recent primer)', () => {
+    const cites = [
+      cita('passada-antiga', '2026-09-01T10:00'),
+      cita('futura-llunyana', '2026-12-20T10:00'),
+      cita('passada-recent', '2026-10-28T10:00'),
+      cita('futura-propera', '2026-11-03T10:00'),
+      cita('avui-mes-tard', '2026-11-01T18:00'),
+    ]
+    expect(ordenarHistorial(cites, '2026-11-01T12:00').map((c) => c.id)).toEqual([
+      'avui-mes-tard',
+      'futura-propera',
+      'futura-llunyana',
+      'passada-recent',
+      'passada-antiga',
+    ])
   })
 })
