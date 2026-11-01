@@ -147,7 +147,7 @@ function Calibratge({ model }: { model: ModelCos }) {
       <aside className="panell-mapa">
         <p className="detall">
           {t.calibratge.model}: {model.definitiu ? t.calibratge.definitiu : t.calibratge.provisional} ·{' '}
-          {formatar(t.calibratge.progres, { n: String(n) })}
+          {n === 1 ? t.calibratge.progres.u : formatar(t.calibratge.progres.altres, { n: String(n) })}
         </p>
         <p>{t.calibratge.instruccions}</p>
 

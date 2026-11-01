@@ -4,6 +4,11 @@ import { expect, test, type Page } from '@playwright/test'
 
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 
+/** Enllaç del menú principal (n'hi ha d'altres amb el mateix text, com «← Pacients»). */
+function menu(page: Page, nom: string) {
+  return page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: nom })
+}
+
 /** Llegeix IndexedDB directament, tal com ho veuria algú amb accés al disc. */
 async function contingutBrutIndexedDB(page: Page): Promise<string> {
   return page.evaluate(
@@ -79,7 +84,7 @@ test('desbloquejar → crear pacient → editar la fitxa clínica', async ({ pag
   expect(page.url()).toBe(urlFitxa)
 
   // 5. Cercar per telèfon i editar les dades
-  await page.getByRole('link', { name: 'Pacients' }).click()
+  await menu(page, 'Pacients').click()
   await page.getByRole('searchbox').fill('600111')
   await expect(page.getByRole('list', { name: 'Pacients' }).getByRole('link')).toHaveCount(1)
   await page.getByRole('searchbox').fill('ningu')
@@ -116,7 +121,7 @@ test('arxivar un pacient l\'amaga de la llista sense esborrar-lo', async ({ page
   await page.getByRole('button', { name: 'Arxivar pacient' }).click()
   await expect(page.getByText('Aquest pacient és a l\'arxiu.')).toBeVisible()
 
-  await page.getByRole('link', { name: 'Pacients' }).click()
+  await menu(page, 'Pacients').click()
   await expect(page.getByRole('link', { name: /Bernat/ })).toHaveCount(0)
   await page.getByLabel('Mostrar arxivats').check()
   await expect(page.getByRole('link', { name: /Bernat Fictici/ })).toBeVisible()

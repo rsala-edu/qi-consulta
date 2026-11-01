@@ -84,7 +84,7 @@ export function Visor3D({ ref, ...props }: Props) {
   }))
 
   return (
-    <div className="visor3d" data-testid="visor3d">
+    <div className="visor3d" data-testid="visor3d" data-marcadors={props.marcadors.length} data-moviment="no">
       <Canvas
         frameloop="demand"
         dpr={[1, 2]}
@@ -161,6 +161,25 @@ const Escena = memo(function Escena({
     c.setBoundary(new Box3(new Vector3(...CAMERA.limits.min), new Vector3(...CAMERA.limits.max)))
     void c.setLookAt(0, CAMERA.alcadaInicial, CAMERA.distanciaInicial, 0, CAMERA.alcadaInicial, 0, false)
   }, [])
+
+  // data-moviment al contenidor: «si» mentre la càmera es mou, «no» quan s'atura.
+  // Ho fan servir les proves (i no provoca cap render de React).
+  const glEl = useThree((s) => s.gl.domElement)
+  useEffect(() => {
+    const c = controls.current
+    const visor = glEl.closest<HTMLElement>('.visor3d')
+    if (!c || !visor) return
+    const moure = () => (visor.dataset.moviment = 'si')
+    const aturar = () => (visor.dataset.moviment = 'no')
+    c.addEventListener('transitionstart', moure)
+    c.addEventListener('controlstart', moure)
+    c.addEventListener('sleep', aturar)
+    return () => {
+      c.removeEventListener('transitionstart', moure)
+      c.removeEventListener('controlstart', moure)
+      c.removeEventListener('sleep', aturar)
+    }
+  }, [glEl])
 
   useImperativeHandle(control, () => ({
     anarA(punt, normal) {
@@ -283,7 +302,10 @@ const Escena = memo(function Escena({
       const cb = callbacks.current
       if (cb.arrossegable && e.button === 0) {
         const { x, y } = local(e)
-        if (mesProperAlToc(cb.projectar(), x, y, RADI_SELECCIO) === cb.arrossegable) {
+        // Només es mira el punt arrossegable: si n'hi ha un altre al damunt
+        // (p. ex. el simètric d'un punt de la línia mitja), no ha de guanyar
+        const propi = cb.projectar().filter((p) => p.dada === cb.arrossegable)
+        if (mesProperAlToc(propi, x, y, RADI_SELECCIO)) {
           gest.arrossegant = true
           if (controls.current) controls.current.enabled = false
           canvas.setPointerCapture?.(e.pointerId)

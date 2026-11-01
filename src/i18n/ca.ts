@@ -157,7 +157,7 @@ export const ca = {
     exportat: 'S\'ha descarregat cataleg.json. S\'ha de copiar a src/punts/cataleg.json.',
     descartar: 'Descartar els canvis',
     confirmarDescartar: 'Vols descartar totes les posicions calibrades en aquest dispositiu per a aquest model?',
-    progres: '{n} posicions col·locades en aquest model',
+    progres: { u: '1 posició col·locada en aquest model', altres: '{n} posicions col·locades en aquest model' },
     model: 'Model',
     definitiu: 'Cos definitiu (MakeHuman)',
     provisional: 'Maniquí provisional',

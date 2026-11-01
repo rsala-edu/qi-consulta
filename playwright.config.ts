@@ -12,6 +12,8 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     locale: 'ca-ES',
     trace: 'retain-on-failure',
+    // WebGL per programari, perquè el navegador sense pantalla pugui dibuixar el cos 3D
+    launchOptions: { args: ['--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--ignore-gpu-blocklist'] },
   },
   projects: [
     { name: 'tauleta', use: { ...devices['Galaxy Tab S9 landscape'] } },
