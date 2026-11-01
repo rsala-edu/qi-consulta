@@ -27,6 +27,7 @@ export const TAULES: readonly DefinicioTaula[] = [
   { nom: 'fitxesCliniques', clau: 'id', data: 'modificatAt' },
   { nom: 'cites', clau: 'id', data: 'modificatAt' },
   { nom: 'calibratge', clau: 'id', data: 'modificatAt' },
+  { nom: 'calibratgeOrella', clau: 'codi', data: 'modificatAt' },
   { nom: 'precaucions', clau: 'codi', data: 'confirmadaAt' },
   { nom: 'categoriesPrecaucio', clau: 'categoria', data: 'confirmadaAt' },
 ]

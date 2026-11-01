@@ -15,7 +15,7 @@ import type { ModelCos } from '../../mapa/model'
 import { useCalibracions } from '../../mapa/useCalibracions'
 import { useModelCos } from '../../mapa/useModelCos'
 import { usePrecaucions } from '../../mapa/usePrecaucions'
-import { REVISIO_BUIDA, ambPrecaucions, cataleg, exportarCataleg, posicioDe } from '../../punts/cataleg'
+import { REVISIO_BUIDA, ambPrecaucions, cataleg, costatsDe, exportarCataleg, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
 
 export function PantallaCalibratge() {
@@ -42,14 +42,16 @@ function Calibratge({ model }: { model: ModelCos }) {
   const [meridia, setMeridia] = useState(cataleg.meridians[0]!.codi)
   const [seleccionat, setSeleccionat] = useState<string | null>(null)
   const [costat, setCostat] = useState<CostatPosicio>('E')
+  /** Subpunt, per als codis que en tenen (Jiaji, Baxie…) */
+  const [subpunt, setSubpunt] = useState(0)
   const [missatge, setMissatge] = useState('')
 
   const puntsMeridia = efectiu.punts.filter((p) => p.meridia === meridia)
-  const bilateral = cataleg.meridians.find((m) => m.codi === meridia)?.bilateral ?? true
-  const costats: CostatPosicio[] = bilateral ? ['E', 'D'] : ['C']
   const punt = efectiu.punts.find((p) => p.codi === seleccionat)
+  const costats: CostatPosicio[] = punt ? costatsDe(cataleg, punt) : ['E', 'D']
+  const bilateral = costats.length > 1
   const sobreModel = useMemo(() => puntsSobreModel(efectiu, model), [efectiu, model])
-  const idSeleccionat = seleccionat ? idMarcador(seleccionat, costat) : null
+  const idSeleccionat = seleccionat ? idMarcador(seleccionat, costat, subpunt) : null
 
   const marcadors: MarcadorVisor[] = useMemo(
     () =>
@@ -68,19 +70,23 @@ function Calibratge({ model }: { model: ModelCos }) {
   const colocar = (toc: TocPell, immediat: boolean) => {
     if (!seleccionat) return
     const pos = posicioDesDePunt(model.geometria, toc.triangle, toc.punt)
-    desar(seleccionat, costat, posicio3D(model.topologia, costat, pos, 'manual'), immediat)
+    desar(seleccionat, costat, posicio3D(model.topologia, costat, pos, 'manual', subpunt), immediat, subpunt)
   }
 
-  const triar = (codi: string, c: CostatPosicio = costat) => {
+  const triar = (codi: string, c: CostatPosicio = costat, i = 0) => {
+    const p = efectiu.punts.find((x) => x.codi === codi)
+    const possibles: CostatPosicio[] = p ? costatsDe(cataleg, p) : ['E', 'D']
+    const k = possibles.includes(c) ? c : possibles[0]!
     setSeleccionat(codi)
-    setCostat(c)
+    setCostat(k)
+    setSubpunt(i)
     setMissatge('')
-    const actual = sobreModel.find((p) => p.id === idMarcador(codi, c))
+    const actual = sobreModel.find((x) => x.id === idMarcador(codi, k, i))
     if (actual) visor.current?.anarA(actual.posicio, actual.normal)
   }
 
   const index = puntsMeridia.findIndex((p) => p.codi === seleccionat)
-  const posActual = punt ? posicioDe(punt, model.topologia, costat) : undefined
+  const posActual = punt ? posicioDe(punt, model.topologia, costat, subpunt) : undefined
   const n = sobreModel.length
 
   function exportar() {
@@ -152,7 +158,7 @@ function Calibratge({ model }: { model: ModelCos }) {
                 <span className="codi">{p.codi}</span>
                 <span className="pinyin">{p.pinyin}</span>
                 <span className="estat-costats">
-                  {costats.map((c) => (
+                  {costatsDe(cataleg, p).map((c) => (
                     <span key={c} className={posicioDe(p, model.topologia, c) ? 'fet' : ''}>
                       {c}
                     </span>
@@ -175,12 +181,24 @@ function Calibratge({ model }: { model: ModelCos }) {
                   type="button"
                   role="radio"
                   aria-checked={costat === c}
-                  onClick={() => triar(punt.codi, c)}
+                  onClick={() => triar(punt.codi, c, subpunt)}
                 >
                   {t.mapa.costat[c]}
                 </button>
               ))}
             </div>
+            {punt.subpunts && (
+              <label className="camp">
+                <span>{t.mapa.subpunt}</span>
+                <select value={subpunt} onChange={(e) => triar(punt.codi, costat, Number(e.target.value))}>
+                  {punt.subpunts.map((nom, i) => (
+                    <option key={nom} value={i}>
+                      {nom}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <div className="accions accions-esquerra">
               {bilateral && (
                 <Boto
@@ -190,13 +208,13 @@ function Calibratge({ model }: { model: ModelCos }) {
                     if (!posActual) return
                     const oposat = COSTAT_OPOSAT[costat]
                     const mirall = posicioMirall(model.geometria, posActual)
-                    desar(punt.codi, oposat, posicio3D(model.topologia, oposat, mirall, 'manual'))
+                    desar(punt.codi, oposat, posicio3D(model.topologia, oposat, mirall, 'manual', subpunt), true, subpunt)
                   }}
                 >
                   {t.calibratge.copiarOposat}
                 </Boto>
               )}
-              <Boto variant="discret" disabled={!posActual} onClick={() => desar(punt.codi, costat, null)}>
+              <Boto variant="discret" disabled={!posActual} onClick={() => desar(punt.codi, costat, null, true, subpunt)}>
                 {t.calibratge.esborrar}
               </Boto>
             </div>

@@ -1,7 +1,7 @@
 // Pantalla de prova del marcatge de punts (etapa 2d). No desa res: quan
 // tinguem les sessions, aquest mateix flux anirà dins la pantalla de sessió.
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
 import {
@@ -10,9 +10,11 @@ import {
   desmarcar,
   marcar,
   nouPuntMarcat,
+  puntMarcat,
   tecnicaDelMarcador,
-  TECNIQUES,
+  TECNIQUES_DEL_MAPA,
   type CostatMarcat,
+  type Mapa,
   type PuntMarcat,
   type Tecnica,
 } from '../../domini/puntMarcat'
@@ -26,20 +28,62 @@ import { useCalibracions } from '../../mapa/useCalibracions'
 import { notaSenseCategoria } from '../../mapa/precaucio'
 import { usePrecaucions } from '../../mapa/usePrecaucions'
 import { useModelCos } from '../../mapa/useModelCos'
-import { REVISIO_BUIDA, ambPrecaucions, cataleg, cercarPunts, nomMeridia, posicioDe } from '../../punts/cataleg'
+import { REVISIO_BUIDA, ambPrecaucions, cataleg, cercarPunts, costatsDe, nomMeridia, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
+import { LlistaMarcats } from './LlistaMarcats'
+import { nomAmple } from './tecniques'
+import { MarcatgeOrella } from './MarcatgeOrella'
+
+const TECNIQUES = TECNIQUES_DEL_MAPA.cos
+
+/** Punt que una pestanya ha de mostrar (des de la llista de marcats); `n` fa que es repeteixi */
+type Peticio = { codi: string; n: number } | null
 
 export function PantallaProvaMapa() {
   const carrega = useModelCos()
+  const [pestanya, setPestanya] = useState<Mapa>('cos')
+  // Els punts del cos i de l'orella van junts, com aniran a la sessió
+  const [marcats, setMarcats] = useState<PuntMarcat[]>([])
+  const [peticions, setPeticions] = useState<Record<Mapa, Peticio>>({ cos: null, orella: null })
+  const veure = (m: PuntMarcat) => {
+    setPestanya(m.mapa)
+    setPeticions((p) => ({ ...p, [m.mapa]: { codi: m.codi, n: (p[m.mapa]?.n ?? 0) + 1 } }))
+  }
+
   return (
     <main className="pantalla-mapa">
       <div className="capcalera-mapa">
         <h1>{t.mapa.titolProva}</h1>
+        <div className="segmentat pestanyes-mapa" role="tablist" aria-label={t.mapa.quinMapa}>
+          {(['cos', 'orella'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              id={`pestanya-${m}`}
+              aria-controls={`mapa-${m}`}
+              aria-selected={pestanya === m}
+              onClick={() => setPestanya(m)}
+            >
+              {m === 'cos' ? t.mapa.pestanyaCos : t.orella.titol}
+            </button>
+          ))}
+        </div>
         <p className="avis">{t.mapa.avisProva}</p>
       </div>
-      {carrega.estat === 'carregant' && <Indicador text={t.mapa.carregantModel} />}
-      {carrega.estat === 'error' && <p role="alert">{t.app.errorInesperat}</p>}
-      {carrega.estat === 'llest' && <Marcatge model={carrega.dades} />}
+      {/* El cos es queda muntat (i carregat) quan es mira l'orella */}
+      <div id="mapa-cos" role="tabpanel" aria-labelledby="pestanya-cos" className="panell-pestanya" hidden={pestanya !== 'cos'}>
+        {carrega.estat === 'carregant' && <Indicador text={t.mapa.carregantModel} />}
+        {carrega.estat === 'error' && <p role="alert">{t.app.errorInesperat}</p>}
+        {carrega.estat === 'llest' && (
+          <Marcatge model={carrega.dades} marcats={marcats} setMarcats={setMarcats} peticio={peticions.cos} onVeure={veure} />
+        )}
+      </div>
+      {pestanya === 'orella' && (
+        <div id="mapa-orella" role="tabpanel" aria-labelledby="pestanya-orella" className="panell-pestanya">
+          <MarcatgeOrella marcats={marcats} setMarcats={setMarcats} peticio={peticions.orella} onVeure={veure} />
+        </div>
+      )}
     </main>
   )
 }
@@ -48,18 +92,33 @@ interface FitxaOberta {
   codi: string
   costat: CostatMarcat
   tecnica: Tecnica
+  /** El marcador que s'ha tocat (per corregir-ne la posició) */
+  tocat: { costat: CostatPosicio; index: number }
 }
 
-function Marcatge({ model }: { model: ModelCos }) {
+/** Punt (i costat i subpunt) que la doctora està corregint */
+interface Correccio {
+  codi: string
+  costat: CostatPosicio
+  index: number
+}
+
+interface PropsMarcatge {
+  model: ModelCos
+  marcats: PuntMarcat[]
+  setMarcats: Dispatch<SetStateAction<PuntMarcat[]>>
+  peticio: Peticio
+  onVeure(m: PuntMarcat): void
+}
+
+function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatge) {
   const visor = useRef<ControlVisor>(null)
   const { efectiu: calibrat, desar, restablir } = useCalibracions(model.topologia)
   const { revisio } = usePrecaucions()
   const efectiu = useMemo(() => ambPrecaucions(calibrat, revisio ?? REVISIO_BUIDA), [calibrat, revisio])
-  /** Punt i costat que la doctora està corregint */
-  const [correccio, setCorreccio] = useState<{ codi: string; costat: CostatPosicio } | null>(null)
+  const [correccio, setCorreccio] = useState<Correccio | null>(null)
   const [meridia, setMeridia] = useState('')
   const [consulta, setConsulta] = useState('')
-  const [marcats, setMarcats] = useState<PuntMarcat[]>([])
   const [fitxa, setFitxa] = useState<FitxaOberta | null>(null)
 
   const tots = useMemo(() => puntsSobreModel(efectiu, model), [efectiu, model])
@@ -79,7 +138,7 @@ function Marcatge({ model }: { model: ModelCos }) {
           punt: p.posicio,
           normal: p.normal,
           color: tecnica && COLOR_TECNICA[tecnica],
-          destacat: correccio ? p.id === idMarcador(correccio.codi, correccio.costat) : fitxa?.codi === p.punt.codi,
+          destacat: correccio ? p.id === idMarcador(correccio.codi, correccio.costat, correccio.index) : fitxa?.codi === p.punt.codi,
           etiqueta: p.punt.codi,
           etiquetaLlarga: `${p.punt.codi} · ${p.punt.pinyin}`,
         }
@@ -87,38 +146,51 @@ function Marcatge({ model }: { model: ModelCos }) {
     [visibles, marcats, fitxa?.codi, correccio],
   )
 
-  function obrirFitxa(codi: string, costatTocat?: CostatPosicio) {
-    const existent = marcats.find((m) => m.codi === codi)
+  function obrirFitxa(codi: string, costatTocat: CostatPosicio = 'E', index = 0) {
+    const existent = puntMarcat(marcats, codi)
     const costat: CostatMarcat =
       existent?.costat ?? (costatTocat === 'E' || costatTocat === 'D' ? costatTocat : 'bilateral')
-    setFitxa({ codi, costat, tecnica: existent?.tecnica ?? 'agulla' })
+    setFitxa({ codi, costat, tecnica: existent?.tecnica ?? 'agulla', tocat: { costat: costatTocat, index } })
   }
 
   function anarAlPunt(codi: string) {
     const p = tots.find((x) => x.punt.codi === codi)
     if (p) visor.current?.anarA(p.posicio, p.normal)
-    obrirFitxa(codi, p?.costat)
+    obrirFitxa(codi, p?.costat, p?.index)
   }
 
   function corregir(punt: TocPell, immediat: boolean) {
     if (!correccio) return
+    const { codi, costat, index } = correccio
     const pos = posicioDesDePunt(model.geometria, punt.triangle, punt.punt)
-    desar(correccio.codi, correccio.costat, posicio3D(model.topologia, correccio.costat, pos, 'doctora'), immediat)
+    desar(codi, costat, posicio3D(model.topologia, costat, pos, 'doctora', index), immediat, index)
   }
 
-  function començarCorreccio(codi: string, costat: CostatPosicio) {
-    setCorreccio({ codi, costat })
-    const p = tots.find((x) => x.id === idMarcador(codi, costat))
+  function començarCorreccio(c: Correccio) {
+    setCorreccio(c)
+    const p = tots.find((x) => x.id === idMarcador(c.codi, c.costat, c.index))
     if (p) visor.current?.anarA(p.posicio, p.normal)
   }
 
   const resultats = consulta.trim() ? cercarPunts(efectiu, consulta).slice(0, 8) : []
   const puntFitxa = efectiu.punts.find((p) => p.codi === (correccio?.codi ?? fitxa?.codi))
-  const origenDe = (codi: string, costat: CostatPosicio) => {
+  const origenDe = (codi: string, costat: CostatPosicio, index = 0) => {
     const p = efectiu.punts.find((x) => x.codi === codi)
-    return p ? posicioDe(p, model.topologia, costat)?.origen : undefined
+    return p ? posicioDe(p, model.topologia, costat, index)?.origen : undefined
   }
-  const jaMarcat = fitxa && marcats.some((m) => m.codi === fitxa.codi)
+  const corregitPerLaDoctora = (codi: string) =>
+    efectiu.punts
+      .find((x) => x.codi === codi)
+      ?.posicions.some((q) => q.topologia === model.topologia && q.origen === 'doctora') ?? false
+  const jaMarcat = fitxa && puntMarcat(marcats, fitxa.codi)
+
+  // Des de la llista de marcats (també quan es ve de la pestanya de l'orella)
+  const darreraPeticio = useRef(0)
+  useEffect(() => {
+    if (!peticio || peticio.n === darreraPeticio.current) return
+    darreraPeticio.current = peticio.n
+    anarAlPunt(peticio.codi)
+  })
 
   return (
     <div className="disseny-mapa">
@@ -134,11 +206,11 @@ function Marcatge({ model }: { model: ModelCos }) {
             etiquetesSempre={meridia !== ''}
             modeToc={correccio ? 'pell' : 'marcador'}
             onTocarMarcador={(id) => {
-              const { codi, costat } = llegirIdMarcador(id)
-              obrirFitxa(codi, costat)
+              const { codi, costat, index } = llegirIdMarcador(id)
+              obrirFitxa(codi, costat, index)
             }}
             onTocarPell={(toc) => corregir(toc, true)}
-            arrossegable={correccio ? idMarcador(correccio.codi, correccio.costat) : null}
+            arrossegable={correccio ? idMarcador(correccio.codi, correccio.costat, correccio.index) : null}
             onArrossegar={(toc) => corregir(toc, false)}
           />
         </div>
@@ -209,7 +281,7 @@ function Marcatge({ model }: { model: ModelCos }) {
           <section className="fitxa-punt" aria-label={formatar(t.mapa.corregint, { codi: correccio.codi })}>
             <h2>{formatar(t.mapa.corregint, { codi: correccio.codi })}</h2>
             <p>{t.mapa.instruccionsCorregir}</p>
-            {cataleg.meridians.find((m) => m.codi === puntFitxa?.meridia)?.bilateral !== false && (
+            {puntFitxa && costatsDe(cataleg, puntFitxa).length > 1 && (
               <div className="segmentat" role="radiogroup" aria-label={t.mapa.costatTitol}>
                 {(['E', 'D'] as const).map((c) => (
                   <button
@@ -217,22 +289,37 @@ function Marcatge({ model }: { model: ModelCos }) {
                     type="button"
                     role="radio"
                     aria-checked={correccio.costat === c}
-                    onClick={() => començarCorreccio(correccio.codi, c)}
+                    onClick={() => començarCorreccio({ ...correccio, costat: c })}
                   >
                     {t.mapa.costat[c]}
                   </button>
                 ))}
               </div>
             )}
+            {puntFitxa?.subpunts && (
+              <label className="camp">
+                <span>{t.mapa.subpunt}</span>
+                <select
+                  value={correccio.index}
+                  onChange={(e) => començarCorreccio({ ...correccio, index: Number(e.target.value) })}
+                >
+                  {puntFitxa.subpunts.map((nom, i) => (
+                    <option key={nom} value={i}>
+                      {nom}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <p className="detall" role="status">
-              {t.mapa.origen[origenDe(correccio.codi, correccio.costat) ?? 'oms']}
+              {t.mapa.origen[origenDe(correccio.codi, correccio.costat, correccio.index) ?? 'oms']}
             </p>
             <div className="accions accions-esquerra">
               <Boto onClick={() => setCorreccio(null)}>{t.mapa.fet}</Boto>
               <Boto
                 variant="discret"
-                disabled={origenDe(correccio.codi, correccio.costat) !== 'doctora'}
-                onClick={() => void restablir(correccio.codi, correccio.costat)}
+                disabled={origenDe(correccio.codi, correccio.costat, correccio.index) !== 'doctora'}
+                onClick={() => void restablir(correccio.codi, correccio.costat, correccio.index)}
               >
                 {t.mapa.restablir}
               </Boto>
@@ -250,6 +337,11 @@ function Marcatge({ model }: { model: ModelCos }) {
               {puntFitxa.nomCatala && ` · ${puntFitxa.nomCatala}`}
             </p>
             <p>{puntFitxa.localitzacio || <span className="detall">{t.mapa.localitzacioPendent}</span>}</p>
+            {puntFitxa.subpunts && (
+              <p className="detall">
+                {formatar(t.mapa.subpunts, { n: String(puntFitxa.subpunts.length) })}: {puntFitxa.subpunts.join(' · ')}
+              </p>
+            )}
             {puntFitxa.precaucions.categories.length > 0 && (
               <div className="avis" role="note">
                 <span className="etiqueta etiqueta-precaucio">
@@ -270,7 +362,7 @@ function Marcatge({ model }: { model: ModelCos }) {
               </div>
             )}
 
-            {(['E', 'D'] as const).some((c) => origenDe(puntFitxa.codi, c) === 'doctora') && (
+            {corregitPerLaDoctora(puntFitxa.codi) && (
               <p className="etiqueta-origen">{t.mapa.origen.doctora}</p>
             )}
 
@@ -293,6 +385,7 @@ function Marcatge({ model }: { model: ModelCos }) {
                   key={tec}
                   type="button"
                   role="radio"
+                  className={nomAmple(t.mapa.tecnica[tec])}
                   aria-checked={fitxa.tecnica === tec}
                   onClick={() => setFitxa({ ...fitxa, tecnica: tec })}
                 >
@@ -326,38 +419,31 @@ function Marcatge({ model }: { model: ModelCos }) {
               </Boto>
             </div>
             <div className="accions accions-esquerra">
-              <Boto variant="discret" onClick={() => començarCorreccio(fitxa.codi, fitxa.costat === 'D' ? 'D' : 'E')}>
+              <Boto
+                variant="discret"
+                onClick={() =>
+                  començarCorreccio({
+                    codi: fitxa.codi,
+                    // El costat triat a la fitxa; si és bilateral, el del marcador tocat
+                    costat:
+                      costatsDe(cataleg, puntFitxa).length === 1
+                        ? 'C'
+                        : fitxa.costat !== 'bilateral'
+                          ? fitxa.costat
+                          : fitxa.tocat.costat === 'D'
+                            ? 'D'
+                            : 'E',
+                    index: fitxa.tocat.index,
+                  })
+                }
+              >
                 {t.mapa.corregir}
               </Boto>
             </div>
           </section>
         )}
 
-        <section>
-          <h2>{t.mapa.marcats}</h2>
-          {marcats.length === 0 && <p className="detall">{t.mapa.capMarcat}</p>}
-          <ul className="llista-marcats" aria-label={t.mapa.marcats}>
-            {marcats.map((m) => {
-              const p = efectiu.punts.find((x) => x.codi === m.codi)
-              return (
-                <li key={m.codi}>
-                  <span className="punt-color" style={{ background: COLOR_TECNICA[m.tecnica] }} />
-                  <span className="codi">{m.codi}</span>
-                  <span className="pinyin">{p?.pinyin}</span>
-                  <span className="detall">
-                    {t.mapa.costat[m.costat]} · {t.mapa.tecnica[m.tecnica]}
-                  </span>
-                  <Boto variant="discret" onClick={() => anarAlPunt(m.codi)}>
-                    {t.mapa.veure}
-                  </Boto>
-                  <Boto variant="discret" onClick={() => setMarcats((l) => desmarcar(l, m.codi))}>
-                    {t.mapa.treure}
-                  </Boto>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
+        <LlistaMarcats marcats={marcats} onVeure={onVeure} onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))} />
       </aside>
     </div>
   )

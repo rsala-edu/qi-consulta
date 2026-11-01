@@ -47,25 +47,35 @@ describe('cos definitiu', () => {
     for (const punt of calcul.punts) {
       const desat = cataleg.punts
         .find((x) => x.codi === punt.codi)!
-        .posicions.find((q) => q.topologia === model.topologia && q.costat === punt.costat)
-      expect(desat, `${punt.codi} ${punt.costat}`).toBeDefined()
+        .posicions.find((q) => q.topologia === model.topologia && q.costat === punt.costat && (q.index ?? 0) === punt.index)
+      expect(desat, `${punt.codi} ${punt.costat} ${punt.index}`).toBeDefined()
       if (desat!.origen === 'doctora') continue
       expect(desat).toMatchObject({ triangle: punt.posicio.triangle, origen: 'oms' })
       desat!.b.forEach((b, i) => expect(b).toBeCloseTo(punt.posicio.b[i]!, 5))
     }
   })
 
-  it('els 361 punts dels 14 meridians tenen regla i posició (dos costats, o un a la línia mitja)', () => {
+  it('els 361 punts dels 14 meridians i els 48 extraordinaris tenen regla i posició (dos costats, o una)', () => {
     const codis = cataleg.punts.map((x) => x.codi)
-    expect(codis).toHaveLength(361)
+    expect(codis).toHaveLength(361 + 48)
     expect(REGLES.map((r) => r.codi).sort()).toEqual([...codis].sort())
-    const mitja = REGLES.filter((r) => r.mitja).length
-    expect(mitja).toBe(52)
-    expect(calcul.punts).toHaveLength((361 - mitja) * 2 + mitja)
+    const meridians = REGLES.filter((r) => !r.codi.startsWith('EX-'))
+    expect(meridians.filter((r) => r.mitja)).toHaveLength(52)
+    const posicions = REGLES.reduce((n, r) => n + (r.subpunts?.length ?? 1) * (r.mitja ? 1 : 2), 0)
+    expect(posicions).toBe(670 + 164)
+    expect(calcul.punts).toHaveLength(posicions)
   })
 
-  it('els punts de la línia mitja són els de CV i GV', () => {
-    for (const r of REGLES) expect(Boolean(r.mitja), r.codi).toBe(/^(CV|GV)/.test(r.codi))
+  it('els punts de la línia mitja dels meridians són els de CV i GV', () => {
+    for (const r of REGLES.filter((x) => !x.codi.startsWith('EX-'))) expect(Boolean(r.mitja), r.codi).toBe(/^(CV|GV)/.test(r.codi))
+  })
+
+  it('el catàleg i les regles tenen els mateixos subpunts i el mateix tipus de posició', () => {
+    for (const r of REGLES) {
+      const p = cataleg.punts.find((x) => x.codi === r.codi)!
+      expect(p.subpunts, r.codi).toEqual(r.subpunts ? [...r.subpunts] : undefined)
+      expect(Boolean(p.mitja), r.codi).toBe(Boolean(r.mitja) && r.codi.startsWith('EX-'))
+    }
   })
 })
 
@@ -186,7 +196,9 @@ describe('distàncies en cun', () => {
 
 describe('simetria', () => {
   it('els punts de la línia mitja hi són (±3 mm)', () => {
-    for (const def of REGLES.filter((d) => d.mitja)) expect(Math.abs(p(def.codi, 'E').x), def.codi).toBeLessThan(0.003)
+    // Fora de la línia: Jinjin i Yuye (a cada costat del fre de la llengua) i Sishencong, que són quatre
+    const foraDeLinia = ['EX-HN1', 'EX-HN12', 'EX-HN13']
+    for (const def of REGLES.filter((d) => d.mitja && !foraDeLinia.includes(d.codi))) expect(Math.abs(p(def.codi, 'E').x), def.codi).toBeLessThan(0.003)
   })
 
   it('cada punt esquerre és el mirall del dret (±3 mm)', () => {

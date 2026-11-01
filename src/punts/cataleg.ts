@@ -16,16 +16,24 @@ export function nomMeridia(c: Cataleg, codi: string): string {
 export function cercarPunts(c: Cataleg, consulta: string): PuntCatalog[] {
   const q = normalitzar(consulta).replace(/[\s-]/g, '')
   if (q === '') return []
-  const exactes = c.punts.filter((p) => p.codi.toLowerCase() === q || normalitzar(p.pinyin) === q)
+  // Els codis dels extraordinaris porten guionet (EX-HN3): es compara sense
+  const codi = (p: PuntCatalog) => p.codi.toLowerCase().replace(/-/g, '')
+  const exactes = c.punts.filter((p) => codi(p) === q || normalitzar(p.pinyin) === q)
   const parcials = c.punts.filter(
-    (p) => !exactes.includes(p) && (p.codi.toLowerCase().startsWith(q) || normalitzar(p.pinyin).includes(q)),
+    (p) => !exactes.includes(p) && (codi(p).startsWith(q) || normalitzar(p.pinyin).includes(q)),
   )
   return [...exactes, ...parcials]
 }
 
-/** Posició d'un punt en una topologia i un costat concrets. */
-export function posicioDe(p: PuntCatalog, topologia: string, costat: CostatPosicio): Posicio3D | undefined {
-  return p.posicions.find((q) => q.topologia === topologia && q.costat === costat)
+/** Posició d'un punt en una topologia, un costat i (per als codis amb subpunts) un subpunt concrets. */
+export function posicioDe(p: PuntCatalog, topologia: string, costat: CostatPosicio, index = 0): Posicio3D | undefined {
+  return p.posicions.find((q) => q.topologia === topologia && q.costat === costat && (q.index ?? 0) === index)
+}
+
+/** Costats on va un punt: E i D, o només C (línia mitja i punts únics com Yintang) */
+export function costatsDe(c: Cataleg, p: PuntCatalog): CostatPosicio[] {
+  const bilateral = (c.meridians.find((m) => m.codi === p.meridia)?.bilateral ?? true) && !p.mitja
+  return bilateral ? ['E', 'D'] : ['C']
 }
 
 /**
@@ -35,7 +43,13 @@ export function posicioDe(p: PuntCatalog, topologia: string, costat: CostatPosic
  */
 export function ambCalibratge(
   c: Cataleg,
-  calibrades: ReadonlyArray<{ codi: string; topologia: string; costat: CostatPosicio; posicio: Posicio3D | null }>,
+  calibrades: ReadonlyArray<{
+    codi: string
+    topologia: string
+    costat: CostatPosicio
+    index?: number
+    posicio: Posicio3D | null
+  }>,
 ): Cataleg {
   if (calibrades.length === 0) return c
   const perCodi = new Map<string, typeof calibrades>()
@@ -47,7 +61,9 @@ export function ambCalibratge(
       if (!canvis) return p
       let posicions = p.posicions
       for (const k of canvis) {
-        posicions = posicions.filter((q) => !(q.topologia === k.topologia && q.costat === k.costat))
+        posicions = posicions.filter(
+          (q) => !(q.topologia === k.topologia && q.costat === k.costat && (q.index ?? 0) === (k.index ?? 0)),
+        )
         if (k.posicio) posicions = [...posicions, k.posicio]
       }
       return { ...p, posicions: ordenarPosicions(posicions) }
@@ -57,7 +73,10 @@ export function ambCalibratge(
 
 function ordenarPosicions(posicions: Posicio3D[]): Posicio3D[] {
   const ordre: Record<CostatPosicio, number> = { E: 0, D: 1, C: 2 }
-  return [...posicions].sort((a, b) => a.topologia.localeCompare(b.topologia) || ordre[a.costat] - ordre[b.costat])
+  return [...posicions].sort(
+    (a, b) =>
+      a.topologia.localeCompare(b.topologia) || ordre[a.costat] - ordre[b.costat] || (a.index ?? 0) - (b.index ?? 0),
+  )
 }
 
 /** Excepció de la doctora per a un punt concret: categories i text propis. */

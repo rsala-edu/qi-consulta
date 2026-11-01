@@ -3,6 +3,7 @@ import 'fake-indexeddb/auto'
 import Dexie from 'dexie'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { desarCalibracio, descartarCalibratge, esborrarCalibracio, llistarCalibratge } from './calibratge'
+import { desarCorreccioOrella, llegirCorreccionsOrella, treureCorreccioOrella } from './calibratgeOrella'
 import { QiDB } from './esquema'
 import {
   confirmarCategoria,
@@ -47,6 +48,14 @@ describe('calibratge local', () => {
     await desarCalibracio(db, 't1', 'LI4', 'D', { ...pos(1), costat: 'D' })
     await esborrarCalibracio(db, 't1', 'LI4', 'E')
     expect((await llistarCalibratge(db, 't1')).map((k) => k.costat)).toEqual(['D'])
+  })
+
+  it('desa i oblida cada subpunt per separat (Jiaji)', async () => {
+    await desarCalibracio(db, 't1', 'EX-B2', 'E', pos(1))
+    await desarCalibracio(db, 't1', 'EX-B2', 'E', { ...pos(2), index: 5 }, 5)
+    expect(await llistarCalibratge(db, 't1')).toHaveLength(2)
+    await esborrarCalibracio(db, 't1', 'EX-B2', 'E', 5)
+    expect(await llistarCalibratge(db, 't1')).toEqual([{ codi: 'EX-B2', topologia: 't1', costat: 'E', posicio: pos(1) }])
   })
 
   it('descarta només la topologia indicada', async () => {
@@ -145,5 +154,21 @@ describe('migració de les precaucions confirmades punt per punt', () => {
     expect(per.get('ST36')!.categories).toEqual(['profunditat'])
     expect(r.categories).toEqual([])
     await nova.delete()
+  })
+})
+
+describe('correccions de l\'orella', () => {
+  it('desa, substitueix i treu la posició corregida d\'un punt', async () => {
+    await desarCorreccioOrella(db, 'TF4', 190.04, 97.66)
+    await desarCorreccioOrella(db, 'CO15', 150, 250)
+    await desarCorreccioOrella(db, 'TF4', 191, 98)
+    expect([...(await llegirCorreccionsOrella(db))]).toEqual([
+      ['CO15', { x: 150, y: 250 }],
+      ['TF4', { x: 191, y: 98 }],
+    ])
+    await treureCorreccioOrella(db, 'TF4')
+    expect([...(await llegirCorreccionsOrella(db)).keys()]).toEqual(['CO15'])
+    // l'esborrat viatja a la còpia, perquè no torni des d'un altre dispositiu
+    expect(await db.esborrats.get('calibratgeOrella:TF4')).toBeDefined()
   })
 })

@@ -36,6 +36,8 @@ export const esquemaPosicio3D = z
     /** Empremta de la topologia de la malla (veure src/mapa/geometria/topologia.ts) */
     topologia: z.string().min(1),
     costat: z.enum(COSTATS_POSICIO),
+    /** Subpunt, per als codis que agrupen diversos punts (Jiaji, Baxie…); sense índex = 0 */
+    index: z.number().int().positive().optional(),
     /** Índex del triangle dins l'índex de la malla (triangle i = índexs 3i, 3i+1, 3i+2) */
     triangle: z.number().int().nonnegative(),
     /** Coordenades baricèntriques; sumen 1 */
@@ -68,9 +70,12 @@ export const esquemaMeridia = z.object({
 
 export type Meridia = z.infer<typeof esquemaMeridia>
 
+/** Codis dels punts extraordinaris: EX-HN1, EX-B2, EX-UE11… */
+export const CODI_EXTRAORDINARI = /^EX-(HN|CA|B|UE|LE)(\d{1,2})$/
+
 export const esquemaPuntCatalog = z.object({
-  /** Nomenclatura estàndard de l'OMS: LI4, ST36, CV12… */
-  codi: z.string().regex(/^[A-Z]{2}\d{1,2}$/),
+  /** Nomenclatura estàndard de l'OMS: LI4, ST36, CV12, EX-HN3… */
+  codi: z.string().regex(/^([A-Z]{2}\d{1,2}|EX-(HN|CA|B|UE|LE)\d{1,2})$/),
   meridia: z.string(),
   numero: z.number().int().positive(),
   pinyin: z.string().min(1),
@@ -94,6 +99,10 @@ export const esquemaPuntCatalog = z.object({
    * costat de ST38), el punt d'on surt la branca. El recorregut no hi passa.
    */
   brancaDe: z.string().nullable().default(null),
+  /** Una sola posició (costat «C»): els de la línia mitja i alguns extraordinaris (Yintang, Jinjin…) */
+  mitja: z.literal(true).optional(),
+  /** Codis que agrupen diversos punts (Jiaji, Baxie, Shixuan…): el nom de cada subpunt */
+  subpunts: z.array(z.string().min(1)).optional(),
   posicions: z.array(esquemaPosicio3D),
   orella: esquemaPosicioOrella.nullable(),
 })
@@ -114,13 +123,18 @@ export const esquemaCataleg = z
       vistos.add(p.codi)
       if (!codisMeridians.has(p.meridia))
         ctx.addIssue({ code: 'custom', message: `Meridià desconegut: ${p.meridia}`, path: ['punts', i] })
-      if (p.codi !== `${p.meridia}${p.numero}`)
+      const ex = CODI_EXTRAORDINARI.exec(p.codi)
+      const quadra = ex ? p.meridia === 'EX' && Number(ex[2]) === p.numero : p.codi === `${p.meridia}${p.numero}`
+      if (!quadra)
         ctx.addIssue({ code: 'custom', message: `El codi ${p.codi} no quadra amb el meridià i el número`, path: ['punts', i] })
       if (p.brancaDe && !c.punts.some((q) => q.codi === p.brancaDe && q.meridia === p.meridia))
         ctx.addIssue({ code: 'custom', message: `${p.codi}: branca d'un punt desconegut`, path: ['punts', i] })
-      const claus = p.posicions.map((q) => `${q.topologia}:${q.costat}`)
+      const claus = p.posicions.map((q) => `${q.topologia}:${q.costat}:${q.index ?? 0}`)
       if (new Set(claus).size !== claus.length)
         ctx.addIssue({ code: 'custom', message: `Posició repetida a ${p.codi}`, path: ['punts', i] })
+      const maxim = p.subpunts?.length ?? 1
+      if (p.posicions.some((q) => (q.index ?? 0) >= maxim))
+        ctx.addIssue({ code: 'custom', message: `${p.codi}: subpunt que no existeix`, path: ['punts', i] })
     })
   })
 

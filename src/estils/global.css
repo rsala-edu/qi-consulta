@@ -1707,3 +1707,61 @@ fieldset {
 .segmentat.segmentat-graella button:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
+
+/* Pestanyes del mapa: Cos i Orella */
+.segmentat button[role='tab'][aria-selected='true'] {
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+}
+
+.panell-pestanya {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panell-pestanya[hidden] {
+  display: none;
+}
+
+/* Orella: dibuix SVG amb zoom i desplaçament */
+.visor-orella {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+.visor-orella svg {
+  display: block;
+}
+
+.etiqueta-zona {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  padding: 0 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--tinta-suau);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Text a l'esquerra de la línia guia (acaba a la línia) o a la dreta (hi comença) */
+.etiqueta-zona-dreta {
+  translate: -100% -50%;
+}
+
+.etiqueta-zona-esquerra {
+  translate: 0 -50%;
+}
+
+/* Botons de tècnica amb el nom llarg: tota la fila, perquè no es tallin */
+.segmentat.segmentat-graella button.ample {
+  grid-column: 1 / -1;
+}

@@ -15,7 +15,7 @@ import {
 import { esquemaCataleg, type Posicio3D } from './esquema'
 
 describe('catàleg del projecte', () => {
-  it('té els 14 meridians amb els 361 punts clàssics', () => {
+  it('té els 14 meridians amb els 361 punts clàssics i els 48 extraordinaris', () => {
     expect(cataleg.meridians.map((m) => [m.codi, m.punts, m.bilateral])).toEqual([
       ['LU', 11, true],
       ['LI', 20, true],
@@ -31,18 +31,26 @@ describe('catàleg del projecte', () => {
       ['LR', 14, true],
       ['CV', 24, false],
       ['GV', 28, false],
+      ['EX', 48, true],
     ])
-    expect(cataleg.punts).toHaveLength(361)
-    for (const m of cataleg.meridians) {
+    expect(cataleg.punts).toHaveLength(361 + 48)
+    for (const m of cataleg.meridians.filter((x) => x.codi !== 'EX')) {
       const punts = cataleg.punts.filter((p) => p.meridia === m.codi)
       expect(punts.map((p) => p.numero)).toEqual(Array.from({ length: m.punts }, (_, i) => i + 1))
     }
+    // Extraordinaris: cada regió numerada des d'1 (HN 15, CA 1, B 9, UE 11, LE 12)
+    for (const [regio, n] of [['HN', 15], ['CA', 1], ['B', 9], ['UE', 11], ['LE', 12]] as const) {
+      const codis = cataleg.punts.filter((p) => p.codi.startsWith(`EX-${regio}`)).map((p) => p.codi)
+      expect(codis).toEqual(Array.from({ length: n }, (_, i) => `EX-${regio}${i + 1}`))
+    }
+    // Sense línia de meridià
+    expect(cataleg.meridians.find((m) => m.codi === 'EX')!.recorregut).toEqual([])
   })
 
   it('té codi, pinyin i hanzi a tots els punts', () => {
     for (const p of cataleg.punts) {
       expect(p.pinyin).toMatch(/^[A-Z][a-z]+$/)
-      expect(p.hanzi).toMatch(/^\p{Script=Han}{2,3}$/u)
+      expect(p.hanzi).toMatch(/^\p{Script=Han}{2,4}$/u)
     }
     expect(cataleg.punts.find((p) => p.codi === 'LI4')).toMatchObject({
       pinyin: 'Hegu',
@@ -57,8 +65,10 @@ describe('catàleg del projecte', () => {
   it("cada punt té posició als dos costats sobre el cos definitiu, calculada amb la regla de l'OMS", () => {
     for (const p of cataleg.punts) {
       const mh = p.posicions.filter((q) => q.topologia.startsWith('mh-'))
-      const bilateral = cataleg.meridians.find((m) => m.codi === p.meridia)!.bilateral
-      expect(mh.map((q) => q.costat).sort(), p.codi).toEqual(bilateral ? ['D', 'E'] : ['C'])
+      const bilateral = cataleg.meridians.find((m) => m.codi === p.meridia)!.bilateral && !p.mitja
+      const n = p.subpunts?.length ?? 1
+      const esperat = (bilateral ? ['D', 'E'] : ['C']).flatMap((k) => Array.from({ length: n }, (_, i) => `${k}${i}`))
+      expect(mh.map((q) => `${q.costat}${q.index ?? 0}`).sort(), p.codi).toEqual(esperat.sort())
       expect(
         mh.every((q) => q.origen === 'oms' || q.origen === 'doctora'),
         p.codi,
@@ -150,6 +160,13 @@ describe('cercador', () => {
     expect(codis('futu')).toEqual(['LI18', 'ST32'])
   })
 
+  it('troba els extraordinaris pel codi amb guionet o sense, i pel pinyin', () => {
+    expect(codis('EX-HN3')[0]).toBe('EX-HN3')
+    expect(codis('exhn3')[0]).toBe('EX-HN3')
+    expect(codis('yintang')).toEqual(['EX-HN3'])
+    expect(codis('jiaji')).toEqual(['EX-B2'])
+  })
+
   it('una consulta buida no dona res', () => {
     expect(codis('  ')).toEqual([])
   })
@@ -183,6 +200,28 @@ describe('calibratge sobre el catàleg', () => {
     expect(maniqui(cataleg)).toEqual([])
   })
 
+  it('corregeix un sol subpunt sense tocar els altres', () => {
+    const jiaji = (c: typeof cataleg) => c.punts.find((p) => p.codi === 'EX-B2')!
+    const abans = jiaji(cataleg)
+    const topo = abans.posicions[0]!.topologia
+    const l3 = posicioDe(abans, topo, 'E', 14)!
+    expect(l3.index).toBe(14)
+    const nova = { ...l3, triangle: 1, b: [1, 0, 0] as [number, number, number], origen: 'doctora' as const }
+    const c = ambCalibratge(cataleg, [{ codi: 'EX-B2', topologia: topo, costat: 'E', index: 14, posicio: nova }])
+    expect(posicioDe(jiaji(c), topo, 'E', 14)).toEqual(nova)
+    expect(posicioDe(jiaji(c), topo, 'E', 13)).toEqual(posicioDe(abans, topo, 'E', 13))
+    expect(posicioDe(jiaji(c), topo, 'E')).toEqual(posicioDe(abans, topo, 'E'))
+    expect(jiaji(c).posicions).toHaveLength(abans.posicions.length)
+    expect(esquemaCataleg.safeParse(c).success).toBe(true)
+  })
+
+  it('no accepta un subpunt que no existeix', () => {
+    const c = structuredClone(cataleg)
+    const yintang = c.punts.find((p) => p.codi === 'EX-HN3')!
+    yintang.posicions.push({ ...yintang.posicions[0]!, index: 3 })
+    expect(esquemaCataleg.safeParse(c).success).toBe(false)
+  })
+
   it('exporta un JSON vàlid que es pot tornar a carregar', () => {
     const c = ambCalibratge(cataleg, [{ codi: 'ST36', topologia: 'maniqui', costat: 'E', posicio: pos('E', 1) }])
     const json = exportarCataleg(c)
@@ -203,7 +242,9 @@ describe('precaucions per categories', () => {
     for (const c of ['LI4', 'SP6', 'BL31', 'BL32', 'BL33', 'BL34', 'BL60', 'BL67', 'GB21'])
       expect(cats(c), c).toContain('embaras')
     for (const c of ['ST9', 'LI18', 'SP11', 'LR12', 'BL40', 'KI3']) expect(cats(c), c).toContain('vasos')
-    expect(puntsDeCategoria(cataleg, 'ull', REVISIO_BUIDA).map((p) => p.codi)).toEqual(['ST1', 'BL1'])
+    expect(puntsDeCategoria(cataleg, 'ull', REVISIO_BUIDA).map((p) => p.codi)).toEqual(['ST1', 'BL1', 'EX-HN4', 'EX-HN7'])
+    expect(cats('EX-CA1')).toEqual(['embaras'])
+    for (const c of ['EX-B2', 'EX-B3']) expect(cats(c), c).toContain('pulmo')
     for (const c of ['LU1', 'ST13', 'BL13', 'GB21', 'ST12']) expect(cats(c), c).toContain('pulmo')
     expect(
       puntsDeCategoria(cataleg, 'bulb', REVISIO_BUIDA)

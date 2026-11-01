@@ -28,7 +28,14 @@ export type RegistreMeta =
   | { clau: 'google'; valor: { connectatAt: string; ultimaCopia: string | null; sub?: string } }
 
 /** Taules que se sincronitzen amb Google Drive */
-export type TaulaSincronitzada = 'pacients' | 'fitxesCliniques' | 'cites' | 'calibratge' | 'precaucions' | 'categoriesPrecaucio'
+export type TaulaSincronitzada =
+  | 'pacients'
+  | 'fitxesCliniques'
+  | 'cites'
+  | 'calibratge'
+  | 'calibratgeOrella'
+  | 'precaucions'
+  | 'categoriesPrecaucio'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -48,7 +55,20 @@ export interface RegistreCalibratge {
   topologia: string
   codi: string
   costat: CostatPosicio
+  /** Subpunt (Jiaji, Baxie…); sense = 0 */
+  index?: number
   posicio: Posicio3D | null
+  modificatAt: string
+}
+
+/**
+ * Posició d'un punt de l'orella corregida per la doctora, sobre el dibuix de
+ * l'orella esquerra (la dreta n'és el mirall). No és dada de pacient.
+ */
+export interface RegistreCalibratgeOrella {
+  codi: string
+  x: number
+  y: number
   modificatAt: string
 }
 
@@ -79,6 +99,7 @@ export class QiDB extends Dexie {
   esborranys!: Table<RegistreXifrat, string>
   cites!: Table<RegistreXifrat, string>
   calibratge!: Table<RegistreCalibratge, string>
+  calibratgeOrella!: Table<RegistreCalibratgeOrella, string>
   esborrats!: Table<RegistreEsborrat, string>
   /** Excepcions per punt */
   precaucions!: Table<RegistrePrecaucio, string>
@@ -125,6 +146,9 @@ export class QiDB extends Dexie {
     })
     this.version(7).stores({
       esborrats: 'id',
+    })
+    this.version(8).stores({
+      calibratgeOrella: 'codi',
     })
   }
 }

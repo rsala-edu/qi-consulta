@@ -105,6 +105,7 @@ export function posicio3D(
   costat: CostatPosicio,
   p: PosicioMalla,
   origen: OrigenPosicio = 'manual',
+  index = 0,
 ): Posicio3D {
-  return { topologia, costat, triangle: p.triangle, b: p.b, origen }
+  return { topologia, costat, ...(index > 0 ? { index } : {}), triangle: p.triangle, b: p.b, origen }
 }

@@ -74,6 +74,9 @@ describe('punts sobre el model', () => {
   })
 
   it('l\'id del marcador fa anada i tornada', () => {
-    expect(llegirIdMarcador(idMarcador('ST36', 'D'))).toEqual({ codi: 'ST36', costat: 'D' })
+    expect(llegirIdMarcador(idMarcador('ST36', 'D'))).toEqual({ codi: 'ST36', costat: 'D', index: 0 })
+    // Els subpunts (EX-B2 a L3) porten l'índex; el primer, no, per no canviar els ids que ja hi havia
+    expect(idMarcador('EX-B2', 'E', 0)).toBe('EX-B2|E')
+    expect(llegirIdMarcador(idMarcador('EX-B2', 'E', 14))).toEqual({ codi: 'EX-B2', costat: 'E', index: 14 })
   })
 })

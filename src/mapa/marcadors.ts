@@ -6,21 +6,23 @@ import { normalTriangle, nombreTriangles, puntDesDePosicio } from './geometria/b
 import type { ModelCos } from './model'
 
 export interface PuntSobreModel {
-  /** `${codi}|${costat}` */
+  /** `${codi}|${costat}` (o `${codi}|${costat}|${index}` per als subpunts) */
   id: string
   punt: PuntCatalog
   costat: CostatPosicio
+  /** Subpunt (0 si el codi només en té un) */
+  index: number
   posicio: Vector3
   normal: Vector3
 }
 
-export function idMarcador(codi: string, costat: CostatPosicio): string {
-  return `${codi}|${costat}`
+export function idMarcador(codi: string, costat: CostatPosicio, index = 0): string {
+  return index > 0 ? `${codi}|${costat}|${index}` : `${codi}|${costat}`
 }
 
-export function llegirIdMarcador(id: string): { codi: string; costat: CostatPosicio } {
-  const [codi, costat] = id.split('|') as [string, CostatPosicio]
-  return { codi, costat }
+export function llegirIdMarcador(id: string): { codi: string; costat: CostatPosicio; index: number } {
+  const [codi, costat, index] = id.split('|') as [string, CostatPosicio, string | undefined]
+  return { codi, costat, index: index ? Number(index) : 0 }
 }
 
 /**
@@ -35,9 +37,10 @@ export function puntsSobreModel(c: Cataleg, model: ModelCos, meridia?: string): 
     for (const q of punt.posicions) {
       if (q.topologia !== model.topologia || q.triangle >= triangles) continue
       resultat.push({
-        id: idMarcador(punt.codi, q.costat),
+        id: idMarcador(punt.codi, q.costat, q.index),
         punt,
         costat: q.costat,
+        index: q.index ?? 0,
         posicio: puntDesDePosicio(model.geometria, q),
         normal: normalTriangle(model.geometria, q.triangle),
       })

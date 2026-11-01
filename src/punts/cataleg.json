@@ -186,6 +186,14 @@
       "bilateral": false,
       "punts": 28,
       "recorregut": null
+    },
+    {
+      "codi": "EX",
+      "nom": "Extraordinaris",
+      "pinyin": "Jingwai qixue",
+      "bilateral": true,
+      "punts": 48,
+      "recorregut": []
     }
   ],
   "punts": [
@@ -10836,7 +10844,7 @@
           "triangle": 22888,
           "b": [
             0.075343,
-            8.5e-05,
+            0.000085,
             0.924572
           ],
           "origen": "oms"
@@ -10848,7 +10856,7 @@
           "b": [
             0.075343,
             0.924572,
-            8.5e-05
+            0.000085
           ],
           "origen": "oms"
         }
@@ -15047,6 +15055,2941 @@
             0.851316,
             0,
             0.148684
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN1",
+      "meridia": "EX",
+      "numero": 1,
+      "pinyin": "Sishencong",
+      "hanzi": "四神聪",
+      "nomCatala": "",
+      "localitzacio": "Quatre punts al voltant de GV20: 1 cun al davant, 1 cun al darrere i 1 cun a cada costat.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "subpunts": [
+        "davant",
+        "darrere",
+        "esquerra",
+        "dreta"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 1366,
+          "b": [
+            0,
+            0.837307,
+            0.162693
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "index": 1,
+          "triangle": 1442,
+          "b": [
+            0.003254,
+            0.996392,
+            0.000354
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "index": 2,
+          "triangle": 14718,
+          "b": [
+            0.079977,
+            0.367852,
+            0.552171
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "index": 3,
+          "triangle": 1475,
+          "b": [
+            0.079977,
+            0.552171,
+            0.367852
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN2",
+      "meridia": "EX",
+      "numero": 2,
+      "pinyin": "Dangyang",
+      "hanzi": "当阳",
+      "nomCatala": "",
+      "localitzacio": "Al cap, just per sobre de la pupil·la, 1 cun dins la línia anterior del cabell.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 23728,
+          "b": [
+            0.464689,
+            0.075812,
+            0.459499
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 10283,
+          "b": [
+            0.464689,
+            0.459499,
+            0.075812
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN3",
+      "meridia": "EX",
+      "numero": 3,
+      "pinyin": "Yintang",
+      "hanzi": "印堂",
+      "nomCatala": "",
+      "localitzacio": "Al front, a la línia mitja, entre els extrems interns de les dues celles.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 279,
+          "b": [
+            0,
+            0.351729,
+            0.648271
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN4",
+      "meridia": "EX",
+      "numero": 4,
+      "pinyin": "Yuyao",
+      "hanzi": "鱼腰",
+      "nomCatala": "",
+      "localitzacio": "Al mig de la cella, just per sobre de la pupil·la.",
+      "notes": "",
+      "precaucions": {
+        "categories": [
+          "ull"
+        ],
+        "nota": "Ull: vora de l'òrbita; punció superficial i sense manipular.",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 13515,
+          "b": [
+            0.296379,
+            0.497442,
+            0.206179
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 258,
+          "b": [
+            0.296379,
+            0.206178,
+            0.497443
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN5",
+      "meridia": "EX",
+      "numero": 5,
+      "pinyin": "Taiyang",
+      "hanzi": "太阳",
+      "nomCatala": "",
+      "localitzacio": "A la templa, al clot que queda un través de dit per darrere del punt mitjà entre l'extrem extern de la cella i el cantó extern de l'ull.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20015,
+          "b": [
+            0.131364,
+            0.039566,
+            0.82907
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 6776,
+          "b": [
+            0.131364,
+            0.82907,
+            0.039566
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN6",
+      "meridia": "EX",
+      "numero": 6,
+      "pinyin": "Erjian",
+      "hanzi": "耳尖",
+      "nomCatala": "",
+      "localitzacio": "A la punta de l'orella, en plegar-la endavant.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 23466,
+          "b": [
+            0.999923,
+            0.000056,
+            0.000021
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 10021,
+          "b": [
+            0.999923,
+            0.000021,
+            0.000056
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN7",
+      "meridia": "EX",
+      "numero": 7,
+      "pinyin": "Qiuhou",
+      "hanzi": "球后",
+      "nomCatala": "",
+      "localitzacio": "A la vora inferior de l'òrbita, a la unió del quart extern amb els tres quarts interns.",
+      "notes": "",
+      "precaucions": {
+        "categories": [
+          "ull"
+        ],
+        "nota": "Ull: empènyer el globus ocular amunt i punxar lentament, sense manipular; risc d'hematoma.",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 23130,
+          "b": [
+            0.095436,
+            0.408282,
+            0.496282
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 9681,
+          "b": [
+            0.095436,
+            0.496283,
+            0.408281
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN8",
+      "meridia": "EX",
+      "numero": 8,
+      "pinyin": "Shangyingxiang",
+      "hanzi": "上迎香",
+      "nomCatala": "",
+      "localitzacio": "A la cara, a l'extrem superior del solc nasogenià, on el cartílag de l'ala del nas s'uneix amb l'os.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 13590,
+          "b": [
+            0.276031,
+            0.513209,
+            0.21076
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 337,
+          "b": [
+            0.276031,
+            0.21076,
+            0.513209
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN9",
+      "meridia": "EX",
+      "numero": 9,
+      "pinyin": "Neiyingxiang",
+      "hanzi": "内迎香",
+      "nomCatala": "",
+      "localitzacio": "Dins la narina, a la mucosa, a la unió del cartílag de l'ala amb el cornet. Al mapa es marca a l'entrada de la narina.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 13857,
+          "b": [
+            0.390216,
+            0.441021,
+            0.168763
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 602,
+          "b": [
+            0.390216,
+            0.168763,
+            0.441021
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN10",
+      "meridia": "EX",
+      "numero": 10,
+      "pinyin": "Juquan",
+      "hanzi": "聚泉",
+      "nomCatala": "",
+      "localitzacio": "Dins la boca, al punt mitjà del dors de la llengua. Al mapa es marca entre els llavis.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 675,
+          "b": [
+            0,
+            0.789243,
+            0.210757
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN11",
+      "meridia": "EX",
+      "numero": 11,
+      "pinyin": "Haiquan",
+      "hanzi": "海泉",
+      "nomCatala": "",
+      "localitzacio": "Dins la boca, al punt mitjà del fre de sota la llengua. Al mapa es marca al llavi inferior.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 899,
+          "b": [
+            0,
+            0.70064,
+            0.29936
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN12",
+      "meridia": "EX",
+      "numero": 12,
+      "pinyin": "Jinjin",
+      "hanzi": "金津",
+      "nomCatala": "",
+      "localitzacio": "Dins la boca, sobre la vena de l'esquerra del fre de la llengua. Al mapa es marca al llavi inferior, a l'esquerra.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 13882,
+          "b": [
+            0.026794,
+            0.619243,
+            0.353963
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN13",
+      "meridia": "EX",
+      "numero": 13,
+      "pinyin": "Yuye",
+      "hanzi": "玉液",
+      "nomCatala": "",
+      "localitzacio": "Dins la boca, sobre la vena de la dreta del fre de la llengua. Al mapa es marca al llavi inferior, a la dreta.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 629,
+          "b": [
+            0.026794,
+            0.353963,
+            0.619243
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN14",
+      "meridia": "EX",
+      "numero": 14,
+      "pinyin": "Yiming",
+      "hanzi": "翳明",
+      "nomCatala": "",
+      "localitzacio": "Al coll, 1 cun per darrere de TE17, sota la mastoide.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 14667,
+          "b": [
+            0.168732,
+            0.411487,
+            0.419781
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 1422,
+          "b": [
+            0.168732,
+            0.419781,
+            0.411487
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-HN15",
+      "meridia": "EX",
+      "numero": 15,
+      "pinyin": "Jingbailao",
+      "hanzi": "颈百劳",
+      "nomCatala": "",
+      "localitzacio": "Al clatell, 2 cun per sobre de GV14 i 1 cun a fora de la línia mitja.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 14372,
+          "b": [
+            0.095999,
+            0.358884,
+            0.545117
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 1129,
+          "b": [
+            0.095999,
+            0.545117,
+            0.358884
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-CA1",
+      "meridia": "EX",
+      "numero": 1,
+      "pinyin": "Zigong",
+      "hanzi": "子宫",
+      "nomCatala": "",
+      "localitzacio": "Al baix ventre, 4 cun per sota del melic i 3 cun a fora de la línia mitja.",
+      "notes": "",
+      "precaucions": {
+        "categories": [
+          "embaras"
+        ],
+        "nota": "Embaràs: contraindicat.",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21360,
+          "b": [
+            0.57303,
+            0.331355,
+            0.095615
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 21258,
+          "b": [
+            0.42643,
+            0.477492,
+            0.096078
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B1",
+      "meridia": "EX",
+      "numero": 1,
+      "pinyin": "Dingchuan",
+      "hanzi": "定喘",
+      "nomCatala": "",
+      "localitzacio": "A l'esquena, 0,5 cun a fora de la línia mitja, a l'altura de la depressió de sota l'apòfisi espinosa de C7.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 26751,
+          "b": [
+            0.061915,
+            0.135021,
+            0.803064
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2370,
+          "b": [
+            0.061915,
+            0.803064,
+            0.135021
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B2",
+      "meridia": "EX",
+      "numero": 2,
+      "pinyin": "Jiaji",
+      "hanzi": "夹脊",
+      "nomCatala": "",
+      "localitzacio": "A l'esquena, 17 punts a cada costat: sota cada apòfisi espinosa de T1 a L5, 0,5 cun a fora de la línia mitja.",
+      "notes": "",
+      "precaucions": {
+        "categories": [
+          "pulmo"
+        ],
+        "nota": "Tòrax: als punts toràcics, punció obliqua cap a la columna i no profunda (pneumotòrax).",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "T8",
+        "T9",
+        "T10",
+        "T11",
+        "T12",
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "L5"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15719,
+          "b": [
+            0.228064,
+            0.343256,
+            0.42868
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 15780,
+          "b": [
+            0.385935,
+            0.495697,
+            0.118368
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 2,
+          "triangle": 15785,
+          "b": [
+            0.240155,
+            0.595132,
+            0.164713
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 3,
+          "triangle": 20353,
+          "b": [
+            0.344994,
+            0.580569,
+            0.074437
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 4,
+          "triangle": 15788,
+          "b": [
+            0.417657,
+            0.036577,
+            0.545766
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 5,
+          "triangle": 20596,
+          "b": [
+            0.394242,
+            0.47545,
+            0.130308
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 6,
+          "triangle": 20606,
+          "b": [
+            0.35641,
+            0.216434,
+            0.427156
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 7,
+          "triangle": 20632,
+          "b": [
+            0.29128,
+            0.116308,
+            0.592412
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 8,
+          "triangle": 20656,
+          "b": [
+            0.217604,
+            0.089981,
+            0.692415
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 9,
+          "triangle": 20680,
+          "b": [
+            0.1789,
+            0.146867,
+            0.674233
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 10,
+          "triangle": 20704,
+          "b": [
+            0.164206,
+            0.148279,
+            0.687515
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 11,
+          "triangle": 20754,
+          "b": [
+            0.125086,
+            0.746185,
+            0.128729
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 12,
+          "triangle": 20974,
+          "b": [
+            0.175495,
+            0.582239,
+            0.242266
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 13,
+          "triangle": 21064,
+          "b": [
+            0.231099,
+            0.071964,
+            0.696937
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 14,
+          "triangle": 21100,
+          "b": [
+            0.134227,
+            0.317464,
+            0.548309
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 15,
+          "triangle": 21463,
+          "b": [
+            0.023563,
+            0.025964,
+            0.950473
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 16,
+          "triangle": 21128,
+          "b": [
+            0.07095,
+            0.668419,
+            0.260631
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2480,
+          "b": [
+            0.228064,
+            0.42868,
+            0.343256
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 2543,
+          "b": [
+            0.385935,
+            0.118369,
+            0.495696
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 2,
+          "triangle": 2546,
+          "b": [
+            0.240155,
+            0.164713,
+            0.595132
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 3,
+          "triangle": 7116,
+          "b": [
+            0.344994,
+            0.074437,
+            0.580569
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 4,
+          "triangle": 2551,
+          "b": [
+            0.417657,
+            0.545767,
+            0.036576
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 5,
+          "triangle": 7361,
+          "b": [
+            0.394242,
+            0.130307,
+            0.475451
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 6,
+          "triangle": 7371,
+          "b": [
+            0.35641,
+            0.427156,
+            0.216434
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 7,
+          "triangle": 7397,
+          "b": [
+            0.29128,
+            0.592412,
+            0.116308
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 8,
+          "triangle": 7421,
+          "b": [
+            0.217604,
+            0.692415,
+            0.089981
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 9,
+          "triangle": 7445,
+          "b": [
+            0.1789,
+            0.674233,
+            0.146867
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 10,
+          "triangle": 7469,
+          "b": [
+            0.164206,
+            0.687515,
+            0.148279
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 11,
+          "triangle": 7521,
+          "b": [
+            0.125086,
+            0.128729,
+            0.746185
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 12,
+          "triangle": 7745,
+          "b": [
+            0.175495,
+            0.242265,
+            0.58224
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 13,
+          "triangle": 7811,
+          "b": [
+            0.231099,
+            0.696937,
+            0.071964
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 14,
+          "triangle": 21099,
+          "b": [
+            0.134227,
+            0.548309,
+            0.317464
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 15,
+          "triangle": 8090,
+          "b": [
+            0.023563,
+            0.950473,
+            0.025964
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 16,
+          "triangle": 21131,
+          "b": [
+            0.731075,
+            0.072528,
+            0.196397
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B3",
+      "meridia": "EX",
+      "numero": 3,
+      "pinyin": "Weiwanxiashu",
+      "hanzi": "胃脘下俞",
+      "nomCatala": "",
+      "localitzacio": "A l'esquena, 1,5 cun a fora de la línia mitja, a l'altura de la depressió de sota l'apòfisi espinosa de T8.",
+      "notes": "",
+      "precaucions": {
+        "categories": [
+          "pulmo"
+        ],
+        "nota": "Tòrax: risc de pneumotòrax; punció obliqua cap a la columna.",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20647,
+          "b": [
+            0.279575,
+            0.445587,
+            0.274838
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7410,
+          "b": [
+            0.279575,
+            0.274838,
+            0.445587
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B4",
+      "meridia": "EX",
+      "numero": 4,
+      "pinyin": "Pigen",
+      "hanzi": "痞根",
+      "nomCatala": "",
+      "localitzacio": "A la zona lumbar, 3,5 cun a fora de la línia mitja, a l'altura de la depressió de sota l'apòfisi espinosa de L1.",
+      "notes": "",
+      "precaucions": {
+        "categories": [
+          "profunditat"
+        ],
+        "nota": "Zona del ronyó: no punxar en profunditat.",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21526,
+          "b": [
+            0.002527,
+            0.968396,
+            0.029077
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8137,
+          "b": [
+            0.002527,
+            0.029077,
+            0.968396
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B5",
+      "meridia": "EX",
+      "numero": 5,
+      "pinyin": "Xiajishu",
+      "hanzi": "下极俞",
+      "nomCatala": "",
+      "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de L3.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 21098,
+          "b": [
+            0.422325,
+            0.577675,
+            0
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B6",
+      "meridia": "EX",
+      "numero": 6,
+      "pinyin": "Yaoyi",
+      "hanzi": "腰宜",
+      "nomCatala": "",
+      "localitzacio": "A la zona lumbar, 3 cun a fora de la línia mitja, a l'altura de la depressió de sota l'apòfisi espinosa de L4.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21450,
+          "b": [
+            0.185046,
+            0.030381,
+            0.784573
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8081,
+          "b": [
+            0.185046,
+            0.784572,
+            0.030382
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B7",
+      "meridia": "EX",
+      "numero": 7,
+      "pinyin": "Yaoyan",
+      "hanzi": "腰眼",
+      "nomCatala": "",
+      "localitzacio": "A la zona lumbar, al clot que queda 3,5 cun a fora de la línia mitja, a l'altura de la depressió de sota l'apòfisi espinosa de L4.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21539,
+          "b": [
+            0.255307,
+            0.707059,
+            0.037634
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8144,
+          "b": [
+            0.255307,
+            0.037634,
+            0.707059
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B8",
+      "meridia": "EX",
+      "numero": 8,
+      "pinyin": "Shiqizhui",
+      "hanzi": "十七椎",
+      "nomCatala": "",
+      "localitzacio": "A la línia mitja de l'esquena, a la depressió de sota l'apòfisi espinosa de L5.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 7830,
+          "b": [
+            0.010525,
+            0.989475,
+            0
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-B9",
+      "meridia": "EX",
+      "numero": 9,
+      "pinyin": "Yaoqi",
+      "hanzi": "腰奇",
+      "nomCatala": "",
+      "localitzacio": "Al sacre, 2 cun per sobre de la punta del còccix, al clot entre les banyes del sacre.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "mitja": true,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "C",
+          "triangle": 7856,
+          "b": [
+            0.437116,
+            0.562884,
+            0
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE1",
+      "meridia": "EX",
+      "numero": 1,
+      "pinyin": "Zhoujian",
+      "hanzi": "肘尖",
+      "nomCatala": "",
+      "localitzacio": "Al colze, a la punta de l'olècranon, amb el colze flexionat.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19074,
+          "b": [
+            0.108499,
+            0.267892,
+            0.623609
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5837,
+          "b": [
+            0.108499,
+            0.62361,
+            0.267891
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE2",
+      "meridia": "EX",
+      "numero": 2,
+      "pinyin": "Erbai",
+      "hanzi": "二白",
+      "nomCatala": "",
+      "localitzacio": "A la cara anterior de l'avantbraç, 4 cun per sobre del plec del canell, a banda i banda del tendó del flexor radial del carp (dos punts a cada braç).",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "costat radial del tendó",
+        "costat cubital del tendó"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20450,
+          "b": [
+            0.004921,
+            0.050577,
+            0.944502
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 19334,
+          "b": [
+            0.828537,
+            0.168841,
+            0.002622
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7215,
+          "b": [
+            0.004921,
+            0.944502,
+            0.050577
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 6097,
+          "b": [
+            0.828537,
+            0.002621,
+            0.168842
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE3",
+      "meridia": "EX",
+      "numero": 3,
+      "pinyin": "Zhongquan",
+      "hanzi": "中泉",
+      "nomCatala": "",
+      "localitzacio": "Al plec dorsal del canell, al clot del costat radial del tendó de l'extensor comú dels dits, entre LI5 i TE4.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20497,
+          "b": [
+            0.25985,
+            0.602947,
+            0.137203
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7260,
+          "b": [
+            0.25985,
+            0.137204,
+            0.602946
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE4",
+      "meridia": "EX",
+      "numero": 4,
+      "pinyin": "Zhongkui",
+      "hanzi": "中魁",
+      "nomCatala": "",
+      "localitzacio": "Al dors del dit del mig, al centre de l'articulació interfalàngica proximal.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 16772,
+          "b": [
+            0.095874,
+            0.358007,
+            0.546119
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 3535,
+          "b": [
+            0.095874,
+            0.54612,
+            0.358006
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE5",
+      "meridia": "EX",
+      "numero": 5,
+      "pinyin": "Dagukong",
+      "hanzi": "大骨空",
+      "nomCatala": "",
+      "localitzacio": "Al dors del polze, al centre de l'articulació interfalàngica.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 17964,
+          "b": [
+            0.70338,
+            0.158425,
+            0.138195
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 4727,
+          "b": [
+            0.70338,
+            0.138196,
+            0.158424
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE6",
+      "meridia": "EX",
+      "numero": 6,
+      "pinyin": "Xiaogukong",
+      "hanzi": "小骨空",
+      "nomCatala": "",
+      "localitzacio": "Al dors del dit petit, al centre de l'articulació interfalàngica proximal.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 17570,
+          "b": [
+            0.347775,
+            0.061879,
+            0.590346
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 4333,
+          "b": [
+            0.347775,
+            0.590346,
+            0.061879
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE7",
+      "meridia": "EX",
+      "numero": 7,
+      "pinyin": "Yaotongdian",
+      "hanzi": "腰痛点",
+      "nomCatala": "",
+      "localitzacio": "Al dors de la mà, dos punts: entre el 2n i el 3r metacarpià i entre el 4t i el 5è, a mig camí entre el plec del canell i els artells.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "entre el 2n i el 3r metacarpià",
+        "entre el 4t i el 5è metacarpià"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19711,
+          "b": [
+            0.007213,
+            0.21475,
+            0.778037
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 19702,
+          "b": [
+            0.179083,
+            0.185096,
+            0.635821
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 6472,
+          "b": [
+            0.007213,
+            0.778037,
+            0.21475
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 6465,
+          "b": [
+            0.179083,
+            0.63582,
+            0.185097
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE8",
+      "meridia": "EX",
+      "numero": 8,
+      "pinyin": "Wailaogong",
+      "hanzi": "外劳宫",
+      "nomCatala": "",
+      "localitzacio": "Al dors de la mà, entre el 2n i el 3r metacarpià, 0,5 cun per sobre dels artells.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 18827,
+          "b": [
+            0.663326,
+            0.289547,
+            0.047127
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5588,
+          "b": [
+            0.663326,
+            0.047127,
+            0.289547
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE9",
+      "meridia": "EX",
+      "numero": 9,
+      "pinyin": "Baxie",
+      "hanzi": "八邪",
+      "nomCatala": "",
+      "localitzacio": "Al dors de la mà, quatre punts: just per sobre de la vora de la membrana entre cada parell de dits, on canvia el color de la pell.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "entre el polze i l'índex",
+        "entre l'índex i el mig",
+        "entre el mig i l'anular",
+        "entre l'anular i el petit"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20242,
+          "b": [
+            0.06828,
+            0.261499,
+            0.670221
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 19460,
+          "b": [
+            0.449985,
+            0.232998,
+            0.317017
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 2,
+          "triangle": 19470,
+          "b": [
+            0.444483,
+            0.344795,
+            0.210722
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 3,
+          "triangle": 19482,
+          "b": [
+            0.354828,
+            0.553701,
+            0.091471
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7007,
+          "b": [
+            0.06828,
+            0.670221,
+            0.261499
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 6223,
+          "b": [
+            0.449985,
+            0.317017,
+            0.232998
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 2,
+          "triangle": 6233,
+          "b": [
+            0.444483,
+            0.210722,
+            0.344795
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 3,
+          "triangle": 6245,
+          "b": [
+            0.354828,
+            0.091471,
+            0.553701
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE10",
+      "meridia": "EX",
+      "numero": 10,
+      "pinyin": "Sifeng",
+      "hanzi": "四缝",
+      "nomCatala": "",
+      "localitzacio": "A la cara palmar dels dits 2n a 5è, al centre del plec de l'articulació interfalàngica proximal (quatre punts a cada mà).",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "índex",
+        "mig",
+        "anular",
+        "petit"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 16658,
+          "b": [
+            0.609661,
+            0.091399,
+            0.29894
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 16902,
+          "b": [
+            0.246837,
+            0.076434,
+            0.676729
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 2,
+          "triangle": 17381,
+          "b": [
+            0.810758,
+            0.116523,
+            0.072719
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 3,
+          "triangle": 17775,
+          "b": [
+            0.813018,
+            0.040602,
+            0.14638
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 3421,
+          "b": [
+            0.609661,
+            0.29894,
+            0.091399
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 3665,
+          "b": [
+            0.246837,
+            0.676729,
+            0.076434
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 2,
+          "triangle": 4142,
+          "b": [
+            0.810758,
+            0.072719,
+            0.116523
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 3,
+          "triangle": 4536,
+          "b": [
+            0.813018,
+            0.14638,
+            0.040602
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-UE11",
+      "meridia": "EX",
+      "numero": 11,
+      "pinyin": "Shixuan",
+      "hanzi": "十宣",
+      "nomCatala": "",
+      "localitzacio": "A la punta de cada dit de la mà, 0,1 cun de la vora lliure de l'ungla (cinc punts a cada mà).",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "polze",
+        "índex",
+        "mig",
+        "anular",
+        "petit"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 18017,
+          "b": [
+            0.615574,
+            0.150902,
+            0.233524
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 16468,
+          "b": [
+            0.002993,
+            0.791612,
+            0.205395
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 2,
+          "triangle": 16840,
+          "b": [
+            0.121355,
+            0.338482,
+            0.540163
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 3,
+          "triangle": 17212,
+          "b": [
+            0.136074,
+            0.659003,
+            0.204923
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 4,
+          "triangle": 17584,
+          "b": [
+            0.064463,
+            0.81372,
+            0.121817
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 4778,
+          "b": [
+            0.615574,
+            0.233524,
+            0.150902
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 3231,
+          "b": [
+            0.002993,
+            0.205396,
+            0.791611
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 2,
+          "triangle": 3603,
+          "b": [
+            0.121355,
+            0.540163,
+            0.338482
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 3,
+          "triangle": 3975,
+          "b": [
+            0.136074,
+            0.204923,
+            0.659003
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 4,
+          "triangle": 4347,
+          "b": [
+            0.064463,
+            0.121817,
+            0.81372
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE1",
+      "meridia": "EX",
+      "numero": 1,
+      "pinyin": "Kuangu",
+      "hanzi": "髋骨",
+      "nomCatala": "",
+      "localitzacio": "A la cara anterior de la cuixa, dos punts a l'altura de ST34: 1,5 cun a fora i 1,5 cun a dins.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "lateral",
+        "medial"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21817,
+          "b": [
+            0.015673,
+            0.224192,
+            0.760135
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 21779,
+          "b": [
+            0.278827,
+            0.223291,
+            0.497882
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8418,
+          "b": [
+            0.015673,
+            0.760135,
+            0.224192
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 8380,
+          "b": [
+            0.278827,
+            0.497882,
+            0.223291
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE2",
+      "meridia": "EX",
+      "numero": 2,
+      "pinyin": "Heding",
+      "hanzi": "鹤顶",
+      "nomCatala": "",
+      "localitzacio": "Al genoll, al clot de just per sobre del punt mitjà de la base de la ròtula.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21843,
+          "b": [
+            0.890217,
+            0.091605,
+            0.018178
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8444,
+          "b": [
+            0.890217,
+            0.018178,
+            0.091605
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE3",
+      "meridia": "EX",
+      "numero": 3,
+      "pinyin": "Baichongwo",
+      "hanzi": "百虫窝",
+      "nomCatala": "",
+      "localitzacio": "A la cara interna de la cuixa, 3 cun per sobre de l'angle intern de la base de la ròtula (1 cun per sobre de SP10).",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25707,
+          "b": [
+            0.306856,
+            0.319003,
+            0.374141
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 12252,
+          "b": [
+            0.306856,
+            0.374141,
+            0.319003
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE4",
+      "meridia": "EX",
+      "numero": 4,
+      "pinyin": "Neixiyan",
+      "hanzi": "内膝眼",
+      "nomCatala": "",
+      "localitzacio": "Al genoll, al clot de la banda interna del lligament rotulià, amb el genoll flexionat.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25687,
+          "b": [
+            0.576001,
+            0.012269,
+            0.41173
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 12232,
+          "b": [
+            0.576001,
+            0.41173,
+            0.012269
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE5",
+      "meridia": "EX",
+      "numero": 5,
+      "pinyin": "Xiyan",
+      "hanzi": "膝眼",
+      "nomCatala": "",
+      "localitzacio": "Al genoll, als dos clots de banda i banda del lligament rotulià: l'intern és EX-LE4 i l'extern coincideix amb ST35.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "intern (EX-LE4)",
+        "extern (ST35)"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25687,
+          "b": [
+            0.576001,
+            0.012269,
+            0.41173
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 21899,
+          "b": [
+            0.584616,
+            0.271432,
+            0.143952
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 12232,
+          "b": [
+            0.576001,
+            0.41173,
+            0.012269
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 8500,
+          "b": [
+            0.584616,
+            0.143953,
+            0.271431
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE6",
+      "meridia": "EX",
+      "numero": 6,
+      "pinyin": "Dannang",
+      "hanzi": "胆囊",
+      "nomCatala": "",
+      "localitzacio": "A la cara externa de la cama, 2 cun per sota de GB34.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22053,
+          "b": [
+            0.072116,
+            0.403434,
+            0.52445
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8654,
+          "b": [
+            0.072116,
+            0.52445,
+            0.403434
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE7",
+      "meridia": "EX",
+      "numero": 7,
+      "pinyin": "Lanwei",
+      "hanzi": "阑尾",
+      "nomCatala": "",
+      "localitzacio": "A la cara anterior de la cama, 5 cun per sota de ST35 (2 cun per sota de ST36), a un través de dit per fora de la cresta de la tíbia.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22073,
+          "b": [
+            0.021539,
+            0.950174,
+            0.028287
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8674,
+          "b": [
+            0.021539,
+            0.028287,
+            0.950174
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE8",
+      "meridia": "EX",
+      "numero": 8,
+      "pinyin": "Neihuaijian",
+      "hanzi": "内踝尖",
+      "nomCatala": "",
+      "localitzacio": "Al punt més prominent del mal·lèol intern.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25057,
+          "b": [
+            0.259167,
+            0.021128,
+            0.719705
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 11602,
+          "b": [
+            0.259167,
+            0.719705,
+            0.021128
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE9",
+      "meridia": "EX",
+      "numero": 9,
+      "pinyin": "Waihuaijian",
+      "hanzi": "外踝尖",
+      "nomCatala": "",
+      "localitzacio": "Al punt més prominent del mal·lèol extern.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 24856,
+          "b": [
+            0.305487,
+            0.486721,
+            0.207792
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 11403,
+          "b": [
+            0.305487,
+            0.207792,
+            0.486721
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE10",
+      "meridia": "EX",
+      "numero": 10,
+      "pinyin": "Bafeng",
+      "hanzi": "八风",
+      "nomCatala": "",
+      "localitzacio": "Al dors del peu, quatre punts: just per darrere de la vora de la membrana entre cada parell de dits.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "entre el 1r i el 2n dit",
+        "entre el 2n i el 3r dit",
+        "entre el 3r i el 4t dit",
+        "entre el 4t i el 5è dit"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25889,
+          "b": [
+            0.564214,
+            0.089932,
+            0.345854
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 25887,
+          "b": [
+            0.551943,
+            0.248452,
+            0.199605
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 2,
+          "triangle": 25885,
+          "b": [
+            0.522506,
+            0.358432,
+            0.119062
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 3,
+          "triangle": 24643,
+          "b": [
+            0.409064,
+            0.558152,
+            0.032784
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 12434,
+          "b": [
+            0.564214,
+            0.345854,
+            0.089932
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 12432,
+          "b": [
+            0.551943,
+            0.199605,
+            0.248452
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 2,
+          "triangle": 12430,
+          "b": [
+            0.522506,
+            0.119062,
+            0.358432
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 3,
+          "triangle": 11192,
+          "b": [
+            0.409064,
+            0.032784,
+            0.558152
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE11",
+      "meridia": "EX",
+      "numero": 11,
+      "pinyin": "Duyin",
+      "hanzi": "独阴",
+      "nomCatala": "",
+      "localitzacio": "A la planta del 2n dit, al centre del plec de l'articulació interfalàngica distal.",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 24982,
+          "b": [
+            0.110538,
+            0.154872,
+            0.73459
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 11529,
+          "b": [
+            0.110538,
+            0.73459,
+            0.154872
+          ],
+          "origen": "oms"
+        }
+      ],
+      "orella": null
+    },
+    {
+      "codi": "EX-LE12",
+      "meridia": "EX",
+      "numero": 12,
+      "pinyin": "Qiduan",
+      "hanzi": "气端",
+      "nomCatala": "",
+      "localitzacio": "A la punta de cada dit del peu, 0,1 cun de la vora lliure de l'ungla (cinc punts a cada peu).",
+      "notes": "",
+      "precaucions": {
+        "categories": [],
+        "nota": "",
+        "confirmada": false
+      },
+      "revisat": false,
+      "brancaDe": null,
+      "subpunts": [
+        "dit gros",
+        "2n dit",
+        "3r dit",
+        "4t dit",
+        "5è dit"
+      ],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25176,
+          "b": [
+            0.049422,
+            0.818252,
+            0.132326
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 1,
+          "triangle": 24646,
+          "b": [
+            0.184047,
+            0.724004,
+            0.091949
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 2,
+          "triangle": 25402,
+          "b": [
+            0.766734,
+            0.197638,
+            0.035628
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 3,
+          "triangle": 26515,
+          "b": [
+            0.769903,
+            0.126617,
+            0.10348
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "index": 4,
+          "triangle": 26537,
+          "b": [
+            0.948646,
+            0.033005,
+            0.018349
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 11723,
+          "b": [
+            0.049422,
+            0.132326,
+            0.818252
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 1,
+          "triangle": 11197,
+          "b": [
+            0.184047,
+            0.09195,
+            0.724003
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 2,
+          "triangle": 11949,
+          "b": [
+            0.766734,
+            0.035629,
+            0.197637
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 3,
+          "triangle": 13052,
+          "b": [
+            0.769903,
+            0.10348,
+            0.126617
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "index": 4,
+          "triangle": 13074,
+          "b": [
+            0.948646,
+            0.018349,
+            0.033005
           ],
           "origen": "oms"
         }

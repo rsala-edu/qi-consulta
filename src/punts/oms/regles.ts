@@ -328,6 +328,7 @@ const ST: DefinicioPunt[] = [
 ]
 
 import { BL, ORDRE_BL } from './meridians/bl'
+import { EX, ORDRE_EX } from './meridians/extraordinaris'
 import { GB, ORDRE_GB } from './meridians/gb'
 import { CV, GV, ORDRE_MITJA } from './meridians/mitja'
 import { HT, LU, ORDRE_SUPERIOR, PC, SI, TE } from './meridians/superior'
@@ -336,8 +337,9 @@ import type { Ordre } from './tipus'
 
 /**
  * Totes les regles, en un ordre on cada punt només depèn de punts anteriors
- * (p. ex. GB3 depèn de ST7, GB4–GB6 de ST8 i GB7, GB8 de TE20).
+ * (p. ex. GB3 depèn de ST7, GB4–GB6 de ST8 i GB7, GB8 de TE20). Els
+ * extraordinaris van al final: es mesuren des de punts dels meridians.
  */
-export const REGLES: readonly DefinicioPunt[] = [...LI, ...ST, ...LU, ...SP, ...HT, ...SI, ...BL, ...KI, ...PC, ...TE, ...GB, ...LR, ...CV, ...GV]
+export const REGLES: readonly DefinicioPunt[] = [...LI, ...ST, ...LU, ...SP, ...HT, ...SI, ...BL, ...KI, ...PC, ...TE, ...GB, ...LR, ...CV, ...GV, ...EX]
 
-export const ORDRES: readonly Ordre[] = [...ORDRE_SUPERIOR, ...ORDRE_YIN_CAMA, ...ORDRE_BL, ...ORDRE_GB, ...ORDRE_MITJA]
+export const ORDRES: readonly Ordre[] = [...ORDRE_SUPERIOR, ...ORDRE_YIN_CAMA, ...ORDRE_BL, ...ORDRE_GB, ...ORDRE_MITJA, ...ORDRE_EX]

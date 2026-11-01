@@ -28,11 +28,14 @@ const nou = {
     const calculs = perCodi.get(p.codi)
     if (!calculs) return p
     // Les correccions de la doctora sobre aquest model es mantenen
+    const clau = (costat: string, index = 0) => `${costat}|${index}`
     const corregits = new Set(
-      p.posicions.filter((q) => q.topologia === model.topologia && q.origen === 'doctora').map((q) => q.costat),
+      p.posicions
+        .filter((q) => q.topologia === model.topologia && q.origen === 'doctora')
+        .map((q) => clau(q.costat, q.index)),
     )
     const altres = p.posicions.filter((q) => q.topologia !== model.topologia || q.origen === 'doctora')
-    const noves = calculs.filter((k) => !corregits.has(k.costat)).map((k) => k.posicio)
+    const noves = calculs.filter((k) => !corregits.has(clau(k.costat, k.index))).map((k) => k.posicio)
     calculats += noves.length
     return { ...p, posicions: [...altres, ...noves] }
   }),

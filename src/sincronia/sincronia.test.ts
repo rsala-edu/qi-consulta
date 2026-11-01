@@ -1,5 +1,6 @@
 // @vitest-environment node
 // Dos dispositius (dues bases de dades) i un Google Drive en memòria.
+import { desarCorreccioOrella } from '../db/calibratgeOrella'
 import 'fake-indexeddb/auto'
 import { afterEach, describe, expect, it } from 'vitest'
 import { canviarContrasenya, crearClauMestra, desbloquejarClauMestra } from '../crypto'
@@ -92,6 +93,7 @@ describe('sincronia amb Google Drive', () => {
     await confirmarCategoria(a.db, 'pulmo')
     const biel = await b.magatzem.crearPacient(pacientInventat({ nom: 'Biel' }))
     await desarCalibracio(b.db, 'mh-prova', 'ST36', 'E', null)
+    await desarCorreccioOrella(b.db, 'TF4', 190, 96)
 
     await sincronitzar(a.db, a.clau, drive, DIA)
     const rb = await sincronitzar(b.db, b.clau, drive, DIA)
@@ -104,6 +106,7 @@ describe('sincronia amb Google Drive', () => {
       expect(await d.magatzem.obtenirCita(cita.id)).toBeUndefined()
       expect(await d.db.categoriesPrecaucio.count()).toBe(1)
       expect(await d.db.calibratge.count()).toBe(1)
+      expect(await d.db.calibratgeOrella.get('TF4')).toMatchObject({ x: 190, y: 96 })
     }
     expect(await llegirContingut(a.db)).toEqual(await llegirContingut(b.db))
     // Sense canvis, no es torna a pujar res

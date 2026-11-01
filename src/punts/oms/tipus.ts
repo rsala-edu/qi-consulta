@@ -35,10 +35,15 @@ export type PuntCalculat = (codi: string, costat?: Costat | 'C') => Vector3
 export interface DefinicioPunt {
   codi: string
   regla: Regla
-  /** Punt de la línia mitja (CV, GV): una sola posició, costat «C» */
+  /** Una sola posició, costat «C» (línia mitja, o un punt únic com Jinjin) */
   mitja?: boolean
+  /**
+   * Punts amb un sol codi però diverses posicions per costat (Jiaji, Baxie,
+   * Shixuan…): el nom de cada una. `calcular` rep l'índex.
+   */
+  subpunts?: readonly string[]
   /** Punt de la pell en aquest costat (per als de la línia mitja, el costat no compta) */
-  calcular(c: CosMesurable, r: Referencies, costat: Costat, punt: PuntCalculat): Vector3
+  calcular(c: CosMesurable, r: Referencies, costat: Costat, punt: PuntCalculat, index: number): Vector3
 }
 
 /** Seqüències que s'han de complir dins un meridià (les proves les comproven) */

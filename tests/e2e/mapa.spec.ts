@@ -22,8 +22,11 @@ async function entrar(page: Page) {
 const menu = (page: Page, nom: string) =>
   page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: nom })
 
-/** 14 meridians: 309 punts × 2 costats + 52 de la línia mitja (CV i GV) */
-const PUNTS_AL_MODEL = 670
+/**
+ * 14 meridians: 309 punts × 2 costats + 52 de la línia mitja (CV i GV) = 670;
+ * extraordinaris: 76 posicions × 2 costats + 12 d'úniques = 164
+ */
+const PUNTS_AL_MODEL = 670 + 164
 
 async function visorLlest(page: Page, n?: number) {
   const visor = page.getByTestId('visor3d')
@@ -123,6 +126,8 @@ test('des de darrere no es pot tocar un punt de davant', async ({ page }) => {
 })
 
 test('la doctora corregeix un punt des del mapa, i el pot tornar a la posició calculada', async ({ page }) => {
+  // Torna a carregar l'app i el cos sencer: amb totes les proves alhora pot passar de 30 s
+  test.setTimeout(60_000)
   await entrar(page)
   await obrirMapa(page)
   await anarAlPunt(page, 'ST36')
@@ -293,4 +298,36 @@ test('els textos dels botons de tècnica no es tallen a cap amplada', async ({ p
     )
     expect(problemes, `amplada ${amplada}px`).toEqual([])
   }
+})
+
+test('els punts extraordinaris tenen grup propi al filtre i cap línia de meridià', async ({ page }) => {
+  await entrar(page)
+  await obrirMapa(page)
+  // 48 codis: 76 posicions per costat més 12 d'úniques (línia mitja, Sishencong, Jinjin…)
+  await page.getByLabel('Meridià').selectOption({ label: 'EX · Extraordinaris' })
+  await visorLlest(page, 164)
+
+  await anarAlPunt(page, 'jiaji')
+  const fitxa = page.getByRole('region', { name: 'EX-B2' })
+  await expect(fitxa.getByRole('heading')).toContainText('EX-B2 · Jiaji')
+  await expect(fitxa).toContainText('17 punts: T1 · T2')
+  await expect(fitxa).toContainText('Pulmó')
+
+  // Es corregeix un sol subpunt (L3), sense moure els altres
+  await fitxa.getByRole('button', { name: 'Corregir la posició' }).click()
+  const correccio = page.getByRole('region', { name: 'Corregint EX-B2' })
+  await correccio.getByLabel('Punt').selectOption({ label: 'L3' })
+  // la càmera hi va: s'espera que comenci a moure's i que s'aturi
+  await page.waitForTimeout(400)
+  await visorLlest(page)
+  // (a més de 28 px del punt: més a prop, el toc l'agafa per arrossegar-lo)
+  await tocarCentre(page, 40)
+  await expect(correccio.getByRole('status')).toHaveText('Corregit per la doctora')
+  await correccio.getByLabel('Punt').selectOption({ label: 'L2' })
+  await expect(correccio.getByRole('status')).toHaveText('Calculat amb la regla de l\'OMS')
+
+  // Es troben pel codi amb guionet
+  await correccio.getByRole('button', { name: 'Fet' }).click()
+  await anarAlPunt(page, 'EX-HN3')
+  await expect(page.getByRole('region', { name: 'EX-HN3' }).getByRole('heading')).toContainText('Yintang')
 })
