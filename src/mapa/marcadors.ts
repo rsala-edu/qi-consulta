@@ -46,12 +46,25 @@ export function puntsSobreModel(c: Cataleg, model: ModelCos, meridia?: string): 
   return resultat
 }
 
-/** Recorregut d'un meridià per a cada costat, en ordre de numeració. */
+/**
+ * Recorregut d'un meridià per a cada costat, en ordre de numeració. Els
+ * punts de branca (p. ex. ST40) no entren a la línia principal: es dibuixen
+ * com un segment curt des del punt d'on surten.
+ */
 export function recorregutsMeridia(punts: readonly PuntSobreModel[], meridia: string): Vector3[][] {
   const perCostat = new Map<CostatPosicio, PuntSobreModel[]>()
   for (const p of punts) {
     if (p.punt.meridia !== meridia) continue
     perCostat.set(p.costat, [...(perCostat.get(p.costat) ?? []), p])
   }
-  return [...perCostat.values()].map((l) => l.sort((a, b) => a.punt.numero - b.punt.numero).map((p) => p.posicio))
+  const linies: Vector3[][] = []
+  for (const llista of perCostat.values()) {
+    const ordenats = [...llista].sort((a, b) => a.punt.numero - b.punt.numero)
+    linies.push(ordenats.filter((p) => !p.punt.brancaDe).map((p) => p.posicio))
+    for (const branca of ordenats.filter((p) => p.punt.brancaDe)) {
+      const origen = ordenats.find((p) => p.punt.codi === branca.punt.brancaDe)
+      if (origen) linies.push([origen.posicio, branca.posicio])
+    }
+  }
+  return linies
 }

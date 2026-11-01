@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ambCalibratge, cataleg, cercarPunts, exportarCataleg, nomMeridia, posicioDe } from './cataleg'
+import { ambCalibratge, ambPrecaucions, cataleg, cercarPunts, exportarCataleg, nomMeridia, posicioDe, puntsAmbPrecaucio } from './cataleg'
 import { esquemaCataleg, type Posicio3D } from './esquema'
 
 describe('catàleg del projecte', () => {
@@ -138,5 +138,28 @@ describe('calibratge sobre el catàleg', () => {
     const json = exportarCataleg(c)
     expect(esquemaCataleg.parse(JSON.parse(json))).toEqual(c)
     expect(json.endsWith('\n')).toBe(true)
+  })
+})
+
+describe('precaucions revisades per la doctora', () => {
+  it('hi ha 28 punts amb precaució per revisar', () => {
+    expect(puntsAmbPrecaucio(cataleg)).toHaveLength(28)
+  })
+
+  it('«D\'acord» la deixa igual però confirmada; «Canviar» la reescriu', () => {
+    const li4 = cataleg.punts.find((p) => p.codi === 'LI4')!
+    const c = ambPrecaucions(cataleg, [
+      { codi: 'LI4', embaras: li4.precaucions.embaras, nota: li4.precaucions.nota },
+      { codi: 'ST9', embaras: false, nota: 'Palpar la caròtida i apartar-la amb el dit.' },
+    ])
+    expect(c.punts.find((p) => p.codi === 'LI4')!.precaucions).toEqual({ ...li4.precaucions, confirmada: true })
+    expect(c.punts.find((p) => p.codi === 'ST9')!.precaucions).toEqual({
+      embaras: false,
+      nota: 'Palpar la caròtida i apartar-la amb el dit.',
+      confirmada: true,
+    })
+    expect(c.punts.find((p) => p.codi === 'ST1')!.precaucions.confirmada).toBe(false)
+    // el catàleg original no canvia
+    expect(cataleg.punts.find((p) => p.codi === 'ST9')!.precaucions.confirmada).toBe(false)
   })
 })

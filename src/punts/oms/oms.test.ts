@@ -5,20 +5,22 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { Vector3 } from 'three'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { normalTriangle } from '../../mapa/geometria/baricentriques'
 import { modelDesDeGlb, type ModelCos } from '../../mapa/model'
 import { cataleg } from '../cataleg'
 import { calcularPunts, type ResultatCalcul } from './calcular'
-import type { Costat } from './cos'
+import type { Costat, DadesMakeHuman } from './cos'
 import { REGLES } from './regles'
 
 let model: ModelCos
 let calcul: ResultatCalcul
+let dades: DadesMakeHuman
 
 beforeAll(async () => {
   const glb = readFileSync(resolve('public/models/cos.glb'))
   model = await modelDesDeGlb(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength))
-  const { articulacions } = JSON.parse(readFileSync(resolve('src/punts/articulacions.json'), 'utf8'))
-  calcul = calcularPunts(model, articulacions)
+  dades = JSON.parse(readFileSync(resolve('src/punts/articulacions.json'), 'utf8'))
+  calcul = calcularPunts(model, dades)
 }, 30_000)
 
 const COSTATS: Costat[] = ['E', 'D']
@@ -190,6 +192,50 @@ describe('ordre dins el meridià', () => {
   })
 })
 
+describe('referències de la cara i el tòrax', () => {
+  const r = () => calcul.referencies
+  const brut = (nom: string) => new Vector3(...(dades.referencies[nom] as [number, number, number]))
+
+  it('ST17 és a menys de 5 mm del mugró detectat a la malla', () => {
+    for (const k of COSTATS) {
+      const mugroMakeHuman = brut(`${k === 'E' ? 'l' : 'r'}-mugro`)
+      expect(p('ST17', k).distanceTo(r()[k].mugro), `ST17 ${k}`).toBeLessThan(0.005)
+      // el mugró detectat (relleu més corbat) és dins la zona del pit que marca MakeHuman
+      expect(r()[k].mugro.distanceTo(mugroMakeHuman), `mugró ${k}`).toBeLessThan(0.03)
+      // i és on toca: a la meitat lateral del pit, entre la clavícula i el xifoide
+      expect(Math.abs(r()[k].mugro.x)).toBeGreaterThan(0.08)
+      expect(r()[k].mugro.y).toBeLessThan(r()[k].clavicula.y)
+      expect(r()[k].mugro.y).toBeGreaterThan(r().unioXifoesternal.y)
+    }
+  })
+
+  it('ST7 és davant del tragus, no damunt l\'orella', () => {
+    for (const k of COSTATS) {
+      const t = r()[k].tragus
+      const st7 = p('ST7', k)
+      expect(st7.z - t.z, `ST7 ${k} davant del tragus`).toBeGreaterThan(0.01)
+      expect(st7.z - t.z).toBeLessThan(0.035)
+      expect(Math.abs(st7.y - t.y)).toBeLessThan(0.01)
+      expect(Math.abs(st7.x)).toBeGreaterThan(0.05)
+    }
+  })
+
+  it('ST8 és a l\'angle del front, 0,5 cun dins la línia del cabell', () => {
+    for (const k of COSTATS) {
+      const st8 = p('ST8', k)
+      expect((st8.y - r().nivellCabell) / r().cun.cap).toBeCloseTo(0.5, 0)
+      // a l'angle: la pell mira a mig camí entre davant i el costat
+      const pos = calcul.perId.get(`ST8|${k}`)!.posicio
+      const n = normalTriangle(model.geometria, pos.triangle)
+      const graus = (Math.atan2(Math.abs(n.x), n.z) * 180) / Math.PI
+      expect(graus, `ST8 ${k}`).toBeGreaterThan(30)
+      expect(graus, `ST8 ${k}`).toBeLessThan(60)
+      // davant de l'orella
+      expect(st8.z).toBeGreaterThan(r()[k].tragus.z)
+    }
+  })
+})
+
 describe('referències anatòmiques', () => {
   const r = () => calcul.referencies
   it('melic i símfisi a la línia mitja, en ordre, i el melic sota el xifoide', () => {
@@ -209,7 +255,6 @@ describe('referències anatòmiques', () => {
       expect(p('LI11', k).distanceTo(art('colze'))).toBeLessThan(0.05)
       expect(p('ST35', k).distanceTo(art('genoll'))).toBeLessThan(0.07)
       expect(p('ST41', k).distanceTo(art('turmell'))).toBeLessThan(0.07)
-      expect(p('ST17', k).distanceTo(calcul.referencies[k].mugro)).toBeLessThan(0.002)
     }
   })
 

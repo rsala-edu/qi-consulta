@@ -601,8 +601,10 @@ fieldset {
 
 .etiqueta-punt {
   position: absolute;
-  left: 10px;
-  top: -10px;
+  left: 0;
+  top: 0;
+  height: 18px;
+  box-sizing: border-box;
   font-size: 0.75rem;
   line-height: 1.2;
   padding: 1px 6px;
@@ -838,4 +840,41 @@ fieldset {
   border-radius: 999px;
   background: var(--accent-suau);
   color: var(--accent-fosc);
+}
+
+/* --- Precaucions per revisar --- */
+
+.llista-precaucions {
+  list-style: none;
+  padding: 0;
+  margin: var(--espai) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.llista-precaucions > li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--superficie);
+  border: 1px solid var(--linia);
+  border-left: 4px solid var(--avis);
+  border-radius: var(--radi);
+}
+
+.llista-precaucions > li.confirmada {
+  border-left-color: var(--accent);
+}
+
+.llista-precaucions p {
+  margin: 0;
+}
+
+.capcalera-precaucio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }

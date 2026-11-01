@@ -33,6 +33,14 @@ export interface RegistreCalibratge {
   modificatAt: string
 }
 
+/** Precaució d'un punt confirmada (o reescrita) per la doctora. No és dada de pacient. */
+export interface RegistrePrecaucio {
+  codi: string
+  embaras: boolean
+  nota: string
+  confirmadaAt: string
+}
+
 export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys'
 
 export class QiDB extends Dexie {
@@ -42,6 +50,7 @@ export class QiDB extends Dexie {
   /** L'id és la clau del formulari */
   esborranys!: Table<RegistreXifrat, string>
   calibratge!: Table<RegistreCalibratge, string>
+  precaucions!: Table<RegistrePrecaucio, string>
 
   constructor(nom = 'qi') {
     super(nom)
@@ -55,6 +64,9 @@ export class QiDB extends Dexie {
     })
     this.version(3).stores({
       calibratge: 'id, topologia',
+    })
+    this.version(4).stores({
+      precaucions: 'codi',
     })
   }
 }

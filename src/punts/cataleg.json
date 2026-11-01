@@ -32,6 +32,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -73,6 +74,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -114,6 +116,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -155,6 +158,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -196,6 +200,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -237,6 +242,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -278,6 +284,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -319,6 +326,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -360,6 +368,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -401,6 +410,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -442,6 +452,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -483,6 +494,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -524,6 +536,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -565,6 +578,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -606,6 +620,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -647,6 +662,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -688,6 +704,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -729,6 +746,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -770,6 +788,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -811,6 +830,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -852,6 +872,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -893,6 +914,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -934,6 +956,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -975,6 +998,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -1016,6 +1040,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -1057,6 +1082,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -1098,26 +1124,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 23528,
+          "triangle": 23074,
           "b": [
-            0.052712,
-            0.296128,
-            0.65116
+            0.417853,
+            0.398006,
+            0.184141
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 10083,
+          "triangle": 9625,
           "b": [
-            0.052712,
-            0.65116,
-            0.296128
+            0.417853,
+            0.18414,
+            0.398007
           ],
           "origen": "oms"
         }
@@ -1139,26 +1166,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 14674,
+          "triangle": 23728,
           "b": [
-            0.051522,
-            0.735671,
-            0.212807
+            0.076037,
+            0.598505,
+            0.325458
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 1431,
+          "triangle": 10283,
           "b": [
-            0.051522,
-            0.212807,
-            0.735671
+            0.076037,
+            0.325458,
+            0.598505
           ],
           "origen": "oms"
         }
@@ -1180,6 +1208,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -1221,6 +1250,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -1262,6 +1292,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -1303,26 +1334,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 15630,
+          "triangle": 15647,
           "b": [
-            0.246699,
-            0.385596,
-            0.367705
+            0.691179,
+            0.296186,
+            0.012635
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 2391,
+          "triangle": 2406,
           "b": [
-            0.246699,
-            0.367705,
-            0.385596
+            0.691179,
+            0.012635,
+            0.296186
           ],
           "origen": "oms"
         }
@@ -1344,26 +1376,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 15491,
+          "triangle": 15425,
           "b": [
-            0.744447,
-            0.24363,
-            0.011923
+            0.4468,
+            0.401671,
+            0.151529
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 2248,
+          "triangle": 2182,
           "b": [
-            0.744447,
-            0.011922,
-            0.243631
+            0.4468,
+            0.151529,
+            0.401671
           ],
           "origen": "oms"
         }
@@ -1385,26 +1418,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 15683,
+          "triangle": 15443,
           "b": [
-            0.154247,
-            0.183037,
-            0.662716
+            0.055123,
+            0.45107,
+            0.493807
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 2444,
+          "triangle": 2200,
           "b": [
-            0.154247,
-            0.662715,
-            0.183038
+            0.055123,
+            0.493807,
+            0.45107
           ],
           "origen": "oms"
         }
@@ -1426,26 +1460,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 15686,
+          "triangle": 15495,
           "b": [
-            0.101163,
-            0.01706,
-            0.881777
+            0.684027,
+            0.0866,
+            0.229373
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 2449,
+          "triangle": 2252,
           "b": [
-            0.101163,
-            0.881777,
-            0.01706
+            0.684027,
+            0.229374,
+            0.086599
           ],
           "origen": "oms"
         }
@@ -1467,26 +1502,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 16301,
+          "triangle": 16291,
           "b": [
-            0.359729,
-            0.220188,
-            0.420083
+            0.394594,
+            0.252448,
+            0.352958
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 3062,
+          "triangle": 3052,
           "b": [
-            0.359729,
-            0.420083,
-            0.220188
+            0.394594,
+            0.352958,
+            0.252448
           ],
           "origen": "oms"
         }
@@ -1508,26 +1544,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 16235,
+          "triangle": 16145,
           "b": [
-            0,
-            0,
-            1
+            0.363706,
+            0.498374,
+            0.13792
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 2996,
+          "triangle": 2906,
           "b": [
-            0,
-            1,
-            0
+            0.363706,
+            0.137919,
+            0.498375
           ],
           "origen": "oms"
         }
@@ -1549,26 +1586,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 16316,
+          "triangle": 16293,
           "b": [
-            0.102476,
-            0.344677,
-            0.552847
+            0.666826,
+            0.055075,
+            0.278099
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 3079,
+          "triangle": 3054,
           "b": [
-            0.102476,
-            0.552847,
-            0.344677
+            0.666825,
+            0.2781,
+            0.055075
           ],
           "origen": "oms"
         }
@@ -1590,26 +1628,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 20861,
+          "triangle": 20855,
           "b": [
-            0.103702,
-            0.82829,
-            0.068008
+            0.796657,
+            0.109751,
+            0.093592
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7626,
+          "triangle": 7620,
           "b": [
-            0.103702,
-            0.068007,
-            0.828291
+            0.796657,
+            0.093593,
+            0.10975
           ],
           "origen": "oms"
         }
@@ -1631,26 +1670,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 20854,
+          "triangle": 20848,
           "b": [
-            0.168202,
-            0.111084,
-            0.720714
+            0.927424,
+            0.027269,
+            0.045307
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7621,
+          "triangle": 7615,
           "b": [
-            0.168202,
-            0.720714,
-            0.111084
+            0.927424,
+            0.045306,
+            0.02727
           ],
           "origen": "oms"
         }
@@ -1672,26 +1712,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 20848,
+          "triangle": 20849,
           "b": [
-            0.165064,
-            0.263207,
-            0.571729
+            0.090633,
+            0.002718,
+            0.906649
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7615,
+          "triangle": 7614,
           "b": [
-            0.165064,
-            0.571729,
-            0.263207
+            0.090633,
+            0.906649,
+            0.002718
           ],
           "origen": "oms"
         }
@@ -1713,26 +1754,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 20986,
+          "triangle": 20901,
           "b": [
-            0.171809,
-            0.367324,
-            0.460867
+            0.833836,
+            0.096824,
+            0.06934
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7757,
+          "triangle": 7668,
           "b": [
-            0.171809,
-            0.460867,
-            0.367324
+            0.833836,
+            0.06934,
+            0.096824
           ],
           "origen": "oms"
         }
@@ -1754,26 +1796,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 20836,
+          "triangle": 20997,
           "b": [
-            0.190218,
-            0.390827,
-            0.418955
+            0.833256,
+            0.111803,
+            0.054941
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7603,
+          "triangle": 7766,
           "b": [
-            0.190218,
-            0.418954,
-            0.390828
+            0.833256,
+            0.054941,
+            0.111803
           ],
           "origen": "oms"
         }
@@ -1795,26 +1838,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 20934,
+          "triangle": 20926,
           "b": [
-            0.17023,
-            0.383655,
-            0.446115
+            0.061005,
+            0.066556,
+            0.872439
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7705,
+          "triangle": 7697,
           "b": [
-            0.17023,
-            0.446114,
-            0.383656
+            0.061005,
+            0.872439,
+            0.066556
           ],
           "origen": "oms"
         }
@@ -1836,26 +1880,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 20958,
+          "triangle": 20959,
           "b": [
-            0.090445,
-            0.420241,
-            0.489314
+            0.095675,
+            0.041587,
+            0.862738
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7729,
+          "triangle": 7728,
           "b": [
-            0.090445,
-            0.489313,
-            0.420242
+            0.095675,
+            0.862738,
+            0.041587
           ],
           "origen": "oms"
         }
@@ -1877,26 +1922,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 21011,
+          "triangle": 21487,
           "b": [
-            0.240602,
-            0.000426,
-            0.758972
+            0.14569,
+            0.036602,
+            0.817708
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 7780,
+          "triangle": 21028,
           "b": [
-            0.240602,
-            0.758972,
-            0.000426
+            0.033102,
+            0.113831,
+            0.853067
           ],
           "origen": "oms"
         }
@@ -1918,26 +1964,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 21535,
+          "triangle": 21486,
           "b": [
-            0.088412,
-            0.755402,
-            0.156186
+            0.004838,
+            0.202719,
+            0.792443
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 21027,
+          "triangle": 21029,
           "b": [
-            0.081433,
-            0.254498,
-            0.664069
+            0.207745,
+            0.005369,
+            0.786886
           ],
           "origen": "oms"
         }
@@ -1959,26 +2006,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 21445,
+          "triangle": 21347,
           "b": [
-            0.151897,
-            0.730341,
-            0.117762
+            0.013583,
+            0.260962,
+            0.725455
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 8074,
+          "triangle": 8014,
           "b": [
-            0.151897,
-            0.117762,
-            0.730341
+            0.013583,
+            0.725455,
+            0.260962
           ],
           "origen": "oms"
         }
@@ -2000,26 +2048,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 21341,
+          "triangle": 21327,
           "b": [
-            0.196045,
-            0.263664,
-            0.540291
+            0.351504,
+            0.036012,
+            0.612484
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 8008,
+          "triangle": 21262,
           "b": [
-            0.196045,
-            0.54029,
-            0.263665
+            0.037141,
+            0.312595,
+            0.650264
           ],
           "origen": "oms"
         }
@@ -2041,26 +2090,27 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "E",
-          "triangle": 21416,
+          "triangle": 21388,
           "b": [
-            0.68419,
-            0.246966,
-            0.068844
+            0.598922,
+            0.167865,
+            0.233213
           ],
           "origen": "oms"
         },
         {
           "topologia": "mh-13380v-26756t-84753624",
           "costat": "D",
-          "triangle": 8063,
+          "triangle": 8037,
           "b": [
-            0.68419,
-            0.068844,
-            0.246966
+            0.598922,
+            0.233213,
+            0.167865
           ],
           "origen": "oms"
         }
@@ -2082,6 +2132,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2123,6 +2174,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2164,6 +2216,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2205,6 +2258,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2246,6 +2300,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2287,6 +2342,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2328,6 +2384,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2369,6 +2426,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2410,6 +2468,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2451,6 +2510,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": "ST38",
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2492,6 +2552,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2533,6 +2594,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2574,6 +2636,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2615,6 +2678,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",
@@ -2656,6 +2720,7 @@
         "confirmada": false
       },
       "revisat": false,
+      "brancaDe": null,
       "posicions": [
         {
           "topologia": "mh-13380v-26756t-84753624",

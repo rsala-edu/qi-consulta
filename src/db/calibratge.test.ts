@@ -3,6 +3,7 @@ import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { desarCalibracio, descartarCalibratge, esborrarCalibracio, llistarCalibratge } from './calibratge'
 import { QiDB } from './esquema'
+import { confirmarPrecaucio, llistarPrecaucions } from './precaucions'
 
 let db: QiDB
 beforeEach(() => {
@@ -41,5 +42,16 @@ describe('calibratge local', () => {
     await descartarCalibratge(db, 't1')
     expect(await llistarCalibratge(db, 't1')).toEqual([])
     expect(await llistarCalibratge(db, 't2')).toHaveLength(1)
+  })
+})
+
+describe('precaucions revisades', () => {
+  it('desa la confirmació i la substitueix si es torna a revisar', async () => {
+    await confirmarPrecaucio(db, 'LI4', { embaras: true, nota: ' Embaràs. ' })
+    await confirmarPrecaucio(db, 'LI4', { embaras: true, nota: 'Embaràs: no punxar.' })
+    const l = await llistarPrecaucions(db)
+    expect(l).toHaveLength(1)
+    expect(l[0]).toMatchObject({ codi: 'LI4', embaras: true, nota: 'Embaràs: no punxar.' })
+    expect(l[0]!.confirmadaAt).toMatch(/^\d{4}-/)
   })
 })

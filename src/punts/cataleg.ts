@@ -60,6 +60,27 @@ function ordenarPosicions(posicions: Posicio3D[]): Posicio3D[] {
   return [...posicions].sort((a, b) => a.topologia.localeCompare(b.topologia) || ordre[a.costat] - ordre[b.costat])
 }
 
+/** Aplica les precaucions confirmades per la doctora: queden com a confirmades. */
+export function ambPrecaucions(
+  c: Cataleg,
+  revisions: ReadonlyArray<{ codi: string; embaras: boolean; nota: string }>,
+): Cataleg {
+  if (revisions.length === 0) return c
+  const perCodi = new Map(revisions.map((r) => [r.codi, r]))
+  return {
+    ...c,
+    punts: c.punts.map((p) => {
+      const r = perCodi.get(p.codi)
+      return r ? { ...p, precaucions: { embaras: r.embaras, nota: r.nota, confirmada: true } } : p
+    }),
+  }
+}
+
+/** Punts amb alguna precaució proposada al catàleg del projecte (els que la doctora ha de revisar). */
+export function puntsAmbPrecaucio(c: Cataleg): Cataleg['punts'] {
+  return c.punts.filter((p) => p.precaucions.nota !== '' || p.precaucions.embaras)
+}
+
 /** JSON llest per substituir src/punts/cataleg.json (valida abans d'exportar). */
 export function exportarCataleg(c: Cataleg): string {
   return `${JSON.stringify(esquemaCataleg.parse(c), null, 2)}\n`

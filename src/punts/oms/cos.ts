@@ -29,24 +29,42 @@ export function dir(...components: Array<[Vector3, number]>): Vector3 {
 
 export class ErrorMesura extends Error {}
 
+type Punt3 = readonly [number, number, number]
+
+/** Dades que acompanyen el GLB (src/punts/articulacions.json) */
+export interface DadesMakeHuman {
+  articulacions: Readonly<Record<string, Punt3>>
+  /** Punts de la pell trets de les deformacions de MakeHuman (mugró, melic, tragus) */
+  referencies: Readonly<Record<string, Punt3>>
+}
+
 export class CosMesurable {
   readonly model: ModelCos
-  private readonly articulacions: Readonly<Record<string, readonly [number, number, number]>>
+  private readonly dades: DadesMakeHuman
   private readonly malla: Mesh
   private readonly raig = new Raycaster()
 
-  constructor(model: ModelCos, articulacions: Readonly<Record<string, readonly [number, number, number]>>) {
+  constructor(model: ModelCos, dades: DadesMakeHuman) {
     this.model = model
-    this.articulacions = articulacions
+    this.dades = dades
     this.malla = new Mesh(model.geometria, new MeshBasicMaterial({ side: DoubleSide }))
     this.malla.updateMatrixWorld()
   }
 
   /** Centre d'una articulació de MakeHuman (p. ex. «knee» amb costat E → «l-knee»). */
   art(nom: string, costat?: Costat): Vector3 {
+    return this.punt(this.dades.articulacions, nom, costat)
+  }
+
+  /** Referència de la pell de MakeHuman (p. ex. «mugro» amb costat E), projectada a la pell. */
+  ref(nom: string, costat?: Costat): Vector3 {
+    return this.puntDe(this.aLaPell(this.punt(this.dades.referencies, nom, costat)))
+  }
+
+  private punt(taula: Readonly<Record<string, Punt3>>, nom: string, costat?: Costat): Vector3 {
     const clau = costat ? `${costat === 'E' ? 'l' : 'r'}-${nom}` : nom
-    const a = this.articulacions[clau]
-    if (!a) throw new ErrorMesura(`Articulació desconeguda: ${clau}`)
+    const a = taula[clau]
+    if (!a) throw new ErrorMesura(`Referència desconeguda: ${clau}`)
     return new Vector3(a[0], a[1], a[2])
   }
 
@@ -69,6 +87,46 @@ export class CosMesurable {
     return this.pell(punt.clone().addScaledVector(d, distancia), d.negate(), distancia * 2)
   }
 
+  /**
+   * Punt de màxima curvatura convexa de la pell a prop d'un punt: el centre
+   * dels `n` vèrtexs on les normals dels veïns se separen més. Serveix per
+   * trobar relleus petits i marcats, com el mugró.
+   */
+  curvaturaMaxima(prop: Vector3, radi: number, n = 4): Vector3 {
+    const geo = this.model.geometria
+    const pos = geo.getAttribute('position')
+    const nor = geo.getAttribute('normal')
+    const idx = geo.getIndex()!
+    const P = (i: number) => new Vector3().fromBufferAttribute(pos, i)
+    const N = (i: number) => new Vector3().fromBufferAttribute(nor, i)
+    const dins = new Set<number>()
+    for (let i = 0; i < pos.count; i++) if (P(i).distanceTo(prop) <= radi) dins.add(i)
+    const veins = new Map<number, Set<number>>()
+    const afegir = (a: number, b: number) => {
+      if (!dins.has(a)) return
+      if (!veins.has(a)) veins.set(a, new Set())
+      veins.get(a)!.add(b)
+    }
+    for (let t = 0; t < idx.count; t += 3) {
+      const [a, b, c] = [idx.getX(t), idx.getX(t + 1), idx.getX(t + 2)]
+      afegir(a, b), afegir(b, a), afegir(b, c), afegir(c, b), afegir(c, a), afegir(a, c)
+    }
+    const curvatures = [...veins.entries()].map(([i, vs]) => {
+      const p = P(i)
+      const ni = N(i)
+      let k = 0
+      for (const j of vs) {
+        const d = P(j).sub(p)
+        k += N(j).sub(ni).dot(d) / d.lengthSq()
+      }
+      return { i, k: k / vs.size }
+    })
+    curvatures.sort((a, b) => b.k - a.k)
+    const millors = curvatures.slice(0, n).map((c) => P(c.i))
+    const centre = millors.reduce((s, p) => s.add(p), new Vector3()).divideScalar(millors.length)
+    return this.puntDe(this.aLaPell(centre))
+  }
+
   /** Com `pell`, però retorna null si no hi ha pell en aquesta direcció. */
   pellOpcional(origen: Vector3, direccio: Vector3, maxim = 0.4): Vector3 | null {
     try {
@@ -85,17 +143,5 @@ export class CosMesurable {
 
   puntDe(p: PosicioMalla): Vector3 {
     return puntDesDePosicio(this.model.geometria, p)
-  }
-
-  /** Vèrtexs de la malla dins d'una capsa, per buscar extrems (mugró…). */
-  vertexsDins(min: Vector3, max: Vector3): Vector3[] {
-    const pos = this.model.geometria.getAttribute('position')
-    const r: Vector3[] = []
-    const t = new Vector3()
-    for (let i = 0; i < pos.count; i++) {
-      t.fromBufferAttribute(pos, i)
-      if (t.x >= min.x && t.x <= max.x && t.y >= min.y && t.y <= max.y && t.z >= min.z && t.z <= max.z) r.push(t.clone())
-    }
-    return r
   }
 }

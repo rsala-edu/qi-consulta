@@ -75,6 +75,11 @@ export const esquemaPuntCatalog = z.object({
   }),
   /** Cert quan la doctora ha revisat el punt */
   revisat: z.boolean(),
+  /**
+   * Si el punt queda fora de la línia principal del meridià (p. ex. ST40, al
+   * costat de ST38), el punt d'on surt la branca. El recorregut no hi passa.
+   */
+  brancaDe: z.string().nullable().default(null),
   posicions: z.array(esquemaPosicio3D),
   orella: esquemaPosicioOrella.nullable(),
 })
@@ -97,6 +102,8 @@ export const esquemaCataleg = z
         ctx.addIssue({ code: 'custom', message: `Meridià desconegut: ${p.meridia}`, path: ['punts', i] })
       if (p.codi !== `${p.meridia}${p.numero}`)
         ctx.addIssue({ code: 'custom', message: `El codi ${p.codi} no quadra amb el meridià i el número`, path: ['punts', i] })
+      if (p.brancaDe && !c.punts.some((q) => q.codi === p.brancaDe && q.meridia === p.meridia))
+        ctx.addIssue({ code: 'custom', message: `${p.codi}: branca d'un punt desconegut`, path: ['punts', i] })
       const claus = p.posicions.map((q) => `${q.topologia}:${q.costat}`)
       if (new Set(claus).size !== claus.length)
         ctx.addIssue({ code: 'custom', message: `Posició repetida a ${p.codi}`, path: ['punts', i] })

@@ -24,6 +24,7 @@ import {
 import { Box3, Group, Mesh, Raycaster, Vector2, Vector3, type BufferGeometry } from 'three'
 import { t } from '../../i18n/t'
 import { azimutMesProper, CAMERA, nivellEtiquetes, VISTES, vistaCapAlPunt, type Vista } from '../camera'
+import { colocarEtiquetes, type EtiquetaColocada } from '../etiquetes'
 import { mesProperAlToc, projectarVisibles, type ProjeccioPantalla } from '../seleccio'
 
 export interface MarcadorVisor {
@@ -96,7 +97,7 @@ export function Visor3D({ ref, ...props }: Props) {
       </Canvas>
       <div className="visor3d-etiquetes" aria-hidden="true">
         {etiquetes.map((e) => (
-          <span key={e.id} className="etiqueta-punt" style={{ transform: `translate(${e.x}px, ${e.y}px)` }}>
+          <span key={e.id} className="etiqueta-punt" style={{ transform: `translate(${e.esquerra}px, ${e.dalt}px)` }}>
             {e.text}
           </span>
         ))}
@@ -115,7 +116,7 @@ export function Visor3D({ ref, ...props }: Props) {
   )
 }
 
-type Etiqueta = { id: string; x: number; y: number; text: string }
+type Etiqueta = EtiquetaColocada
 
 // memo: l'escena no s'ha de tornar a pintar quan només canvien les etiquetes
 // (si no, cada fotograma provocaria un altre fotograma).
@@ -219,21 +220,27 @@ const Escena = memo(function Escena({
     const c = controls.current
     const nivell = nivellEtiquetes(c ? c.distance : CAMERA.distanciaInicial)
     const perId = new Map(marcadors.map((m) => [m.id, m]))
-    const noves: Etiqueta[] =
+    // Primer el punt destacat, després els més propers a la càmera
+    const ordenades =
       nivell === 'cap'
         ? []
         : projectar()
-        .sort((a, b) => a.profunditat - b.profunditat)
-        .slice(0, 80)
-        .map((p) => {
-          const m = perId.get(p.dada)!
-          return { id: p.dada, x: Math.round(p.x), y: Math.round(p.y), text: nivell === 'codi' ? m.etiqueta : m.etiquetaLlarga }
-        })
+            .sort(
+              (a, b) =>
+                Number(perId.get(b.dada)?.destacat ?? false) - Number(perId.get(a.dada)?.destacat ?? false) ||
+                a.profunditat - b.profunditat,
+            )
+            .slice(0, 80)
+            .map((p) => {
+              const m = perId.get(p.dada)!
+              return { id: p.dada, x: p.x, y: p.y, text: nivell === 'codi' ? m.etiqueta : m.etiquetaLlarga }
+            })
+    const noves = colocarEtiquetes(ordenades, size.width, size.height)
     const clau = JSON.stringify(noves)
     if (clau === ultimes.current) return
     ultimes.current = clau
     onEtiquetes(noves)
-  }, [marcadors, projectar, onEtiquetes])
+  }, [marcadors, projectar, onEtiquetes, size])
 
   // Es recalcula després de cada fotograma dibuixat (només n'hi ha quan canvia res)
   const pendent = useRef(false)

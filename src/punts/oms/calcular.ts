@@ -3,7 +3,7 @@
 import type { Vector3 } from 'three'
 import type { ModelCos } from '../../mapa/model'
 import type { Posicio3D } from '../esquema'
-import { CosMesurable, type Costat } from './cos'
+import { CosMesurable, type Costat, type DadesMakeHuman } from './cos'
 import { calcularReferencies, type Referencies } from './referencies'
 import { REGLES } from './regles'
 
@@ -21,11 +21,8 @@ export interface ResultatCalcul {
   perId: Map<string, PuntCalculat>
 }
 
-export function calcularPunts(
-  model: ModelCos,
-  articulacions: Readonly<Record<string, readonly [number, number, number]>>,
-): ResultatCalcul {
-  const c = new CosMesurable(model, articulacions)
+export function calcularPunts(model: ModelCos, dades: DadesMakeHuman): ResultatCalcul {
+  const c = new CosMesurable(model, dades)
   const referencies = calcularReferencies(c)
   const punts: PuntCalculat[] = []
   for (const def of REGLES) {

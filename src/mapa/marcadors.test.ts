@@ -4,7 +4,16 @@ import { describe, expect, it } from 'vitest'
 import { ambCalibratge, cataleg } from '../punts/cataleg'
 import { posicio3D, posicioMesPropera } from './geometria/baricentriques'
 import { idMarcador, llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from './marcadors'
-import { modelManiqui } from './model'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { beforeAll } from 'vitest'
+import { modelDesDeGlb, modelManiqui, type ModelCos } from './model'
+
+let modelGlb: ModelCos
+beforeAll(async () => {
+  const glb = readFileSync(resolve('public/models/cos.glb'))
+  modelGlb = await modelDesDeGlb(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength))
+})
 
 const model = modelManiqui()
 const a = (x: number, y: number, z: number) => posicioMesPropera(model.geometria, new Vector3(x, y, z))
@@ -38,6 +47,18 @@ describe('punts sobre el model', () => {
     expect(r.map((l) => l.length).sort()).toEqual([1, 2])
     const esquerre = r.find((l) => l.length === 2)!
     expect(esquerre[0]!.y).toBeGreaterThan(esquerre[1]!.y) // ST35 (genoll) abans que ST36
+  })
+
+  it('ST40 és una branca de ST38: la línia principal no hi passa', () => {
+    const tots = puntsSobreModel(cataleg, modelGlb)
+    const linies = recorregutsMeridia(tots, 'ST')
+    const st = (codi: string) => tots.find((p) => p.id === `${codi}|E`)!.posicio
+    const principal = linies.find((l) => l.length > 2 && l.some((v) => v.equals(st('ST38'))))!
+    expect(principal.some((v) => v.equals(st('ST40')))).toBe(false)
+    const i38 = principal.findIndex((v) => v.equals(st('ST38')))
+    expect(principal[i38 + 1]!.equals(st('ST39'))).toBe(true)
+    // i hi ha un segment ST38 → ST40
+    expect(linies.some((l) => l.length === 2 && l[0]!.equals(st('ST38')) && l[1]!.equals(st('ST40')))).toBe(true)
   })
 
   it('l\'id del marcador fa anada i tornada', () => {

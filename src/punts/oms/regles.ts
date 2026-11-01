@@ -3,6 +3,7 @@
 // `regla` declarativa que les proves fan servir per comprovar-lo.
 
 import { Vector3 } from 'three'
+import { normalTriangle } from '../../mapa/geometria/baricentriques'
 import { AMUNT, CosMesurable, DARRERE, DAVANT, dir, signe, v, type Costat } from './cos'
 import type { Referencies, UnitatsCun } from './referencies'
 
@@ -158,20 +159,17 @@ function cap(c: CosMesurable, r: Referencies, costat: Costat, y: number, graus: 
 }
 
 /**
- * Punt del front a una alçada, a una distància de la línia mitja mesurada
- * sobre la pell (seguint l'arc), com es mesuren els cun.
+ * Angle del front (en graus des de davant) a una alçada: on la pell deixa de
+ * mirar endavant i passa a mirar cap al costat (normal a 45°), és a dir, on
+ * el front es gira cap a la templa.
  */
-function arcFront(c: CosMesurable, r: Referencies, costat: Costat, y: number, longitud: number): Vector3 {
-  let anterior = cap(c, r, costat, y, 0)
-  let recorregut = 0
-  for (let graus = 1; graus <= 120; graus++) {
-    const actual = cap(c, r, costat, y, graus)
-    const pas = actual.distanceTo(anterior)
-    if (recorregut + pas >= longitud) return anterior.lerp(actual, (longitud - recorregut) / pas)
-    recorregut += pas
-    anterior = actual
+export function angleDelFront(c: CosMesurable, r: Referencies, costat: Costat, y: number): number {
+  for (let graus = 5; graus <= 85; graus++) {
+    const p = c.aLaPell(cap(c, r, costat, y, graus))
+    const n = normalTriangle(c.model.geometria, p.triangle)
+    if (Math.abs(n.x) >= n.z) return graus
   }
-  throw new Error('El front no és prou ample per a aquesta distància')
+  throw new Error('No s\'ha trobat l\'angle del front')
 }
 
 // --- Estómac (ST) -------------------------------------------------------------
@@ -231,13 +229,20 @@ const ST: DefinicioPunt[] = [
   },
   {
     codi: 'ST7',
-    regla: { tipus: 'referencia', descripcio: 'depressió entre l\'arc zigomàtic i l\'escotadura de la mandíbula' },
-    calcular: (c, r, k) => cap(c, r, k, r[k].ull.y - 0.028, 78),
+    regla: { tipus: 'referencia', descripcio: 'davant del tragus, depressió entre l\'arc zigomàtic i l\'escotadura de la mandíbula' },
+    calcular: (c, r, k) => {
+      // 1 cun davant del tragus, una mica per sota (sota l'arc zigomàtic), entrant des de fora
+      const t = r[k].tragus
+      return c.pellDesDeFora(v(t.x, t.y - 0.004, t.z + r.cun.cap), v(signe(k), 0, 0), 0.2)
+    },
   },
   {
     codi: 'ST8',
-    regla: { tipus: 'referencia', descripcio: '0,5 cun dins la línia del cabell, 4,5 cun lateral a la línia mitja' },
-    calcular: (c, r, k) => arcFront(c, r, k, r.nivellST8, 4.5 * r.cun.cap),
+    regla: { tipus: 'referencia', descripcio: 'angle del front, 0,5 cun dins la línia anterior del cabell' },
+    calcular: (c, r, k) => {
+      const angle = angleDelFront(c, r, k, r.nivellCabell)
+      return cap(c, r, k, r.nivellCabell + 0.5 * r.cun.cap, angle)
+    },
   },
   {
     codi: 'ST9',

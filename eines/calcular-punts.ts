@@ -14,10 +14,10 @@ import { calcularPunts } from '../src/punts/oms/calcular'
 const arrel = new URL('..', import.meta.url).pathname
 const glb = readFileSync(`${arrel}public/models/cos.glb`)
 const model = await modelDesDeGlb(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength))
-const { articulacions } = JSON.parse(readFileSync(`${arrel}src/punts/articulacions.json`, 'utf8'))
+const dades = JSON.parse(readFileSync(`${arrel}src/punts/articulacions.json`, 'utf8'))
 const cataleg = esquemaCataleg.parse(JSON.parse(readFileSync(`${arrel}src/punts/cataleg.json`, 'utf8')))
 
-const { punts } = calcularPunts(model, articulacions)
+const { punts } = calcularPunts(model, dades)
 const perCodi = new Map<string, typeof punts>()
 for (const p of punts) perCodi.set(p.codi, [...(perCodi.get(p.codi) ?? []), p])
 

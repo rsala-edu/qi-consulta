@@ -53,6 +53,56 @@ for v in malla.vertices:
             comptes[nom] = comptes.get(nom, 0) + 1
 articulacions = {nom[len("joint-"):]: a_gltf(sumes[nom] / comptes[nom]) for nom in sorted(sumes)}
 
+# Referències de la pell a partir de les deformacions («targets») de MakeHuman:
+# els vèrtexs que una deformació mou són una regió anatòmica coneguda.
+import gzip  # noqa: E402
+import os  # noqa: E402
+
+import bl_ext.user_default.mpfb as _mpfb  # noqa: E402
+
+DIR_TARGETS = os.path.join(os.path.dirname(_mpfb.__file__), "data", "targets")
+
+
+def desplacaments(nom):
+    carpeta = nom.split("-")[0] if not nom.startswith(("l-", "r-")) else nom.split("-")[1] + "s"
+    with gzip.open(os.path.join(DIR_TARGETS, carpeta, nom + ".target.gz"), "rt") as f:
+        for linia in f:
+            parts = linia.split()
+            if len(parts) == 4 and not linia.startswith("#"):
+                yield int(parts[0]), Vector([float(x) for x in parts[1:]]).length
+
+
+def posicio(i):
+    return cos.matrix_world @ malla.vertices[i].co
+
+
+def centre_del_maxim(nom, condicio=lambda p: True, fraccio=0.95):
+    """Centre dels vèrtexs que la deformació mou gairebé al màxim (la «punta»)."""
+    d = [(i, m) for i, m in desplacaments(nom) if condicio(posicio(i))]
+    maxim = max(m for _, m in d)
+    punts = [posicio(i) for i, m in d if m >= fraccio * maxim]
+    return a_gltf(sum(punts, Vector()) / len(punts))
+
+
+def tragus(costat):
+    # Vèrtexs de l'orella (els que la deformació mou del tot; els del voltant
+    # es mouen poc); el tragus és el més anterior (−Y a Blender) de la franja mitjana
+    d = list(desplacaments(f"{costat}-ear-trans-forward"))
+    maxim = max(m for _, m in d)
+    punts = [posicio(i) for i, m in d if m >= 0.9 * maxim]
+    zmin, zmax = min(p.z for p in punts), max(p.z for p in punts)
+    franja = [p for p in punts if zmin + 0.35 * (zmax - zmin) <= p.z <= zmin + 0.6 * (zmax - zmin)]
+    return a_gltf(min(franja, key=lambda p: p.y))
+
+
+referencies = {
+    "l-mugro": centre_del_maxim("breast-point-incr", lambda p: p.x > 0),
+    "r-mugro": centre_del_maxim("breast-point-incr", lambda p: p.x < 0),
+    "melic": centre_del_maxim("stomach-navel-in"),
+    "l-tragus": tragus("l"),
+    "r-tragus": tragus("r"),
+}
+
 # Treure la geometria auxiliar (aplicar la màscara «body»)
 bpy.context.view_layer.objects.active = cos
 for mod in list(cos.modifiers):
@@ -90,6 +140,7 @@ info = {
     "vertexs": len(malla.vertices),
     "triangles": sum(len(p.vertices) - 2 for p in malla.polygons),
     "articulacions": articulacions,
+    "referencies": referencies,
 }
 with open(SORTIDA_JSON, "w") as f:
     json.dump(info, f, indent=1, ensure_ascii=False)

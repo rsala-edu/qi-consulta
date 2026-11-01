@@ -22,8 +22,9 @@ import { posicio3D, posicioDesDePunt } from '../../mapa/geometria/baricentriques
 import { idMarcador, llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from '../../mapa/marcadors'
 import type { ModelCos } from '../../mapa/model'
 import { useCalibracions } from '../../mapa/useCalibracions'
+import { usePrecaucions } from '../../mapa/usePrecaucions'
 import { useModelCos } from '../../mapa/useModelCos'
-import { cataleg, cercarPunts, nomMeridia, posicioDe } from '../../punts/cataleg'
+import { ambPrecaucions, cataleg, cercarPunts, nomMeridia, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
 
 export function PantallaProvaMapa() {
@@ -49,7 +50,9 @@ interface FitxaOberta {
 
 function Marcatge({ model }: { model: ModelCos }) {
   const visor = useRef<ControlVisor>(null)
-  const { efectiu, desar, restablir } = useCalibracions(model.topologia)
+  const { efectiu: calibrat, desar, restablir } = useCalibracions(model.topologia)
+  const { revisions } = usePrecaucions()
+  const efectiu = useMemo(() => ambPrecaucions(calibrat, revisions ?? []), [calibrat, revisions])
   /** Punt i costat que la doctora està corregint */
   const [correccio, setCorreccio] = useState<{ codi: string; costat: CostatPosicio } | null>(null)
   const [meridia, setMeridia] = useState('')
@@ -237,6 +240,7 @@ function Marcatge({ model }: { model: ModelCos }) {
               <p className="avis" role="note">
                 {puntFitxa.precaucions.embaras && <strong>{t.mapa.precaucioEmbaras}. </strong>}
                 {puntFitxa.precaucions.nota}
+                {puntFitxa.precaucions.confirmada && <span className="detall"> ({t.precaucions.confirmada})</span>}
               </p>
             )}
 

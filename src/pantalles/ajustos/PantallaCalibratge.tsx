@@ -18,7 +18,8 @@ import { idMarcador, puntsSobreModel } from '../../mapa/marcadors'
 import type { ModelCos } from '../../mapa/model'
 import { useCalibracions } from '../../mapa/useCalibracions'
 import { useModelCos } from '../../mapa/useModelCos'
-import { cataleg, exportarCataleg, posicioDe } from '../../punts/cataleg'
+import { usePrecaucions } from '../../mapa/usePrecaucions'
+import { ambPrecaucions, cataleg, exportarCataleg, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
 
 export function PantallaCalibratge() {
@@ -41,6 +42,7 @@ export function PantallaCalibratge() {
 function Calibratge({ model }: { model: ModelCos }) {
   const visor = useRef<ControlVisor>(null)
   const { calibracions, efectiu, desar, descartarTot } = useCalibracions(model.topologia)
+  const { revisions } = usePrecaucions()
   const [meridia, setMeridia] = useState(cataleg.meridians[0]!.codi)
   const [seleccionat, setSeleccionat] = useState<string | null>(null)
   const [costat, setCostat] = useState<CostatPosicio>('E')
@@ -86,7 +88,7 @@ function Calibratge({ model }: { model: ModelCos }) {
   const n = sobreModel.length
 
   function exportar() {
-    const blob = new Blob([exportarCataleg(efectiu)], { type: 'application/json' })
+    const blob = new Blob([exportarCataleg(ambPrecaucions(efectiu, revisions ?? []))], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url

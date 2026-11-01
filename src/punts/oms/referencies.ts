@@ -3,7 +3,7 @@
 //   canell – plec del colze ................ 12 cun
 //   plec axil·lar anterior – plec del colze .  9 cun
 //   entre els dos mugrons ...................  8 cun
-//   fossa supraesternal – unió xifoesternal .  9 cun
+//   (la unió xifoesternal es pren a l'alçada del 5è espai intercostal, com CV16)
 //   unió xifoesternal – melic ...............  8 cun
 //   melic – vora superior de la símfisi .....  5 cun
 //   símfisi – base de la ròtula ............. 18 cun
@@ -66,6 +66,7 @@ export interface ReferenciesCostat {
   malleolExtern: Vector3
   // Cara
   ull: Vector3
+  tragus: Vector3
 }
 
 export interface Referencies {
@@ -87,8 +88,8 @@ export interface Referencies {
   nivellBaseNas: number
   nivellBoca: number
   nivellCellaSuperior: number
-  /** Alçada de ST8 (0,5 cun dins la línia anterior del cabell) */
-  nivellST8: number
+  /** Alçada de la línia anterior del cabell (3 cun per sobre de la glabel·la) */
+  nivellCabell: number
 }
 
 /** Punts de la línia mitja del cap, de la glabel·la (alçada `yInici`) fins al vèrtex. */
@@ -137,10 +138,9 @@ function referenciesCostat(c: CosMesurable, costat: Costat): ReferenciesCostat {
   const lateralColze = colze.clone().sub(espatlla).cross(canell.clone().sub(colze)).multiplyScalar(-s).normalize()
   const anteriorColze = perpendicular(eixAvantbrac, eixBrac)
 
-  // Mugró: el vèrtex més avançat del pit en aquest costat
-  const candidats = c.vertexsDins(v(s > 0 ? 0.04 : -0.17, 1.08, 0), v(s > 0 ? 0.17 : -0.04, 1.32, 0.3))
-  const mugroVertex = candidats.reduce((a, b) => (b.z > a.z ? b : a))
-  const mugro = c.puntDe(c.aLaPell(mugroVertex))
+  // Mugró: el relleu més corbat de la pell a menys de 3 cm de la referència de
+  // MakeHuman («breast-point», que marca la zona del pit però no la punta)
+  const mugro = c.curvaturaMaxima(c.ref('mugro', costat), 0.03)
 
   // Clavícula: de l'articulació esternoclavicular cap a l'acromi
   const esternoclav = c.art('clavicle', costat)
@@ -187,6 +187,7 @@ function referenciesCostat(c: CosMesurable, costat: Costat): ReferenciesCostat {
     espinaIliaca,
     malleolExtern,
     ull: c.art('eye', costat),
+    tragus: c.ref('tragus', costat),
   }
 }
 
@@ -209,24 +210,15 @@ export function calcularReferencies(c: CosMesurable): Referencies {
   const fossaSupraesternal = c.pell(v(0, esternoclav.y + 0.006, esternoclav.z - 0.02), DAVANT)
   const cunPit = (Math.abs(E.mugro.x) + Math.abs(D.mugro.x)) / 8
 
-  // Melic: la depressió més marcada del perfil de l'abdomen a la línia mitja
-  const perfil = perfilMitja(c, 0.9, 1.12, 0.002)
-  let melicY = perfil[0]!.y
-  let pitjor = Infinity
-  perfil.forEach((p, i) => {
-    const veins = perfil.slice(Math.max(0, i - 10), i + 11)
-    const mitjana = veins.reduce((a, b) => a + b.z, 0) / veins.length
-    if (i > 10 && i < perfil.length - 10 && p.z - mitjana < pitjor) {
-      pitjor = p.z - mitjana
-      melicY = p.y
-    }
-  })
-  const melic = c.pell(v(0, melicY, -0.02), DAVANT)
+  // Melic: el centre que mou la deformació «navel-in» de MakeHuman
+  const melic = c.ref('melic')
 
   // Símfisi del pubis: a l'alçada dels caps del fèmur
   const nivellSimfisi = (E.maluc.y + D.maluc.y) / 2
   const simfisi = c.pell(v(0, nivellSimfisi, -0.02), DAVANT)
-  const unioXifoesternal = c.pell(v(0, fossaSupraesternal.y - 9 * cunPit, -0.02), DAVANT)
+  // Unió xifoesternal (CV16): a l'alçada del 5è espai intercostal
+  const nivellXifoide = (E.mugro.y + D.mugro.y) / 2 - (E.espaiIntercostal + D.espaiIntercostal) / 2
+  const unioXifoesternal = c.pell(v(0, nivellXifoide, -0.02), DAVANT)
 
   // Coll: nivells del cartílag tiroide i del cricoide entre la fossa i el mentó
   const mento = c.art('jaw')
@@ -257,8 +249,8 @@ export function calcularReferencies(c: CosMesurable): Referencies {
   const nivellCellaSuperior = ull.y + 0.018
   const arc = arcSagital(c, centreCap, nivellCellaSuperior)
   const cunCap = longitud(arc) / 8
-  // Línia anterior del cabell + 0,5 cun (alçada de ST8): 3,5 cun sobre l'arc
-  const nivellST8 = puntSobreArc(arc, 3.5 * cunCap).y
+  // Línia anterior del cabell: 3 cun per sobre de la glabel·la, sobre l'arc
+  const nivellCabell = puntSobreArc(arc, 3 * cunCap).y
 
   const cun: UnitatsCun = {
     avantbrac: (E.colze.distanceTo(E.canell) + D.colze.distanceTo(D.canell)) / 2 / 12,
@@ -287,7 +279,7 @@ export function calcularReferencies(c: CosMesurable): Referencies {
     nivellBaseNas,
     nivellBoca,
     nivellCellaSuperior,
-    nivellST8,
+    nivellCabell,
   }
 }
 

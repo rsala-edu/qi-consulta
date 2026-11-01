@@ -11,6 +11,7 @@ import { PantallaDesbloqueig } from './pantalles/desbloqueig/PantallaDesbloqueig
 import { PantallaNouPacient } from './pantalles/pacients/PantallaNouPacient'
 import { PantallaPacients } from './pantalles/pacients/PantallaPacients'
 import { PantallaAjustos } from './pantalles/ajustos/PantallaAjustos'
+import { PantallaPrecaucions } from './pantalles/ajustos/PantallaPrecaucions'
 
 // Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
 const PantallaCalibratge = lazy(() =>
@@ -82,6 +83,7 @@ function Porta() {
             <Route path="mapa" element={<PantallaProvaMapa />} />
             <Route path="ajustos" element={<PantallaAjustos />} />
             <Route path="ajustos/calibratge" element={<PantallaCalibratge />} />
+            <Route path="ajustos/precaucions" element={<PantallaPrecaucions />} />
             <Route path="*" element={<Navigate to="/pacients" replace />} />
           </Route>
         </Routes>
