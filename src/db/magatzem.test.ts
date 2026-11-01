@@ -3,6 +3,7 @@ import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ErrorDesxifratge } from '../crypto'
 import { clauDeProva, fitxaInventada, pacientInventat } from '../test/dadesInventades'
+import { novaCita } from '../domini/cita'
 import { QiDB } from './esquema'
 import { crearMagatzem, type Magatzem } from './magatzem'
 
@@ -102,5 +103,48 @@ describe('fitxa clínica', () => {
 
   it('no es pot desar per a un pacient que no existeix', async () => {
     await expect(magatzem.desarFitxaClinica(crypto.randomUUID(), fitxaInventada())).rejects.toThrow()
+  })
+})
+
+describe('cites', () => {
+  it('crea, llegeix, edita i esborra una cita xifrada', async () => {
+    const p = await magatzem.crearPacient(pacientInventat())
+    const c = await magatzem.crearCita({ ...novaCita(p.id, '2026-11-02T10:15', 'primera'), motiu: 'Acúfens' })
+    expect(c.durada).toBe(60)
+    expect(await magatzem.obtenirCita(c.id)).toEqual(c)
+
+    // en clar només hi ha l'id, el pacient i les dates
+    const brut = JSON.stringify(await db.cites.get(c.id))
+    for (const valor of ['Acúfens', 'primera', 'programada', '"durada"']) expect(brut).not.toContain(valor)
+    expect(brut).toContain('2026-11-02T10:15')
+
+    const editada = await magatzem.actualitzarCita(c.id, { ...c, inici: '2026-11-03T09:00', estat: 'feta' })
+    expect(editada.creatAt).toBe(c.creatAt)
+    expect((await magatzem.obtenirCita(c.id))!.estat).toBe('feta')
+    await magatzem.esborrarCita(c.id)
+    expect(await magatzem.obtenirCita(c.id)).toBeUndefined()
+  })
+
+  it('llista per interval de dies i per pacient, en ordre', async () => {
+    const a = await magatzem.crearPacient(pacientInventat())
+    const b = await magatzem.crearPacient(pacientInventat({ nom: 'Biel' }))
+    await magatzem.crearCita(novaCita(a.id, '2026-11-03T12:00'))
+    await magatzem.crearCita(novaCita(b.id, '2026-11-02T09:00'))
+    await magatzem.crearCita(novaCita(a.id, '2026-11-02T17:30'))
+    await magatzem.crearCita(novaCita(a.id, '2026-11-10T10:00'))
+
+    const dia = await magatzem.llistarCites('2026-11-02', '2026-11-03')
+    expect(dia.map((c) => c.inici)).toEqual(['2026-11-02T09:00', '2026-11-02T17:30'])
+    const setmana = await magatzem.llistarCites('2026-11-02', '2026-11-09')
+    expect(setmana).toHaveLength(3)
+    const deA = await magatzem.citesDelPacient(a.id)
+    expect(deA.map((c) => c.inici)).toEqual(['2026-11-02T17:30', '2026-11-03T12:00', '2026-11-10T10:00'])
+  })
+
+  it('no accepta una cita d\'un pacient que no existeix ni dades invàlides', async () => {
+    await expect(magatzem.crearCita(novaCita('no-existeix', '2026-11-02T10:00'))).rejects.toThrow()
+    const p = await magatzem.crearPacient(pacientInventat())
+    await expect(magatzem.crearCita({ ...novaCita(p.id, '2026-11-02T10:00'), durada: -5 })).rejects.toThrow()
+    expect(await db.cites.count()).toBe(0)
   })
 })

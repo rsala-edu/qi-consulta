@@ -13,6 +13,8 @@ export interface RegistreXifrat {
   creatAt: string
   modificatAt: string
   pacientId?: string
+  /** Cites: hora d'inici local («2026-11-02T10:15»), per cercar per dies */
+  inici?: string
   xifrat: DadesXifrades
 }
 
@@ -51,7 +53,7 @@ export interface RegistreCategoriaPrecaucio {
   confirmadaAt: string
 }
 
-export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys'
+export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites'
 
 export class QiDB extends Dexie {
   meta!: Table<RegistreMeta, RegistreMeta['clau']>
@@ -59,6 +61,7 @@ export class QiDB extends Dexie {
   fitxesCliniques!: Table<RegistreXifrat, string>
   /** L'id és la clau del formulari */
   esborranys!: Table<RegistreXifrat, string>
+  cites!: Table<RegistreXifrat, string>
   calibratge!: Table<RegistreCalibratge, string>
   /** Excepcions per punt */
   precaucions!: Table<RegistrePrecaucio, string>
@@ -100,5 +103,8 @@ export class QiDB extends Dexie {
             delete r.embaras
           })
       })
+    this.version(6).stores({
+      cites: 'id, inici, pacientId, modificatAt',
+    })
   }
 }

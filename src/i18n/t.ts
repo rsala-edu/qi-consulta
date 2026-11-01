@@ -13,3 +13,34 @@ const formatDataHora = new Intl.DateTimeFormat('ca', { dateStyle: 'medium', time
 export function dataHora(iso: string): string {
   return formatDataHora.format(new Date(iso))
 }
+
+// Dates locals de l'agenda («2026-11-02» o «2026-11-02T10:15»). Es formen a
+// mà, amb els noms de ca.ts, perquè Intl no dona el mateix a tots els
+// navegadors («de 2026» o «del 2026»).
+function parts(dia: string) {
+  const [a, m, d] = dia.slice(0, 10).split('-').map(Number)
+  return { any: a!, mes: m! - 1, dia: d!, setmana: new Date(a!, m! - 1, d!).getDay() }
+}
+
+/** «dilluns, 2 de novembre de 2026» */
+export function diaLlarg(dia: string): string {
+  const p = parts(dia)
+  return `${t.dates.dies[p.setmana]}, ${p.dia} ${t.dates.mesos[p.mes]} de ${p.any}`
+}
+
+/** «dl. 2» */
+export function diaCurt(dia: string): string {
+  const p = parts(dia)
+  return `${t.dates.diesCurts[p.setmana]} ${p.dia}`
+}
+
+/** «novembre de 2026» */
+export function mesAny(dia: string): string {
+  const p = parts(dia)
+  return `${t.dates.mesosNom[p.mes]} de ${p.any}`
+}
+
+/** «10:15» */
+export function hora(diaHora: string): string {
+  return diaHora.slice(11, 16)
+}

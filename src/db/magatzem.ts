@@ -15,6 +15,7 @@ import {
   type Pacient,
   type PacientGuardat,
 } from '../domini/pacient'
+import { esquemaCitaGuardada, esquemaDadesCita, type Cita, type DadesCita } from '../domini/cita'
 import { esquemaEsborranyGuardat, type Esborrany, type EsborranyGuardat } from '../domini/esborrany'
 import { araIso, nouId } from '../domini/registre'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
@@ -45,6 +46,13 @@ export interface Magatzem {
   llistarEsborranys(): Promise<Esborrany[]>
   desarEsborrany(clau: string, esborrany: EsborranyGuardat): Promise<void>
   esborrarEsborrany(clau: string): Promise<void>
+  /** Cites amb inici dins [desDe, finsA) (dies o dies i hora locals), ordenades */
+  llistarCites(desDe: string, finsA: string): Promise<Cita[]>
+  citesDelPacient(pacientId: string): Promise<Cita[]>
+  obtenirCita(id: string): Promise<Cita | undefined>
+  crearCita(dades: DadesCita): Promise<Cita>
+  actualitzarCita(id: string, dades: DadesCita): Promise<Cita>
+  esborrarCita(id: string): Promise<void>
 }
 
 export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
@@ -73,6 +81,27 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     const p = await magatzem.obtenirPacient(id)
     if (!p) throw new Error(`No existeix el pacient ${id}`)
     return p
+  }
+
+  async function llegirCita(r: RegistreXifrat): Promise<Cita> {
+    const dades = await obrir(clau, 'cites', r, esquemaCitaGuardada)
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, inici: r.inici!, ...dades }
+  }
+
+  async function guardarCita(id: string, creatAt: string, dades: DadesCita): Promise<Cita> {
+    const valid = esquemaDadesCita.parse(dades)
+    await pacientExistent(valid.pacientId)
+    const { pacientId, inici, ...resta } = valid
+    const modificatAt = araIso()
+    await db.cites.put({
+      id,
+      creatAt,
+      modificatAt,
+      pacientId,
+      inici,
+      xifrat: await xifrarJson(clau, esquemaCitaGuardada.parse(resta), context('cites', id)),
+    })
+    return { id, creatAt, modificatAt, ...valid }
   }
 
   const magatzem: Magatzem = {
@@ -154,6 +183,35 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
 
     async esborrarEsborrany(clauFormulari) {
       await db.esborranys.delete(clauFormulari)
+    },
+
+    async llistarCites(desDe, finsA) {
+      const registres = await db.cites.where('inici').between(desDe, finsA, true, false).sortBy('inici')
+      return Promise.all(registres.map(llegirCita))
+    },
+
+    async citesDelPacient(pacientId) {
+      const registres = await db.cites.where('pacientId').equals(pacientId).sortBy('inici')
+      return Promise.all(registres.map(llegirCita))
+    },
+
+    async obtenirCita(id) {
+      const r = await db.cites.get(id)
+      return r && llegirCita(r)
+    },
+
+    async crearCita(dades) {
+      return guardarCita(nouId(), araIso(), dades)
+    },
+
+    async actualitzarCita(id, dades) {
+      const actual = await db.cites.get(id)
+      if (!actual) throw new Error(`No existeix la cita ${id}`)
+      return guardarCita(id, actual.creatAt, dades)
+    },
+
+    async esborrarCita(id) {
+      await db.cites.delete(id)
     },
   }
   return magatzem
