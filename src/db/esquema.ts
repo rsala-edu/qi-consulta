@@ -25,7 +25,7 @@ export type RegistreMeta =
   /** Altres maneres d'obrir la clau mestra: empremta i clau de recuperació */
   | { clau: 'secrets'; valor: EmbolcallSecret[] }
   /** Aquest dispositiu s'ha connectat amb el compte de Google de la doctora */
-  | { clau: 'google'; valor: { connectatAt: string; ultimaCopia: string | null } }
+  | { clau: 'google'; valor: { connectatAt: string; ultimaCopia: string | null; sub?: string } }
 
 /** Taules que se sincronitzen amb Google Drive */
 export type TaulaSincronitzada = 'pacients' | 'fitxesCliniques' | 'cites' | 'calibratge' | 'precaucions' | 'categoriesPrecaucio'

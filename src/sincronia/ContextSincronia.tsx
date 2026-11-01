@@ -1,14 +1,27 @@
 // Sincronia automàtica amb Google Drive mentre l'app és oberta: uns segons
 // després de cada canvi, cada cinc minuts (per rebre els canvis de l'altre
-// dispositiu) i en connectar-se. Si el permís de Google ha caducat, ho diu i
-// un toc el renova.
+// dispositiu) i en connectar-se.
+//
+// El permís de Google dura una hora. Quan ha caducat (o en queden menys de
+// deu minuts), el pròxim toc de la doctora a qualsevol lloc de l'app obre la
+// renovació silenciosa: la finestra de Google s'obre i es tanca sola, sense
+// preguntar res. Mentrestant els canvis queden desats al dispositiu i es
+// pugen després. «Drive: connectar» només apareix si la renovació falla.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { guardarEstatGoogle, llegirEstatGoogle } from '../db/magatzem'
+import { guardarEstatGoogle, llegirEstatGoogle, type EstatGoogle } from '../db/magatzem'
 import { useClauMestra, useSessio } from '../sessio/ContextSessio'
 import { TAULES } from './copia'
 import { driveGoogle, ErrorAutoritzacio } from './drive'
-import { googleConfigurat, oblidarPermis, quanCanviiElPermis, tokenGoogle } from './google'
+import {
+  acceptarPermis,
+  calRenovarPermis,
+  googleConfigurat,
+  iniciarSessioGoogle,
+  oblidarPermis,
+  quanCanviiElPermis,
+  tokenGoogle,
+} from './google'
 import { sincronitzar } from './sincronitzar'
 
 export type EstatSincronia =
@@ -35,6 +48,11 @@ const Context = createContext<ValorSincronia | null>(null)
 
 export const ESPERA_DESPRES_DE_DESAR = 5_000
 const CADA = 5 * 60_000
+/** Després d'una renovació silenciosa fallida, no es torna a provar fins al cap de deu minuts */
+const ESPERA_DESPRES_DE_FALLAR = 10 * 60_000
+
+/** Atribut dels botons que ja connecten amb Google (no cal la renovació silenciosa) */
+export const ATRIBUT_CONNECTAR = 'data-connectar-google'
 
 export function ProveidorSincronia({ children }: { children: ReactNode }) {
   const { db, connectarGoogle } = useSessio()
@@ -45,13 +63,29 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   const enCurs = useRef(false)
   const pendentRef = useRef(false)
   const temporitzador = useRef<number | undefined>(undefined)
+  /** Estat desat de Google: si aquest dispositiu ja s'hi ha connectat (i la pista del compte) */
+  const google = useRef<EstatGoogle | null>(null)
+  const renovant = useRef(false)
+  const fallitAt = useRef(0)
+
+  /** Es podrà renovar el permís amb el pròxim toc, sense preguntar res */
+  const esperaRenovacio = useCallback(
+    () => google.current !== null && Date.now() - fallitAt.current > ESPERA_DESPRES_DE_FALLAR,
+    [],
+  )
+
+  /** Sense permís: si es pot renovar amb el pròxim toc, els canvis queden pendents; si no, cal connectar */
+  const sensePermis = useCallback(() => {
+    if (esperaRenovacio()) {
+      pendentRef.current = true
+      setPendent(true)
+      setEstat('al-dia')
+    } else setEstat('cal-connectar')
+  }, [esperaRenovacio])
 
   const sincronitzarAra = useCallback(async () => {
     if (!googleConfigurat()) return
-    if (!tokenGoogle()) {
-      setEstat('cal-connectar')
-      return
-    }
+    if (!tokenGoogle()) return sensePermis()
     if (enCurs.current) {
       pendentRef.current = true
       return
@@ -64,7 +98,9 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         setEstat('sincronitzant')
         const r = await sincronitzar(db, clau, driveGoogle(tokenGoogle))
         const anterior = await llegirEstatGoogle(db)
-        await guardarEstatGoogle(db, { connectatAt: anterior?.connectatAt ?? new Date().toISOString(), ultimaCopia: r.copiaAt })
+        const nou = { ...anterior, connectatAt: anterior?.connectatAt ?? new Date().toISOString(), ultimaCopia: r.copiaAt }
+        await guardarEstatGoogle(db, nou)
+        google.current = nou
         setUltimaCopia(r.copiaAt)
         setEstat('al-dia')
       } while (pendentRef.current && tokenGoogle())
@@ -72,20 +108,22 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
     } catch (e) {
       if (e instanceof ErrorAutoritzacio) {
         oblidarPermis()
-        setEstat('cal-connectar')
+        sensePermis()
       } else setEstat('error')
     } finally {
       enCurs.current = false
     }
-  }, [db, clau])
+  }, [db, clau, sensePermis])
 
   // En obrir: l'última còpia coneguda i, si ja hi ha permís, sincronitzar
   useEffect(() => {
     let actiu = true
     void llegirEstatGoogle(db).then((g) => {
       if (!actiu) return
+      google.current = g
       setUltimaCopia(g?.ultimaCopia ?? null)
       if (tokenGoogle()) void sincronitzarAra()
+      else if (googleConfigurat()) setEstat(g ? 'al-dia' : 'cal-connectar')
     })
     const desfer = quanCanviiElPermis(() => {
       if (tokenGoogle()) void sincronitzarAra()
@@ -95,6 +133,35 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       desfer()
     }
   }, [db, sincronitzarAra])
+
+  // Renovació silenciosa amb el pròxim toc. S'escolta en fase de captura i no
+  // atura el toc: el botó que s'ha tocat fa la seva feina igualment.
+  useEffect(() => {
+    if (!googleConfigurat()) return
+    const alTocar = (ev: MouseEvent) => {
+      if (renovant.current || !calRenovarPermis() || !esperaRenovacio()) return
+      if ((ev.target as Element | null)?.closest?.(`[${ATRIBUT_CONNECTAR}]`)) return
+      renovant.current = true
+      // window.open s'ha de fer ara mateix, dins el toc
+      iniciarSessioGoogle({ mode: 'silenciosa', pista: google.current?.sub || undefined })
+        .then(acceptarPermis)
+        .then(async ({ sub }) => {
+          if (sub && google.current && google.current.sub !== sub) {
+            google.current = { ...google.current, sub }
+            await guardarEstatGoogle(db, google.current)
+          }
+        })
+        .catch(() => {
+          fallitAt.current = Date.now()
+          if (!tokenGoogle()) setEstat('cal-connectar')
+        })
+        .finally(() => {
+          renovant.current = false
+        })
+    }
+    document.addEventListener('click', alTocar, true)
+    return () => document.removeEventListener('click', alTocar, true)
+  }, [db, esperaRenovacio])
 
   // Cada canvi a les taules que se sincronitzen es puja uns segons després
   useEffect(() => {
@@ -125,8 +192,12 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
     }
   }, [db, sincronitzarAra])
 
-  // En arribar el permís, la subscripció de dalt ja sincronitza
-  const connectar = connectarGoogle
+  // Reserva manual. En arribar el permís, la subscripció de dalt ja sincronitza
+  const connectar = useCallback(async () => {
+    await connectarGoogle()
+    fallitAt.current = 0
+    google.current = await llegirEstatGoogle(db)
+  }, [connectarGoogle, db])
 
   const valor = useMemo(
     () => ({ estat, ultimaCopia, pendent, connectar, sincronitzarAra }),

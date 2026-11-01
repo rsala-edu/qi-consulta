@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import { faTemps, formatar, t } from '../i18n/t'
-import { useSincronia } from '../sincronia/ContextSincronia'
+import { ATRIBUT_CONNECTAR, useSincronia } from '../sincronia/ContextSincronia'
 import { Boto } from './Boto'
 
 export function EstatCopia() {
@@ -34,6 +34,7 @@ export function EstatCopia() {
       {estat === 'cal-connectar' && (
         <Boto
           variant="secundari"
+          {...{ [ATRIBUT_CONNECTAR]: '' }}
           onClick={() => {
             setError(false)
             connectar().catch(() => setError(true))

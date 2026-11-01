@@ -2,7 +2,7 @@
 // Si cal tornar a connectar, un toc obre la finestra de Google.
 
 import { t } from '../i18n/t'
-import { useSincronia } from '../sincronia/ContextSincronia'
+import { ATRIBUT_CONNECTAR, useSincronia } from '../sincronia/ContextSincronia'
 
 export function IndicadorCopia() {
   const { estat, pendent, connectar, sincronitzarAra } = useSincronia()
@@ -11,6 +11,7 @@ export function IndicadorCopia() {
     <button
       type="button"
       className={`indicador-copia estat-${estat}`}
+      {...{ [ATRIBUT_CONNECTAR]: estat === 'cal-connectar' ? '' : undefined }}
       title={estat === 'cal-connectar' ? t.sincronia.calConnectar : undefined}
       onClick={() => {
         if (estat === 'cal-connectar') void connectar().catch(() => {})

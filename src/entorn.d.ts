@@ -3,8 +3,8 @@
 interface ImportMetaEnv {
   /** ID del client OAuth de Google (és públic) */
   readonly VITE_GOOGLE_CLIENT_ID?: string
-  /** SHA-256 del correu de la doctora en minúscules (mai el correu en clar) */
-  readonly VITE_HASH_CORREU_DOCTORA?: string
+  /** SHA-256 dels correus permesos (en minúscules), separats per comes; mai els correus en clar */
+  readonly VITE_HASHOS_CORREUS_PERMESOS?: string
 }
 
 interface ImportMeta {

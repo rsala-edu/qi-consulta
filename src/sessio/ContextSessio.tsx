@@ -92,10 +92,10 @@ export function ProveidorSessio({
 
   const connectarGoogle = useCallback(async () => {
     // La finestra s'obre abans de cap espera: ha de ser dins el mateix toc
-    const finestra = iniciarSessioGoogle({ triarCompte: estat.tipus === 'sense-google' })
-    await acceptarPermis(await finestra)
+    const finestra = iniciarSessioGoogle({ mode: estat.tipus === 'sense-google' ? 'triar' : 'normal' })
+    const { sub } = await acceptarPermis(await finestra)
     const anterior = await llegirEstatGoogle(db)
-    await guardarEstatGoogle(db, { connectatAt: new Date().toISOString(), ultimaCopia: anterior?.ultimaCopia ?? null })
+    await guardarEstatGoogle(db, { connectatAt: new Date().toISOString(), ultimaCopia: anterior?.ultimaCopia ?? null, sub })
     // Dispositiu nou: si ja hi ha dades a Drive, es restauren
     if (!(await llegirClauEmbolcallada(db))) {
       const fitxer = await copiaDeDrive(driveGoogle(tokenGoogle))

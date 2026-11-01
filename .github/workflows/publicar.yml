@@ -58,8 +58,9 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          # SHA-256 del correu de la doctora (variable del repositori; mai el correu en clar)
-          VITE_HASH_CORREU_DOCTORA: ${{ vars.HASH_CORREU_DOCTORA }}
+          # SHA-256 dels correus que poden entrar, separats per comes (variable
+          # del repositori; mai els correus en clar)
+          VITE_HASHOS_CORREUS_PERMESOS: ${{ vars.HASHOS_CORREUS_PERMESOS }}
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

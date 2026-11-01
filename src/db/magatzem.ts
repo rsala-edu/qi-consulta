@@ -250,6 +250,8 @@ export async function guardarSecrets(db: QiDB, valor: EmbolcallSecret[]): Promis
 export interface EstatGoogle {
   connectatAt: string
   ultimaCopia: string | null
+  /** Identificador intern del compte de Google (no el correu): pista per renovar el permís */
+  sub?: string
 }
 
 export async function llegirEstatGoogle(db: QiDB): Promise<EstatGoogle | null> {

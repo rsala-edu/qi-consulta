@@ -2,8 +2,9 @@
 // Google Drive en memòria. Cap prova surt a internet. Només dades inventades.
 import { test as base, expect, type BrowserContext, type Page } from '@playwright/test'
 
-/** Correu inventat de la doctora; el seu hash és VITE_HASH_CORREU_DOCTORA a playwright.config.ts */
+/** Correus inventats permesos; els seus hashos són a VITE_HASHOS_CORREUS_PERMESOS (playwright.config.ts) */
 export const CORREU_DOCTORA = 'doctora@exemple.invalid'
+export const CORREU_PROVES = 'proves@exemple.invalid'
 
 export interface FitxerSimulat {
   id: string
@@ -18,6 +19,12 @@ export interface GoogleSimulat {
   fitxers: Map<string, FitxerSimulat>
   /** Peticions a l'API de Drive (mètode i ruta), per comprovar què s'ha fet */
   peticions: string[]
+  /** Cada obertura de la pàgina d'autorització: el `prompt` i la pista del compte */
+  autoritzacions: { prompt: string | null; pista: string | null }[]
+  /** Segons que dura cada permís (per simular que caduca aviat) */
+  durada: number
+  /** La renovació silenciosa (prompt=none) falla, com si Google hagués de preguntar */
+  silenciosaFalla: boolean
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' }
@@ -31,15 +38,17 @@ export async function simularGoogle(context: BrowserContext, google: GoogleSimul
     const u = new URL(route.request().url())
     const retorn = u.searchParams.get('redirect_uri')!
     const estat = u.searchParams.get('state')!
-    const token = `token-simulat-${crypto.randomUUID()}`
-    await route.fulfill({
-      status: 302,
-      headers: { location: `${retorn}#access_token=${token}&token_type=Bearer&expires_in=3599&state=${estat}` },
-    })
+    const prompt = u.searchParams.get('prompt')
+    google.autoritzacions.push({ prompt, pista: u.searchParams.get('login_hint') })
+    const resposta =
+      prompt === 'none' && google.silenciosaFalla
+        ? `error=interaction_required&state=${estat}`
+        : `access_token=token-simulat-${crypto.randomUUID()}&token_type=Bearer&expires_in=${google.durada}&state=${estat}`
+    await route.fulfill({ status: 302, headers: { location: `${retorn}#${resposta}` } })
   })
 
   await context.route('https://openidconnect.googleapis.com/**', (route) =>
-    route.fulfill({ headers: CORS, json: { email: google.correu, email_verified: true } }),
+    route.fulfill({ headers: CORS, json: { sub: `sub-${google.correu.split('@')[0]}`, email: google.correu, email_verified: true } }),
   )
 
   await context.route('https://www.googleapis.com/**', async (route) => {
@@ -78,7 +87,7 @@ export async function simularGoogle(context: BrowserContext, google: GoogleSimul
 }
 
 export function nouGoogle(correu = CORREU_DOCTORA): GoogleSimulat {
-  return { correu, fitxers: new Map(), peticions: [] }
+  return { correu, fitxers: new Map(), peticions: [], autoritzacions: [], durada: 3599, silenciosaFalla: false }
 }
 
 /** Totes les proves tenen Google simulat (cada una el seu Drive buit). */

@@ -3,7 +3,15 @@
 // empremta (autenticador virtual amb PRF) i pantalla Avui.
 // Google és simulat (tests/e2e/google.ts) i totes les dades són inventades.
 import type { Browser, Page } from '@playwright/test'
-import { continuarAmbGoogle, expect as expectBase, nouGoogle, simularGoogle, test, type GoogleSimulat } from './google.js'
+import {
+  continuarAmbGoogle,
+  CORREU_PROVES,
+  expect as expectBase,
+  nouGoogle,
+  simularGoogle,
+  test,
+  type GoogleSimulat,
+} from './google.js'
 
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 const expect = expectBase.configure({ timeout: 15_000 })
@@ -49,6 +57,56 @@ test('un altre compte de Google no pot entrar', async ({ browser }, info) => {
   await expect(page.getByRole('alert')).toHaveText('Aquest compte de Google no té accés a Qi. Entra amb el compte de la doctora.')
   await expect(page.getByLabel('Contrasenya', { exact: true })).toHaveCount(0)
   await context.close()
+})
+
+test('el compte de proves (el segon hash de la llista) també pot entrar', async ({ browser }, info) => {
+  const context = await browser.newContext(info.project.use)
+  await simularGoogle(context, nouGoogle(CORREU_PROVES))
+  const page = await context.newPage()
+  await crearContrasenya(page)
+  await context.close()
+})
+
+test('el permís de Google caducat es renova sol amb el pròxim toc, sense «Drive: connectar»', async ({ page, google }) => {
+  // El primer permís dura només 61 s: en un segon ja no serveix
+  google.durada = 61
+  await crearContrasenya(page)
+  google.durada = 3599
+  await page.waitForTimeout(1_500)
+
+  // La doctora fa la seva feina: el primer toc renova el permís sense preguntar res
+  await nouPacient(page, 'Aina', 'Provencal Inventada', '600 111 222')
+  await esperarCopia(page)
+  expect(google.autoritzacions).toEqual([
+    { prompt: 'select_account', pista: null },
+    { prompt: 'none', pista: 'sub-doctora' },
+  ])
+  const principal = [...google.fitxers.values()].find((f) => f.name === 'qi-dades.json')!
+  expect(principal.contingut).not.toContain('Aina')
+  // Amb el permís nou (una hora), els tocs següents ja no obren res
+  await menu(page, 'Avui').click()
+  await menu(page, 'Agenda').click()
+  expect(google.autoritzacions).toHaveLength(2)
+})
+
+test('si la renovació silenciosa falla, queda «Drive: connectar» com a reserva', async ({ page, google }) => {
+  google.durada = 61
+  google.silenciosaFalla = true
+  await crearContrasenya(page)
+  google.durada = 3599
+  await page.waitForTimeout(1_500)
+
+  await menu(page, 'Pacients').click()
+  const indicador = page.locator('.indicador-copia')
+  await expect(indicador).toHaveText('Drive: connectar')
+  expect(google.autoritzacions.at(-1)).toEqual({ prompt: 'none', pista: 'sub-doctora' })
+  // Un altre toc no torna a provar-ho de seguida
+  await menu(page, 'Avui').click()
+  expect(google.autoritzacions.filter((a) => a.prompt === 'none')).toHaveLength(1)
+
+  await indicador.click()
+  await esperarCopia(page)
+  expect(google.autoritzacions.at(-1)!.prompt).toBeNull()
 })
 
 test('còpia xifrada a Drive, restauració en un altre dispositiu i canvis entre tots dos', async ({
@@ -122,7 +180,7 @@ test('clau de recuperació: imprimir-la i entrar amb ella si s\'oblida la contra
   // Escrita en minúscules i amb espais també val
   await page.getByLabel('Clau de recuperació').fill(clau.toLowerCase().replace(/-/g, ' '))
   await page.getByRole('button', { name: 'Posar la contrasenya nova i entrar' }).click()
-  await expect(page.getByRole('button', { name: 'Bloquejar' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Bloquejar', exact: true })).toBeVisible()
 
   // Ara val la contrasenya nova i no l'antiga
   await page.getByRole('button', { name: 'Bloquejar' }).click()
@@ -131,7 +189,7 @@ test('clau de recuperació: imprimir-la i entrar amb ella si s\'oblida la contra
   await expect(page.getByRole('alert')).toHaveText('La contrasenya no és correcta.')
   await page.getByLabel('Contrasenya', { exact: true }).fill('contrasenya-nova-e2e')
   await page.getByRole('button', { name: 'Desbloquejar' }).click()
-  await expect(page.getByRole('button', { name: 'Bloquejar' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Bloquejar', exact: true })).toBeVisible()
 })
 
 test('empremta (passkey amb PRF): activar-la i desbloquejar sense contrasenya', async ({ page }) => {
@@ -162,7 +220,7 @@ test('empremta (passkey amb PRF): activar-la i desbloquejar sense contrasenya', 
 
   await page.getByRole('button', { name: 'Bloquejar' }).click()
   await page.getByRole('button', { name: 'Desbloquejar amb l\'empremta' }).click()
-  await expect(page.getByRole('button', { name: 'Bloquejar' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Bloquejar', exact: true })).toBeVisible()
 })
 
 test('Avui: les cites del dia en ordre i «Començar visita» a la següent', async ({ page }) => {

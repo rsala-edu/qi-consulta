@@ -8,7 +8,17 @@
 import { hashCorreu } from '../crypto'
 
 export const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
-const HASH_DOCTORA = (import.meta.env.VITE_HASH_CORREU_DOCTORA ?? '').trim().toLowerCase()
+/**
+ * Hashos SHA-256 (en hexadecimal) dels correus que poden entrar, separats per
+ * comes: el de la doctora i el de qui fa proves amb dades inventades.
+ */
+export function llegirHashos(text: string | undefined): string[] {
+  return (text ?? '')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter((h) => /^[0-9a-f]{64}$/.test(h))
+}
+const HASHOS_PERMESOS = llegirHashos(import.meta.env.VITE_HASHOS_CORREUS_PERMESOS)
 
 const AUTORITZACIO = 'https://accounts.google.com/o/oauth2/v2/auth'
 const USUARI = 'https://openidconnect.googleapis.com/v1/userinfo'
@@ -36,6 +46,14 @@ export interface PermisGoogle {
 let permis: PermisGoogle | null = null
 const subscriptors = new Set<() => void>()
 
+/** Marge per renovar el permís abans que caduqui (amb el pròxim toc) */
+export const MARGE_RENOVACIO = 10 * 60_000
+
+/** No hi ha permís, o caduca d'aquí a menys de deu minuts. */
+export function calRenovarPermis(ara: number = Date.now()): boolean {
+  return !permis || permis.caducaAt - MARGE_RENOVACIO < ara
+}
+
 export function tokenGoogle(): string | null {
   // Un minut de marge abans que caduqui
   return permis && permis.caducaAt - 60_000 > Date.now() ? permis.token : null
@@ -58,9 +76,20 @@ function urlRetorn(): string {
 /**
  * Obre la finestra de Google. S'ha de cridar directament des d'un toc (els
  * navegadors bloquegen les finestres que no obre la persona).
- * `triarCompte`: el primer cop es deixa triar el compte; després, no.
+ * - `triar`: el primer cop es deixa triar el compte.
+ * - `normal`: torna a connectar; Google només pregunta si cal.
+ * - `silenciosa`: renovació sense cap pregunta (`prompt=none`); la finestra
+ *   s'obre i es tanca sola. Si Google necessita preguntar res, falla.
+ * `pista`: l'identificador intern del compte de Google (no el correu), perquè
+ *   Google sàpiga quin compte renovar si n'hi ha més d'un d'obert.
  */
-export function iniciarSessioGoogle({ triarCompte }: { triarCompte: boolean }): Promise<PermisGoogle> {
+export function iniciarSessioGoogle({
+  mode,
+  pista,
+}: {
+  mode: 'triar' | 'normal' | 'silenciosa'
+  pista?: string
+}): Promise<PermisGoogle> {
   const estat = crypto.randomUUID()
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
@@ -69,9 +98,10 @@ export function iniciarSessioGoogle({ triarCompte }: { triarCompte: boolean }): 
     scope: PERMISOS,
     state: estat,
     include_granted_scopes: 'true',
-    prompt: triarCompte ? 'select_account' : '',
   })
-  if (!triarCompte) params.delete('prompt')
+  if (mode === 'triar') params.set('prompt', 'select_account')
+  if (mode === 'silenciosa') params.set('prompt', 'none')
+  if (pista) params.set('login_hint', pista)
   const finestra = window.open(`${AUTORITZACIO}?${params}`, 'qi-google', 'popup,width=500,height=640')
   if (!finestra) return Promise.reject(new ErrorGoogle('bloquejat'))
 
@@ -97,24 +127,29 @@ export function iniciarSessioGoogle({ triarCompte }: { triarCompte: boolean }): 
   })
 }
 
-/** Comprova que el compte és el de la doctora (pel hash del correu) i guarda el permís. */
-export async function acceptarPermis(nou: PermisGoogle, fetchFn: typeof fetch = (...a) => fetch(...a)): Promise<void> {
-  let correu: string
+/**
+ * Comprova que el compte és un dels permesos (pel hash del correu) i guarda
+ * el permís. Torna l'identificador intern del compte (`sub`), que serveix de
+ * pista per a les renovacions; el correu no es guarda.
+ */
+export async function acceptarPermis(nou: PermisGoogle, fetchFn: typeof fetch = (...a) => fetch(...a)): Promise<{ sub: string }> {
+  let usuari: { email?: string; sub?: string }
   try {
     const r = await fetchFn(USUARI, { headers: { Authorization: `Bearer ${nou.token}` } })
     if (!r.ok) throw new Error(String(r.status))
-    correu = ((await r.json()) as { email?: string; email_verified?: boolean }).email ?? ''
+    usuari = (await r.json()) as { email?: string; sub?: string }
   } catch {
     throw new ErrorGoogle('xarxa')
   }
-  if (!(await esCorreuDeLaDoctora(correu))) {
+  if (!(await esCorreuPermes(usuari.email ?? ''))) {
     // El permís d'un altre compte no es fa servir per a res
     throw new ErrorGoogle('compte')
   }
   permis = nou
   subscriptors.forEach((f) => f())
+  return { sub: usuari.sub ?? '' }
 }
 
-export async function esCorreuDeLaDoctora(correu: string): Promise<boolean> {
-  return HASH_DOCTORA !== '' && correu !== '' && (await hashCorreu(correu)) === HASH_DOCTORA
+export async function esCorreuPermes(correu: string, hashos: readonly string[] = HASHOS_PERMESOS): Promise<boolean> {
+  return hashos.length > 0 && correu !== '' && hashos.includes(await hashCorreu(correu))
 }
