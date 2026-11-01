@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { HashRouter, Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import { Boto } from './components/Boto'
+import { Simbol } from './components/Simbol'
 import { Indicador } from './components/Indicador'
 import type { QiDB } from './db/esquema'
 import { t } from './i18n/t'
@@ -37,7 +38,10 @@ function Marc() {
     <ProveidorSincronia>
       <ProveidorEsborranys magatzem={magatzem}>
         <header className="barra-app">
-          <span className="logotip">{t.app.nom}</span>
+          <span className="logotip">
+          <Simbol />
+          {t.app.nom}
+        </span>
           <nav className="navegacio" aria-label={t.navegacio.principal}>
             <NavLink to="/avui">{t.navegacio.avui}</NavLink>
             <NavLink to="/agenda">{t.navegacio.agenda}</NavLink>

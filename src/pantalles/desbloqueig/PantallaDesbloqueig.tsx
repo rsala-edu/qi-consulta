@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { Indicador } from '../../components/Indicador'
+import { Simbol } from '../../components/Simbol'
 import { ErrorContrasenya } from '../../crypto'
 import { t } from '../../i18n/t'
 import { ErrorClauRecuperacio } from '../../sessio/claus'
@@ -102,7 +103,19 @@ function FormulariContrasenya({
   return (
     <main className="pantalla-desbloqueig">
       <form className="targeta-desbloqueig" onSubmit={handleSubmit(enviar)} noValidate>
-        <h1 className={mode === 'desbloquejar' ? 'logotip' : undefined}>{titol}</h1>
+        {mode === 'desbloquejar' ? (
+          <h1 className="logotip">
+            <Simbol mida={72} />
+            {titol}
+          </h1>
+        ) : (
+          <>
+            <span className="logotip">
+              <Simbol mida={72} />
+            </span>
+            <h1>{titol}</h1>
+          </>
+        )}
 
         {empremta && onEmpremta && (
           <>
@@ -190,6 +203,9 @@ function FormulariRecuperacio({
   return (
     <main className="pantalla-desbloqueig">
       <form className="targeta-desbloqueig" onSubmit={handleSubmit(enviar)} noValidate>
+        <span className="logotip">
+          <Simbol mida={72} />
+        </span>
         <h1>{t.desbloqueig.titolRecuperar}</h1>
         <p>{t.desbloqueig.introRecuperar}</p>
         <Camp etiqueta={t.desbloqueig.clauRecuperacio} error={errors.clau?.message}>
@@ -242,6 +258,9 @@ export function PantallaGoogle({ onConnectar }: { onConnectar(): Promise<void> }
   return (
     <main className="pantalla-desbloqueig">
       <div className="targeta-desbloqueig">
+        <span className="logotip">
+          <Simbol mida={72} />
+        </span>
         <h1>{t.desbloqueig.titolGoogle}</h1>
         <p>{t.desbloqueig.introGoogle}</p>
         {error && <p role="alert">{error}</p>}

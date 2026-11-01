@@ -31,12 +31,10 @@ export function PantallaAvui() {
   const a = t.avui
   return (
     <main className="pantalla pantalla-avui">
-      <div className="capcalera-pantalla">
-        <div>
-          <h1>{a.titol}</h1>
-          <p className="detall dia-avui">{diaLlarg(avui)}</p>
-        </div>
-      </div>
+      <header className="capcalera-avui">
+        <h1>{a.titol}</h1>
+        <p className="dia-avui">{diaLlarg(avui)}</p>
+      </header>
 
       {carrega.estat === 'carregant' && <Indicador text={t.app.carregant} />}
       {carrega.estat === 'error' && <p role="alert">{t.app.errorInesperat}</p>}
@@ -77,9 +75,9 @@ export function PantallaAvui() {
                           <span className="detall">
                             {t.cites.tipusNoms[c.tipus]}
                             {c.motiu && ` · ${c.motiu}`}
-                            {c.estat !== 'programada' && ` · ${t.cites.estats[c.estat]}`}
                           </span>
                         </span>
+                        <span className={`etiqueta etiqueta-${c.estat}`}>{t.cites.estats[c.estat]}</span>
                         {esSeguent && (
                           <button
                             type="button"

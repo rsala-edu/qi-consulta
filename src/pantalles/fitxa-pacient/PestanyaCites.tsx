@@ -113,7 +113,7 @@ export function PestanyaCites() {
                   {c.motiu && ` · ${c.motiu}`}
                 </span>
               </div>
-              <span className="etiqueta">{t.cites.estats[c.estat]}</span>
+              <span className={`etiqueta etiqueta-${c.estat}`}>{t.cites.estats[c.estat]}</span>
               <span className="detall">{c.sessioId ? t.cites.ambSessio : t.cites.senseSessio}</span>
               <div className="accions">
                 <Boto variant="discret" onClick={() => setObert({ tipus: 'editar', cita: c })}>

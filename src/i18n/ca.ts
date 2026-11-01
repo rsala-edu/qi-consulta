@@ -298,7 +298,7 @@ export const ca = {
     accessos: 'Accessos ràpids',
     nouPacient: 'Nou pacient',
     novaCita: 'Nova cita',
-    cerca: 'Cerca',
+    cerca: 'Cercar',
     configurar: 'Acaba de configurar Qi',
     activarEmpremta: 'Activa l\'empremta per obrir l\'app més de pressa.',
     imprimirClau: 'Imprimeix la clau de recuperació, per si un dia oblides la contrasenya.',

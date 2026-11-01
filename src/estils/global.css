@@ -1,24 +1,39 @@
-/* Estil zen: clar, molt d'espai, botons grans per a la tauleta.
-   Tipografia del sistema (sense cap recurs d'internet). */
+/* Estil zen de Qi: paper d'arròs, boira, jade, tinta i cinabri.
+   Molt d'espai, poques línies i cap ombra forta. Tipografies locals
+   (tipografia.css): Shippori Mincho per als títols, DM Sans per a la resta. */
 
 :root {
-  --fons: #f7f5f0;
-  --superficie: #ffffff;
-  --tinta: #2b2a27;
-  --tinta-suau: #6b675f;
-  --linia: #e3dfd6;
-  --accent: #3f6b5a;
-  --accent-fosc: #2f5245;
-  --accent-suau: #e6efe9;
-  --error: #a33a2c;
-  --avis: #8a6d1f;
-  --radi: 12px;
+  /* Paleta */
+  --paper: #f6f3ec;
+  --boira: #dce5df;
+  --jade: #2f5d50;
+  --tinta-base: #1f2421;
+  --cinabri: #b5432f;
+
+  /* Tokens d'ús */
+  --fons: var(--paper);
+  /* Targetes i blocs */
+  --superficie: var(--boira);
+  /* Camps, diàlegs i graelles: un paper més clar, perquè s'hi llegeixi i s'hi escrigui bé */
+  --clar: #fcfbf7;
+  --tinta: var(--tinta-base);
+  --tinta-suau: #59615c;
+  --linia: #cfd9d2;
+  --accent: var(--jade);
+  --accent-fosc: #234a3f;
+  --accent-suau: #e6ede8;
+  --error: var(--cinabri);
+  --avis: var(--cinabri);
+  --avis-suau: #f3e3dd;
+  --radi: 14px;
   --toc: 52px;
   --espai: clamp(16px, 3vw, 32px);
+  --lletra-titol: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  --lletra: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  font-family: var(--lletra);
   font-size: 18px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--tinta);
   background: var(--fons);
   -webkit-text-size-adjust: 100%;
@@ -36,10 +51,18 @@ body {
   background: var(--fons);
 }
 
-h1 {
-  font-weight: 400;
-  font-size: 1.8rem;
+h1,
+h2,
+h3 {
+  font-family: var(--lletra-titol);
+  font-weight: 600;
   letter-spacing: 0.01em;
+  color: var(--tinta);
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.25;
   margin: 0 0 var(--espai);
 }
 
@@ -58,15 +81,28 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px var(--espai);
+  padding: 10px var(--espai);
   border-bottom: 1px solid var(--linia);
-  background: var(--superficie);
+  background: var(--fons);
 }
 
+/* Símbol i paraula «Qi» */
 .logotip {
-  font-size: 1.5rem;
-  letter-spacing: 0.15em;
-  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--lletra-titol);
+  font-weight: 600;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--jade);
+  text-decoration: none;
+}
+
+.logotip img {
+  width: 36px;
+  height: 36px;
+  display: block;
 }
 
 .pantalla {
@@ -102,14 +138,17 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--toc);
+  min-height: max(44px, var(--toc));
   padding: 0 28px;
-  border-radius: var(--radi);
-  border: 1px solid transparent;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
   font: inherit;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
 .boto:disabled {
@@ -118,8 +157,8 @@ a {
 }
 
 .boto-principal {
-  background: var(--accent);
-  color: #fff;
+  background: var(--jade);
+  color: var(--paper);
 }
 
 .boto-principal:hover:not(:disabled) {
@@ -127,15 +166,23 @@ a {
 }
 
 .boto-secundari {
-  background: var(--superficie);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: transparent;
+  border-color: var(--jade);
+  color: var(--jade);
+}
+
+.boto-secundari:hover:not(:disabled) {
+  background: var(--accent-suau);
 }
 
 .boto-discret {
   background: transparent;
-  color: var(--tinta-suau);
-  border-color: var(--linia);
+  color: var(--jade);
+  border-color: transparent;
+}
+
+.boto-discret:hover:not(:disabled) {
+  background: var(--accent-suau);
 }
 
 /* --- Formularis --- */
@@ -165,6 +212,7 @@ a {
 .camp label,
 legend {
   font-size: 0.9rem;
+  font-weight: 500;
   color: var(--tinta-suau);
 }
 
@@ -176,7 +224,7 @@ textarea {
   padding: 10px 14px;
   border: 1px solid var(--linia);
   border-radius: var(--radi);
-  background: var(--superficie);
+  background: var(--clar);
   color: var(--tinta);
   width: 100%;
 }
@@ -445,7 +493,7 @@ fieldset {
   width: min(640px, 100%);
   max-height: 90vh;
   overflow-y: auto;
-  background: var(--superficie);
+  background: var(--fons);
   border-radius: calc(var(--radi) * 2);
   padding: calc(var(--espai) * 1.25);
   display: flex;
@@ -576,8 +624,9 @@ fieldset {
   min-height: 0;
   border-radius: calc(var(--radi) * 1.5);
   overflow: hidden;
-  background: linear-gradient(#fbfaf7, #efebe3);
-  border: 1px solid var(--linia);
+  /* Paper d'arròs que s'esvaeix cap a la boira */
+  background: linear-gradient(#fcfbf7, #e9ede7);
+  border: none;
 }
 
 .visor3d {
@@ -609,7 +658,7 @@ fieldset {
   line-height: 1.2;
   padding: 1px 6px;
   border-radius: 6px;
-  background: rgb(255 255 255 / 0.85);
+  background: rgb(252 251 247 / 0.88);
   color: var(--tinta);
   white-space: nowrap;
 }
@@ -725,7 +774,7 @@ fieldset {
   text-align: left;
   border: 1px solid var(--linia);
   border-radius: var(--radi);
-  background: var(--superficie);
+  background: var(--clar);
   color: var(--tinta);
   cursor: pointer;
 }
@@ -778,7 +827,7 @@ fieldset {
   font: inherit;
   border: 1px solid var(--linia);
   border-radius: var(--radi);
-  background: var(--superficie);
+  background: var(--clar);
   color: var(--tinta);
   cursor: pointer;
 }
@@ -947,7 +996,7 @@ fieldset {
   border: 1px solid var(--linia);
   border-radius: 999px;
   padding: 3px;
-  background: var(--superficie);
+  background: var(--clar);
 }
 
 .segmentat button {
@@ -970,7 +1019,7 @@ fieldset {
 .agenda {
   display: grid;
   grid-template-columns: 52px repeat(var(--dies, 1), minmax(0, 1fr));
-  background: var(--superficie);
+  background: var(--clar);
   border: 1px solid var(--linia);
   border-radius: var(--radi);
   overflow-x: auto;
@@ -991,7 +1040,7 @@ fieldset {
   border-bottom: 1px solid var(--linia);
   position: sticky;
   top: 0;
-  background: var(--superficie);
+  background: var(--clar);
   z-index: 2;
 }
 
@@ -1077,7 +1126,7 @@ fieldset {
 }
 
 .cita-agenda.estat-feta {
-  background: var(--superficie);
+  background: var(--clar);
 }
 
 .cita-agenda.estat-anullada,
@@ -1251,7 +1300,7 @@ fieldset {
 .indicador-copia {
   margin-left: auto;
   border: 1px solid var(--linia);
-  background: var(--superficie);
+  background: transparent;
   border-radius: 999px;
   font: inherit;
   font-size: 0.8rem;
@@ -1412,4 +1461,186 @@ fieldset {
     background: #fff;
     border: none;
   }
+}
+
+/* =====================================================================
+   Estil Qi: targetes de boira sense vores, etiquetes d'estat i Avui
+   ===================================================================== */
+
+/* Targetes: boira sobre paper, sense línies ni ombres */
+.targeta-desbloqueig,
+.panell,
+.llista-pacients a,
+.llista-cites li,
+.cites-avui li,
+.llista-precaucions > li,
+.fitxa-punt {
+  border-color: transparent;
+  border-radius: calc(var(--radi) * 1.4);
+}
+
+.llista-pacients a:hover {
+  background: var(--accent-suau);
+}
+
+.dialeg {
+  border-radius: calc(var(--radi) * 2);
+}
+
+.fons-dialeg {
+  background: rgb(31 36 33 / 0.28);
+}
+
+/* Avisos: cinabri */
+.avis {
+  color: var(--cinabri);
+}
+
+/* Etiquetes d'estat: petites, arrodonides, sense vora */
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  background: var(--clar);
+  color: var(--jade);
+  white-space: nowrap;
+}
+
+.etiqueta-feta {
+  background: var(--jade);
+  color: var(--paper);
+}
+
+.etiqueta-anullada,
+.etiqueta-noPresentat {
+  background: transparent;
+  color: var(--tinta-suau);
+  box-shadow: inset 0 0 0 1px var(--linia);
+}
+
+.etiqueta-precaucio {
+  background: var(--avis-suau);
+  color: var(--cinabri);
+}
+
+.llista-precaucions > li {
+  border-left: 4px solid var(--cinabri);
+}
+
+.llista-precaucions > li.confirmada {
+  border-left-color: var(--jade);
+}
+
+/* Fitxa del punt al mapa: la precaució, en un requadre cinabri suau */
+.fitxa-punt .avis {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  background: var(--avis-suau);
+  color: var(--tinta);
+  padding: 12px 14px;
+  border-radius: var(--radi);
+}
+
+/* Pantalla de desbloqueig: símbol gran i «Qi» */
+.targeta-desbloqueig .logotip {
+  flex-direction: column;
+  gap: 14px;
+  font-size: 2.2rem;
+  align-self: center;
+}
+
+.targeta-desbloqueig .logotip img {
+  width: 72px;
+  height: 72px;
+}
+
+/* --- Avui --- */
+
+.capcalera-avui {
+  margin-bottom: calc(var(--espai) * 1.2);
+}
+
+.capcalera-avui h1 {
+  margin: 0;
+  font-size: 2.4rem;
+}
+
+.dia-avui {
+  margin: 6px 0 0;
+  font-size: 1.05rem;
+  color: var(--tinta-suau);
+}
+
+.dia-avui::first-letter {
+  text-transform: uppercase;
+}
+
+.pantalla-avui h2 {
+  font-size: 1.35rem;
+  margin: calc(var(--espai) * 1.2) 0 14px;
+}
+
+.cites-avui {
+  gap: 12px;
+}
+
+.cites-avui li {
+  padding: 18px 22px;
+  border-left: none;
+  gap: 10px 22px;
+}
+
+.cites-avui li.seguent {
+  background: var(--clar);
+  box-shadow: inset 0 0 0 1.5px var(--jade);
+}
+
+.cites-avui li.estat-anullada,
+.cites-avui li.estat-noPresentat {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--linia);
+}
+
+.cites-avui .hora {
+  font-family: var(--lletra-titol);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--jade);
+  min-width: 10ch;
+}
+
+.cites-avui .qui a {
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+
+.accessos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin: calc(var(--espai) * 1.2) 0 12px;
+}
+
+.accessos .boto {
+  min-height: 60px;
+}
+
+.recordatori {
+  border-left: 4px solid var(--cinabri);
+}
+
+.pantalla-avui .recordatori h2 {
+  margin-top: 0;
+}
+
+.cites-avui li.seguent .etiqueta-programada,
+.cites-avui li.seguent .etiqueta:not(.etiqueta-feta) {
+  background: var(--boira);
 }

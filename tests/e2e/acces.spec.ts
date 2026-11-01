@@ -68,11 +68,11 @@ test('el compte de proves (el segon hash de la llista) també pot entrar', async
 })
 
 test('el permís de Google caducat es renova sol amb el pròxim toc, sense «Drive: connectar»', async ({ page, google }) => {
-  // El primer permís dura només 61 s: en un segon ja no serveix
-  google.durada = 61
+  // El primer permís dura 70 s: amb el minut de marge, en 10 s ja no serveix
+  google.durada = 70
   await crearContrasenya(page)
   google.durada = 3599
-  await page.waitForTimeout(1_500)
+  await page.waitForTimeout(10_500)
 
   // La doctora fa la seva feina: el primer toc renova el permís sense preguntar res
   await nouPacient(page, 'Aina', 'Provencal Inventada', '600 111 222')
@@ -90,11 +90,11 @@ test('el permís de Google caducat es renova sol amb el pròxim toc, sense «Dri
 })
 
 test('si la renovació silenciosa falla, queda «Drive: connectar» com a reserva', async ({ page, google }) => {
-  google.durada = 61
+  google.durada = 70
   google.silenciosaFalla = true
   await crearContrasenya(page)
   google.durada = 3599
-  await page.waitForTimeout(1_500)
+  await page.waitForTimeout(10_500)
 
   await menu(page, 'Pacients').click()
   const indicador = page.locator('.indicador-copia')

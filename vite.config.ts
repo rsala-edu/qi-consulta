@@ -10,19 +10,20 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['icona.svg', 'apple-touch-icon.png'],
+      includeAssets: ['logo/qi-icona.svg', 'logo/qi-icona-180.png', 'logo/qi-simbol.svg', 'logo/qi-simbol-clar.svg'],
       manifest: {
         name: 'Qi — consulta d\'acupuntura',
         short_name: 'Qi',
         description: 'Pacients, valoracions i sessions d\'acupuntura',
         lang: 'ca',
-        theme_color: '#3f6b5a',
-        background_color: '#f7f5f0',
+        theme_color: '#2f5d50',
+        background_color: '#f6f3ec',
         display: 'standalone',
         icons: [
-          { src: 'icona-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icona-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icona-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'logo/qi-icona-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'logo/qi-icona-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'logo/qi-icona-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: 'logo/qi-icona-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

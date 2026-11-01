@@ -106,10 +106,18 @@ export function iniciarSessioGoogle({
   if (!finestra) return Promise.reject(new ErrorGoogle('bloquejat'))
 
   return new Promise((resoldre, rebutjar) => {
+    // Si la finestra es tanca sense resposta, és que s'ha cancel·lat. La
+    // pàgina de retorn envia la resposta i es tanca tot seguit: es deixa un
+    // marge perquè el missatge arribi abans de donar-ho per cancel·lat.
+    let acabat = false
     const vigilant = window.setInterval(() => {
-      if (finestra.closed) acabar(() => rebutjar(new ErrorGoogle('cancellat')))
+      if (!finestra.closed) return
+      window.clearInterval(vigilant)
+      window.setTimeout(() => acabar(() => rebutjar(new ErrorGoogle('cancellat'))), 2_000)
     }, 500)
     function acabar(f: () => void) {
+      if (acabat) return
+      acabat = true
       window.clearInterval(vigilant)
       window.removeEventListener('message', rebre)
       f()

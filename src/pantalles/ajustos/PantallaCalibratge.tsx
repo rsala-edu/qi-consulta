@@ -61,7 +61,7 @@ function Calibratge({ model }: { model: ModelCos }) {
         id: p.id,
         punt: p.posicio,
         normal: p.normal,
-        color: p.punt.codi === seleccionat ? '#2f6b55' : undefined,
+        color: p.punt.codi === seleccionat ? '#2f5d50' : undefined,
         destacat: p.id === idSeleccionat,
         etiqueta: `${p.punt.codi} ${p.costat}`,
         etiquetaLlarga: `${p.punt.codi} ${p.costat} · ${p.punt.pinyin}`,

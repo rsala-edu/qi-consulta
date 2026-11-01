@@ -67,8 +67,11 @@ interface Props {
 }
 
 const COLOR_PELL = '#e9d8c8'
-const COLOR_NEUTRE = '#8f8a80'
-const COLOR_DESTACAT = '#c43b2f'
+/** Punts: vermell cinabri; el destacat, més fosc (i més gran) */
+const COLOR_NEUTRE = '#b5432f'
+const COLOR_DESTACAT = '#7e2a1c'
+/** Recorregut del meridià: jade, suau, perquè els punts destaquin */
+const COLOR_RECORREGUT = '#2f5d50'
 const MOVIMENT_MAXIM_TOC = 8 // px
 const RADI_SELECCIO = 28 // px
 
@@ -391,7 +394,7 @@ const Escena = memo(function Escena({
       {recorreguts
         .filter((r) => r.length > 1)
         .map((r, i) => (
-          <Line key={i} points={r} color={COLOR_DESTACAT} lineWidth={2} transparent opacity={0.55} />
+          <Line key={i} points={r} color={COLOR_RECORREGUT} lineWidth={2} transparent opacity={0.5} />
         ))}
     </>
   )

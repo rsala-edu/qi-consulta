@@ -7,7 +7,7 @@ export type Tecnica = (typeof TECNIQUES)[number]
 
 /** Colors dels marcadors segons la tècnica (també a la llegenda) */
 export const COLOR_TECNICA: Record<Tecnica, string> = {
-  agulla: '#2f6b55',
+  agulla: '#2f5d50',
   moxa: '#c2571a',
   ventosa: '#7b3fa0',
   llavor: '#a8840f',
