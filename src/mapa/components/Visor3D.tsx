@@ -7,7 +7,7 @@
 // Només es redibuixa quan canvia alguna cosa (frameloop="demand"), per
 // estalviar bateria a la tauleta.
 
-import { CameraControls, Line } from '@react-three/drei'
+import { Billboard, CameraControls, Line } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import CameraControlsImpl from 'camera-controls'
 import {
@@ -67,9 +67,15 @@ interface Props {
 }
 
 const COLOR_PELL = '#e9d8c8'
-/** Punts: vermell cinabri; el destacat, més fosc (i més gran) */
-const COLOR_NEUTRE = '#b5432f'
-const COLOR_DESTACAT = '#7e2a1c'
+/** Punts sense marcar: petits, en gris jade suau */
+const COLOR_NEUTRE = '#8aa096'
+/** Punt seleccionat: cinabri (amb vora blanca, com els marcats) */
+const COLOR_DESTACAT = '#b5432f'
+const COLOR_VORA = '#ffffff'
+/** Radis (m): sense marcar, marcat i seleccionat; la vora blanca és un 25 % més gran */
+const RADI_NEUTRE = 0.0055
+const RADI_MARCAT = 0.0095
+const RADI_DESTACAT = 0.012
 /** Recorregut del meridià: jade, suau, perquè els punts destaquin */
 const COLOR_RECORREGUT = '#2f5d50'
 const MOVIMENT_MAXIM_TOC = 8 // px
@@ -383,12 +389,25 @@ const Escena = memo(function Escena({
       </mesh>
 
       <group ref={grupMarcadors}>
-        {posicionsMarcadors.map(({ m, posicio }) => (
-          <mesh key={m.id} position={posicio}>
-            <sphereGeometry args={[m.destacat ? 0.014 : m.color ? 0.011 : 0.007, 16, 12]} />
-            <meshBasicMaterial color={m.destacat ? COLOR_DESTACAT : (m.color ?? COLOR_NEUTRE)} />
-          </mesh>
-        ))}
+        {posicionsMarcadors.map(({ m, posicio }) => {
+          // Discos que sempre miren a la càmera: els marcats i el seleccionat, amb vora blanca
+          const ambVora = m.destacat || m.color !== undefined
+          const radi = m.destacat ? RADI_DESTACAT : m.color ? RADI_MARCAT : RADI_NEUTRE
+          return (
+            <Billboard key={m.id} position={posicio}>
+              {ambVora && (
+                <mesh>
+                  <circleGeometry args={[radi * 1.25, 24]} />
+                  <meshBasicMaterial color={COLOR_VORA} />
+                </mesh>
+              )}
+              <mesh position={[0, 0, 0.0004]}>
+                <circleGeometry args={[radi, 24]} />
+                <meshBasicMaterial color={m.destacat ? COLOR_DESTACAT : (m.color ?? COLOR_NEUTRE)} />
+              </mesh>
+            </Billboard>
+          )
+        })}
       </group>
 
       {recorreguts

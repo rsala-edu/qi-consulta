@@ -57,17 +57,17 @@ test('confirmar categories, fer una excepció i veure-ho a la fitxa del punt', a
   await expect(page.getByTestId('visor3d')).toHaveAttribute('data-moviment', 'no')
 
   const st9Nota = await anarAlPunt(page, 'ST9')
-  await expect(st9Nota).toContainText(/Precaució\s*Grans vasos · Profunditat \(només informativa\)\./)
+  await expect(st9Nota).toContainText('Precaució · Grans vasos · Profunditat (només informativa)')
   await expect(st9Nota).toContainText('Palpar la caròtida')
   await expect(st9Nota).toContainText('Confirmada per la doctora')
 
   // ST13 és de la categoria «Pulmó», confirmada sencera
   const st13Nota = await anarAlPunt(page, 'ST13')
-  await expect(st13Nota).toContainText(/Precaució\s*Pulmó\./)
+  await expect(st13Nota).toContainText('Precaució · Pulmó')
   await expect(st13Nota).toContainText('Confirmada per la doctora')
 
   // LI4 (embaràs) encara és pendent
   const li4Nota = await anarAlPunt(page, 'LI4')
-  await expect(li4Nota).toContainText(/Precaució\s*Embaràs\./)
+  await expect(li4Nota).toContainText('Precaució · Embaràs')
   await expect(li4Nota).not.toContainText('Confirmada per la doctora')
 })

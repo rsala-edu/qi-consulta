@@ -22,6 +22,7 @@ import { posicio3D, posicioDesDePunt } from '../../mapa/geometria/baricentriques
 import { idMarcador, llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from '../../mapa/marcadors'
 import type { ModelCos } from '../../mapa/model'
 import { useCalibracions } from '../../mapa/useCalibracions'
+import { notaSenseCategoria } from '../../mapa/precaucio'
 import { usePrecaucions } from '../../mapa/usePrecaucions'
 import { useModelCos } from '../../mapa/useModelCos'
 import { REVISIO_BUIDA, ambPrecaucions, cataleg, cercarPunts, nomMeridia, posicioDe } from '../../punts/cataleg'
@@ -241,9 +242,17 @@ function Marcatge({ model }: { model: ModelCos }) {
             <p>{puntFitxa.localitzacio || <span className="detall">{t.mapa.localitzacioPendent}</span>}</p>
             {puntFitxa.precaucions.categories.length > 0 && (
               <div className="avis" role="note">
-                <span className="etiqueta etiqueta-precaucio">{t.precaucions.precaucio}</span>
-                <strong>{puntFitxa.precaucions.categories.map((x) => t.precaucions.categories[x]).join(' · ')}.</strong>
-                {puntFitxa.precaucions.nota && <span>{puntFitxa.precaucions.nota}</span>}
+                <span className="etiqueta etiqueta-precaucio">
+                  {[t.precaucions.precaucio, ...puntFitxa.precaucions.categories.map((x) => t.precaucions.categories[x])].join(' · ')}
+                </span>
+                {puntFitxa.precaucions.nota && (
+                  <span>
+                    {notaSenseCategoria(
+                      puntFitxa.precaucions.nota,
+                      puntFitxa.precaucions.categories.map((x) => t.precaucions.categories[x]),
+                    )}
+                  </span>
+                )}
                 {puntFitxa.precaucions.confirmada && <span className="detall">{t.precaucions.confirmada}</span>}
               </div>
             )}

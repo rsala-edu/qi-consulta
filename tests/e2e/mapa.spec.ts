@@ -104,7 +104,7 @@ test('la fitxa mostra les precaucions del punt', async ({ page }) => {
   await obrirMapa(page)
   await anarAlPunt(page, 'LI4')
   const fitxa = page.getByRole('region', { name: 'LI4' })
-  await expect(fitxa.getByRole('note')).toContainText(/Precaució\s*Embaràs\./)
+  await expect(fitxa.getByRole('note')).toContainText('Precaució · Embaràs')
 })
 
 test('des de darrere no es pot tocar un punt de davant', async ({ page }) => {
