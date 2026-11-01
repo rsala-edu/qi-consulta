@@ -15,7 +15,7 @@
 // cada punt compleix la seva regla respecte d'aquestes referències.
 
 import { Vector3 } from 'three'
-import { CosMesurable, DAVANT, dir, signe, v, type Costat } from './cos'
+import { AMUNT, CosMesurable, DARRERE, DAVANT, dir, signe, v, type Costat } from './cos'
 
 export interface UnitatsCun {
   avantbrac: number
@@ -26,7 +26,10 @@ export interface UnitatsCun {
   abdomenInferior: number
   cuixa: number
   cama: number
+  /** Cap, part anterior: de la glabel·la a GV20 hi ha 8 cun */
   cap: number
+  /** Cap i nuca, part posterior: de GV20 a C7 hi ha 10 cun (7 fins al cabell + 3) */
+  capPosterior: number
 }
 
 export interface ReferenciesCostat {
@@ -67,6 +70,26 @@ export interface ReferenciesCostat {
   // Cara
   ull: Vector3
   tragus: Vector3
+  cantIntern: Vector3
+  cantExtern: Vector3
+  orellaApex: Vector3
+  orellaLobul: Vector3
+  orellaPosterior: Vector3
+  // Direccions oposades (per comoditat)
+  palmar: Vector3
+  cubital: Vector3
+  medialColze: Vector3
+  posteriorColze: Vector3
+  medial: Vector3
+  posteriorGenoll: Vector3
+  // Més referències de les extremitats
+  aixella: Vector3
+  acromi: Vector3
+  malleolIntern: Vector3
+  capPerone: Vector3
+  plecPopliti: Vector3
+  trocanter: Vector3
+  plecGluti: Vector3
 }
 
 export interface Referencies {
@@ -90,19 +113,98 @@ export interface Referencies {
   nivellCellaSuperior: number
   /** Alçada de la línia anterior del cabell (3 cun per sobre de la glabel·la) */
   nivellCabell: number
+  /** Alçada total del cos (m) */
+  alcada: number
+  /** Alçada (Y) de l'apòfisi espinosa de cada vertebra: C7, T1…T12, L1…L5, S1…S4, coccix */
+  vertebres: Readonly<Record<string, number>>
+  /**
+   * Línia mitja del cap, de la glabel·la cap enrere fins a la nuca, vista des
+   * de fora. Els punts del cap es mesuren en cun sobre aquest arc.
+   */
+  arcCap: Vector3[]
+  /** Distància sobre l'arc de la glabel·la a GV20 (punt mitjà entre les puntes de les orelles) */
+  distanciaGV20: number
 }
 
-/** Punts de la línia mitja del cap, de la glabel·la (alçada `yInici`) fins al vèrtex. */
-function arcSagital(c: CosMesurable, centre: Vector3, yInici: number): Vector3[] {
+/** Vertebres en ordre, de C7 al còccix */
+export const VERTEBRES = [
+  'C7',
+  ...Array.from({ length: 12 }, (_, i) => `T${i + 1}`),
+  ...Array.from({ length: 5 }, (_, i) => `L${i + 1}`),
+  'S1',
+  'S2',
+  'S3',
+  'S4',
+  'coccix',
+] as const
+
+/**
+ * Nivells de les vertebres per proporcions antropomètriques: C7 (cervicale)
+ * al 84,6 % de l'alçada, L4 a l'alçada de la cresta ilíaca; dorsals i
+ * lumbars repartides per pes (una lumbar = 1,35 dorsals); sacre i còccix sota L5.
+ */
+function nivellsVertebres(alcada: number, nivellL4: number): Record<string, number> {
+  const c7 = 0.846 * alcada
+  const pesos = [...Array(12).fill(1), ...Array(4).fill(1.35)] as number[]
+  const unitat = (c7 - nivellL4) / pesos.reduce((a, b) => a + b, 0)
+  const n: Record<string, number> = { C7: c7 }
+  let y = c7
+  const noms = [...Array.from({ length: 12 }, (_, i) => `T${i + 1}`), 'L1', 'L2', 'L3', 'L4']
+  noms.forEach((nom, i) => {
+    y -= pesos[i]! * unitat
+    n[nom] = y
+  })
+  const lumbar = 1.35 * unitat
+  n.L5 = n.L4! - lumbar
+  n.S1 = n.L5 - 0.85 * lumbar
+  n.S2 = n.S1 - 0.6 * lumbar
+  n.S3 = n.S2 - 0.55 * lumbar
+  n.S4 = n.S3 - 0.5 * lumbar
+  n.coccix = n.S4 - 0.9 * lumbar
+  return n
+}
+
+/**
+ * Línia mitja del cap i la nuca des de fora: de la glabel·la (alçada yInici)
+ * cap enrere fins a l'alçada de C7. S'atura si troba un salt (espatlles).
+ */
+function arcCapComplet(c: CosMesurable, centre: Vector3, yInici: number, yC7: number): Vector3[] {
   const punts: Vector3[] = []
-  for (let graus = -10; graus <= 100; graus += 1) {
+  for (let graus = -10; graus <= 270; graus += 0.5) {
     const a = (graus * Math.PI) / 180
-    const p = c.pellDesDeFora(centre, v(0, Math.sin(a), Math.cos(a)))
-    if (p.y >= yInici && p.z > centre.z - 0.02) punts.push(p)
+    const p = c.pellOpcional(centre.clone().addScaledVector(v(0, Math.sin(a), Math.cos(a)), 0.4), v(0, -Math.sin(a), -Math.cos(a)), 0.8)
+    if (!p) continue
+    if (graus < 90 && p.y < yInici) continue
+    const darrer = punts[punts.length - 1]
+    if (darrer && p.distanceTo(darrer) > 0.015) break
+    punts.push(p)
+    if (p.y <= yC7) break
   }
-  // fins al punt més alt (vèrtex)
-  const cim = punts.reduce((m, p, i) => (p.y > punts[m]!.y ? i : m), 0)
-  return punts.slice(0, cim + 1)
+  return punts
+}
+
+/** Distància sobre l'arc fins al punt més proper a un pla z (el primer, venint de davant) */
+function distanciaFinsZ(punts: Vector3[], z: number, yMinim: number): number {
+  let recorregut = 0
+  let millor = { d: Infinity, s: 0 }
+  punts.forEach((p, i) => {
+    if (i) recorregut += p.distanceTo(punts[i - 1]!)
+    if (p.y >= yMinim && Math.abs(p.z - z) < millor.d) millor = { d: Math.abs(p.z - z), s: recorregut }
+  })
+  return millor.s
+}
+
+/**
+ * Distància sobre l'arc del cap per a una posició expressada en cun des de la
+ * glabel·la: fins a 8 cun (GV20) amb el cun anterior, i després amb el posterior.
+ */
+export function distanciaArcCap(r: Referencies, cun: number): number {
+  return cun <= 8 ? cun * r.cun.cap : r.distanciaGV20 + (cun - 8) * r.cun.capPosterior
+}
+
+/** Punt de la línia mitja del cap a una distància (m) de la glabel·la, sobre l'arc. */
+export function puntArcCap(r: Referencies, distancia: number): Vector3 {
+  return puntSobreArc(r.arcCap, distancia)
 }
 
 function longitud(punts: Vector3[]): number {
@@ -121,6 +223,17 @@ function puntSobreArc(punts: Vector3[], distancia: number): Vector3 {
 
 function perpendicular(vec: Vector3, eix: Vector3): Vector3 {
   return vec.clone().sub(eix.clone().multiplyScalar(vec.dot(eix))).normalize()
+}
+
+/** Àpex de l'aixella: el punt més alt que troben els raigs que pugen entre el braç i el tronc. */
+function aixella(c: CosMesurable, s: number, espatlla: Vector3): Vector3 {
+  let millor: Vector3 | null = null
+  for (let x = 0.1; x <= 0.26; x += 0.005) {
+    const p = c.pellOpcional(v(s * x, espatlla.y - 0.37, espatlla.z), AMUNT, 0.5)
+    if (p && p.y < espatlla.y && (!millor || p.y > millor.y)) millor = p
+  }
+  if (!millor) throw new Error('No s\'ha trobat l\'aixella')
+  return millor
 }
 
 function referenciesCostat(c: CosMesurable, costat: Costat): ReferenciesCostat {
@@ -188,6 +301,24 @@ function referenciesCostat(c: CosMesurable, costat: Costat): ReferenciesCostat {
     malleolExtern,
     ull: c.art('eye', costat),
     tragus: c.ref('tragus', costat),
+    cantIntern: c.ref('cant-intern', costat),
+    cantExtern: c.ref('cant-extern', costat),
+    orellaApex: c.ref('orella-apex', costat),
+    orellaLobul: c.ref('orella-lobul', costat),
+    orellaPosterior: c.ref('orella-posterior', costat),
+    palmar: dorsal.clone().negate(),
+    cubital: radial.clone().negate(),
+    medialColze: lateralColze.clone().negate(),
+    posteriorColze: anteriorColze.clone().negate(),
+    medial: lateral.clone().negate(),
+    posteriorGenoll: anteriorGenoll.clone().negate(),
+    aixella: aixella(c, s, espatlla),
+    acromi: c.pell(espatlla, dir([AMUNT, 1], [v(s, 0, 0), 0.35])),
+    malleolIntern: c.pell(turmell.clone().add(v(0, 0.004, 0)), dir([v(-s, 0, 0), 1], [DAVANT, -0.1])),
+    capPerone: c.pell(genoll.clone().addScaledVector(eixCama, 0.045), dir([lateral, 1], [anteriorGenoll, -0.35])),
+    plecPopliti: c.pell(genoll, anteriorGenoll.clone().negate()),
+    trocanter: c.pell(maluc.clone().add(v(0, -0.015, 0)), v(s, 0, 0)),
+    plecGluti: c.pell(v(maluc.x * 0.85, maluc.y - 0.075, maluc.z), DARRERE),
   }
 }
 
@@ -244,14 +375,22 @@ export function calcularReferencies(c: CosMesurable): Referencies {
     }
   }
 
-  // Cun del cap: l'arc de la línia mitja de la glabel·la al vèrtex fa 8 cun.
-  // (Sense cabell al model, la línia del cabell no serveix de referència.)
+  // Cun del cap: GV20 és el punt mitjà entre les puntes de les orelles; de la
+  // glabel·la a GV20 hi ha 8 cun, i de GV20 a C7, 10 cun. (Sense cabell al
+  // model, les línies del cabell es dedueixen d'aquestes mesures.)
   const nivellCellaSuperior = ull.y + 0.018
-  const arc = arcSagital(c, centreCap, nivellCellaSuperior)
-  const cunCap = longitud(arc) / 8
+  const alcadaCos = c.model.geometria.boundingBox!.max.y - c.model.geometria.boundingBox!.min.y
+  const vertebres = nivellsVertebres(alcadaCos, (E.maluc.y + D.maluc.y) / 2 + 0.105)
+  const arcCap = arcCapComplet(c, centreCap, nivellCellaSuperior, vertebres.C7!)
+  const zOrelles = (E.orellaApex.z + D.orellaApex.z) / 2
+  const distanciaGV20 = distanciaFinsZ(arcCap, zOrelles, (E.orellaApex.y + D.orellaApex.y) / 2)
+  const cunCap = distanciaGV20 / 8
+  const cunCapPosterior = (longitud(arcCap) - distanciaGV20) / 10
+  const arc = arcCap
   // Línia anterior del cabell: 3 cun per sobre de la glabel·la, sobre l'arc
   const nivellCabell = puntSobreArc(arc, 3 * cunCap).y
 
+  const alcada = c.model.geometria.boundingBox!.max.y - c.model.geometria.boundingBox!.min.y
   const cun: UnitatsCun = {
     avantbrac: (E.colze.distanceTo(E.canell) + D.colze.distanceTo(D.canell)) / 2 / 12,
     brac: (0.8 * (E.espatlla.distanceTo(E.colze) + D.espatlla.distanceTo(D.colze))) / 2 / 9,
@@ -261,6 +400,7 @@ export function calcularReferencies(c: CosMesurable): Referencies {
     cuixa: (simfisi.y - (E.basePatella.y + D.basePatella.y) / 2) / 18,
     cama: ((E.genoll.y - E.malleolExtern.y) + (D.genoll.y - D.malleolExtern.y)) / 2 / 16,
     cap: cunCap,
+    capPosterior: cunCapPosterior,
   }
 
   return {
@@ -280,6 +420,10 @@ export function calcularReferencies(c: CosMesurable): Referencies {
     nivellBoca,
     nivellCellaSuperior,
     nivellCabell,
+    alcada,
+    vertebres,
+    arcCap,
+    distanciaGV20,
   }
 }
 

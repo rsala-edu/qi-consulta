@@ -2,46 +2,26 @@
 // com a càlcul sobre les referències anatòmiques del cos. Cada punt té una
 // `regla` declarativa que les proves fan servir per comprovar-lo.
 
-import { Vector3 } from 'three'
-import { normalTriangle } from '../../mapa/geometria/baricentriques'
-import { AMUNT, CosMesurable, DARRERE, DAVANT, dir, signe, v, type Costat } from './cos'
-import type { Referencies, UnitatsCun } from './referencies'
 
-export type Regla =
-  /** A `cun` de `de` en direcció a `a`; tot el segment `de`–`a` fa `total` cun */
-  | { tipus: 'segment'; de: string; a: string; cun: number; total: number }
-  /** A `cun` per sobre (positiu) o per sota (negatiu) d'una referència i, si cal, a `lateral` cun de la línia mitja */
-  | { tipus: 'vertical'; ref: 'melic' | 'basePatella'; cun: number; unitat: keyof UnitatsCun; lateral?: number }
-  /** A la mateixa alçada que un altre punt */
-  | { tipus: 'nivell'; com: string }
-  /** Sobre una referència anatòmica concreta (mugró, espai intercostal…) */
-  | { tipus: 'referencia'; descripcio: string }
+import { AMUNT, DARRERE, DAVANT, dir, signe, v } from './cos'
+import {
+  abdomen,
+  avantbrac,
+  brac,
+  cama,
+  cap,
+  cara,
+  coll,
+  cuixa,
+  angleDelFront,
+  dits,
+  pit,
+} from './eines'
+import type { DefinicioPunt } from './tipus'
 
-export interface DefinicioPunt {
-  codi: string
-  regla: Regla
-  /** Punt de la pell en aquest costat */
-  calcular(c: CosMesurable, r: Referencies, costat: Costat): Vector3
-}
+export type { DefinicioPunt, Regla } from './tipus'
 
 // --- Intestí gros (LI) -------------------------------------------------------
-
-function avantbrac(c: CosMesurable, r: Referencies, costat: Costat, cunDesDelCanell: number): Vector3 {
-  const k = r[costat]
-  const t = cunDesDelCanell / 12
-  const origen = k.canell.clone().lerp(k.colze, t)
-  const aCanell = dir([k.radial, 1], [k.dorsal, 0.5])
-  const aColze = dir([k.lateralColze, 1], [k.anteriorColze, 0.35])
-  return c.pell(origen, aCanell.lerp(aColze, t).normalize())
-}
-
-function brac(c: CosMesurable, r: Referencies, costat: Costat, cunSobreColze: number, anterior = 0): Vector3 {
-  const k = r[costat]
-  const origen = k.colze.clone().addScaledVector(k.eixBrac, -cunSobreColze * r.cun.brac)
-  return c.pell(origen, dir([k.lateralColze, 1], [k.anteriorColze, anterior]))
-}
-
-const dits = (costat: Costat, nom: string, c: CosMesurable) => c.art(nom, costat)
 
 const LI: DefinicioPunt[] = [
   {
@@ -140,61 +120,7 @@ const LI: DefinicioPunt[] = [
 
 // --- Coll i cara --------------------------------------------------------------
 
-/** Pell del coll a una alçada, girant `graus` des de davant cap al costat. */
-function coll(c: CosMesurable, _r: Referencies, costat: Costat, y: number, graus: number): Vector3 {
-  const a = (graus * Math.PI) / 180
-  const centre = c.art('neck')
-  return c.pell(v(0, y, centre.z), v(signe(costat) * Math.sin(a), 0, Math.cos(a)))
-}
-
-/** Pell de la cara (vista des de davant) a una distància lateral de la línia mitja (m) i una alçada. */
-function cara(c: CosMesurable, _r: Referencies, costat: Costat, lateral: number, y: number): Vector3 {
-  return c.pellDesDeFora(v(signe(costat) * lateral, y, 0), DAVANT)
-}
-
-/** Pell del cap a una alçada, vista des d'un angle de `graus` entre davant i el costat. */
-function cap(c: CosMesurable, r: Referencies, costat: Costat, y: number, graus: number): Vector3 {
-  const a = (graus * Math.PI) / 180
-  return c.pellDesDeFora(v(0, y, r.centreCap.z), v(signe(costat) * Math.sin(a), 0, Math.cos(a)))
-}
-
-/**
- * Angle del front (en graus des de davant) a una alçada: on la pell deixa de
- * mirar endavant i passa a mirar cap al costat (normal a 45°), és a dir, on
- * el front es gira cap a la templa.
- */
-export function angleDelFront(c: CosMesurable, r: Referencies, costat: Costat, y: number): number {
-  for (let graus = 5; graus <= 85; graus++) {
-    const p = c.aLaPell(cap(c, r, costat, y, graus))
-    const n = normalTriangle(c.model.geometria, p.triangle)
-    if (Math.abs(n.x) >= n.z) return graus
-  }
-  throw new Error('No s\'ha trobat l\'angle del front')
-}
-
 // --- Estómac (ST) -------------------------------------------------------------
-
-function pit(c: CosMesurable, r: Referencies, costat: Costat, y: number, amunt = 0): Vector3 {
-  return c.pell(v(r[costat].mugro.x, y, 0), dir([DAVANT, 1], [AMUNT, amunt]))
-}
-
-function abdomen(c: CosMesurable, r: Referencies, costat: Costat, cun: number, unitat: keyof UnitatsCun): Vector3 {
-  return c.pell(v(signe(costat) * 2 * r.cun.pit, r.melic.y + cun * r.cun[unitat], -0.02), DAVANT)
-}
-
-/** Cuixa: sobre la línia espina ilíaca – base de la ròtula, a `cun` per sobre de la ròtula. */
-function cuixa(c: CosMesurable, r: Referencies, costat: Costat, cunSobreRotula: number): Vector3 {
-  const k = r[costat]
-  const t = (cunSobreRotula * r.cun.cuixa) / (k.espinaIliaca.y - k.basePatella.y)
-  return c.puntDe(c.aLaPell(k.basePatella.clone().lerp(k.espinaIliaca, t)))
-}
-
-/** Cama: a `cun` per sota del genoll, a un través de dit lateral de la cresta de la tíbia. */
-function cama(c: CosMesurable, r: Referencies, costat: Costat, cunSotaGenoll: number, lateral = 0.22): Vector3 {
-  const k = r[costat]
-  const origen = k.genoll.clone().addScaledVector(k.eixCama, (cunSotaGenoll * r.cun.cama) / -k.eixCama.y)
-  return c.pell(origen, dir([k.anteriorGenoll, 1], [k.lateral, lateral]))
-}
 
 const ST: DefinicioPunt[] = [
   {
@@ -402,4 +328,17 @@ const ST: DefinicioPunt[] = [
   },
 ]
 
-export const REGLES: readonly DefinicioPunt[] = [...LI, ...ST]
+import { BL, ORDRE_BL } from './meridians/bl'
+import { GB, ORDRE_GB } from './meridians/gb'
+import { CV, GV, ORDRE_MITJA } from './meridians/mitja'
+import { HT, LU, ORDRE_SUPERIOR, PC, SI, TE } from './meridians/superior'
+import { KI, LR, ORDRE_YIN_CAMA, SP } from './meridians/yin-cama'
+import type { Ordre } from './tipus'
+
+/**
+ * Totes les regles, en un ordre on cada punt només depèn de punts anteriors
+ * (p. ex. GB3 depèn de ST7, GB4–GB6 de ST8 i GB7, GB8 de TE20).
+ */
+export const REGLES: readonly DefinicioPunt[] = [...LI, ...ST, ...LU, ...SP, ...HT, ...SI, ...BL, ...KI, ...PC, ...TE, ...GB, ...LR, ...CV, ...GV]
+
+export const ORDRES: readonly Ordre[] = [...ORDRE_SUPERIOR, ...ORDRE_YIN_CAMA, ...ORDRE_BL, ...ORDRE_GB, ...ORDRE_MITJA]

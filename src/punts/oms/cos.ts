@@ -109,7 +109,7 @@ export class CosMesurable {
     }
     for (let t = 0; t < idx.count; t += 3) {
       const [a, b, c] = [idx.getX(t), idx.getX(t + 1), idx.getX(t + 2)]
-      afegir(a, b), afegir(b, a), afegir(b, c), afegir(c, b), afegir(c, a), afegir(a, c)
+      for (const [u, w] of [[a, b], [b, a], [b, c], [c, b], [c, a], [a, c]] as const) afegir(u, w)
     }
     const curvatures = [...veins.entries()].map(([i, vs]) => {
       const p = P(i)

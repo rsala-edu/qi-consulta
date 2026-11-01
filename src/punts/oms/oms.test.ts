@@ -10,7 +10,9 @@ import { modelDesDeGlb, type ModelCos } from '../../mapa/model'
 import { cataleg } from '../cataleg'
 import { calcularPunts, type ResultatCalcul } from './calcular'
 import type { Costat, DadesMakeHuman } from './cos'
-import { REGLES } from './regles'
+import { cunCamaMedial, nivellVertebra } from './eines'
+import { distanciaArcCap, puntArcCap } from './referencies'
+import { ORDRES, REGLES } from './regles'
 
 let model: ModelCos
 let calcul: ResultatCalcul
@@ -25,7 +27,7 @@ beforeAll(async () => {
 
 const COSTATS: Costat[] = ['E', 'D']
 const p = (codi: string, costat: Costat): Vector3 => {
-  const r = calcul.perId.get(`${codi}|${costat}`)
+  const r = calcul.perId.get(`${codi}|${costat}`) ?? calcul.perId.get(`${codi}|C`)
   if (!r) throw new Error(`Falta ${codi} ${costat}`)
   return r.punt
 }
@@ -53,10 +55,17 @@ describe('cos definitiu', () => {
     }
   })
 
-  it('tots els punts de LI i ST tenen regla i posició als dos costats', () => {
-    const codis = cataleg.punts.filter((x) => ['LI', 'ST'].includes(x.meridia)).map((x) => x.codi)
+  it('els 361 punts dels 14 meridians tenen regla i posició (dos costats, o un a la línia mitja)', () => {
+    const codis = cataleg.punts.map((x) => x.codi)
+    expect(codis).toHaveLength(361)
     expect(REGLES.map((r) => r.codi).sort()).toEqual([...codis].sort())
-    expect(calcul.punts).toHaveLength(codis.length * 2)
+    const mitja = REGLES.filter((r) => r.mitja).length
+    expect(mitja).toBe(52)
+    expect(calcul.punts).toHaveLength((361 - mitja) * 2 + mitja)
+  })
+
+  it('els punts de la línia mitja són els de CV i GV', () => {
+    for (const r of REGLES) expect(Boolean(r.mitja), r.codi).toBe(/^(CV|GV)/.test(r.codi))
   })
 })
 
@@ -76,7 +85,7 @@ describe('regla de l\'OMS de cada punt', () => {
           expect(t, `${def.codi} ${k}`).toBeCloseTo(regla.cun / regla.total, 1)
           // No s'aparta més de 2,5 cm de la línia (la pell no és recta)
           const projeccio = de.clone().addScaledVector(linia, t)
-          expect(punt.distanceTo(projeccio), `${def.codi} ${k} fora de la línia`).toBeLessThan(0.025)
+          expect(punt.distanceTo(projeccio), `${def.codi} ${k} fora de la línia`).toBeLessThan(regla.desviacio ?? 0.025)
         }
       })
     }
@@ -84,10 +93,36 @@ describe('regla de l\'OMS de cada punt', () => {
       it(`${def.codi}: ${regla.cun} cun respecte de ${regla.ref}${regla.lateral ? ` i ${regla.lateral} cun de la línia mitja` : ''}`, () => {
         for (const k of COSTATS) {
           const punt = p(def.codi, k)
-          const base = regla.ref === 'melic' ? r().melic : r()[k].basePatella
-          expect((punt.y - base.y) / r().cun[regla.unitat], `${def.codi} ${k}`).toBeCloseTo(regla.cun, 0)
+          const base = regla.ref === 'melic' ? r().melic : r()[k][regla.ref]
+          const unitat = regla.ref === 'malleolIntern' ? cunCamaMedial(r(), k) : r().cun[regla.unitat]
+          expect((punt.y - base.y) / unitat, `${def.codi} ${k}`).toBeCloseTo(regla.cun, 0)
           if (regla.lateral !== undefined)
             expect(Math.abs(punt.x) / r().cun.pit, `${def.codi} ${k}`).toBeCloseTo(regla.lateral, 0)
+        }
+      })
+    }
+    if (regla.tipus === 'vertebra') {
+      it(`${def.codi}: a l'alçada de ${regla.vertebra}${regla.sota ? ' (sota l\'apòfisi)' : ''}, ${regla.lateral} cun de la línia mitja`, () => {
+        for (const k of COSTATS) {
+          const punt = p(def.codi, k)
+          expect(Math.abs(punt.y - nivellVertebra(r(), regla.vertebra, regla.sota)), `${def.codi} ${k}`).toBeLessThan(0.008)
+          expect(Math.abs(punt.x) / r().cun.pit, `${def.codi} ${k}`).toBeCloseTo(regla.lateral, 0)
+          expect(punt.z, `${def.codi} és a l'esquena`).toBeLessThan(0)
+        }
+      })
+    }
+    if (regla.tipus === 'cap') {
+      it(`${def.codi}: al cap, a ${regla.cun} cun de la glabel·la i ${regla.lateral} cun de la línia mitja`, () => {
+        for (const k of COSTATS) {
+          const punt = p(def.codi, k)
+          const mig = puntArcCap(r(), distanciaArcCap(r(), regla.cun))
+          if (regla.lateral === 0) expect(punt.distanceTo(mig), def.codi).toBeLessThan(0.005)
+          else {
+            // la distància en línia recta és una mica menor que la mesurada sobre la pell
+            const proporcio = punt.distanceTo(mig) / (regla.lateral * r().cun.cap)
+            expect(proporcio, `${def.codi} ${k}`).toBeGreaterThan(0.75)
+            expect(proporcio, `${def.codi} ${k}`).toBeLessThan(1.02)
+          }
         }
       })
     }
@@ -133,14 +168,29 @@ describe('distàncies en cun', () => {
   it('les unitats de cun són raonables per a un adult (1,5–3,2 cm)', () => {
     for (const [nom, valor] of Object.entries(cun())) {
       expect(valor, nom).toBeGreaterThan(0.015)
-      expect(valor, nom).toBeLessThan(0.032)
+      // El cun posterior del cap (GV20–C7 = 10 cun) surt més gran perquè
+      // aquest model té el coll posterior llarg; les posicions hi quadren.
+      expect(valor, nom).toBeLessThan(nom === 'capPosterior' ? 0.036 : 0.032)
     }
+  })
+
+  it('GV15 i GV16 són a la nuca, a l\'alçada del lòbul de l\'orella, i GV20 entre les puntes de les orelles', () => {
+    const r = calcul.referencies
+    const lobul = (r.E.orellaLobul.y + r.D.orellaLobul.y) / 2
+    expect(Math.abs(p('GV15', 'E').y - lobul)).toBeLessThan(0.02)
+    expect(p('GV16', 'E').y).toBeGreaterThan(p('GV15', 'E').y)
+    expect(p('GV16', 'E').y).toBeLessThan(r.E.orellaApex.y)
+    expect(Math.abs(p('GV20', 'E').z - r.E.orellaApex.z)).toBeLessThan(0.01)
   })
 })
 
 describe('simetria', () => {
+  it('els punts de la línia mitja hi són (±3 mm)', () => {
+    for (const def of REGLES.filter((d) => d.mitja)) expect(Math.abs(p(def.codi, 'E').x), def.codi).toBeLessThan(0.003)
+  })
+
   it('cada punt esquerre és el mirall del dret (±3 mm)', () => {
-    for (const def of REGLES) {
+    for (const def of REGLES.filter((d) => !d.mitja)) {
       const e = p(def.codi, 'E')
       const d = p(def.codi, 'D')
       expect(e.x, `${def.codi} ha de ser a l'esquerra (+X)`).toBeGreaterThan(0.004)
@@ -152,6 +202,22 @@ describe('simetria', () => {
 })
 
 describe('ordre dins el meridià', () => {
+  for (const o of ORDRES) {
+    it(`${o.codis[0]} → ${o.codis[o.codis.length - 1]}: ${o.criteri}`, () => {
+      for (const k of COSTATS) {
+        o.codis.forEach((codi, i) => {
+          if (i === 0) return
+          const a = p(o.codis[i - 1]!, k)
+          const b = p(codi, k)
+          if (o.criteri === 'baixa') expect(b.y, `${codi} sota ${o.codis[i - 1]} (${k})`).toBeLessThan(a.y)
+          if (o.criteri === 'puja') expect(b.y, `${codi} sobre ${o.codis[i - 1]} (${k})`).toBeGreaterThan(a.y)
+          if (o.criteri === 'allunya')
+            expect(b.distanceTo(p(o.codis[0]!, k)), `${codi} més lluny que ${o.codis[i - 1]} (${k})`).toBeGreaterThan(a.distanceTo(p(o.codis[0]!, k)))
+        })
+      }
+    })
+  }
+
   const baixen = (codis: string[], k: Costat) => codis.every((c, i) => i === 0 || p(c, k).y < p(codis[i - 1]!, k).y)
 
   it('LI puja del dit índex fins a l\'espatlla sense fer marrada', () => {

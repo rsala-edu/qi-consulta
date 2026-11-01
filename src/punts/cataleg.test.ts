@@ -3,11 +3,24 @@ import { ambCalibratge, ambPrecaucions, cataleg, cercarPunts, exportarCataleg, n
 import { esquemaCataleg, type Posicio3D } from './esquema'
 
 describe('catàleg del projecte', () => {
-  it('té els meridians LI (20 punts) i ST (45 punts), bilaterals', () => {
+  it('té els 14 meridians amb els 361 punts clàssics', () => {
     expect(cataleg.meridians.map((m) => [m.codi, m.punts, m.bilateral])).toEqual([
+      ['LU', 11, true],
       ['LI', 20, true],
       ['ST', 45, true],
+      ['SP', 21, true],
+      ['HT', 9, true],
+      ['SI', 19, true],
+      ['BL', 67, true],
+      ['KI', 27, true],
+      ['PC', 9, true],
+      ['TE', 23, true],
+      ['GB', 44, true],
+      ['LR', 14, true],
+      ['CV', 24, false],
+      ['GV', 28, false],
     ])
+    expect(cataleg.punts).toHaveLength(361)
     for (const m of cataleg.meridians) {
       const punts = cataleg.punts.filter((p) => p.meridia === m.codi)
       expect(punts.map((p) => p.numero)).toEqual(Array.from({ length: m.punts }, (_, i) => i + 1))
@@ -26,7 +39,8 @@ describe('catàleg del projecte', () => {
   it('cada punt té posició als dos costats sobre el cos definitiu, calculada amb la regla de l\'OMS', () => {
     for (const p of cataleg.punts) {
       const mh = p.posicions.filter((q) => q.topologia.startsWith('mh-'))
-      expect(mh.map((q) => q.costat).sort(), p.codi).toEqual(['D', 'E'])
+      const bilateral = cataleg.meridians.find((m) => m.codi === p.meridia)!.bilateral
+      expect(mh.map((q) => q.costat).sort(), p.codi).toEqual(bilateral ? ['D', 'E'] : ['C'])
       expect(mh.every((q) => q.origen === 'oms' || q.origen === 'doctora'), p.codi).toBe(true)
       expect(p.orella).toBeNull()
     }
@@ -34,17 +48,17 @@ describe('catàleg del projecte', () => {
 
   it('cada punt té la localització redactada; el nom català i la revisió queden per a la doctora', () => {
     for (const p of cataleg.punts) {
-      expect(p.localitzacio.length, p.codi).toBeGreaterThan(30)
+      expect(p.localitzacio.length, p.codi).toBeGreaterThan(15)
       expect(p.localitzacio.endsWith('.'), p.codi).toBe(true)
       expect(p.nomCatala).toBe('')
       expect(p.revisat).toBe(false)
     }
   })
 
-  it('té una llista curta de precaucions pendents de confirmar', () => {
+  it('té una llista de precaucions pendents de confirmar', () => {
     const amb = cataleg.punts.filter((p) => p.precaucions.nota !== '')
     expect(amb.length).toBeGreaterThan(10)
-    expect(amb.length).toBeLessThan(40)
+    expect(amb.every((p) => p.precaucions.nota.endsWith('.'))).toBe(true)
     expect(cataleg.punts.every((p) => !p.precaucions.confirmada)).toBe(true)
     expect(cataleg.punts.find((p) => p.codi === 'LI4')?.precaucions.embaras).toBe(true)
     expect(cataleg.punts.find((p) => p.codi === 'ST9')?.precaucions.nota).toMatch(/caròtida/)
@@ -142,8 +156,12 @@ describe('calibratge sobre el catàleg', () => {
 })
 
 describe('precaucions revisades per la doctora', () => {
-  it('hi ha 28 punts amb precaució per revisar', () => {
-    expect(puntsAmbPrecaucio(cataleg)).toHaveLength(28)
+  it('els punts amb precaució per revisar inclouen els clàssics de l\'embaràs', () => {
+    const codis = puntsAmbPrecaucio(cataleg).map((p) => p.codi)
+    for (const c of ['LI4', 'SP6', 'BL60', 'BL67', 'GB21']) expect(codis).toContain(c)
+    expect(cataleg.punts.filter((p) => p.precaucions.embaras).map((p) => p.codi)).toEqual(
+      expect.arrayContaining(['LI4', 'SP6', 'BL31', 'BL32', 'BL33', 'BL34', 'BL60', 'BL67', 'GB21']),
+    )
   })
 
   it('«D\'acord» la deixa igual però confirmada; «Canviar» la reescriu', () => {

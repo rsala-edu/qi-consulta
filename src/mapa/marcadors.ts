@@ -51,13 +51,28 @@ export function puntsSobreModel(c: Cataleg, model: ModelCos, meridia?: string): 
  * punts de branca (p. ex. ST40) no entren a la línia principal: es dibuixen
  * com un segment curt des del punt d'on surten.
  */
-export function recorregutsMeridia(punts: readonly PuntSobreModel[], meridia: string): Vector3[][] {
+export function recorregutsMeridia(
+  punts: readonly PuntSobreModel[],
+  meridia: string,
+  recorregut: readonly (readonly string[])[] | null = null,
+): Vector3[][] {
   const perCostat = new Map<CostatPosicio, PuntSobreModel[]>()
   for (const p of punts) {
     if (p.punt.meridia !== meridia) continue
     perCostat.set(p.costat, [...(perCostat.get(p.costat) ?? []), p])
   }
   const linies: Vector3[][] = []
+  // Recorregut explícit (p. ex. BL, amb dues línies a l'esquena)
+  if (recorregut) {
+    for (const llista of perCostat.values()) {
+      const perCodi = new Map(llista.map((p) => [p.punt.codi, p.posicio]))
+      for (const cadena of recorregut) {
+        const linia = cadena.map((codi) => perCodi.get(codi)).filter((v): v is Vector3 => v !== undefined)
+        if (linia.length > 1) linies.push(linia)
+      }
+    }
+    return linies
+  }
   for (const llista of perCostat.values()) {
     const ordenats = [...llista].sort((a, b) => a.punt.numero - b.punt.numero)
     linies.push(ordenats.filter((p) => !p.punt.brancaDe).map((p) => p.posicio))

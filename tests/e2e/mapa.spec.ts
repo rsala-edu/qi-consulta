@@ -20,8 +20,8 @@ async function entrar(page: Page) {
 const menu = (page: Page, nom: string) =>
   page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: nom })
 
-/** LI i ST: 65 punts × 2 costats */
-const PUNTS_AL_MODEL = 130
+/** 14 meridians: 309 punts × 2 costats + 52 de la línia mitja (CV i GV) */
+const PUNTS_AL_MODEL = 670
 
 async function visorLlest(page: Page, n?: number) {
   const visor = page.getByTestId('visor3d')
@@ -51,7 +51,7 @@ async function obrirMapa(page: Page) {
   await visorLlest(page, PUNTS_AL_MODEL)
 }
 
-test('el cos definitiu porta els punts de LI i ST calculats', async ({ page }) => {
+test('el cos definitiu porta els punts dels 14 meridians calculats', async ({ page }) => {
   await entrar(page)
   await obrirMapa(page)
   await expect(page.getByText(/Maniquí provisional/)).toHaveCount(0)
@@ -62,6 +62,8 @@ test('el cos definitiu porta els punts de LI i ST calculats', async ({ page }) =
   await visorLlest(page, 40)
   await page.getByLabel('Meridià').selectOption('ST')
   await visorLlest(page, 90)
+  await page.getByLabel('Meridià').selectOption('GV')
+  await visorLlest(page, 28)
 })
 
 test('marcatge: anar a un punt, marcar-lo amb una tècnica i treure\'l', async ({ page }) => {
@@ -164,6 +166,7 @@ test('calibratge (Ajustos): moure un punt, copiar-lo a l\'altre costat i exporta
   await visorLlest(page, PUNTS_AL_MODEL)
   await expect(page.getByText(`${PUNTS_AL_MODEL} posicions col·locades en aquest model`)).toBeVisible()
 
+  await page.getByLabel('Meridià').selectOption('LI')
   const llista = page.getByRole('list', { name: 'Punts del catàleg' })
   await expect(llista.getByRole('button', { name: /^LI4\b/ }).locator('.fet')).toHaveText(['E', 'D'])
 

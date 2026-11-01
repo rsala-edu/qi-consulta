@@ -95,7 +95,34 @@ def tragus(costat):
     return a_gltf(min(franja, key=lambda p: p.y))
 
 
+def vertexs_moguts(nom, fraccio=0.9, condicio=lambda p: True):
+    d = [(i, m) for i, m in desplacaments(nom) if condicio(posicio(i))]
+    maxim = max(m for _, m in d)
+    return [posicio(i) for i, m in d if m >= fraccio * maxim]
+
+
+def orella(costat):
+    punts = vertexs_moguts(f"{costat}-ear-trans-forward")
+    return {
+        f"{costat}-orella-apex": a_gltf(max(punts, key=lambda p: p.z)),
+        f"{costat}-orella-lobul": a_gltf(min(punts, key=lambda p: p.z)),
+        # vora posterior: el punt més enrere (+Y a Blender) a mitja alçada
+        f"{costat}-orella-posterior": a_gltf(max(punts, key=lambda p: p.y - abs(p.z - sum(q.z for q in punts) / len(punts)))),
+    }
+
+
+def ull(costat):
+    c1 = centre_del_maxim(f"{costat}-eye-corner1-up")
+    c2 = centre_del_maxim(f"{costat}-eye-corner2-up")
+    intern, extern = sorted([c1, c2], key=lambda p: abs(p[0]))
+    return {f"{costat}-cant-intern": intern, f"{costat}-cant-extern": extern}
+
+
 referencies = {
+    **orella("l"),
+    **orella("r"),
+    **ull("l"),
+    **ull("r"),
     "l-mugro": centre_del_maxim("breast-point-incr", lambda p: p.x > 0),
     "r-mugro": centre_del_maxim("breast-point-incr", lambda p: p.x < 0),
     "melic": centre_del_maxim("stomach-navel-in"),

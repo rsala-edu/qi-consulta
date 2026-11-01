@@ -62,7 +62,10 @@ function Marcatge({ model }: { model: ModelCos }) {
 
   const tots = useMemo(() => puntsSobreModel(efectiu, model), [efectiu, model])
   const visibles = useMemo(() => (meridia ? tots.filter((p) => p.punt.meridia === meridia) : tots), [tots, meridia])
-  const recorreguts = useMemo(() => (meridia ? recorregutsMeridia(tots, meridia) : []), [tots, meridia])
+  const recorreguts = useMemo(
+    () => (meridia ? recorregutsMeridia(tots, meridia, cataleg.meridians.find((m) => m.codi === meridia)?.recorregut) : []),
+    [tots, meridia],
+  )
 
   const marcadors: MarcadorVisor[] = useMemo(
     () =>

@@ -51,6 +51,11 @@ export const esquemaMeridia = z.object({
   bilateral: z.boolean(),
   /** Nombre de punts del meridià */
   punts: z.number().int().positive(),
+  /**
+   * Línies del recorregut, si no és simplement l'ordre de numeració
+   * (p. ex. BL, amb dues línies a l'esquena). Cada línia és una llista de codis.
+   */
+  recorregut: z.array(z.array(z.string())).nullable().default(null),
 })
 
 export type Meridia = z.infer<typeof esquemaMeridia>

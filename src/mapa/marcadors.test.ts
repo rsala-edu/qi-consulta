@@ -61,6 +61,18 @@ describe('punts sobre el model', () => {
     expect(linies.some((l) => l.length === 2 && l[0]!.equals(st('ST38')) && l[1]!.equals(st('ST40')))).toBe(true)
   })
 
+  it('BL segueix el recorregut del catàleg: dues línies a l\'esquena que s\'uneixen a BL40', () => {
+    const tots = puntsSobreModel(cataleg, modelGlb)
+    const bl = cataleg.meridians.find((m) => m.codi === 'BL')!
+    const linies = recorregutsMeridia(tots, 'BL', bl.recorregut)
+    expect(linies).toHaveLength(4) // dues línies × dos costats
+    const st = (codi: string) => tots.find((p) => p.id === `${codi}|E`)!.posicio
+    const externa = linies.find((l) => l.some((v) => v.equals(st('BL41'))))!
+    expect(externa[externa.length - 1]!.equals(st('BL40'))).toBe(true)
+    const principal = linies.find((l) => l.some((v) => v.equals(st('BL11'))))!
+    expect(principal.some((v) => v.equals(st('BL41')))).toBe(false)
+  })
+
   it('l\'id del marcador fa anada i tornada', () => {
     expect(llegirIdMarcador(idMarcador('ST36', 'D'))).toEqual({ codi: 'ST36', costat: 'D' })
   })
