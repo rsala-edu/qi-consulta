@@ -1,6 +1,6 @@
 # Aplicació de consulta d'acupuntura — Especificacions
 
-Oct 31, 2026 · @Raül
+2026-10-31 · @Raül
 
 ## Objectiu i abast
 
@@ -43,7 +43,7 @@ Nou requisits formen l'MVP: amb ells ja es pot atendre un pacient de principi a 
 | R9 | Còpia de seguretat | Pujada automàtica i xifrada a Google Drive a cada canvi, còpies diàries i mensuals, i restauració en un altre aparell | MVP |
 | R10 | Consentiment informat | Model de consentiment per a acupuntura, signatura a la tauleta i PDF guardat a la fitxa | Fase 2 |
 | R11 | Fotos i documents | Fotos de la llengua, informes i analítiques adjunts a la fitxa | Fase 2 |
-| R12 | Agenda | Cites per dia i setmana, vinculades al pacient | Fase 2 |
+| R12 | Agenda | Cites lligades al pacient i a la sessió, vista de dia i setmana, historial per pacient. S'avança a l'MVP (veure la secció Cites) | Fase 2 |
 | R13 | Protocols favorits | Combinacions de punts desades (p. ex. acúfens, insòmni) per aplicar-les ràpidament | Fase 2 |
 | R14 | Informe per al pacient | PDF amb el resum de la sessió i recomanacions | Fase 2 |
 | R15 | Sincronització entre dispositius | Tauleta i PC treballant alhora amb les mateixes dades a través de Google Drive, resolent conflictes entre els dos aparells | Futur |
@@ -76,15 +76,39 @@ El cos és un model 3D que gira sobre si mateix, com una persona dreta que fa un
 - Camps per punt: codi, pinyin, caràcters xinesos, nom en català, meridià, coordenades 3D (x, y, z) sobre el model o x/y a l'orella, localització, notes de la doctora, precaucions (p. ex. punts prohibits en l'embaràs)
 - Format: un fitxer JSON versionat dins el projecte, editable per afegir-hi punts o corregir posicions
 
-**Autoria del contingut**
+**Font dels punts i del model**
 
-- El model 3D ha de tenir llicència lliure (per exemple, un cos generat amb MakeHuman); no es poden copiar atles, pòsters ni models comercials
-- Els codis i noms de punts són nomenclatura estàndard; les descripcions de localització les ha de redactar o revisar la doctora
-- Calibratge: una eina interna per tocar la pell del model, col·locar-hi un punt o arrossegar-lo i desar-ne la posició, perquè ella pugui ajustar el mapa sense tocar codi
+- **Font de referència:** l'estàndard de l'OMS *WHO Standard Acupuncture Point Locations in the Western Pacific Region* (2008). Fixa la localització dels 361 punts clàssics amb referències anatòmiques i mesura proporcional (cun), i és el que fan servir les universitats i la recerca
+- **Com es col·loquen:** Claude Code marca al model les referències anatòmiques (ròtula, mal·lèols, melic, apòfisis espinoses…) i calcula cada punt amb la regla de l'OMS. Per exemple, ST36 queda a 3 cun per sota de ST35, sobre la línia ST35–ST41
+- **Validació:** Claude Code comprova automàticament cada punt contra la regla de l'OMS (distàncies en cun, simetria entre costats, ordre dins el meridià). La doctora no ha de revisar-los un per un: si en troba un de mal col·locat, el corregeix directament des del mapa, i queda marcat com a «corregit per la doctora». Només ha de confirmar la llista curta de precaucions (punts prohibits en l'embaràs, prop de vasos o òrgans)
+- **Drets:** codis, noms i localitzacions són dades; les descripcions s'escriuen amb paraules pròpies, sense copiar el text ni les il·lustracions de l'OMS
+- **Model:** cos generat amb MakeHuman (MPFB2, llicència CC0), amb el relleu anatòmic real: esquena, pit, clavícules, ròtules i mans. El genera Claude Code amb Blender sense interfície
+- **Calibratge:** l'eina interna queda per corregir posicions concretes, no per col·locar-les totes a mà
 
 **Per què 3D i no dibuixos**
 
 L'alternativa senzilla són vuit dibuixos plans, un cada 45°, que canvien en arrossegar. Sembla un gir, però cada vista necessita el seu dibuix i les seves coordenades de cada punt. El model 3D costa més al principi, però cada punt es col·loca una sola vegada i es veu des de qualsevol angle.
+
+## Cites
+
+La gestió de cites entra a l'MVP: cada cita va lligada a un pacient i, quan es fa la visita, es converteix en la seva sessió clínica. Així, l'agenda, l'historial de visites i les sessions són la mateixa informació vista des de llocs diferents.
+
+&#91;embedded content: cicle d'una cita · 4 estats\]
+
+Una cita programada es pot moure tantes vegades com calgui. Quan acaba en anul·lada o no presentat, queda a l'historial del pacient; quan es fa, crea la sessió.
+
+**Nova entitat: Cita**
+
+- Camps: pacient, data i hora, durada (60 min la primera visita, 40 el seguiment), tipus, estat (Programada, Feta, Anul·lada, No presentat), motiu breu, notes
+- La sessió guarda l'id de la seva cita. Si es fa una sessió sense cita prèvia, l'app en crea una de Feta automàticament, perquè l'historial sigui complet
+- Xifrada com la resta de dades; en clar només hi ha l'id i les dates
+
+**On es veu**
+
+- **Agenda:** vista de dia i de setmana amb franges de 15 minuts. Es crea una cita tocant una franja buida i cercant el pacient, o donant-lo d'alta ràpidament amb nom i telèfon. Arrossegar una cita la mou
+- **Fitxa del pacient:** pestanya Cites amb la pròxima cita, l'historial (data, tipus, estat i enllaç a la sessió) i el recompte de visites fetes, anul·lacions i no presentats
+- **Pantalla Avui:** les cites del dia i el botó «Començar visita» a la següent
+- **Avisos:** l'app avisa si dues cites se solapen. Els recordatoris al pacient per SMS o correu queden per més endavant, perquè enviarien dades fora de l'app
 
 ## Model de dades
 
@@ -159,6 +183,34 @@ Les dades viuen a Google Drive, xifrades. L'app treballa sobre una còpia local,
 
 GitHub Pages és gratuït amb un repositori públic; amb un repositori privat cal un pla de pagament de GitHub. Com que el codi no conté cap dada de pacients, pot ser públic sense risc.
 
+## Accés i pantalla d'inici
+
+L'app és pública a internet, però només serveix el programa: sense el compte de Google de la doctora i la seva contrasenya no hi ha cap dada a veure. Per a ella, l'ús diari ha de ser obrir l'app i posar el dit al sensor.
+
+| Capa | Què protegeix | Com ho viu la doctora |
+| --- | --- | --- |
+| Compte de Google | Qui pot entrar i accedir a les dades de Drive. L'app només accepta el seu correu | «Continuar amb Google», una sola vegada per aparell |
+| Contrasenya de l'app | Desxifra les dades; ni Google ni Raül no les poden llegir | La crea el primer dia i la fa servir si l'empremta falla |
+| Empremta o cara (passkey amb PRF) | Desbloqueig ràpid del dia a dia, amb la mateixa seguretat que la contrasenya | Toca el sensor de la tauleta |
+| Clau de recuperació impresa | Recuperar les dades si oblida la contrasenya | Un full guardat en un sobre, fora de la consulta |
+
+**Primer ús (una sola vegada, acompanyada):** Continuar amb Google → crear la contrasenya → activar l'empremta → imprimir la clau de recuperació.
+
+**Cada dia:** obrir l'app → empremta → pantalla Avui. A l'ordinador és igual, amb la contrasenya o amb Windows Hello si l'ordinador ho permet; les dades hi arriben des de Google Drive.
+
+**Pantalla Avui (inici)**
+
+- Les cites del dia, en ordre, amb el botó «Començar visita» a la següent
+- Accessos ràpids: Nou pacient, Nova cita i Cerca
+- Estat de la còpia a Google Drive («Última còpia: fa 2 minuts»)
+- Res més: sense menús tècnics ni estadístiques
+
+**Administració**
+
+- No hi ha cap compte d'administrador amb accés a les dades. Raül administra el codi, GitHub i la configuració de Google Cloud, però no pot llegir històries clíniques: no ho ha de fer per RGPD, i el xifratge ho impedeix
+- L'empremta amb PRF funciona amb Chrome a Android (amb les passkeys del gestor de contrasenyes de Google) i amb Safari a l'iPad amb el clauer d'iCloud. Si no està disponible, l'app demana la contrasenya
+- Les passkeys de gestors externs, com Samsung Pass, poden no oferir PRF: l'app ho ha de comprovar en activar l'empremta
+
 ## Privacitat, seguretat i RGPD
 
 Les dades de salut són categoria especial del RGPD, i la doctora n'és la responsable com a metgessa. Per això l'MVP xifra tot al dispositiu abans de guardar-ho o pujar-ho a Google Drive. Aquesta secció recull mesures tècniques; no substitueix l'assessorament del Col·legi de Metges o d'un delegat de protecció de dades.
@@ -188,7 +240,7 @@ Cinc etapes, cadascuna amb una porta que s'ha de complir abans de passar a la se
 
 &#91;embedded content: pla de treball · 5 etapes, 4 portes\]
 
-La porta de l'etapa 2 depèn de la doctora: ella ha de comprovar que els punts són al lloc correcte abans de construir les sessions damunt el mapa.
+La porta de l'etapa 2 és automàtica: els punts es calculen amb les regles de l'OMS i es comproven amb proves. La doctora els pot corregir en qualsevol moment des del mapa.
 
 **Primeres passes amb Claude Code (etapa 0)**
 
@@ -244,3 +296,4 @@ Aquestes decisions s'han de prendre abans de la Fase 1 o durant aquesta fase. Le
 - [ ] Camps de la valoració MTC i ORL: la doctora els ha de revisar i ordenar com treballa ella
 - [ ] Compte de Google per a les dades: personal o Google Workspace?
 - [ ] Nom de l'app (provisional: «Qi»)
+

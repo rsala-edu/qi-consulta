@@ -24,14 +24,38 @@
       "pinyin": "Shangyang",
       "hanzi": "商阳",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al dit índex, al costat del polze, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 18171,
+          "b": [
+            0.354811,
+            0.452187,
+            0.193002
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 4932,
+          "b": [
+            0.354811,
+            0.193002,
+            0.452187
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -41,14 +65,38 @@
       "pinyin": "Erjian",
       "hanzi": "二间",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al costat del polze de l'índex, just davant de l'articulació de la base del dit (2a metacarpofalàngica), on la pell del dors es troba amb la del palmell.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 16388,
+          "b": [
+            0.232541,
+            0.284187,
+            0.483272
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 3151,
+          "b": [
+            0.232541,
+            0.483272,
+            0.284187
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -58,14 +106,38 @@
       "pinyin": "Sanjian",
       "hanzi": "三间",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al costat del polze de la mà, just darrere de la 2a articulació metacarpofalàngica, a la vora entre la pell del dors i la del palmell.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20236,
+          "b": [
+            0.041647,
+            0.893213,
+            0.06514
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7001,
+          "b": [
+            0.041647,
+            0.06514,
+            0.893213
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -75,14 +147,38 @@
       "pinyin": "Hegu",
       "hanzi": "合谷",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al dors de la mà, entre el 1r i el 2n metacarpià, a l'alçada del punt mitjà del 2n metacarpià i tocant-ne la vora del costat del polze.",
       "notes": "",
       "precaucions": {
         "embaras": true,
-        "nota": "Contraindicat tradicionalment en l'embaràs. Pendent de revisar."
+        "nota": "Embaràs: tradicionalment contraindicat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 18825,
+          "b": [
+            0.315239,
+            0.213086,
+            0.471675
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5586,
+          "b": [
+            0.315239,
+            0.471675,
+            0.213086
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -92,14 +188,38 @@
       "pinyin": "Yangxi",
       "hanzi": "阳溪",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al canell, a l'extrem del plec dorsal del costat del polze, dins el clot que es forma entre els tendons del polze quan s'estira (tabaquera anatòmica).",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19429,
+          "b": [
+            0.627456,
+            0.024258,
+            0.348286
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 6190,
+          "b": [
+            0.627456,
+            0.348286,
+            0.024258
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -109,14 +229,38 @@
       "pinyin": "Pianli",
       "hanzi": "偏历",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'avantbraç, sobre la línia que uneix LI5 i LI11, 3 cun per sobre del plec del canell.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19340,
+          "b": [
+            0.519655,
+            0.057817,
+            0.422528
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 6103,
+          "b": [
+            0.519655,
+            0.422528,
+            0.057817
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -126,14 +270,38 @@
       "pinyin": "Wenliu",
       "hanzi": "温溜",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 5 cun per sobre del plec del canell.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19257,
+          "b": [
+            0.079807,
+            0.078107,
+            0.842086
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 6018,
+          "b": [
+            0.079807,
+            0.842086,
+            0.078107
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -143,14 +311,38 @@
       "pinyin": "Xialian",
       "hanzi": "下廉",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 4 cun per sota de LI11.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19229,
+          "b": [
+            0.244772,
+            0.685243,
+            0.069985
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5990,
+          "b": [
+            0.244772,
+            0.069986,
+            0.685242
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -160,14 +352,38 @@
       "pinyin": "Shanglian",
       "hanzi": "上廉",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 3 cun per sota de LI11.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19187,
+          "b": [
+            0.574889,
+            0.024759,
+            0.400352
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5948,
+          "b": [
+            0.574889,
+            0.400353,
+            0.024758
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -177,14 +393,38 @@
       "pinyin": "Shousanli",
       "hanzi": "手三里",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'avantbraç, sobre la línia LI5–LI11, 2 cun per sota de LI11.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19158,
+          "b": [
+            0.589479,
+            0.21484,
+            0.195681
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5921,
+          "b": [
+            0.589479,
+            0.195682,
+            0.214839
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -194,14 +434,38 @@
       "pinyin": "Quchi",
       "hanzi": "曲池",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Amb el colze doblegat, a l'extrem lateral del plec del colze, a mig camí entre el tendó del bíceps i l'epicòndil lateral.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19095,
+          "b": [
+            0.504568,
+            0.459647,
+            0.035785
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5856,
+          "b": [
+            0.504568,
+            0.035785,
+            0.459647
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -211,14 +475,38 @@
       "pinyin": "Zhouliao",
       "hanzi": "肘髎",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara posterolateral del braç, 1 cun per sobre de l'epicòndil lateral, arran de la cresta supracondília.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19037,
+          "b": [
+            0.158373,
+            0.240969,
+            0.600658
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 5798,
+          "b": [
+            0.158373,
+            0.600659,
+            0.240968
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -228,14 +516,38 @@
       "pinyin": "Shouwuli",
       "hanzi": "手五里",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara lateral del braç, 3 cun per sobre de LI11, en direcció a LI15.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 16105,
+          "b": [
+            0.505884,
+            0.15821,
+            0.335906
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2866,
+          "b": [
+            0.505884,
+            0.335906,
+            0.15821
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -245,14 +557,38 @@
       "pinyin": "Binao",
       "hanzi": "臂臑",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara lateral del braç, 7 cun per sobre de LI11, just davant de la vora del deltoide, prop d'on s'insereix.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15966,
+          "b": [
+            0.775969,
+            0.187026,
+            0.037005
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2729,
+          "b": [
+            0.775969,
+            0.037005,
+            0.187026
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -262,14 +598,38 @@
       "pinyin": "Jianyu",
       "hanzi": "肩髃",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'espatlla, al clot anterior que apareix sota la punta de l'acromi quan s'aixeca el braç.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15538,
+          "b": [
+            0.344029,
+            0.61553,
+            0.040441
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2297,
+          "b": [
+            0.344029,
+            0.040441,
+            0.61553
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -279,14 +639,38 @@
       "pinyin": "Jugu",
       "hanzi": "巨骨",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la part alta de l'espatlla, al clot entre l'extrem extern de la clavícula i l'espina de l'escàpula.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15720,
+          "b": [
+            0.169406,
+            0.421725,
+            0.408869
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2483,
+          "b": [
+            0.169406,
+            0.408869,
+            0.421725
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -296,14 +680,38 @@
       "pinyin": "Tianding",
       "hanzi": "天鼎",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al coll, a l'alçada del cartílag cricoide, a la vora posterior de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Vasos del coll: no punxar en profunditat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15656,
+          "b": [
+            0.29677,
+            0.004235,
+            0.698995
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2417,
+          "b": [
+            0.29677,
+            0.698995,
+            0.004235
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -313,14 +721,38 @@
       "pinyin": "Futu",
       "hanzi": "扶突",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al coll, a l'alçada de la vora superior del cartílag tiroide (la nou), entre els dos caps de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Vasos del coll (caròtida): no punxar en profunditat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15571,
+          "b": [
+            0.004281,
+            0.691288,
+            0.304431
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2328,
+          "b": [
+            0.004281,
+            0.304431,
+            0.691288
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -330,14 +762,38 @@
       "pinyin": "Kouheliao",
       "hanzi": "口禾髎",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al llavi superior, a mitja alçada del filtre, just sota la vora externa de la narina.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 23311,
+          "b": [
+            0.881998,
+            0.025452,
+            0.09255
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 9862,
+          "b": [
+            0.881998,
+            0.09255,
+            0.025452
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -347,14 +803,38 @@
       "pinyin": "Yingxiang",
       "hanzi": "迎香",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al costat del nas, dins el solc nasogenià, a l'alçada del punt mitjà de la vora externa de l'ala del nas.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22673,
+          "b": [
+            0.418073,
+            0.427496,
+            0.154431
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 9214,
+          "b": [
+            0.418073,
+            0.154431,
+            0.427496
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -364,14 +844,38 @@
       "pinyin": "Chengqi",
       "hanzi": "承泣",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Amb la mirada al davant, just sota la pupil·la, entre el globus ocular i la vora inferior de l'òrbita.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": "Proximitat del globus ocular. Pendent de revisar."
+        "nota": "Ull: punció superficial i sense manipular; risc d'hematoma.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22655,
+          "b": [
+            0.432708,
+            0.019997,
+            0.547295
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 9196,
+          "b": [
+            0.432708,
+            0.547295,
+            0.019997
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -381,14 +885,38 @@
       "pinyin": "Sibai",
       "hanzi": "四白",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Sota la pupil·la, una mica més avall que ST1, al petit clot del forat infraorbitari.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Forat infraorbitari: no punxar en profunditat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 23038,
+          "b": [
+            0.046665,
+            0.551853,
+            0.401482
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 9589,
+          "b": [
+            0.046665,
+            0.401481,
+            0.551854
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -398,14 +926,38 @@
       "pinyin": "Juliao",
       "hanzi": "巨髎",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Sota la pupil·la, a l'alçada de la vora inferior de l'ala del nas.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22708,
+          "b": [
+            0.580103,
+            0.01538,
+            0.404517
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 9251,
+          "b": [
+            0.580103,
+            0.404517,
+            0.01538
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -415,14 +967,38 @@
       "pinyin": "Dicang",
       "hanzi": "地仓",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al costat de la comissura de la boca, uns 0,4 cun cap enfora.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22701,
+          "b": [
+            0.478195,
+            0.213761,
+            0.308044
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 9242,
+          "b": [
+            0.478195,
+            0.308045,
+            0.21376
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -432,14 +1008,38 @@
       "pinyin": "Daying",
       "hanzi": "大迎",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Davant de l'angle de la mandíbula, al clot de la vora anterior del masseter, on es nota el batec de l'artèria facial.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Artèria facial: evitar-la.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 14302,
+          "b": [
+            0.101984,
+            0.554258,
+            0.343758
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 1059,
+          "b": [
+            0.101984,
+            0.343758,
+            0.554258
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -449,14 +1049,38 @@
       "pinyin": "Jiache",
       "hanzi": "颊车",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Un través de dit per sobre i per davant de l'angle de la mandíbula, al punt més prominent del masseter quan es mossega.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 14480,
+          "b": [
+            0.654333,
+            0.242007,
+            0.10366
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 1237,
+          "b": [
+            0.654333,
+            0.10366,
+            0.242007
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -466,14 +1090,38 @@
       "pinyin": "Xiaguan",
       "hanzi": "下关",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Davant de l'orella, al clot entre l'arc zigomàtic i l'escotadura de la mandíbula; el clot es tanca en obrir la boca.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 23528,
+          "b": [
+            0.052712,
+            0.296128,
+            0.65116
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 10083,
+          "b": [
+            0.052712,
+            0.65116,
+            0.296128
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -483,14 +1131,38 @@
       "pinyin": "Touwei",
       "hanzi": "头维",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'angle del front, 0,5 cun dins la línia del cabell i 4,5 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 14674,
+          "b": [
+            0.051522,
+            0.735671,
+            0.212807
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 1431,
+          "b": [
+            0.051522,
+            0.212807,
+            0.735671
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -500,14 +1172,38 @@
       "pinyin": "Renying",
       "hanzi": "人迎",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al coll, a l'alçada de la vora superior del cartílag tiroide, davant de l'esternocleidomastoidal, sobre el batec de la caròtida.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": "Proximitat de l'artèria caròtida. Pendent de revisar."
+        "nota": "Artèria caròtida: apartar-la i no punxar en profunditat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19762,
+          "b": [
+            0.6203,
+            0.139251,
+            0.240449
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 6525,
+          "b": [
+            0.6203,
+            0.240449,
+            0.139251
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -517,14 +1213,38 @@
       "pinyin": "Shuitu",
       "hanzi": "水突",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al coll, a l'alçada del cartílag cricoide, a la vora anterior de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 19907,
+          "b": [
+            0.602559,
+            0.240383,
+            0.157058
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 6668,
+          "b": [
+            0.602559,
+            0.157058,
+            0.240383
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -534,14 +1254,38 @@
       "pinyin": "Qishe",
       "hanzi": "气舍",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Just per sobre de l'extrem intern de la clavícula, al clot entre els dos caps de l'esternocleidomastoidal.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Àpex del pulmó i vasos subclavis: punció superficial.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15564,
+          "b": [
+            0.812282,
+            0.0329,
+            0.154818
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2323,
+          "b": [
+            0.812282,
+            0.154818,
+            0.0329
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -551,14 +1295,38 @@
       "pinyin": "Quepen",
       "hanzi": "缺盆",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al clot de sobre la clavícula (fossa supraclavicular), 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
-        "nota": ""
+        "embaras": true,
+        "nota": "Àpex del pulmó i vasos subclavis: punció superficial. Algunes fonts el contraindiquen en l'embaràs.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15630,
+          "b": [
+            0.246699,
+            0.385596,
+            0.367705
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2391,
+          "b": [
+            0.246699,
+            0.367705,
+            0.385596
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -568,14 +1336,38 @@
       "pinyin": "Qihu",
       "hanzi": "气户",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Just sota la clavícula, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15491,
+          "b": [
+            0.744447,
+            0.24363,
+            0.011923
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2248,
+          "b": [
+            0.744447,
+            0.011922,
+            0.243631
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -585,14 +1377,38 @@
       "pinyin": "Kufang",
       "hanzi": "库房",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al primer espai intercostal, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15683,
+          "b": [
+            0.154247,
+            0.183037,
+            0.662716
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2444,
+          "b": [
+            0.154247,
+            0.662715,
+            0.183038
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -602,14 +1418,38 @@
       "pinyin": "Wuyi",
       "hanzi": "屋翳",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al segon espai intercostal, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 15686,
+          "b": [
+            0.101163,
+            0.01706,
+            0.881777
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2449,
+          "b": [
+            0.101163,
+            0.881777,
+            0.01706
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -619,14 +1459,38 @@
       "pinyin": "Yingchuang",
       "hanzi": "膺窗",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al tercer espai intercostal, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 16301,
+          "b": [
+            0.359729,
+            0.220188,
+            0.420083
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 3062,
+          "b": [
+            0.359729,
+            0.420083,
+            0.220188
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -636,14 +1500,38 @@
       "pinyin": "Ruzhong",
       "hanzi": "乳中",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al centre del mugró (quart espai intercostal). S'utilitza com a referència.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": "Tradicionalment no es punxa ni s'hi aplica moxa; serveix de referència anatòmica. Pendent de revisar."
+        "nota": "No es punxa ni s'hi aplica moxa: només és una referència.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 16235,
+          "b": [
+            0,
+            0,
+            1
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 2996,
+          "b": [
+            0,
+            1,
+            0
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -653,14 +1541,38 @@
       "pinyin": "Rugen",
       "hanzi": "乳根",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al cinquè espai intercostal, sota el mugró, 4 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Tòrax: risc de pneumotòrax; punció obliqua i superficial.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 16316,
+          "b": [
+            0.102476,
+            0.344677,
+            0.552847
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 3079,
+          "b": [
+            0.102476,
+            0.552847,
+            0.344677
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -670,14 +1582,38 @@
       "pinyin": "Burong",
       "hanzi": "不容",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 6 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20861,
+          "b": [
+            0.103702,
+            0.82829,
+            0.068008
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7626,
+          "b": [
+            0.103702,
+            0.068007,
+            0.828291
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -687,14 +1623,38 @@
       "pinyin": "Chengman",
       "hanzi": "承满",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 5 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20854,
+          "b": [
+            0.168202,
+            0.111084,
+            0.720714
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7621,
+          "b": [
+            0.168202,
+            0.720714,
+            0.111084
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -704,14 +1664,38 @@
       "pinyin": "Liangmen",
       "hanzi": "梁门",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 4 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20848,
+          "b": [
+            0.165064,
+            0.263207,
+            0.571729
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7615,
+          "b": [
+            0.165064,
+            0.571729,
+            0.263207
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -721,14 +1705,38 @@
       "pinyin": "Guanmen",
       "hanzi": "关门",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 3 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20986,
+          "b": [
+            0.171809,
+            0.367324,
+            0.460867
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7757,
+          "b": [
+            0.171809,
+            0.460867,
+            0.367324
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -738,14 +1746,38 @@
       "pinyin": "Taiyi",
       "hanzi": "太乙",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 2 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20836,
+          "b": [
+            0.190218,
+            0.390827,
+            0.418955
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7603,
+          "b": [
+            0.190218,
+            0.418954,
+            0.390828
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -755,14 +1787,38 @@
       "pinyin": "Huaroumen",
       "hanzi": "滑肉门",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 1 cun per sobre del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Abdomen superior: no punxar en profunditat (fetge, estómac).",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20934,
+          "b": [
+            0.17023,
+            0.383655,
+            0.446115
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7705,
+          "b": [
+            0.17023,
+            0.446114,
+            0.383656
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -772,14 +1828,38 @@
       "pinyin": "Tianshu",
       "hanzi": "天枢",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, a l'alçada del centre del melic i 2 cun cap enfora.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
-        "nota": ""
+        "embaras": true,
+        "nota": "Abdomen inferior: precaució en l'embaràs; no punxar en profunditat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 20958,
+          "b": [
+            0.090445,
+            0.420241,
+            0.489314
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7729,
+          "b": [
+            0.090445,
+            0.489313,
+            0.420242
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -789,14 +1869,38 @@
       "pinyin": "Wailing",
       "hanzi": "外陵",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 1 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
-        "nota": ""
+        "embaras": true,
+        "nota": "Abdomen inferior: precaució en l'embaràs; no punxar en profunditat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21011,
+          "b": [
+            0.240602,
+            0.000426,
+            0.758972
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 7780,
+          "b": [
+            0.240602,
+            0.758972,
+            0.000426
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -806,14 +1910,38 @@
       "pinyin": "Daju",
       "hanzi": "大巨",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 2 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
-        "nota": ""
+        "embaras": true,
+        "nota": "Abdomen inferior: precaució en l'embaràs; no punxar en profunditat.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21535,
+          "b": [
+            0.088412,
+            0.755402,
+            0.156186
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 21027,
+          "b": [
+            0.081433,
+            0.254498,
+            0.664069
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -823,14 +1951,38 @@
       "pinyin": "Shuidao",
       "hanzi": "水道",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 3 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
-        "nota": ""
+        "embaras": true,
+        "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21445,
+          "b": [
+            0.151897,
+            0.730341,
+            0.117762
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8074,
+          "b": [
+            0.151897,
+            0.117762,
+            0.730341
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -840,14 +1992,38 @@
       "pinyin": "Guilai",
       "hanzi": "归来",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'abdomen, 4 cun per sota del centre del melic i 2 cun cap enfora de la línia mitja.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
-        "nota": ""
+        "embaras": true,
+        "nota": "Abdomen inferior: precaució en l'embaràs; buidar la bufeta abans de punxar.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21341,
+          "b": [
+            0.196045,
+            0.263664,
+            0.540291
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8008,
+          "b": [
+            0.196045,
+            0.54029,
+            0.263665
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -857,14 +2033,38 @@
       "pinyin": "Qichong",
       "hanzi": "气冲",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A l'engonal, a l'alçada de la vora superior de la símfisi del pubis i 2 cun cap enfora, sobre el batec de l'artèria femoral.",
       "notes": "",
       "precaucions": {
-        "embaras": false,
-        "nota": ""
+        "embaras": true,
+        "nota": "Artèria femoral: evitar-la. Precaució en l'embaràs.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21416,
+          "b": [
+            0.68419,
+            0.246966,
+            0.068844
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8063,
+          "b": [
+            0.68419,
+            0.068844,
+            0.246966
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -874,14 +2074,38 @@
       "pinyin": "Biguan",
       "hanzi": "髀关",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la part alta de la cara anterior de la cuixa, al clot entre el sartori, el tensor de la fàscia lata i el recte femoral, a l'alçada de la vora inferior de la símfisi.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21493,
+          "b": [
+            0.152635,
+            0.782896,
+            0.064469
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8102,
+          "b": [
+            0.152635,
+            0.064469,
+            0.782896
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -891,14 +2115,38 @@
       "pinyin": "Futu",
       "hanzi": "伏兔",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara anterolateral de la cuixa, 6 cun per sobre de la vora superior de la ròtula, sobre la línia que va de l'espina ilíaca anterosuperior a l'angle extern de la ròtula.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21705,
+          "b": [
+            0.332709,
+            0.62582,
+            0.041471
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8306,
+          "b": [
+            0.332709,
+            0.041471,
+            0.62582
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -908,14 +2156,38 @@
       "pinyin": "Yinshi",
       "hanzi": "阴市",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara anterolateral de la cuixa, 3 cun per sobre de la ròtula, per fora del tendó del recte femoral.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21771,
+          "b": [
+            0.257336,
+            0.331945,
+            0.410719
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8372,
+          "b": [
+            0.257336,
+            0.410719,
+            0.331945
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -925,14 +2197,38 @@
       "pinyin": "Liangqiu",
       "hanzi": "梁丘",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara anterolateral de la cuixa, 2 cun per sobre de la ròtula, entre el vast extern i la vora externa del tendó del recte femoral.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21770,
+          "b": [
+            0.712829,
+            0.259779,
+            0.027392
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8373,
+          "b": [
+            0.712829,
+            0.027392,
+            0.259779
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -942,14 +2238,38 @@
       "pinyin": "Dubi",
       "hanzi": "犊鼻",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al genoll doblegat, al clot que queda per fora del lligament rotulià (ull extern del genoll).",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 21899,
+          "b": [
+            0.584616,
+            0.271432,
+            0.143952
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8500,
+          "b": [
+            0.584616,
+            0.143953,
+            0.271431
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -959,14 +2279,38 @@
       "pinyin": "Zusanli",
       "hanzi": "足三里",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara anterior de la cama, 3 cun per sota de ST35, a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22004,
+          "b": [
+            0.343006,
+            0.053771,
+            0.603223
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8607,
+          "b": [
+            0.343006,
+            0.603223,
+            0.053771
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -976,14 +2320,38 @@
       "pinyin": "Shangjuxu",
       "hanzi": "上巨虚",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara anterior de la cama, 6 cun per sota de ST35, a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22072,
+          "b": [
+            0.01592,
+            0.633549,
+            0.350531
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8675,
+          "b": [
+            0.01592,
+            0.350531,
+            0.633549
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -993,14 +2361,38 @@
       "pinyin": "Tiaokou",
       "hanzi": "条口",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara anterior de la cama, 8 cun per sota de ST35 (a mitja cama), a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22086,
+          "b": [
+            0.014274,
+            0.762876,
+            0.22285
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8689,
+          "b": [
+            0.014274,
+            0.222849,
+            0.762877
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -1010,14 +2402,38 @@
       "pinyin": "Xiajuxu",
       "hanzi": "下巨虚",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cara anterior de la cama, 9 cun per sota de ST35, a un través de dit per fora de la cresta de la tíbia.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22138,
+          "b": [
+            0.059806,
+            0.24301,
+            0.697184
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8741,
+          "b": [
+            0.059806,
+            0.697185,
+            0.243009
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -1027,14 +2443,38 @@
       "pinyin": "Fenglong",
       "hanzi": "丰隆",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "A la cama, a la mateixa alçada que ST38 i un través de dit més cap enfora, a la vora externa del tibial anterior.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 22110,
+          "b": [
+            0.000309,
+            0.164723,
+            0.834968
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 8713,
+          "b": [
+            0.000309,
+            0.834969,
+            0.164722
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -1044,14 +2484,38 @@
       "pinyin": "Jiexi",
       "hanzi": "解溪",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al centre de la cara anterior del turmell, entre els tendons de l'extensor llarg del dit gros i de l'extensor llarg dels dits.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 24879,
+          "b": [
+            0.201468,
+            0.118724,
+            0.679808
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 11424,
+          "b": [
+            0.201468,
+            0.679808,
+            0.118724
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -1061,14 +2525,38 @@
       "pinyin": "Chongyang",
       "hanzi": "冲阳",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al dors del peu, on la base del 2n metatarsià s'uneix al cuneïforme, sobre el batec de l'artèria pèdia.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "Artèria pèdia: evitar-la.",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25075,
+          "b": [
+            0.581942,
+            0.234741,
+            0.183317
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 11620,
+          "b": [
+            0.581942,
+            0.183316,
+            0.234742
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -1078,14 +2566,38 @@
       "pinyin": "Xiangu",
       "hanzi": "陷谷",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al dors del peu, entre el 2n i el 3r metatarsià, al clot just darrere de la 2a articulació metatarsofalàngica.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25907,
+          "b": [
+            0.430342,
+            0.422249,
+            0.147409
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 12452,
+          "b": [
+            0.430342,
+            0.147409,
+            0.422249
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -1095,14 +2607,38 @@
       "pinyin": "Neiting",
       "hanzi": "内庭",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Entre el 2n i el 3r dit del peu, just darrere del marge de la membrana que els uneix.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25437,
+          "b": [
+            0.497702,
+            0.258028,
+            0.24427
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 11982,
+          "b": [
+            0.497702,
+            0.24427,
+            0.258028
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     },
     {
@@ -1112,14 +2648,38 @@
       "pinyin": "Lidui",
       "hanzi": "厉兑",
       "nomCatala": "",
-      "localitzacio": "",
+      "localitzacio": "Al 2n dit del peu, al costat extern, uns 2 mm (0,1 cun) cap enfora i cap enrere de l'angle de l'ungla.",
       "notes": "",
       "precaucions": {
         "embaras": false,
-        "nota": ""
+        "nota": "",
+        "confirmada": false
       },
       "revisat": false,
-      "posicions": [],
+      "posicions": [
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "E",
+          "triangle": 25999,
+          "b": [
+            0.123954,
+            0.087531,
+            0.788515
+          ],
+          "origen": "oms"
+        },
+        {
+          "topologia": "mh-13380v-26756t-84753624",
+          "costat": "D",
+          "triangle": 12544,
+          "b": [
+            0.123954,
+            0.788515,
+            0.087531
+          ],
+          "origen": "oms"
+        }
+      ],
       "orella": null
     }
   ]

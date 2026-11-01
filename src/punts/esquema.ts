@@ -14,6 +14,13 @@ export const COSTATS_POSICIO = ['E', 'D', 'C'] as const
 /** E = esquerre del pacient (+X del model), D = dret (−X), C = línia mitja */
 export type CostatPosicio = (typeof COSTATS_POSICIO)[number]
 
+/**
+ * D'on surt una posició: calculada amb la regla de l'OMS, corregida per la
+ * doctora des del mapa o col·locada a mà amb l'eina de calibratge.
+ */
+export const ORIGENS_POSICIO = ['oms', 'doctora', 'manual'] as const
+export type OrigenPosicio = (typeof ORIGENS_POSICIO)[number]
+
 const baricentrica = z.number().min(-1e-6).max(1 + 1e-6)
 
 export const esquemaPosicio3D = z
@@ -25,6 +32,7 @@ export const esquemaPosicio3D = z
     triangle: z.number().int().nonnegative(),
     /** Coordenades baricèntriques; sumen 1 */
     b: z.tuple([baricentrica, baricentrica, baricentrica]),
+    origen: z.enum(ORIGENS_POSICIO).default('manual'),
   })
   .refine((p) => Math.abs(p.b[0] + p.b[1] + p.b[2] - 1) < 1e-4, {
     message: 'Les coordenades baricèntriques han de sumar 1',
@@ -62,6 +70,8 @@ export const esquemaPuntCatalog = z.object({
   precaucions: z.object({
     embaras: z.boolean(),
     nota: z.string(),
+    /** Cert quan la doctora ha confirmat la precaució */
+    confirmada: z.boolean(),
   }),
   /** Cert quan la doctora ha revisat el punt */
   revisat: z.boolean(),

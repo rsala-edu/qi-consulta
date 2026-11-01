@@ -2,7 +2,7 @@
 // Funciona amb qualsevol BufferGeometry indexada en l'espai del model.
 
 import { BufferGeometry, Triangle, Vector3 } from 'three'
-import type { CostatPosicio, Posicio3D } from '../../punts/esquema'
+import type { CostatPosicio, OrigenPosicio, Posicio3D } from '../../punts/esquema'
 
 export interface PosicioMalla {
   triangle: number
@@ -100,6 +100,11 @@ export function posicioMirall(geom: BufferGeometry, p: PosicioMalla): PosicioMal
 export const COSTAT_OPOSAT: Record<CostatPosicio, CostatPosicio> = { E: 'D', D: 'E', C: 'C' }
 
 /** Construeix una Posicio3D del catàleg. */
-export function posicio3D(topologia: string, costat: CostatPosicio, p: PosicioMalla): Posicio3D {
-  return { topologia, costat, triangle: p.triangle, b: p.b }
+export function posicio3D(
+  topologia: string,
+  costat: CostatPosicio,
+  p: PosicioMalla,
+  origen: OrigenPosicio = 'manual',
+): Posicio3D {
+  return { topologia, costat, triangle: p.triangle, b: p.b, origen }
 }

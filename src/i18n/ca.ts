@@ -138,6 +138,12 @@ export const ca = {
     veure: 'Veure',
     treure: 'Treure',
     sensePosicions: 'Encara no hi ha cap punt col·locat en aquest model. Es col·loquen a Ajustos → Calibratge.',
+    corregir: 'Corregir la posició',
+    corregint: 'Corregint {codi}',
+    instruccionsCorregir: 'Toca la pell on ha d\'anar el punt o arrossega\'l. Es desa sol.',
+    fet: 'Fet',
+    restablir: 'Tornar a la posició calculada',
+    origen: { oms: 'Calculat amb la regla de l\'OMS', doctora: 'Corregit per la doctora', manual: 'Col·locat a mà' },
   },
   ajustos: {
     titol: 'Ajustos',

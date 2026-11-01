@@ -1,10 +1,9 @@
 // Pantalla de prova del marcatge de punts (etapa 2d). No desa res: quan
 // tinguem les sessions, aquest mateix flux anirà dins la pantalla de sessió.
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
-import { llistarCalibratge, type Calibracio } from '../../db/calibratge'
 import {
   COLOR_TECNICA,
   COSTATS_MARCAT,
@@ -17,14 +16,15 @@ import {
   type PuntMarcat,
   type Tecnica,
 } from '../../domini/puntMarcat'
-import { t } from '../../i18n/t'
-import { Visor3D, type ControlVisor, type MarcadorVisor } from '../../mapa/components/Visor3D'
-import { llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from '../../mapa/marcadors'
+import { formatar, t } from '../../i18n/t'
+import { Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
+import { posicio3D, posicioDesDePunt } from '../../mapa/geometria/baricentriques'
+import { idMarcador, llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from '../../mapa/marcadors'
 import type { ModelCos } from '../../mapa/model'
+import { useCalibracions } from '../../mapa/useCalibracions'
 import { useModelCos } from '../../mapa/useModelCos'
-import { ambCalibratge, cataleg, cercarPunts, nomMeridia } from '../../punts/cataleg'
+import { cataleg, cercarPunts, nomMeridia, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
-import { useSessio } from '../../sessio/ContextSessio'
 
 export function PantallaProvaMapa() {
   const carrega = useModelCos()
@@ -48,19 +48,15 @@ interface FitxaOberta {
 }
 
 function Marcatge({ model }: { model: ModelCos }) {
-  const { db } = useSessio()
   const visor = useRef<ControlVisor>(null)
-  const [calibracions, setCalibracions] = useState<Calibracio[]>([])
+  const { efectiu, desar, restablir } = useCalibracions(model.topologia)
+  /** Punt i costat que la doctora està corregint */
+  const [correccio, setCorreccio] = useState<{ codi: string; costat: CostatPosicio } | null>(null)
   const [meridia, setMeridia] = useState('')
   const [consulta, setConsulta] = useState('')
   const [marcats, setMarcats] = useState<PuntMarcat[]>([])
   const [fitxa, setFitxa] = useState<FitxaOberta | null>(null)
 
-  useEffect(() => {
-    void llistarCalibratge(db, model.topologia).then(setCalibracions)
-  }, [db, model.topologia])
-
-  const efectiu = useMemo(() => ambCalibratge(cataleg, calibracions), [calibracions])
   const tots = useMemo(() => puntsSobreModel(efectiu, model), [efectiu, model])
   const visibles = useMemo(() => (meridia ? tots.filter((p) => p.punt.meridia === meridia) : tots), [tots, meridia])
   const recorreguts = useMemo(() => (meridia ? recorregutsMeridia(tots, meridia) : []), [tots, meridia])
@@ -74,12 +70,12 @@ function Marcatge({ model }: { model: ModelCos }) {
           punt: p.posicio,
           normal: p.normal,
           color: tecnica && COLOR_TECNICA[tecnica],
-          destacat: fitxa?.codi === p.punt.codi,
+          destacat: correccio ? p.id === idMarcador(correccio.codi, correccio.costat) : fitxa?.codi === p.punt.codi,
           etiqueta: p.punt.codi,
           etiquetaLlarga: `${p.punt.codi} · ${p.punt.pinyin}`,
         }
       }),
-    [visibles, marcats, fitxa?.codi],
+    [visibles, marcats, fitxa?.codi, correccio],
   )
 
   function obrirFitxa(codi: string, costatTocat?: CostatPosicio) {
@@ -94,8 +90,24 @@ function Marcatge({ model }: { model: ModelCos }) {
     obrirFitxa(codi, p?.costat)
   }
 
+  function corregir(punt: TocPell, immediat: boolean) {
+    if (!correccio) return
+    const pos = posicioDesDePunt(model.geometria, punt.triangle, punt.punt)
+    desar(correccio.codi, correccio.costat, posicio3D(model.topologia, correccio.costat, pos, 'doctora'), immediat)
+  }
+
+  function començarCorreccio(codi: string, costat: CostatPosicio) {
+    setCorreccio({ codi, costat })
+    const p = tots.find((x) => x.id === idMarcador(codi, costat))
+    if (p) visor.current?.anarA(p.posicio, p.normal)
+  }
+
   const resultats = consulta.trim() ? cercarPunts(efectiu, consulta).slice(0, 8) : []
-  const puntFitxa = fitxa && efectiu.punts.find((p) => p.codi === fitxa.codi)
+  const puntFitxa = efectiu.punts.find((p) => p.codi === (correccio?.codi ?? fitxa?.codi))
+  const origenDe = (codi: string, costat: CostatPosicio) => {
+    const p = efectiu.punts.find((x) => x.codi === codi)
+    return p ? posicioDe(p, model.topologia, costat)?.origen : undefined
+  }
   const jaMarcat = fitxa && marcats.some((m) => m.codi === fitxa.codi)
 
   return (
@@ -108,11 +120,14 @@ function Marcatge({ model }: { model: ModelCos }) {
           geometria={model.geometria}
           marcadors={marcadors}
           recorreguts={recorreguts}
-          modeToc="marcador"
+          modeToc={correccio ? 'pell' : 'marcador'}
           onTocarMarcador={(id) => {
             const { codi, costat } = llegirIdMarcador(id)
             obrirFitxa(codi, costat)
           }}
+          onTocarPell={(toc) => corregir(toc, true)}
+          arrossegable={correccio ? idMarcador(correccio.codi, correccio.costat) : null}
+          onArrossegar={(toc) => corregir(toc, false)}
         />
         <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
           {TECNIQUES.map((tec) => (
@@ -173,7 +188,42 @@ function Marcatge({ model }: { model: ModelCos }) {
           </ul>
         )}
 
-        {fitxa && puntFitxa && (
+        {correccio && (
+          <section className="fitxa-punt" aria-label={formatar(t.mapa.corregint, { codi: correccio.codi })}>
+            <h2>{formatar(t.mapa.corregint, { codi: correccio.codi })}</h2>
+            <p>{t.mapa.instruccionsCorregir}</p>
+            {cataleg.meridians.find((m) => m.codi === puntFitxa?.meridia)?.bilateral !== false && (
+              <div className="segmentat" role="radiogroup" aria-label={t.mapa.costatTitol}>
+                {(['E', 'D'] as const).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    role="radio"
+                    aria-checked={correccio.costat === c}
+                    onClick={() => començarCorreccio(correccio.codi, c)}
+                  >
+                    {t.mapa.costat[c]}
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="detall" role="status">
+              {t.mapa.origen[origenDe(correccio.codi, correccio.costat) ?? 'oms']}
+            </p>
+            <div className="accions accions-esquerra">
+              <Boto onClick={() => setCorreccio(null)}>{t.mapa.fet}</Boto>
+              <Boto
+                variant="discret"
+                disabled={origenDe(correccio.codi, correccio.costat) !== 'doctora'}
+                onClick={() => void restablir(correccio.codi, correccio.costat)}
+              >
+                {t.mapa.restablir}
+              </Boto>
+            </div>
+          </section>
+        )}
+
+        {!correccio && fitxa && puntFitxa && (
           <section className="fitxa-punt" aria-label={puntFitxa.codi}>
             <h2>
               {puntFitxa.codi} · {puntFitxa.pinyin} <span lang="zh">{puntFitxa.hanzi}</span>
@@ -188,6 +238,10 @@ function Marcatge({ model }: { model: ModelCos }) {
                 {puntFitxa.precaucions.embaras && <strong>{t.mapa.precaucioEmbaras}. </strong>}
                 {puntFitxa.precaucions.nota}
               </p>
+            )}
+
+            {(['E', 'D'] as const).some((c) => origenDe(puntFitxa.codi, c) === 'doctora') && (
+              <p className="etiqueta-origen">{t.mapa.origen.doctora}</p>
             )}
 
             <div className="segmentat" role="radiogroup" aria-label={t.mapa.costatTitol}>
@@ -239,6 +293,14 @@ function Marcatge({ model }: { model: ModelCos }) {
               )}
               <Boto variant="discret" onClick={() => setFitxa(null)}>
                 {t.mapa.tancar}
+              </Boto>
+            </div>
+            <div className="accions accions-esquerra">
+              <Boto
+                variant="discret"
+                onClick={() => començarCorreccio(fitxa.codi, fitxa.costat === 'D' ? 'D' : 'E')}
+              >
+                {t.mapa.corregir}
               </Boto>
             </div>
           </section>

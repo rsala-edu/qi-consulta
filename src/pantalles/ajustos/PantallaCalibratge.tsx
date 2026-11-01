@@ -2,11 +2,10 @@
 // del model (raycast), arrossegar-los i exportar el catàleg amb les posicions.
 // Les posicions es guarden al dispositiu fins que s'exporten.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
-import { desarCalibracio, descartarCalibratge, llistarCalibratge, type Calibracio } from '../../db/calibratge'
 import { formatar, t } from '../../i18n/t'
 import { Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
 import {
@@ -17,10 +16,10 @@ import {
 } from '../../mapa/geometria/baricentriques'
 import { idMarcador, puntsSobreModel } from '../../mapa/marcadors'
 import type { ModelCos } from '../../mapa/model'
+import { useCalibracions } from '../../mapa/useCalibracions'
 import { useModelCos } from '../../mapa/useModelCos'
-import { ambCalibratge, cataleg, exportarCataleg, posicioDe } from '../../punts/cataleg'
+import { cataleg, exportarCataleg, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
-import { useSessio } from '../../sessio/ContextSessio'
 
 export function PantallaCalibratge() {
   const carrega = useModelCos()
@@ -40,19 +39,13 @@ export function PantallaCalibratge() {
 }
 
 function Calibratge({ model }: { model: ModelCos }) {
-  const { db } = useSessio()
   const visor = useRef<ControlVisor>(null)
-  const [calibracions, setCalibracions] = useState<Calibracio[]>([])
+  const { calibracions, efectiu, desar, descartarTot } = useCalibracions(model.topologia)
   const [meridia, setMeridia] = useState(cataleg.meridians[0]!.codi)
   const [seleccionat, setSeleccionat] = useState<string | null>(null)
   const [costat, setCostat] = useState<CostatPosicio>('E')
   const [missatge, setMissatge] = useState('')
 
-  useEffect(() => {
-    void llistarCalibratge(db, model.topologia).then(setCalibracions)
-  }, [db, model.topologia])
-
-  const efectiu = useMemo(() => ambCalibratge(cataleg, calibracions), [calibracions])
   const puntsMeridia = efectiu.punts.filter((p) => p.meridia === meridia)
   const bilateral = cataleg.meridians.find((m) => m.codi === meridia)?.bilateral ?? true
   const costats: CostatPosicio[] = bilateral ? ['E', 'D'] : ['C']
@@ -74,30 +67,10 @@ function Calibratge({ model }: { model: ModelCos }) {
     [sobreModel, seleccionat, idSeleccionat],
   )
 
-  // Desa a l'estat de seguida i a la base de dades (amb un petit retard en arrossegar)
-  const pendents = useRef(new Map<string, ReturnType<typeof setTimeout>>())
-  const aplicar = useCallback(
-    (codi: string, c: CostatPosicio, posicio: Calibracio['posicio'], immediat = true) => {
-      const nova: Calibracio = { codi, topologia: model.topologia, costat: c, posicio }
-      setCalibracions((l) => [...l.filter((k) => !(k.codi === codi && k.costat === c)), nova])
-      const clau = idMarcador(codi, c)
-      clearTimeout(pendents.current.get(clau))
-      const desar = () => void desarCalibracio(db, model.topologia, codi, c, posicio)
-      if (immediat) desar()
-      else pendents.current.set(clau, setTimeout(desar, 250))
-    },
-    [db, model.topologia],
-  )
-
-  useEffect(() => {
-    const p = pendents.current
-    return () => p.forEach((id) => clearTimeout(id))
-  }, [])
-
   const colocar = (toc: TocPell, immediat: boolean) => {
     if (!seleccionat) return
     const pos = posicioDesDePunt(model.geometria, toc.triangle, toc.punt)
-    aplicar(seleccionat, costat, posicio3D(model.topologia, costat, pos), immediat)
+    desar(seleccionat, costat, posicio3D(model.topologia, costat, pos, 'manual'), immediat)
   }
 
   const triar = (codi: string, c: CostatPosicio = costat) => {
@@ -125,8 +98,7 @@ function Calibratge({ model }: { model: ModelCos }) {
 
   async function descartar() {
     if (!window.confirm(t.calibratge.confirmarDescartar)) return
-    await descartarCalibratge(db, model.topologia)
-    setCalibracions([])
+    await descartarTot()
   }
 
   return (
@@ -206,13 +178,13 @@ function Calibratge({ model }: { model: ModelCos }) {
                     if (!posActual) return
                     const oposat = COSTAT_OPOSAT[costat]
                     const mirall = posicioMirall(model.geometria, posActual)
-                    aplicar(punt.codi, oposat, posicio3D(model.topologia, oposat, mirall))
+                    desar(punt.codi, oposat, posicio3D(model.topologia, oposat, mirall, 'manual'))
                   }}
                 >
                   {t.calibratge.copiarOposat}
                 </Boto>
               )}
-              <Boto variant="discret" disabled={!posActual} onClick={() => aplicar(punt.codi, costat, null)}>
+              <Boto variant="discret" disabled={!posActual} onClick={() => desar(punt.codi, costat, null)}>
                 {t.calibratge.esborrar}
               </Boto>
             </div>

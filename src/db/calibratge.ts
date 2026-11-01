@@ -33,6 +33,11 @@ export async function desarCalibracio(
   })
 }
 
+/** Oblida el canvi local d'un punt i costat: torna a valer la posició del catàleg. */
+export async function esborrarCalibracio(db: QiDB, topologia: string, codi: string, costat: CostatPosicio): Promise<void> {
+  await db.calibratge.delete(id(topologia, codi, costat))
+}
+
 /** Oblida tots els canvis locals d'una topologia (torna al catàleg del projecte). */
 export async function descartarCalibratge(db: QiDB, topologia: string): Promise<void> {
   await db.calibratge.where('topologia').equals(topologia).delete()

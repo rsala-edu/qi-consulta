@@ -23,16 +23,31 @@ describe('catàleg del projecte', () => {
     expect(cataleg.punts.find((p) => p.codi === 'ST36')).toMatchObject({ pinyin: 'Zusanli', hanzi: '足三里' })
   })
 
-  it('encara no té cap posició: s\'han de calibrar sobre el model definitiu', () => {
-    expect(cataleg.punts.every((p) => p.posicions.length === 0 && p.orella === null)).toBe(true)
+  it('cada punt té posició als dos costats sobre el cos definitiu, calculada amb la regla de l\'OMS', () => {
+    for (const p of cataleg.punts) {
+      const mh = p.posicions.filter((q) => q.topologia.startsWith('mh-'))
+      expect(mh.map((q) => q.costat).sort(), p.codi).toEqual(['D', 'E'])
+      expect(mh.every((q) => q.origen === 'oms' || q.origen === 'doctora'), p.codi).toBe(true)
+      expect(p.orella).toBeNull()
+    }
   })
 
-  it('les localitzacions i els noms en català queden pendents de la doctora', () => {
-    expect(cataleg.punts.every((p) => !p.revisat && p.localitzacio === '' && p.nomCatala === '')).toBe(true)
+  it('cada punt té la localització redactada; el nom català i la revisió queden per a la doctora', () => {
+    for (const p of cataleg.punts) {
+      expect(p.localitzacio.length, p.codi).toBeGreaterThan(30)
+      expect(p.localitzacio.endsWith('.'), p.codi).toBe(true)
+      expect(p.nomCatala).toBe('')
+      expect(p.revisat).toBe(false)
+    }
   })
 
-  it('marca LI4 com a precaució en l\'embaràs', () => {
+  it('té una llista curta de precaucions pendents de confirmar', () => {
+    const amb = cataleg.punts.filter((p) => p.precaucions.nota !== '')
+    expect(amb.length).toBeGreaterThan(10)
+    expect(amb.length).toBeLessThan(40)
+    expect(cataleg.punts.every((p) => !p.precaucions.confirmada)).toBe(true)
     expect(cataleg.punts.find((p) => p.codi === 'LI4')?.precaucions.embaras).toBe(true)
+    expect(cataleg.punts.find((p) => p.codi === 'ST9')?.precaucions.nota).toMatch(/caròtida/)
   })
 
   it('dona el nom del meridià', () => {
@@ -42,7 +57,7 @@ describe('catàleg del projecte', () => {
 
 describe('validació del format', () => {
   const base = () => structuredClone(cataleg)
-  const posicio: Posicio3D = { topologia: 'prova', costat: 'E', triangle: 12, b: [0.2, 0.3, 0.5] }
+  const posicio: Posicio3D = { topologia: 'prova', costat: 'E', triangle: 12, b: [0.2, 0.3, 0.5], origen: 'manual' }
 
   it('accepta una posició baricèntrica vàlida', () => {
     const c = base()
@@ -98,7 +113,7 @@ describe('cercador', () => {
 })
 
 describe('calibratge sobre el catàleg', () => {
-  const pos = (costat: 'E' | 'D', triangle: number): Posicio3D => ({ topologia: 'maniqui', costat, triangle, b: [1, 0, 0] })
+  const pos = (costat: 'E' | 'D', triangle: number): Posicio3D => ({ topologia: 'maniqui', costat, triangle, b: [1, 0, 0], origen: 'manual' })
 
   it('afegeix, substitueix i esborra posicions sense tocar les altres topologies', () => {
     const c1 = ambCalibratge(cataleg, [
@@ -106,14 +121,16 @@ describe('calibratge sobre el catàleg', () => {
       { codi: 'LI4', topologia: 'maniqui', costat: 'E', posicio: pos('E', 9) },
     ])
     const li4 = c1.punts.find((p) => p.codi === 'LI4')!
-    expect(li4.posicions.map((q) => q.costat)).toEqual(['E', 'D'])
+    expect(li4.posicions.filter((q) => q.topologia === 'maniqui').map((q) => q.costat)).toEqual(['E', 'D'])
     expect(posicioDe(li4, 'maniqui', 'E')?.triangle).toBe(9)
     expect(posicioDe(li4, 'una-altra', 'E')).toBeUndefined()
 
     const c2 = ambCalibratge(c1, [{ codi: 'LI4', topologia: 'maniqui', costat: 'E', posicio: null }])
-    expect(c2.punts.find((p) => p.codi === 'LI4')!.posicions.map((q) => q.costat)).toEqual(['D'])
-    // El catàleg original no canvia
-    expect(cataleg.punts.find((p) => p.codi === 'LI4')!.posicions).toEqual([])
+    const maniqui = (c: typeof c2) => c.punts.find((p) => p.codi === 'LI4')!.posicions.filter((q) => q.topologia === 'maniqui')
+    expect(maniqui(c2).map((q) => q.costat)).toEqual(['D'])
+    // Les posicions del cos definitiu i el catàleg original no canvien
+    expect(c2.punts.find((p) => p.codi === 'LI4')!.posicions.filter((q) => q.topologia !== 'maniqui')).toHaveLength(2)
+    expect(maniqui(cataleg)).toEqual([])
   })
 
   it('exporta un JSON vàlid que es pot tornar a carregar', () => {
