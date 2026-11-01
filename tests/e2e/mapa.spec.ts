@@ -271,3 +271,26 @@ test('amb tot el cos i sense meridià filtrat no hi ha etiquetes; amb un meridi�
   await visorLlest(page, 90)
   await expect(page.locator('.etiqueta-punt').first()).toBeVisible()
 })
+
+test('els textos dels botons de tècnica no es tallen a cap amplada', async ({ page }) => {
+  await entrar(page)
+  await obrirMapa(page)
+  await anarAlPunt(page, 'zusanli')
+  const grup = page.getByRole('region', { name: 'ST36' }).getByRole('radiogroup', { name: 'Tècnica' })
+  const alcada = page.viewportSize()!.height
+  for (const amplada of [768, 1024, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width: amplada, height: alcada })
+    const problemes = await grup.evaluate((g) =>
+      [...g.querySelectorAll('button')].flatMap((b) => {
+        const caixa = b.getBoundingClientRect()
+        const text = document.createRange()
+        text.selectNodeContents(b)
+        const t = text.getBoundingClientRect()
+        // El text, sencer i dins la vora del botó (amb una mica de marge)
+        const dins = t.left >= caixa.left + 4 && t.right <= caixa.right - 4 && t.top >= caixa.top && t.bottom <= caixa.bottom
+        return dins && b.scrollWidth <= b.clientWidth ? [] : [b.textContent]
+      }),
+    )
+    expect(problemes, `amplada ${amplada}px`).toEqual([])
+  }
+})

@@ -1665,17 +1665,22 @@ fieldset {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
   min-height: 44px;
-  padding: 0 14px;
+  padding: 6px 12px;
   font-size: 0.95rem;
+  line-height: 1.2;
   text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* El text mai no es talla: si no hi cap, passa a dues línies */
+  white-space: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .segmentat.segmentat-graella .punt-color {
   flex: none;
+  margin-right: 0;
 }
 
 /* Avís del tipus de cita (seguiment abans de la primera visita) */
