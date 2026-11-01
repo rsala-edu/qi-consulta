@@ -43,7 +43,8 @@ export function PantallaAgenda() {
   const [avui] = useState(() => diaDe(new Date()))
   const dia = esDia(params.get('dia') ?? '') ? params.get('dia')! : avui
   const vista: Vista = params.get('vista') === 'setmana' ? 'setmana' : 'dia'
-  const [obert, setObert] = useState<Obert>(null)
+  // Des de l'accés ràpid «Nova cita» (Avui) s'obre directament el formulari
+  const [obert, setObert] = useState<Obert>(() => (params.get('nova') ? { tipus: 'nova', inici: `${dia}T10:00` } : null))
   const [versio, setVersio] = useState(0)
 
   const [carrega, substituir] = useCarrega(

@@ -1,6 +1,7 @@
 // La doctora revisa les precaucions per categories: confirma cada categoria
 // i, dins d'una categoria, pot fer una excepció per a un punt concret.
-import { expect as expectBase, test, type Page } from '@playwright/test'
+import { type Page } from '@playwright/test'
+import { continuarAmbGoogle, expect as expectBase, test } from './google.js'
 
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 const expect = expectBase.configure({ timeout: 15_000 })
@@ -15,6 +16,7 @@ async function anarAlPunt(page: Page, codi: string) {
 
 test('confirmar categories, fer una excepció i veure-ho a la fitxa del punt', async ({ page }) => {
   await page.goto('/qi-consulta/')
+  await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
   await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Crear i entrar' }).click()

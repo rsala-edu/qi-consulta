@@ -4,6 +4,7 @@
 import type { RevisioPrecaucions } from '../punts/cataleg'
 import { ordenarCategories } from '../punts/cataleg'
 import type { CategoriaPrecaucio } from '../punts/esquema'
+import { registrarEsborrats } from './esborrats'
 import type { QiDB, RegistreCategoriaPrecaucio, RegistrePrecaucio } from './esquema'
 
 export interface RevisioDesada extends RevisioPrecaucions {
@@ -25,6 +26,7 @@ export async function confirmarCategoria(db: QiDB, categoria: CategoriaPrecaucio
 /** La categoria torna a quedar pendent. */
 export async function desconfirmarCategoria(db: QiDB, categoria: CategoriaPrecaucio): Promise<void> {
   await db.categoriesPrecaucio.delete(categoria)
+  await registrarEsborrats(db, 'categoriesPrecaucio', [categoria])
 }
 
 /** Excepció per a un punt: categories i text propis (queda confirmat). */
@@ -45,4 +47,5 @@ export async function desarExcepcio(
 
 export async function treureExcepcio(db: QiDB, codi: string): Promise<void> {
   await db.precaucions.delete(codi)
+  await registrarEsborrats(db, 'precaucions', [codi])
 }

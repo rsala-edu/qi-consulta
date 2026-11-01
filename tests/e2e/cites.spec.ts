@@ -1,6 +1,7 @@
 // Agenda (dia i setmana), cites lligades al pacient, avís de solapament i
 // pestanya Cites de la fitxa del pacient. Només dades inventades.
-import { expect as expectBase, test, type Page } from '@playwright/test'
+import { type Page } from '@playwright/test'
+import { continuarAmbGoogle, expect as expectBase, test } from './google.js'
 
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 const expect = expectBase.configure({ timeout: 10_000 })
@@ -12,10 +13,11 @@ const DIA = '2026-11-02'
 
 async function entrar(page: Page) {
   await page.goto('/qi-consulta/')
+  await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
   await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Crear i entrar' }).click()
-  await expect(page.getByRole('heading', { name: 'Pacients' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Avui', exact: true })).toBeVisible()
 }
 
 /** Sense recarregar (l'app es bloquejaria): només canvia la ruta */

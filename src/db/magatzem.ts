@@ -2,7 +2,7 @@
 // aquí no es guarda mai res en clar, excepte els identificadors i les dates.
 
 import type { z } from 'zod'
-import { desxifrarJson, xifrarJson, type ClauEmbolcallada } from '../crypto'
+import { desxifrarJson, xifrarJson, type ClauEmbolcallada, type EmbolcallSecret } from '../crypto'
 import {
   esquemaDadesFitxaClinica,
   fitxaClinicaBuida,
@@ -18,6 +18,7 @@ import {
 import { esquemaCitaGuardada, esquemaDadesCita, type Cita, type DadesCita } from '../domini/cita'
 import { esquemaEsborranyGuardat, type Esborrany, type EsborranyGuardat } from '../domini/esborrany'
 import { araIso, nouId } from '../domini/registre'
+import { registrarEsborrats } from './esborrats'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
 
 /** Les dades associades lliguen cada text xifrat a la seva taula i al seu id. */
@@ -212,6 +213,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
 
     async esborrarCita(id) {
       await db.cites.delete(id)
+      await registrarEsborrats(db, 'cites', [id])
     },
   }
   return magatzem
@@ -220,9 +222,41 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
 // --- Clau mestra embolcallada (no és dada de pacient; ja va xifrada) ---
 
 export async function llegirClauEmbolcallada(db: QiDB): Promise<ClauEmbolcallada | undefined> {
-  return (await db.meta.get('clauMestra'))?.valor
+  const r = await db.meta.get('clauMestra')
+  return r?.clau === 'clauMestra' ? r.valor : undefined
 }
 
-export async function guardarClauEmbolcallada(db: QiDB, valor: ClauEmbolcallada): Promise<void> {
-  await db.meta.put({ clau: 'clauMestra', valor })
+export async function guardarClauEmbolcallada(db: QiDB, valor: ClauEmbolcallada, at = new Date().toISOString()): Promise<void> {
+  await db.meta.bulkPut([
+    { clau: 'clauMestra', valor },
+    { clau: 'clauMestraAt', valor: at },
+  ])
+}
+
+export async function llegirClauMestraAt(db: QiDB): Promise<string> {
+  const r = await db.meta.get('clauMestraAt')
+  return r?.clau === 'clauMestraAt' ? r.valor : '1970-01-01T00:00:00.000Z'
+}
+
+export async function llegirSecrets(db: QiDB): Promise<EmbolcallSecret[]> {
+  const r = await db.meta.get('secrets')
+  return r?.clau === 'secrets' ? r.valor : []
+}
+
+export async function guardarSecrets(db: QiDB, valor: EmbolcallSecret[]): Promise<void> {
+  await db.meta.put({ clau: 'secrets', valor })
+}
+
+export interface EstatGoogle {
+  connectatAt: string
+  ultimaCopia: string | null
+}
+
+export async function llegirEstatGoogle(db: QiDB): Promise<EstatGoogle | null> {
+  const r = await db.meta.get('google')
+  return r?.clau === 'google' ? r.valor : null
+}
+
+export async function guardarEstatGoogle(db: QiDB, valor: EstatGoogle): Promise<void> {
+  await db.meta.put({ clau: 'google', valor })
 }

@@ -7,6 +7,12 @@ export function PantallaAjustos() {
       <h1>{t.ajustos.titol}</h1>
       <ul className="llista-pacients">
         <li>
+          <Link to="/ajustos/seguretat">
+            <span className="nom">{t.seguretat.titol}</span>
+            <span className="detall">{t.seguretat.desc}</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/ajustos/precaucions">
             <span className="nom">{t.ajustos.precaucions}</span>
             <span className="detall">{t.ajustos.precaucionsDesc}</span>

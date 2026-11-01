@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { ClauEmbolcallada, DadesXifrades } from '../crypto'
+import type { ClauEmbolcallada, DadesXifrades, EmbolcallSecret } from '../crypto'
 import { cataleg, ordenarCategories } from '../punts/cataleg'
 import type { CategoriaPrecaucio, CostatPosicio, Posicio3D } from '../punts/esquema'
 
@@ -18,9 +18,25 @@ export interface RegistreXifrat {
   xifrat: DadesXifrades
 }
 
-export interface RegistreMeta {
-  clau: 'clauMestra'
-  valor: ClauEmbolcallada
+export type RegistreMeta =
+  | { clau: 'clauMestra'; valor: ClauEmbolcallada }
+  /** Quan es va crear o canviar la contrasenya (per triar l'embolcall més nou en sincronitzar) */
+  | { clau: 'clauMestraAt'; valor: string }
+  /** Altres maneres d'obrir la clau mestra: empremta i clau de recuperació */
+  | { clau: 'secrets'; valor: EmbolcallSecret[] }
+  /** Aquest dispositiu s'ha connectat amb el compte de Google de la doctora */
+  | { clau: 'google'; valor: { connectatAt: string; ultimaCopia: string | null } }
+
+/** Taules que se sincronitzen amb Google Drive */
+export type TaulaSincronitzada = 'pacients' | 'fitxesCliniques' | 'cites' | 'calibratge' | 'precaucions' | 'categoriesPrecaucio'
+
+/** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
+export interface RegistreEsborrat {
+  /** «taula:clau» */
+  id: string
+  taula: TaulaSincronitzada
+  clau: string
+  esborratAt: string
 }
 
 /**
@@ -63,6 +79,7 @@ export class QiDB extends Dexie {
   esborranys!: Table<RegistreXifrat, string>
   cites!: Table<RegistreXifrat, string>
   calibratge!: Table<RegistreCalibratge, string>
+  esborrats!: Table<RegistreEsborrat, string>
   /** Excepcions per punt */
   precaucions!: Table<RegistrePrecaucio, string>
   categoriesPrecaucio!: Table<RegistreCategoriaPrecaucio, string>
@@ -105,6 +122,9 @@ export class QiDB extends Dexie {
       })
     this.version(6).stores({
       cites: 'id, inici, pacientId, modificatAt',
+    })
+    this.version(7).stores({
+      esborrats: 'id',
     })
   }
 }

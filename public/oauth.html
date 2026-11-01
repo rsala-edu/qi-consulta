@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Qi · Google</title>
+<style>body{font:16px system-ui,sans-serif;background:#f7f5f0;color:#2b2a27;display:grid;place-items:center;min-height:90vh;margin:0}</style>
+</head>
+<body>
+<p>Connectant amb Google…</p>
+<script>
+  // Pàgina de retorn de l'inici de sessió amb Google: passa la resposta
+  // (al fragment de l'adreça) a la finestra de Qi que l'ha oberta i es tanca.
+  // No carrega res d'internet.
+  (function () {
+    var resposta = location.hash.slice(1) || location.search.slice(1)
+    history.replaceState(null, '', location.pathname)
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({ tipus: 'qi-oauth', resposta: resposta }, location.origin)
+      window.close()
+    } else {
+      document.body.textContent = 'Pots tancar aquesta finestra i tornar a Qi.'
+    }
+  })()
+</script>
+</body>
+</html>

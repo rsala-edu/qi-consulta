@@ -1245,3 +1245,171 @@ fieldset {
   color: var(--avis);
   font-weight: 500;
 }
+
+/* --- Còpia a Google Drive --- */
+
+.indicador-copia {
+  margin-left: auto;
+  border: 1px solid var(--linia);
+  background: var(--superficie);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--tinta-suau);
+  min-height: 36px;
+  padding: 0 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.indicador-copia.estat-cal-connectar,
+.indicador-copia.estat-error {
+  color: var(--avis);
+  border-color: var(--avis);
+}
+
+.estat-copia {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--tinta-suau);
+  font-size: 0.95rem;
+  margin: 12px 0;
+}
+
+.estat-copia.estat-cal-connectar,
+.estat-copia.estat-error {
+  color: var(--avis);
+}
+
+/* --- Avui --- */
+
+.pantalla-avui h2 {
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin: 24px 0 10px;
+}
+
+.dia-avui::first-letter {
+  text-transform: uppercase;
+}
+
+.recordatori {
+  border-left: 4px solid var(--avis);
+}
+
+.recordatori h2 {
+  margin-top: 0;
+}
+
+.recordatori ul {
+  margin: 0 0 14px;
+  padding-left: 1.2em;
+}
+
+.cites-avui {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cites-avui li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 14px 18px;
+  background: var(--superficie);
+  border: 1px solid var(--linia);
+  border-left: 4px solid var(--linia);
+  border-radius: var(--radi);
+}
+
+.cites-avui li.seguent {
+  border-left-color: var(--accent);
+  background: var(--accent-suau);
+}
+
+.cites-avui li.estat-anullada,
+.cites-avui li.estat-noPresentat {
+  color: var(--tinta-suau);
+}
+
+.cites-avui .hora {
+  font-variant-numeric: tabular-nums;
+  min-width: 11ch;
+  color: var(--accent-fosc);
+}
+
+.cites-avui .qui {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 14ch;
+}
+
+.cites-avui .qui a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cites-avui .detall {
+  color: var(--tinta-suau);
+  font-size: 0.9rem;
+}
+
+.accessos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 28px 0 8px;
+}
+
+/* --- Clau de recuperació --- */
+
+.text-clau {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.full-imprimir {
+  background: var(--superficie);
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  padding: calc(var(--espai) * 1.5);
+  margin-bottom: 20px;
+}
+
+.full-imprimir h1 {
+  margin-top: 0;
+}
+
+.text-clau-impresa {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: clamp(1rem, 3.4vw, 1.5rem);
+  letter-spacing: 0.06em;
+  line-height: 1.9;
+  word-spacing: 0.3em;
+  overflow-wrap: anywhere;
+  padding: 16px;
+  border: 2px dashed var(--linia);
+  border-radius: var(--radi);
+}
+
+@media print {
+  .barra-app,
+  .no-imprimir {
+    display: none !important;
+  }
+
+  body,
+  .full-imprimir {
+    background: #fff;
+    border: none;
+  }
+}

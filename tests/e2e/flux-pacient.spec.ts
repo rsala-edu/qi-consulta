@@ -1,6 +1,7 @@
 // Flux complet amb dades INVENTADES: crear contrasenya → crear pacient →
 // omplir la fitxa clínica → bloquejar → desbloquejar → cercar → editar.
-import { expect, test, type Page } from '@playwright/test'
+import { type Page } from '@playwright/test'
+import { continuarAmbGoogle, expect, test } from './google.js'
 
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 
@@ -36,10 +37,12 @@ test('desbloquejar → crear pacient → editar la fitxa clínica', async ({ pag
 
   // 1. Primera vegada: crear la contrasenya
   await expect(page.getByRole('heading', { name: 'Benvinguda a Qi' })).toBeVisible()
+  await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
   await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Crear i entrar' }).click()
-  await expect(page.getByRole('heading', { name: 'Pacients' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Avui', exact: true })).toBeVisible()
+  await menu(page, 'Pacients').click()
   await expect(page.getByText('Encara no hi ha cap pacient.')).toBeVisible()
 
   // 2. Alta d'un pacient
@@ -107,6 +110,7 @@ test('desbloquejar → crear pacient → editar la fitxa clínica', async ({ pag
 
 test('arxivar un pacient l\'amaga de la llista sense esborrar-lo', async ({ page }) => {
   await page.goto('/qi-consulta/')
+  await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
   await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Crear i entrar' }).click()
@@ -129,6 +133,7 @@ test('arxivar un pacient l\'amaga de la llista sense esborrar-lo', async ({ page
 
 test('esborrany: els canvis sense desar es recuperen després de tancar l\'app', async ({ page }) => {
   await page.goto('/qi-consulta/')
+  await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
   await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Crear i entrar' }).click()
@@ -169,6 +174,7 @@ test('esborrany: els canvis sense desar es recuperen després de tancar l\'app',
 
 test('esborrany: en bloquejar es desa al moment', async ({ page }) => {
   await page.goto('/qi-consulta/')
+  await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
   await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Crear i entrar' }).click()

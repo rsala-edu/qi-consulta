@@ -44,3 +44,15 @@ export function mesAny(dia: string): string {
 export function hora(diaHora: string): string {
   return diaHora.slice(11, 16)
 }
+
+/** «ara mateix», «fa 2 minuts», «fa 3 hores», «fa 2 dies» */
+export function faTemps(iso: string, ara: number = Date.now()): string {
+  const minuts = Math.max(0, Math.round((ara - new Date(iso).getTime()) / 60_000))
+  const f = t.temps
+  if (minuts < 1) return f.araMateix
+  if (minuts < 60) return formatar(minuts === 1 ? f.minut : f.minuts, { n: String(minuts) })
+  const hores = Math.round(minuts / 60)
+  if (hores < 24) return formatar(hores === 1 ? f.hora : f.hores, { n: String(hores) })
+  const dies = Math.round(hores / 24)
+  return formatar(dies === 1 ? f.dia : f.dies, { n: String(dies) })
+}

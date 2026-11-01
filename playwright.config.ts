@@ -23,5 +23,11 @@ export default defineConfig({
     command: `npm run dev -- --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}/qi-consulta/`,
     reuseExistingServer: !process.env.CI,
+    // Google simulat (tests/e2e/google.ts): un ID de client fals i el hash
+    // de doctora@exemple.invalid
+    env: {
+      VITE_GOOGLE_CLIENT_ID: 'client-de-prova.apps.googleusercontent.com',
+      VITE_HASH_CORREU_DOCTORA: 'd1949bb93978ebea0b611a497057f210e94c831269473405e18e797069478384',
+    },
   },
 })
