@@ -36,6 +36,43 @@ export interface ResultatSincronia {
   copiaAt: string
 }
 
+/** Què se sap de la còpia de Drive, per als detalls tècnics (sense cap dada) */
+export interface InfoDrive {
+  /** Versió del format del fitxer de Drive (null: no n'hi ha o no es pot llegir) */
+  versio: number | null
+  /** Identificador de la clau amb què va xifrada (null: no en porta) */
+  clauId: string | null
+}
+
+export interface OpcionsSincronia {
+  ara?: Date
+  /** S'avisa del que s'ha llegit de Drive, també si després falla */
+  informar?(info: InfoDrive): void
+  /**
+   * La còpia principal és danyada: es fa servir la diària o la mensual més
+   * nova que es pugui obrir, i la danyada es conserva a part a Drive.
+   */
+  copiaAnterior?: boolean
+}
+
+export function infoDeText(text: string | null): InfoDrive {
+  if (text === null) return { versio: null, clauId: null }
+  try {
+    const j = JSON.parse(text) as { versio?: unknown; clauId?: unknown }
+    return { versio: typeof j.versio === 'number' ? j.versio : null, clauId: typeof j.clauId === 'string' ? j.clauId : null }
+  } catch {
+    return { versio: null, clauId: null }
+  }
+}
+
+/** La còpia de Drive no es pot obrir i no n'hi ha cap de diària ni mensual que es pugui fer servir */
+export class ErrorSenseCopiaAnterior extends Error {
+  constructor() {
+    super('Cap còpia anterior es pot obrir')
+    this.name = 'ErrorSenseCopiaAnterior'
+  }
+}
+
 async function embolcallsLocals(db: QiDB): Promise<Embolcalls> {
   const contrasenya = await llegirClauEmbolcallada(db)
   if (!contrasenya) throw new Error('No hi ha contrasenya')
@@ -48,7 +85,15 @@ export async function copiaDeDrive(drive: Drive): Promise<FitxerCopia | null> {
   return principal ? llegirFitxer(await drive.baixar(principal.id)) : null
 }
 
-export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara: Date = new Date()): Promise<ResultatSincronia> {
+export async function sincronitzar(
+  db: QiDB,
+  clau: CryptoKey,
+  drive: Drive,
+  opcions: OpcionsSincronia | Date = {},
+  /** Ja s'ha tornat a comprovar Drive abans d'escriure-hi per primer cop */
+  tornada = false,
+): Promise<ResultatSincronia> {
+  const { ara = new Date(), informar, copiaAnterior = false } = opcions instanceof Date ? { ara: opcions } : opcions
   const fitxers = await drive.llistar()
   const principal = fitxers.find((f) => f.name === FITXER_PRINCIPAL)
   // L'hora d'aquest dispositiu en començar: el que es modifiqui a partir d'ara
@@ -61,8 +106,18 @@ export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara:
   let fusionat = local
   let remot = null
   let embolcallsRemots: Embolcalls | null = null
+  if (!principal) informar?.({ versio: null, clauId: null })
   if (principal) {
-    const fitxer = llegirFitxer(await drive.baixar(principal.id))
+    const text = await drive.baixar(principal.id)
+    informar?.(infoDeText(text))
+    let fitxer: FitxerCopia
+    if (copiaAnterior) {
+      const anterior = await copiaAnteriorQueEsPotObrir(drive, fitxers, clau)
+      if (!anterior) throw new ErrorSenseCopiaAnterior()
+      // La danyada no es perd: es conserva a part
+      await drive.crear(`qi-danyada-${new Date().toISOString().replace(/[:.]/g, '-')}.json`, text)
+      fitxer = anterior
+    } else fitxer = llegirFitxer(text)
     embolcallsRemots = fitxer.embolcalls
     remot = await desxifrarCopia(clau, fitxer)
     // Les dades clíniques editades als dos dispositius es fusionen camp a camp
@@ -94,9 +149,15 @@ export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara:
   let actual: FitxerDrive | undefined = principal
   const text = JSON.stringify(await xifrarCopia(clau, fusionat, embolcalls))
   if (!principal) {
+    // Primera escriptura: es torna a mirar que cap altre dispositiu no hi hagi
+    // posat una còpia mentrestant. Si n'hi ha, no s'escriu res i es torna a
+    // començar amb la seva (si és d'una altra clau, surt l'opció de fusionar).
+    if (!tornada && (await drive.llistar()).some((f) => f.name === FITXER_PRINCIPAL)) {
+      return sincronitzar(db, clau, drive, { ara, informar, copiaAnterior }, true)
+    }
     actual = await drive.crear(FITXER_PRINCIPAL, text)
     pujat = true
-  } else if (!iguals(fusionat, remot!) || JSON.stringify(embolcallsRemots) !== JSON.stringify(embolcalls)) {
+  } else if (copiaAnterior || !iguals(fusionat, remot!) || JSON.stringify(embolcallsRemots) !== JSON.stringify(embolcalls)) {
     actual = await drive.actualitzar(principal.id, text)
     pujat = true
   }
@@ -116,6 +177,23 @@ export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara:
 export async function llegirDarreraSincronia(db: QiDB): Promise<string | null> {
   const r = await db.meta.get('darreraSincronia')
   return r?.clau === 'darreraSincronia' ? r.valor : null
+}
+
+/** La còpia diària o mensual més nova que s'obre amb aquesta clau */
+async function copiaAnteriorQueEsPotObrir(drive: Drive, fitxers: readonly FitxerDrive[], clau: CryptoKey): Promise<FitxerCopia | null> {
+  const candidates = fitxers
+    .filter((f) => DIARIA.test(f.name) || MENSUAL.test(f.name))
+    .sort((a, b) => b.modifiedTime.localeCompare(a.modifiedTime))
+  for (const f of candidates) {
+    try {
+      const fitxer = llegirFitxer(await drive.baixar(f.id))
+      await desxifrarCopia(clau, fitxer)
+      return fitxer
+    } catch {
+      // Es prova la següent
+    }
+  }
+  return null
 }
 
 /** Les còpies diàries i mensuals de Drive que es poden llegir (les que no, es deixen estar) */

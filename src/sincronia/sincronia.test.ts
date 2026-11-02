@@ -3,7 +3,7 @@
 import { desarCorreccioOrella } from '../db/calibratgeOrella'
 import 'fake-indexeddb/auto'
 import { afterEach, describe, expect, it } from 'vitest'
-import { canviarContrasenya, crearClauMestra, desbloquejarClauMestra } from '../crypto'
+import { canviarContrasenya, crearClauMestra, desbloquejarClauMestra, idClau } from '../crypto'
 import { desarCalibracio } from '../db/calibratge'
 import { QiDB } from '../db/esquema'
 import { crearMagatzem, guardarClauEmbolcallada, llegirClauEmbolcallada } from '../db/magatzem'
@@ -64,7 +64,10 @@ describe('sincronia amb Google Drive', () => {
     for (const clar of ['Aina', 'Provencal', '600 111 222', 'Acúfens', '2026-11-03', p.id, 'pacients', 'cites'])
       expect(text, clar).not.toContain(clar)
     const fitxer = llegirFitxer(text)
-    expect(Object.keys(fitxer)).toEqual(['format', 'versio', 'embolcalls', 'xifrat'])
+    expect(Object.keys(fitxer)).toEqual(['format', 'versio', 'embolcalls', 'clauId', 'xifrat'])
+    // De la clau, només un hash (per saber si dues còpies van amb la mateixa)
+    expect(fitxer.clauId).toMatch(/^[0-9a-f]{64}$/)
+    expect(fitxer.clauId).toBe(await idClau(a.clau))
   })
 
   it('un dispositiu nou recupera les dades amb la contrasenya', async () => {

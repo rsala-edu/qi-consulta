@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_CLIENT_ID?: string
   /** SHA-256 dels correus permesos (en minúscules), separats per comes; mai els correus en clar */
   readonly VITE_HASHOS_CORREUS_PERMESOS?: string
+  /** Commit de la versió (vite.config.ts), per als detalls tècnics */
+  readonly VITE_VERSIO_APP?: string
 }
 
 interface ImportMeta {

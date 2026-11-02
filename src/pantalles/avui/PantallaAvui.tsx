@@ -11,6 +11,8 @@ import { diaLlarg, hora, t } from '../../i18n/t'
 import { teClauRecuperacio, teEmpremta } from '../../sessio/claus'
 import { useMagatzem, useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
+import { useSincronia } from '../../sincronia/ContextSincronia'
+import { diesSenseCopia, textSenseCopia } from '../../sincronia/senseCopia'
 
 export function PantallaAvui() {
   const magatzem = useMagatzem()
@@ -35,6 +37,8 @@ export function PantallaAvui() {
         <h1>{a.titol}</h1>
         <p className="dia-avui">{diaLlarg(avui)}</p>
       </header>
+
+      <AvisSenseCopia />
 
       {carrega.estat === 'carregant' && <Indicador text={t.app.carregant} />}
       {carrega.estat === 'error' && <p role="alert">{t.app.errorInesperat}</p>}
@@ -112,5 +116,23 @@ export function PantallaAvui() {
 
       <EstatCopia />
     </main>
+  )
+}
+
+/** Fa més de 24 hores seguides que no es pot fer cap còpia a Drive */
+function AvisSenseCopia() {
+  const { senseCopiaDesDe, error } = useSincronia()
+  const [ara] = useState(() => Date.now())
+  const dies = diesSenseCopia(senseCopiaDesDe, ara)
+  if (!dies) return null
+  const s = t.sincronia
+  return (
+    <section className="panell avis-sense-copia" role="alert" aria-label={textSenseCopia(dies)}>
+      <p>
+        <strong>{textSenseCopia(dies)}.</strong> {s.avisAvui}
+      </p>
+      {error && <p>{s.motius[error.motiu]}</p>}
+      <Link to="/ajustos/drive">{s.veureQuePassa}</Link>
+    </section>
   )
 }

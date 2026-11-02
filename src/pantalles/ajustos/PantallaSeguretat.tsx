@@ -2,6 +2,18 @@
 // Google Drive, empremta i clau de recuperació.
 
 import { useState } from 'react'
+import { descarregarText } from '../../components/descarregar'
+import { FormulariCredencial } from '../../components/FormulariCredencial'
+import {
+  desarCopiaAbansCanviClau,
+  exportarQi,
+  importarQi,
+  llegirCopiaAbansCanviClau,
+  llegirQi,
+  nomFitxerQi,
+  obrirClauCopia,
+} from '../../sincronia/canviClau'
+import type { FitxerCopia } from '../../sincronia/copia'
 import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
@@ -10,7 +22,7 @@ import { Indicador } from '../../components/Indicador'
 import { ErrorContrasenya, ErrorPasskeyCancellada, ErrorSensePrf, passkeyDisponible } from '../../crypto'
 import { diaLlarg, formatar, t } from '../../i18n/t'
 import { activarEmpremta, desactivarEmpremta, novaClauRecuperacio, teClauRecuperacio, teEmpremta } from '../../sessio/claus'
-import { useSessio } from '../../sessio/ContextSessio'
+import { useClauMestra, useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 import { useSincronia } from '../../sincronia/ContextSincronia'
 import { diaDe } from '../../domini/cita'
@@ -20,7 +32,7 @@ type Accio = 'empremta' | 'clau' | null
 
 export function PantallaSeguretat() {
   const { db, minutsBloqueig, canviarMinutsBloqueig } = useSessio()
-  const { estat: estatCopia, sincronitzarAra } = useSincronia()
+  const { estat: estatCopia, error: errorCopia, sincronitzarAra } = useSincronia()
   const [versio, setVersio] = useState(0)
   const [carrega] = useCarrega(async () => {
     const [empremta, clau, disponible] = await Promise.all([teEmpremta(db), teClauRecuperacio(db), passkeyDisponible()])
@@ -77,7 +89,14 @@ export function PantallaSeguretat() {
             {s.sincronitzarAra}
           </Boto>
         )}
+        {estatCopia === 'error' && errorCopia?.motiu === 'clau' && (
+          <p>
+            <strong>{t.sincronia.motius.clau}</strong> <Link to="/ajustos/drive">{t.sincronia.veureOpcions}</Link>
+          </p>
+        )}
       </section>
+
+      <CopiaEnFitxer />
 
       {carrega.estat === 'carregant' && <Indicador text={t.app.carregant} />}
       {carrega.estat === 'llest' && (
@@ -227,3 +246,100 @@ function FullClauRecuperacio({ clau, onFet }: { clau: string; onFet(): void }) {
     </main>
   )
 }
+
+/** Descarregar i importar un fitxer .qi xifrat */
+function CopiaEnFitxer() {
+  const { db } = useSessio()
+  const clau = useClauMestra()
+  const [versio, setVersio] = useState(0)
+  const [abans] = useCarrega(() => llegirCopiaAbansCanviClau(db), [db, versio])
+  const [fitxer, setFitxer] = useState<FitxerCopia | null>(null)
+  const [missatge, setMissatge] = useState<{ text: string; error: boolean } | null>(null)
+  const s = t.seguretat
+
+  return (
+    <section className="panell" aria-label={s.fitxers}>
+      <h2>{s.fitxers}</h2>
+      <p className="detall">{s.fitxersDesc}</p>
+      <div className="accions accions-esquerra">
+        <Boto
+          variant="secundari"
+          onClick={() =>
+            void exportarQi(db, clau).then(
+              (text) => descarregarText(text, nomFitxerQi()),
+              () => setMissatge({ text: t.app.errorInesperat, error: true }),
+            )
+          }
+        >
+          {s.descarregar}
+        </Boto>
+        {abans.estat === 'llest' && abans.dades && (
+          <Boto
+            variant="discret"
+            onClick={() => descarregarText(abans.dades!.text, nomFitxerQi(new Date(abans.dades!.at)))}
+          >
+            {formatar(s.copiaAbans, { quan: diaLlarg(diaDe(new Date(abans.dades.at))) })}
+          </Boto>
+        )}
+      </div>
+
+      <h3>{s.importar}</h3>
+      <p className="detall">{s.importarDesc}</p>
+      <Camp etiqueta={s.triarFitxer}>
+        <input
+          type="file"
+          accept=".qi,application/json"
+          onChange={(e) => {
+            setMissatge(null)
+            setFitxer(null)
+            const f = e.target.files?.[0]
+            if (!f) return
+            void f.text().then(
+              (text) => {
+                try {
+                  setFitxer(llegirQi(text))
+                } catch {
+                  setMissatge({ text: s.fitxerNoValid, error: true })
+                }
+              },
+              () => setMissatge({ text: s.fitxerNoValid, error: true }),
+            )
+          }}
+        />
+      </Camp>
+      {fitxer && (
+        <FormulariCredencial
+          etiquetaContrasenya={s.contrasenyaCopia}
+          etiquetaClau={s.clauCopia}
+          textBoto={s.importar}
+          textFent={s.important}
+          onCancellar={() => setFitxer(null)}
+          onCredencial={async (c) => {
+            const clauQi = await obrirClauCopia(fitxer, c)
+            // Per si de cas, les dades d'abans queden desades dins el dispositiu
+            await desarCopiaAbansCanviClau(db, clau)
+            const r = await importarQi(db, clau, fitxer, clauQi)
+            setFitxer(null)
+            setVersio((n) => n + 1)
+            setMissatge({
+              text: [
+                s.importat,
+                r.possiblesDuplicats > 0 ? formatar(t.drive.duplicats, { n: String(r.possiblesDuplicats) }) : '',
+                r.conflictes > 0 ? formatar(t.drive.conflictes, { n: String(r.conflictes) }) : '',
+              ]
+                .filter(Boolean)
+                .join(' '),
+              error: false,
+            })
+          }}
+        />
+      )}
+      {missatge && (
+        <p role={missatge.error ? 'alert' : 'status'} className={missatge.error ? 'camp-error' : undefined}>
+          {missatge.text}
+        </p>
+      )}
+    </section>
+  )
+}
+

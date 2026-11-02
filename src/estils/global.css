@@ -2802,3 +2802,55 @@ fieldset {
   padding: 24px;
   text-align: center;
 }
+
+/* Fa més de 24 hores que no es pot fer cap còpia: la píndola ho diu ben clar */
+.indicador-copia.estat-sense-copia {
+  color: var(--paper, #fff);
+  background: var(--avis);
+  border-color: var(--avis);
+  font-weight: 600;
+}
+
+.panell-copia .avis-fort,
+.avis-sense-copia strong {
+  color: var(--avis);
+  font-weight: 600;
+}
+
+.avis-sense-copia {
+  border-left: 4px solid var(--avis);
+}
+
+.detalls-tecnics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.detalls-tecnics code {
+  font-size: 0.75rem;
+  word-break: break-word;
+  user-select: all;
+}
+
+/* Ajustos > Drive: les dues opcions quan les claus no coincideixen */
+.opcions-clau {
+  display: grid;
+  gap: 16px;
+}
+
+.opcio-clau {
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  padding: 16px 18px;
+}
+
+.opcio-clau h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.opcio-clau[aria-current='true'] {
+  border-color: var(--jade, var(--avis));
+}

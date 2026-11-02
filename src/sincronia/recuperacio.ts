@@ -9,7 +9,7 @@
 import { desbloquejarClauMestra, ErrorContrasenya } from '../crypto'
 import type { QiDB } from '../db/esquema'
 import { guardarClauEmbolcallada, guardarSecrets } from '../db/magatzem'
-import { aplicarContingut, desxifrarCopia, ErrorCopiaDanyada, ErrorCopiaVersio, llegirFitxer, type FitxerCopia } from './copia'
+import { aplicarContingut, desxifrarCopia, ErrorClauDiferent, ErrorCopiaDanyada, ErrorCopiaVersio, llegirFitxer, type FitxerCopia } from './copia'
 import { ErrorAutoritzacio, ErrorDrive, type Drive } from './drive'
 import { baseDe } from './fusioClinica'
 import { ErrorGoogle } from './google'
@@ -56,7 +56,8 @@ export function classificar(pas: PasRecuperacio, e: unknown): ErrorRecuperacio {
         ? 'drive'
         : e instanceof ErrorCopiaVersio
           ? 'versio'
-          : e instanceof ErrorCopiaDanyada
+          : // La clau s'ha obert amb l'embolcall de la mateixa còpia: si no hi quadra, la còpia és danyada
+            e instanceof ErrorCopiaDanyada || e instanceof ErrorClauDiferent
             ? 'danyada'
             : // Sense connexió, fetch falla amb TypeError: només és de Drive al pas A
               pas === 'A' && e instanceof TypeError

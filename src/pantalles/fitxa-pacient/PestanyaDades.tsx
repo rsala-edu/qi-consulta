@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { dadesDePacient, nomComplet } from '../../domini/pacient'
 import { formatar, t } from '../../i18n/t'
@@ -36,6 +37,7 @@ export function PestanyaDades() {
 
   return (
     <section>
+      <AvisDuplicat />
       <RevisioConflictes
         conflictes={conflictes}
         etiquetes={t.camps.pacient}
@@ -63,5 +65,36 @@ export function PestanyaDades() {
         </Boto>
       </div>
     </section>
+  )
+}
+
+/** Fitxa que pot ser la mateixa persona que una altra (dades de dos dispositius) */
+function AvisDuplicat() {
+  const magatzem = useMagatzem()
+  const { pacient, actualitzarPacient } = useFitxaPacient()
+  const ids = pacient.revisarDuplicat ?? []
+  const [altres] = useCarrega(
+    async () => (await Promise.all(ids.map((x) => magatzem.obtenirPacient(x)))).filter((x) => x !== undefined),
+    [magatzem, ids.join('|')],
+  )
+  if (ids.length === 0) return null
+  return (
+    <div className="avis avis-duplicat" role="note">
+      <p>
+        <span className="etiqueta etiqueta-precaucio">{t.pacients.possibleDuplicat}</span> {t.pacients.avisDuplicat}
+      </p>
+      {altres.estat === 'llest' &&
+        altres.dades.map((a) => (
+          <p key={a.id} className="accions accions-esquerra">
+            <Link to={`/pacients/${a.id}/dades`}>{formatar(t.pacients.veureAltra, { nom: nomComplet(a) })}</Link>
+            <Boto
+              variant="discret"
+              onClick={() => void magatzem.descartarDuplicat(pacient.id, a.id).then(actualitzarPacient)}
+            >
+              {t.pacients.noEsLaMateixa}
+            </Boto>
+          </p>
+        ))}
+    </div>
   )
 }

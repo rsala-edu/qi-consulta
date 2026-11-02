@@ -9,7 +9,7 @@
 //   més nou, i un esborrat més nou que el registre l'esborra.
 
 import { z } from 'zod'
-import { desxifrarJson, xifrarJson, type ClauEmbolcallada, type DadesXifrades, type EmbolcallSecret } from '../crypto'
+import { desxifrarJson, ErrorDesxifratge, idClau, xifrarJson, type ClauEmbolcallada, type DadesXifrades, type EmbolcallSecret } from '../crypto'
 import type { QiDB, RegistreEsborrat, TaulaSincronitzada } from '../db/esquema'
 
 const CONTEXT = 'qi:copia:v1'
@@ -63,6 +63,13 @@ export interface FitxerCopia {
   format: 'qi-copia'
   versio: 1
   embolcalls: Embolcalls
+  /**
+   * Identificador de la clau mestra amb què va xifrada (crypto/empremtaClau.ts).
+   * Les còpies de versions anteriors no en tenen.
+   */
+  clauId?: string
+  /** Quan s'ha fet (fitxers .qi descarregats) */
+  creatAt?: string
   xifrat: DadesXifrades
 }
 
@@ -74,6 +81,8 @@ export const esquemaFitxerCopia = z.object({
     contrasenyaAt: z.string(),
     secrets: z.array(z.object({}).passthrough()),
   }),
+  clauId: z.string().optional(),
+  creatAt: z.string().optional(),
   xifrat: z.object({ iv: z.string(), dades: z.string() }),
 })
 
@@ -135,7 +144,13 @@ export async function aplicarContingut(db: QiDB, c: Contingut): Promise<void> {
 }
 
 export async function xifrarCopia(clau: CryptoKey, contingut: Contingut, embolcalls: Embolcalls): Promise<FitxerCopia> {
-  return { format: 'qi-copia', versio: 1, embolcalls, xifrat: await xifrarJson(clau, contingut, CONTEXT) }
+  return {
+    format: 'qi-copia',
+    versio: 1,
+    embolcalls,
+    clauId: await idClau(clau),
+    xifrat: await xifrarJson(clau, contingut, CONTEXT),
+  }
 }
 
 /** La còpia és d'una versió de l'app més nova, amb un format que aquesta no entén */
@@ -151,6 +166,18 @@ export class ErrorCopiaDanyada extends Error {
   constructor() {
     super('Còpia danyada')
     this.name = 'ErrorCopiaDanyada'
+  }
+}
+
+/**
+ * La còpia va tancada amb una altra clau mestra: l'ha creada un altre
+ * dispositiu que va començar de zero amb una contrasenya pròpia. No és cap
+ * fitxer danyat: cal triar si es recuperen les dades de Drive o si es fusionen.
+ */
+export class ErrorClauDiferent extends Error {
+  constructor() {
+    super('La còpia va xifrada amb una altra clau')
+    this.name = 'ErrorClauDiferent'
   }
 }
 
@@ -188,12 +215,21 @@ export function migrarContingut(c: unknown): Contingut {
   return { versio: 1, taules: totes, esborrats: (esborrats ?? []) as RegistreEsborrat[] }
 }
 
+/**
+ * Desxifra la còpia. Si no es pot:
+ * - la còpia diu que és d'una altra clau, o no ho diu (versions anteriors) i
+ *   l'autenticació d'AES-GCM falla → ErrorClauDiferent;
+ * - és de la mateixa clau i tot i així falla, o el contingut no és JSON →
+ *   ErrorCopiaDanyada (un fitxer a mig escriure o modificat).
+ */
 export async function desxifrarCopia(clau: CryptoKey, fitxer: FitxerCopia): Promise<Contingut> {
+  const meva = fitxer.clauId ? await idClau(clau) : null
+  if (fitxer.clauId && fitxer.clauId !== meva) throw new ErrorClauDiferent()
   let c: unknown
   try {
     c = await desxifrarJson(clau, fitxer.xifrat, CONTEXT)
-  } catch {
-    // La clau és la bona (s'ha obert amb la contrasenya): el contingut és el que falla
+  } catch (e) {
+    if (e instanceof ErrorDesxifratge && !fitxer.clauId) throw new ErrorClauDiferent()
     throw new ErrorCopiaDanyada()
   }
   return migrarContingut(c)

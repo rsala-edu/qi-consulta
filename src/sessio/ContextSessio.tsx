@@ -5,8 +5,11 @@
 // recuperació.
 //
 // Primer ús en un dispositiu (amb Google configurat): «Continuar amb Google».
-// Si a Drive ja hi ha una còpia, es restaura amb la contrasenya; si no, es
-// crea la contrasenya.
+// Si a Drive ja hi ha una còpia, només es pot recuperar (amb la contrasenya o
+// la clau de recuperació); si no, es crea la contrasenya. Mentre no hi hagi
+// contrasenya, l'app torna sempre a «Continuar amb Google» (encara que ja
+// s'hi hagués connectat) i Drive es torna a mirar just abans de crear-la: un
+// dispositiu no pot començar mai de zero si a Drive ja hi ha dades.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { crearClauMestra, desbloquejarClauMestra, passkeyDisponible } from '../crypto'
@@ -51,6 +54,11 @@ interface ValorSessio {
   /** Contrasenya oblidada: clau de recuperació i contrasenya nova */
   recuperar(clauRecuperacio: string, contrasenyaNova: string): Promise<void>
   bloquejar(): void
+  /**
+   * El dispositiu passa a fer servir una altra clau mestra (la de Drive,
+   * després de recuperar-ne les dades o de fusionar-s'hi)
+   */
+  adoptarClau(clau: CryptoKey): void
   /** Minuts sense activitat abans de bloquejar (Ajustos > Seguretat) */
   minutsBloqueig: number
   canviarMinutsBloqueig(minuts: number): Promise<void>
@@ -103,7 +111,8 @@ export function ProveidorSessio({
       const embolcall = await llegirClauEmbolcallada(db)
       let nou: EstatSessio
       if (embolcall) nou = await estatBloquejat(db)
-      else if (googleConfigurat() && !(await llegirEstatGoogle(db))) nou = { tipus: 'sense-google' }
+      // Encara que ja s'hi hagués connectat: cal tornar a mirar Drive
+      else if (googleConfigurat()) nou = { tipus: 'sense-google' }
       else nou = { tipus: 'sense-configurar' }
       if (actiu) setEstat(nou)
     })()
@@ -130,6 +139,12 @@ export function ProveidorSessio({
   const crearContrasenya = useCallback(
     async (contrasenya: string) => {
       if (await llegirClauEmbolcallada(db)) throw new Error('La contrasenya ja està creada')
+      if (googleConfigurat()) {
+        // Un altre dispositiu pot haver pujat dades des que s'ha mirat Drive
+        if (!tokenGoogle()) return setEstat({ tipus: 'sense-google' })
+        const fitxer = await copiaPerRecuperar(driveGoogle(tokenGoogle))
+        if (fitxer) return setEstat({ tipus: 'restaurar', fitxer })
+      }
       const { embolcall, clau } = await crearClauMestra(contrasenya)
       await guardarClauEmbolcallada(db, embolcall)
       obrir(clau)
@@ -185,6 +200,7 @@ export function ProveidorSessio({
       desbloquejarAmbEmpremta: desbloquejarEmpremta,
       recuperar,
       bloquejar,
+      adoptarClau: obrir,
       minutsBloqueig,
       canviarMinutsBloqueig,
     }),
@@ -197,6 +213,7 @@ export function ProveidorSessio({
       desbloquejarEmpremta,
       recuperar,
       bloquejar,
+      obrir,
       minutsBloqueig,
       canviarMinutsBloqueig,
     ],

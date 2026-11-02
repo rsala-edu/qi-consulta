@@ -24,6 +24,7 @@ import { IndicadorCopia } from './components/IndicadorCopia'
 import { BotoTema } from './components/BotoTema'
 import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
 import { PantallaAjustAgenda } from './pantalles/ajustos/PantallaAjustAgenda'
+import { PantallaDrive } from './pantalles/ajustos/PantallaDrive'
 
 // Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
 const PantallaCalibratge = lazy(() =>
@@ -153,6 +154,7 @@ function PortaOberta() {
             <Route path="ajustos/calibratge" element={<P codi="UI-CALIBRATGE"><PantallaCalibratge /></P>} />
             <Route path="ajustos/precaucions" element={<P codi="UI-PRECAUCIONS"><PantallaPrecaucions /></P>} />
             <Route path="ajustos/seguretat" element={<P codi="UI-SEGURETAT"><PantallaSeguretat /></P>} />
+            <Route path="ajustos/drive" element={<P codi="UI-DRIVE"><PantallaDrive /></P>} />
             <Route path="ajustos/aparenca" element={<P codi="UI-APARENCA"><PantallaAparenca /></P>} />
             <Route path="ajustos/agenda" element={<P codi="UI-AJUST-AGENDA"><PantallaAjustAgenda /></P>} />
             <Route path="*" element={<Navigate to="/avui" replace />} />

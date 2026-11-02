@@ -105,7 +105,7 @@ describe('formulari de cita', () => {
     await usuari.clear(screen.getByLabelText('Hora'))
     await usuari.type(screen.getByLabelText('Hora'), '09:30')
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Atenció: se solapa amb Biel Inventat (10:00–10:40).',
+      'Coincideix amb la cita de Biel Inventat a les 10:00. Es pot desar igualment.',
     )
     await usuari.click(screen.getByRole('button', { name: 'Desar' }))
     expect(onDesar).toHaveBeenCalledWith(expect.objectContaining({ inici: '2026-11-02T09:30' }))

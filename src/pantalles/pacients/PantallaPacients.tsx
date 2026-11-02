@@ -57,6 +57,9 @@ export function PantallaPacients() {
                   <span className="nom">{nomComplet(p)}</span>
                   <span className="detall">{p.telefon}</span>
                   {p.arxivat && <span className="etiqueta">{t.pacients.arxivat}</span>}
+                  {p.revisarDuplicat && p.revisarDuplicat.length > 0 && (
+                    <span className="etiqueta etiqueta-precaucio">{t.pacients.possibleDuplicat}</span>
+                  )}
                 </Link>
               </li>
             ))}

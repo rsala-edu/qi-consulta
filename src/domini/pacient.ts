@@ -25,7 +25,15 @@ export const esquemaDadesPacient = z.object({
 export type DadesPacient = z.infer<typeof esquemaDadesPacient>
 
 /** El que es xifra i es guarda (sense id ni dates, que van a part). */
-export const esquemaPacientGuardat = esquemaDadesPacient.extend({ arxivat: z.boolean() })
+export const esquemaPacientGuardat = esquemaDadesPacient.extend({
+  arxivat: z.boolean(),
+  /**
+   * Ids d'altres fitxes que poden ser la mateixa persona (mateix nom i data de
+   * naixement), trobades en fusionar les dades de dos dispositius. No es
+   * fusionen soles: la doctora les revisa.
+   */
+  revisarDuplicat: z.array(z.string()).optional(),
+})
 export type PacientGuardat = z.infer<typeof esquemaPacientGuardat>
 
 export type Pacient = Registre & PacientGuardat

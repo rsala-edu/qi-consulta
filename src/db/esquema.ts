@@ -36,6 +36,14 @@ export type RegistreMeta =
   | { clau: 'baseSincronia'; valor: Partial<Record<string, RegistreXifrat[]>> }
   /** S'han buscat a les còpies de Drive les fitxes clíniques duplicades descartades abans (data i quantes) */
   | { clau: 'fitxesRecuperades'; valor: { at: string; recuperades: number } }
+  /** Des de quan falla la sincronia sense cap còpia correcta entremig (per avisar passades 24 hores) */
+  | { clau: 'errorSincroniaDesDe'; valor: string }
+  /**
+   * Les dades d'aquest dispositiu tal com eren just abans de canviar de clau
+   * (recuperar les de Drive o fusionar-s'hi): un fitxer .qi complet, xifrat amb
+   * la clau d'abans, per si la descàrrega automàtica no s'ha pogut fer.
+   */
+  | { clau: 'copiaAbansCanviClau'; valor: { at: string; text: string } }
 
 /** Taules que se sincronitzen amb Google Drive */
 export type TaulaSincronitzada =

@@ -1,10 +1,28 @@
 // Agenda (dia i setmana), cites lligades al pacient, avís de solapament i
 // pestanya Cites de la fitxa del pacient. Només dades inventades.
-import { type Page } from '@playwright/test'
+import { type Locator, type Page } from '@playwright/test'
 import { continuarAmbGoogle, expect as expectBase, test } from './google.js'
 
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 const expect = expectBase.configure({ timeout: 10_000 })
+/** Les dues cites que se solapen: una al costat de l'altra, cap sobre l'altra */
+async function alCostat(dia: Locator) {
+  const aina = dia.getByRole('button', { name: /10:00–11:00 Aina/ })
+  const biel = dia.getByRole('button', { name: /10:30–11:30 Biel/ })
+  await expect(aina).toBeVisible()
+  await expect(biel).toBeVisible()
+  const columna = (await dia.locator('.agenda-cos').boundingBox())!
+  const a = (await aina.boundingBox())!
+  const b = (await biel.boundingBox())!
+  for (const x of [a, b]) {
+    expect(x.width).toBeGreaterThan(columna.width * 0.4)
+    expect(x.width).toBeLessThan(columna.width * 0.55)
+  }
+  // No es trepitgen: la de l'esquerra acaba abans que comenci l'altra
+  const [esq, dre] = a.x < b.x ? [a, b] : [b, a]
+  expect(esq.x + esq.width).toBeLessThanOrEqual(dre.x)
+}
+
 const menu = (page: Page, nom: string) =>
   page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: nom })
 
@@ -70,9 +88,16 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   // El Biel encara no té cap cita: primera visita, sola
   await expect(dialeg.getByRole('status', { name: 'Tipus' })).toHaveText('Primera visita')
   await expect(dialeg.getByLabel('Durada (minuts)')).toHaveValue('60')
-  await expect(dialeg.getByRole('alert')).toHaveText('Atenció: se solapa amb Aina Provencal Inventada (10:00–11:00).')
+  await expect(dialeg.getByRole('alert')).toHaveText(
+    'Coincideix amb la cita de Aina Provencal Inventada a les 10:00. Es pot desar igualment.',
+  )
   await dialeg.getByRole('button', { name: 'Desar' }).click()
   await expect(dia.getByRole('button', { name: /Se solapa/ })).toHaveCount(2)
+  // Una al costat de l'altra, cadascuna amb la meitat de l'amplada (al dia i a la setmana)
+  await alCostat(dia)
+  await page.getByRole('radio', { name: 'Setmana' }).click()
+  await alCostat(dia)
+  await page.getByRole('radio', { name: 'Dia' }).click()
 
   // Moure la del Biel a les 11:00: ja no se solapa
   // Tocar la cita n'obre la fitxa; «Editar» obre el formulari

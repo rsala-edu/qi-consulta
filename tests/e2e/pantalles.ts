@@ -57,6 +57,7 @@ export async function recorrerPantalles(page: Page) {
   await anar(page, '/ajustos/calibratge', 'Calibratge del mapa')
   await anar(page, '/ajustos/precaucions', 'Precaucions per revisar')
   await anar(page, '/ajustos/seguretat', 'Seguretat i còpia')
+  await anar(page, '/ajustos/drive', 'Còpia a Google Drive')
   await anar(page, '/ajustos/aparenca', 'Aparença')
   await anar(page, '/ajustos/agenda', 'Agenda')
 }

@@ -17,7 +17,6 @@ import {
   horaPassada,
   ESTATS_CITA,
   esquemaDadesCita,
-  fiDe,
   solapaments,
   type Cita,
   type DadesCita,
@@ -231,7 +230,9 @@ export function FormulariCita({
       {encavalcades.length > 0 && (
         <p className="avis" role="alert">
           {formatar(c.solapa, {
-            llista: encavalcades.map((x) => `${nomDe(x.pacientId)} (${horaDe(x.inici)}–${horaDe(fiDe(x))})`).join(', '),
+            llista: encavalcades
+              .map((x) => formatar(c.solapaCita, { nom: nomDe(x.pacientId), hora: horaDe(x.inici) }))
+              .join(c.solapaI),
           })}
         </p>
       )}

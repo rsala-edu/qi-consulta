@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ErrorCopiaDanyada, ErrorCopiaVersio } from './copia'
+import { ErrorClauDiferent, ErrorCopiaDanyada, ErrorCopiaVersio } from './copia'
 import { ErrorAutoritzacio, ErrorDrive } from './drive'
 import { classificarErrorSincronia as classificar } from './motiuSincronia'
 
@@ -13,7 +13,12 @@ describe('motiu de l\'error de la sincronia', () => {
     expect(classificar(new ErrorDrive(503), false).motiu).toBe('xarxa')
     expect(classificar(new ErrorDrive(503), true)).toEqual({ motiu: 'drive', codi: 'DRV-503' })
     expect(classificar(new ErrorCopiaVersio(), true).motiu).toBe('versio')
-    expect(classificar(new ErrorCopiaDanyada(), true).motiu).toBe('danyada')
+    expect(classificar(new ErrorCopiaDanyada(), true)).toEqual({ motiu: 'danyada', codi: 'DRV-C' })
+    expect(classificar(new ErrorClauDiferent(), true)).toEqual({ motiu: 'clau', codi: 'DRV-K' })
+    const restriccio = Object.assign(new Error('x'), { name: 'ConstraintError' })
+    expect(classificar(restriccio, true)).toEqual({ motiu: 'duplicades', codi: 'DRV-D' })
+    const bulkDuplicada = Object.assign(new Error('x'), { name: 'BulkError', failures: [restriccio] })
+    expect(classificar(bulkDuplicada, true).motiu).toBe('duplicades')
     const bulk = Object.assign(new Error('fitxesCliniques.bulkPut(): 1 of 2 operations failed'), { name: 'BulkError' })
     expect(classificar(bulk, true)).toEqual({ motiu: 'local', codi: 'DRV-L' })
     expect(classificar(new RangeError('x'), true)).toEqual({ motiu: 'desconegut', codi: 'DRV-X' })
@@ -23,7 +28,7 @@ describe('motiu de l\'error de la sincronia', () => {
     const consola = vi.spyOn(console, 'error').mockImplementation(() => {})
     classificar(Object.assign(new Error('Aina Provencal, acúfens'), { name: 'ConstraintError' }), true)
     const escrit = consola.mock.calls.flat().join(' ')
-    expect(escrit).toContain('local')
+    expect(escrit).toContain('duplicades')
     expect(escrit).toContain('ConstraintError')
     expect(escrit).not.toContain('Aina')
   })

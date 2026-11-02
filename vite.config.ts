@@ -1,6 +1,18 @@
+import { execSync } from 'node:child_process'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+
+// Versió de l'app per als detalls tècnics: el commit (a GitHub Actions, GITHUB_SHA)
+function versioApp(): string {
+  if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA.slice(0, 7)
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+  } catch {
+    return 'dev'
+  }
+}
+process.env.VITE_VERSIO_APP ??= versioApp()
 
 // Publicació a GitHub Pages: https://<usuari>.github.io/qi-consulta/
 export default defineConfig({

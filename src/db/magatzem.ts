@@ -43,6 +43,8 @@ export interface Magatzem {
   crearPacient(dades: DadesPacient): Promise<Pacient>
   actualitzarPacient(id: string, dades: DadesPacient): Promise<Pacient>
   arxivarPacient(id: string, arxivat: boolean): Promise<Pacient>
+  /** La doctora ha revisat que les dues fitxes són persones diferents: es treu l'avís de totes dues */
+  descartarDuplicat(id: string, altreId: string): Promise<Pacient>
   obtenirFitxaClinica(pacientId: string): Promise<FitxaClinica>
   desarFitxaClinica(pacientId: string, dades: DadesFitxaClinica): Promise<FitxaClinica>
   llistarEsborranys(): Promise<Esborrany[]>
@@ -136,13 +138,30 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
 
     async actualitzarPacient(id, dades) {
       const actual = await pacientExistent(id)
-      return guardarPacient(id, actual.creatAt, { ...dades, arxivat: actual.arxivat })
+      return guardarPacient(id, actual.creatAt, {
+        ...dades,
+        arxivat: actual.arxivat,
+        // L'avís de possible duplicat es manté fins que la doctora el revisa
+        ...(actual.revisarDuplicat ? { revisarDuplicat: actual.revisarDuplicat } : {}),
+      })
     },
 
     async arxivarPacient(id, arxivat) {
       const actual = await pacientExistent(id)
       // l'esquema descarta id i dates abans de xifrar
       return guardarPacient(id, actual.creatAt, { ...actual, arxivat })
+    },
+
+    async descartarDuplicat(id, altreId) {
+      const treure = async (de: string, quin: string) => {
+        const p = await magatzem.obtenirPacient(de)
+        if (!p?.revisarDuplicat) return p
+        const { revisarDuplicat, ...resta } = p
+        const queden = revisarDuplicat.filter((x) => x !== quin)
+        return guardarPacient(de, p.creatAt, { ...resta, ...(queden.length > 0 ? { revisarDuplicat: queden } : {}) })
+      }
+      await treure(altreId, id)
+      return (await treure(id, altreId)) ?? pacientExistent(id)
     },
 
     async obtenirFitxaClinica(pacientId) {

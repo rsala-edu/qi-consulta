@@ -4,10 +4,14 @@
 // Google o desar ara). No ensenya mai cap dada clínica.
 
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { diaDe, diaHoraDe } from '../domini/cita'
 import { diaLlarg, faTemps, formatar, hora, t } from '../i18n/t'
 import { ATRIBUT_CONNECTAR, useSincronia } from '../sincronia/ContextSincronia'
+import { actualitzarApp } from '../sincronia/actualitzarApp'
+import { diesSenseCopia, textSenseCopia } from '../sincronia/senseCopia'
 import { Boto } from './Boto'
+import { DetallsTecnics } from './DetallsTecnics'
 
 function quan(iso: string): string {
   const d = new Date(iso)
@@ -15,8 +19,17 @@ function quan(iso: string): string {
 }
 
 export function IndicadorCopia() {
-  const { estat, pendent, error, ultimaCopia, connectar, sincronitzarAra } = useSincronia()
+  const { estat, pendent, error, ultimaCopia, connectar, sincronitzarAra, provarCopiesAnteriors, senseCopiaDesDe } =
+    useSincronia()
   const [obert, setObert] = useState(false)
+  const [provant, setProvant] = useState<'provant' | 'fet' | 'cap' | null>(null)
+  const navigate = useNavigate()
+  // Torna a mirar cada minut si ja fa més de 24 hores
+  const [ara, setAra] = useState(() => Date.now())
+  useEffect(() => {
+    const i = window.setInterval(() => setAra(Date.now()), 60_000)
+    return () => window.clearInterval(i)
+  }, [])
   const arrel = useRef<HTMLDivElement>(null)
 
   // Es tanca tocant fora o amb Escape
@@ -37,7 +50,10 @@ export function IndicadorCopia() {
   if (estat === 'sense-google') return null
   const s = t.sincronia
   const senseConnexio = estat === 'error' && error?.motiu === 'xarxa'
-  const text = senseConnexio
+  const dies = diesSenseCopia(senseCopiaDesDe, ara)
+  const text = dies
+    ? textSenseCopia(dies)
+    : senseConnexio
     ? s.curt.senseConnexio
     : estat === 'al-dia' && pendent
       ? s.curt.pendent
@@ -56,7 +72,7 @@ export function IndicadorCopia() {
     <div className="indicador-copia-arrel" ref={arrel}>
       <button
         type="button"
-        className={`indicador-copia estat-${senseConnexio ? 'sense-connexio' : estat}`}
+        className={`indicador-copia estat-${dies ? 'sense-copia' : senseConnexio ? 'sense-connexio' : estat}`}
         aria-expanded={obert}
         onClick={() => setObert((o) => !o)}
       >
@@ -65,15 +81,49 @@ export function IndicadorCopia() {
       {obert && (
         <section className="panell-copia" aria-label={s.panell} role="dialog">
           <h2>{s.panell}</h2>
+          {dies && <p className="avis-fort">{textSenseCopia(dies)}</p>}
           <p role="status">{missatge}</p>
+          {provant === 'fet' && <p role="status">{s.copiaAnteriorFeta}</p>}
+          {provant === 'cap' && <p role="alert">{s.capCopiaAnterior}</p>}
           <p className="detall">
             {ultimaCopia ? formatar(s.ultimaCorrecta, { quan: quan(ultimaCopia) }) : s.capCopia}
           </p>
           {estat === 'error' && error && error.motiu !== 'xarxa' && (
             <p className="detall">{formatar(s.codi, { codi: error.codi })}</p>
           )}
+          <DetallsTecnics />
           <div className="accions accions-esquerra">
-            {calGoogle ? (
+            {estat === 'error' && error?.motiu === 'versio' ? (
+              <Boto onClick={() => void actualitzarApp()}>{s.actualitzarApp}</Boto>
+            ) : estat === 'error' && error?.motiu === 'duplicades' ? (
+              <Boto
+                onClick={() => {
+                  setObert(false)
+                  void navigate('/pacients')
+                }}
+              >
+                {s.revisarFitxes}
+              </Boto>
+            ) : estat === 'error' && error?.motiu === 'clau' ? (
+              <Boto
+                onClick={() => {
+                  setObert(false)
+                  void navigate('/ajustos/drive')
+                }}
+              >
+                {s.veureOpcions}
+              </Boto>
+            ) : estat === 'error' && error?.motiu === 'danyada' ? (
+              <Boto
+                disabled={provant === 'provant'}
+                onClick={() => {
+                  setProvant('provant')
+                  void provarCopiesAnteriors().then((b) => setProvant(b ? 'fet' : 'cap'))
+                }}
+              >
+                {provant === 'provant' ? s.provantCopies : s.provarCopies}
+              </Boto>
+            ) : calGoogle ? (
               <Boto
                 {...{ [ATRIBUT_CONNECTAR]: '' }}
                 onClick={() => void connectar().then(() => setObert(false), () => {})}
