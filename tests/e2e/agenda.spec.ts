@@ -10,8 +10,8 @@ const ARA = new Date(2026, 10, 3, 16, 20)
 const menu = (page: Page, nom: string) =>
   page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: nom })
 
-async function entrar(page: Page) {
-  await page.clock.setFixedTime(ARA)
+async function entrar(page: Page, ara = ARA) {
+  await page.clock.setFixedTime(ara)
   await page.goto('/qi-consulta/')
   await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
@@ -52,11 +52,14 @@ test('l\'Agenda s\'obre a l\'hora actual, amb la línia de l\'hora només avui',
   const l = (await linia.boundingBox())!
   expect(l.y).toBeGreaterThan(caixa.y + 52)
   expect(l.y).toBeLessThan(caixa.y + caixa.height)
-  expect(await graella.evaluate((g) => g.scrollTop)).toBeGreaterThan(200)
   // La línia és a la columna d'avui
   await expect(page.getByRole('region', { name: 'Cites del dimarts, 3 de novembre de 2026' }).locator('.linia-ara')).toHaveCount(1)
   // Setmana sense cites: missatge suau amb «Nova cita»
-  await expect(page.getByRole('status').filter({ hasText: 'Aquesta setmana no hi ha cap cita.' })).toBeVisible()
+  const buida = page.getByRole('status').filter({ hasText: 'Aquesta setmana no hi ha cap cita.' })
+  await expect(buida).toBeVisible()
+  // Una franja sobre la graella: no tapa cap columna
+  const franja = (await buida.boundingBox())!
+  expect(franja.y + franja.height).toBeLessThanOrEqual(caixa.y)
 })
 
 test('tocar un espai buit crea una cita amb el dia i l\'hora posats', async ({ page }) => {
@@ -75,7 +78,10 @@ test('tocar un espai buit crea una cita amb el dia i l\'hora posats', async ({ p
   await dialeg.getByRole('button', { name: 'Desar' }).click()
   await expect(dialeg).toBeHidden()
   const cita = dijous.getByRole('button', { name: /11:15–12:15 Aina Provencal Inventada/ })
-  await expect(cita).toContainText('Primera visita · Acúfens')
+  // A la setmana: nom i hora d'inici a la vista; tota la informació al tooltip
+  await expect(cita).toContainText('Aina Provencal Inventada')
+  await expect(cita).toContainText('11:15')
+  await expect(cita).toHaveAttribute('title', '11:15–12:15 Aina Provencal Inventada · Primera visita · Acúfens · 60 min')
   await expect(cita).toHaveClass(/tipus-primera/)
   // El missatge de setmana buida ja no hi és
   await expect(page.getByText('Aquesta setmana no hi ha cap cita.')).toHaveCount(0)
@@ -119,7 +125,9 @@ test('el minicalendari salta a qualsevol dia i marca un dia com a tancat', async
 
   // Marcar-lo com a tancat: surt ombrejat a la graella i al minicalendari
   cal = await minicalendari(page)
-  await page.getByRole('button', { name: 'Marcar el dimarts, 8 de desembre de 2026 com a tancat' }).click()
+  // El dia triat ja és el marcat al calendari
+  await expect(cal.getByRole('gridcell', { name: 'dimarts, 8 de desembre de 2026' })).toHaveAttribute('aria-selected', 'true')
+  await page.getByRole('button', { name: 'Marcar com a tancat' }).click()
   await expect(dia).toHaveClass(/tancat/)
   await expect(dia).toContainText('Tancat')
   cal = await minicalendari(page)
@@ -145,7 +153,7 @@ test('el minicalendari salta a qualsevol dia i marca un dia com a tancat', async
 
   // Tornar-lo a obrir
   await minicalendari(page)
-  await page.getByRole('button', { name: 'Tornar a obrir el dimarts, 8 de desembre de 2026' }).click()
+  await page.getByRole('button', { name: 'Tornar a obrir' }).click()
   await expect(dia).not.toHaveClass(/tancat/)
 })
 
@@ -198,4 +206,38 @@ test('a la tauleta vertical, per defecte la vista de dia', async ({ page }) => {
   await menu(page, 'Agenda').click()
   await expect(page.getByRole('radio', { name: 'Dia' })).toHaveAttribute('aria-checked', 'true')
   await expect(page.getByRole('region', { name: /^Cites del / })).toHaveCount(1)
+})
+
+test('ordinador: tota la jornada (8:30–20:30) a la pantalla sense desplaçar-se', async ({ page }) => {
+  test.skip(test.info().project.name !== 'escriptori', 'A l\'ordinador')
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await entrar(page)
+  await menu(page, 'Agenda').click()
+  const graella = page.getByTestId('graella-agenda')
+  await expect(page.locator('.linia-ara')).toHaveCount(1)
+  const mida = await graella.evaluate((g) => ({ scroll: g.scrollHeight, client: g.clientHeight, top: g.scrollTop }))
+  expect(mida.scroll).toBeLessThanOrEqual(mida.client + 1)
+  expect(mida.top).toBe(0)
+  // Una hora fa com a mínim 48 px
+  const hores = page.locator('.agenda-hores span')
+  await expect(hores.first()).toHaveText('09:00')
+  await expect(hores.last()).toHaveText('20:00')
+  const h10 = (await hores.nth(1).boundingBox())!
+  const h11 = (await hores.nth(2).boundingBox())!
+  expect(h11.y - h10.y).toBeGreaterThanOrEqual(48)
+})
+
+test('quan cal desplaçar-se, la vista comença una hora abans de l\'hora actual, en punt', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 600 })
+  // A les 11:20: la vista comença a les 10:00
+  await entrar(page, new Date(2026, 10, 3, 11, 20))
+  await menu(page, 'Agenda').click()
+  const graella = page.getByTestId('graella-agenda')
+  await expect(page.locator('.linia-ara')).toHaveCount(1)
+  // Les 10:00 just sota la capçalera dels dies
+  expect(await graella.evaluate((g) => g.scrollTop)).toBeGreaterThan(0)
+  const caixa = (await graella.boundingBox())!
+  const h10 = (await page.locator('.agenda-hores span', { hasText: '10:00' }).boundingBox())!
+  expect(h10.y + h10.height / 2 - (caixa.y + 52)).toBeGreaterThanOrEqual(0)
+  expect(h10.y + h10.height / 2 - (caixa.y + 52)).toBeLessThan(14)
 })

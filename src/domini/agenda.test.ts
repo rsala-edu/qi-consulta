@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  alcadaHora,
   avisHorari,
+  contingutTargeta,
+  HORA_MINIMA,
+  iniciVista,
   diesMinicalendari,
   esquemaHorari,
   HORARI_PER_DEFECTE as H,
@@ -82,5 +86,28 @@ describe('vista i minicalendari', () => {
     expect(sumarMesos('2026-01-31', 1)).toBe('2026-02-28')
     expect(sumarMesos(DIMARTS, -1)).toBe('2026-10-03')
     expect(sumarMesos('2026-12-15', 1)).toBe('2027-01-15')
+  })
+})
+
+describe('jornada sencera a la vista', () => {
+  it('l\'hora es fa prou alta perquè hi càpiga tot l\'horari, amb un mínim', () => {
+    // De 8:30 a 20:30 són 12 hores
+    expect(alcadaHora(660, 12 * 60, HORA_MINIMA.ratoli)).toBe(55)
+    expect(alcadaHora(400, 12 * 60, HORA_MINIMA.ratoli)).toBe(48) // no hi cap: es desplaça
+    expect(alcadaHora(400, 12 * 60, HORA_MINIMA.dits)).toBe(56)
+    expect(alcadaHora(5000, 12 * 60, 48)).toBe(120)
+  })
+
+  it('quan cal desplaçar-se, una hora abans, en punt', () => {
+    expect(iniciVista(11 * 60 + 40, { inici: 510 })).toBe(10 * 60)
+    expect(iniciVista(9 * 60, { inici: 510 })).toBe(510)
+  })
+
+  it('targetes de la setmana: nom, hora i motiu segons l\'alçada; les curtes, hora i nom', () => {
+    expect(contingutTargeta(36, 40, 15, 6)).toEqual({ tipus: 'curta', linies: 2 })
+    expect(contingutTargeta(20, 15, 15, 6)).toEqual({ tipus: 'curta', linies: 1 })
+    expect(contingutTargeta(46, 60, 15, 6)).toEqual({ tipus: 'completa', liniesNom: 1, motiu: false })
+    expect(contingutTargeta(53, 60, 15, 6)).toEqual({ tipus: 'completa', liniesNom: 2, motiu: false })
+    expect(contingutTargeta(70, 60, 15, 6)).toEqual({ tipus: 'completa', liniesNom: 2, motiu: true })
   })
 })

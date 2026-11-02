@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import { diesMinicalendari, esLaborable, sumarMesos, type Horari } from '../../domini/agenda'
-import { diaLlarg, formatar, mesAny, t } from '../../i18n/t'
+import { diaLlarg, mesAny, t } from '../../i18n/t'
 
 /** dl. dt. dc. dj. dv. ds. dg. */
 const CAPCALERA = [1, 2, 3, 4, 5, 6, 0].map((d) => t.dates.diesCurts[d]!.replace('.', ''))
@@ -79,7 +79,7 @@ export function Minicalendari({ dia, avui, visibles, ambCites, horari, diesTanca
         })}
       </div>
       <button type="button" className="enllac-tancat" onClick={() => onCanviarTancat(dia, !tancat)}>
-        {formatar(tancat ? t.cites.obrirDia : t.cites.marcarTancat, { dia: diaLlarg(dia) })}
+        {tancat ? t.cites.obrirDia : t.cites.marcarTancat}
       </button>
     </div>
   )

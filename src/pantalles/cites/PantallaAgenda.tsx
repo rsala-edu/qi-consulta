@@ -17,8 +17,12 @@ import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
 import { canviarDiaTancat, llegirDiesTancats, llegirHorari } from '../../db/agenda'
 import {
+  alcadaHora,
+  contingutTargeta,
   esLaborable,
   hhmm,
+  HORA_MINIMA,
+  iniciVista,
   minutInicial,
   rangGraella,
   vistaPerDefecte,
@@ -52,10 +56,15 @@ type Obert =
   | { tipus: 'editar'; cita: Cita }
   | null
 
-/** Alçada d'un tram de 15 minuts (px) */
-const ALT_QUART = 22
 /** Alçada mínima d'una targeta de cita: zona tàctil */
 const ALT_MINIMA_CITA = 44
+/** Capçalera dels dies (px) */
+const ALT_CAPCALERA = 52
+/** Marge sota la graella (px) */
+const MARGE_INFERIOR = 16
+/** Text de les targetes: alçada de línia i marge vertical (px), com al CSS */
+const LINIA_TARGETA = 15
+const MARGE_TARGETA = 8
 const CLAU_VISTA = 'qi.vistaAgenda'
 /** Distància mínima (px) per comptar un lliscament del dit */
 const LLISCAMENT = 70
@@ -186,21 +195,12 @@ export function PantallaAgenda() {
 
   return (
     <main className={`pantalla pantalla-agenda${ambLateral ? ' amb-lateral' : ''}`}>
-      <div className="capcalera-pantalla">
-        <h1>{t.cites.titol}</h1>
-        <Boto
-          disabled={carrega.estat !== 'llest'}
-          onClick={() => carrega.estat === 'llest' && setObert({ tipus: 'nova', inici: iniciNovaCita(carrega.dades.horari) })}
-        >
-          {t.cites.novaCita}
-        </Boto>
-      </div>
-
       <div className="disseny-agenda">
         {ambLateral && <aside className="agenda-lateral">{minicalendari}</aside>}
 
         <div className="agenda-principal">
           <div className="barra-agenda">
+            <h1 className="titol-agenda">{t.cites.titol}</h1>
             <div className="grup-botons">
               <button type="button" className="boto-rodo" onClick={() => anar(sumarDies(dia, -pas))} aria-label={t.cites.anterior}>
                 ‹
@@ -232,6 +232,12 @@ export function PantallaAgenda() {
                 </button>
               ))}
             </div>
+            <Boto
+              disabled={carrega.estat !== 'llest'}
+              onClick={() => carrega.estat === 'llest' && setObert({ tipus: 'nova', inici: iniciNovaCita(carrega.dades.horari) })}
+            >
+              {t.cites.novaCita}
+            </Boto>
           </div>
 
           {carrega.estat === 'carregant' && <Indicador text={t.app.carregant} />}
@@ -391,27 +397,49 @@ function Graella({
     return m
   }, [dies, cites])
   const visibles = useMemo(() => [...perDia.values()].flat(), [perDia])
+  // Sense cites, la franja del missatge fa baixar la graella: cal tornar a mesurar
+  const buida = visibles.length === 0
   const rang = rangGraella(horari, visibles)
   const franges = Array.from({ length: (rang.fi - rang.inici) / FRANJA }, (_, i) => rang.inici + i * FRANJA)
-  const y = (minut: number) => ((minut - rang.inici) / FRANJA) * ALT_QUART
-  const alcada = franges.length * ALT_QUART
+  // L'alçada de cada hora: tot l'horari a la pantalla si hi cap (mínim 48 px
+  // amb ratolí i 56 px amb els dits); si no, la graella es desplaça
+  const dits = useConsulta('(pointer: coarse)')
+  const desplacament = useRef<HTMLDivElement>(null)
+  const [espai, setEspai] = useState<{ graella: number; hores: number } | null>(null)
+  useLayoutEffect(() => {
+    const mesurar = () => {
+      const el = desplacament.current
+      if (!el) return
+      const dalt = el.getBoundingClientRect().top + window.scrollY
+      const graella = Math.max(360, window.innerHeight - dalt - MARGE_INFERIOR)
+      setEspai((e) =>
+        e && e.graella === graella ? e : { graella, hores: graella - ALT_CAPCALERA },
+      )
+    }
+    mesurar()
+    window.addEventListener('resize', mesurar)
+    return () => window.removeEventListener('resize', mesurar)
+  }, [buida])
+  const alturaHora = alcadaHora(espai?.hores ?? 0, rang.fi - rang.inici, dits ? HORA_MINIMA.dits : HORA_MINIMA.ratoli)
+  const quart = alturaHora / 4
+  const y = (minut: number) => ((minut - rang.inici) / FRANJA) * quart
+  const alcada = franges.length * quart
+  const setmana = dies.length > 1
   const nomDe = (id: string) => {
     const p = pacients.find((x) => x.id === id)
     return p ? nomComplet(p) : '—'
   }
 
-  // En obrir (i en canviar de dies), la vista se situa a l'hora actual o a la primera cita
-  const desplacament = useRef<HTMLDivElement>(null)
-  const clauDies = dies.join()
+  // En obrir (i en canviar de dies), si cal desplaçar-se, la vista comença una
+  // hora abans de l'hora actual o de la primera cita, en punt
+  const clauDies = `${dies.join()}|${alturaHora}`
   const situada = useRef('')
   useLayoutEffect(() => {
     const el = desplacament.current
-    if (!el || situada.current === clauDies) return
+    if (!el || !espai || situada.current === clauDies) return
     situada.current = clauDies
     const minut = minutInicial(dies, new Date(), horari, visibles)
-    // Una mica de context per sobre: des de l'hora en punt, amb l'etiqueta de l'hora sencera
-    const hora = Math.floor((minut - 20) / 60) * 60
-    el.scrollTop = Math.max(0, y(hora) - 12)
+    el.scrollTop = Math.max(0, y(iniciVista(minut, rang)) - 8)
   })
 
   // Lliscar el dit (tauleta): canvia de dia o de setmana
@@ -434,8 +462,17 @@ function Graella({
 
   return (
     <div className="contenidor-graella">
+      {buida && (
+        <div className="franja-buida" role="status">
+          <span>{buit}</span>
+          <Boto variant="secundari" onClick={onNova}>
+            {t.cites.novaCita}
+          </Boto>
+        </div>
+      )}
       <div
         ref={desplacament}
+        style={{ maxHeight: espai?.graella }}
         className={`agenda agenda-${dies.length === 1 ? 'dia' : 'setmana'}`}
         data-testid="graella-agenda"
         onTouchStart={tocar}
@@ -481,7 +518,7 @@ function Graella({
                     key={m}
                     type="button"
                     className={`franja${m % 60 === 0 ? ' en-punt' : ''}`}
-                    style={{ top: y(m), height: ALT_QUART }}
+                    style={{ top: y(m), height: quart }}
                     aria-label={formatar(t.cites.franjaLliure, { dia: diaLlarg(d), hora: hhmm(m) })}
                     onClick={() => onFranja(`${d}T${hhmm(m)}`)}
                   />
@@ -496,6 +533,17 @@ function Graella({
                   const solapa = solapaments(c, delDia).length > 0
                   const minut = minutDelDia(c.inici)
                   const durada = Math.min(c.durada, 24 * 60 - minut)
+                  const alt = Math.max(ALT_MINIMA_CITA, (durada / FRANJA) * quart - 2)
+                  const nom = nomDe(c.pacientId)
+                  const tipusMotiu = `${t.cites.tipusNoms[c.tipus]}${c.motiu ? ` · ${c.motiu}` : ''}${
+                    c.estat !== 'programada' ? ` · ${t.cites.estats[c.estat]}` : ''
+                  }`
+                  // Tota la informació: tooltip a l'ordinador i nom accessible
+                  const tot = `${hora(c.inici)}–${hora(fiDe(c))} ${nom} · ${tipusMotiu} · ${formatar(t.cites.minuts, {
+                    n: String(c.durada),
+                  })}${solapa ? ` · ${t.cites.solapaCurt}` : ''}`
+                  const linies = Math.max(1, Math.floor((alt - MARGE_TARGETA) / LINIA_TARGETA))
+                  const contingut = contingutTargeta(alt, c.durada, LINIA_TARGETA, MARGE_TARGETA)
                   return (
                     <button
                       key={c.id}
@@ -503,23 +551,43 @@ function Graella({
                       className={`cita-agenda tipus-${c.tipus} estat-${c.estat}${solapa ? ' solapa' : ''}`}
                       style={{
                         top: y(minut) + 1,
-                        height: Math.max(ALT_MINIMA_CITA, (durada / FRANJA) * ALT_QUART - 2),
+                        height: alt,
                         left: `calc(${(100 / n) * columna}% + 3px)`,
                         width: `calc(${100 / n}% - 6px)`,
                       }}
+                      title={tot}
+                      aria-label={tot}
                       onClick={() => onCita(c)}
                     >
-                      <span className="hora">
-                        {hora(c.inici)}–{hora(fiDe(c))}
-                      </span>{' '}
-                      <span className="nom">{nomDe(c.pacientId)}</span>{' '}
-                      <span className="detall">
-                        {t.cites.tipusNoms[c.tipus]}
-                        {c.motiu && ` · ${c.motiu}`}
-                        {c.estat !== 'programada' && ` · ${t.cites.estats[c.estat]}`}
-                      </span>{' '}
-                      <span className="durada">· {formatar(t.cites.minuts, { n: String(c.durada) })}</span>
-                      {solapa && <span className="marca-solapa"> · {t.cites.solapaCurt}</span>}
+                      {setmana ? (
+                        // Setmana: nom, hora d'inici i motiu, segons l'alçada
+                        contingut.tipus === 'curta' ? (
+                          <span className="text-targeta" style={{ WebkitLineClamp: contingut.linies }}>
+                            <span className="hora">{hora(c.inici)}</span> <span className="nom">{nom}</span>
+                          </span>
+                        ) : (
+                          <>
+                            <span className="nom text-targeta" style={{ WebkitLineClamp: contingut.liniesNom }}>
+                              {nom}
+                            </span>
+                            <span className="hora">{hora(c.inici)}</span>
+                            {contingut.motiu && c.motiu && <span className="detall">{c.motiu}</span>}
+                          </>
+                        )
+                      ) : (
+                        // Dia: hora i durada, nom i «tipus · motiu», si hi caben
+                        <>
+                          <span className="linia-targeta">
+                            <span className="hora">
+                              {hora(c.inici)}–{hora(fiDe(c))}
+                            </span>{' '}
+                            <span className="durada">· {formatar(t.cites.minuts, { n: String(c.durada) })}</span>
+                            {solapa && <span className="marca-solapa"> · {t.cites.solapaCurt}</span>}
+                          </span>
+                          <span className="nom linia-targeta">{nom}</span>
+                          {linies >= 3 && <span className="detall linia-targeta">{tipusMotiu}</span>}
+                        </>
+                      )}
                     </button>
                   )
                 })}
@@ -528,13 +596,6 @@ function Graella({
           )
         })}
       </div>
-      {visibles.length === 0 && (
-        <div className="agenda-buida" role="status">
-          <p>{buit}</p>
-          <p className="detall">{t.cites.buitSuau}</p>
-          <Boto onClick={onNova}>{t.cites.novaCita}</Boto>
-        </div>
-      )}
     </div>
   )
 }

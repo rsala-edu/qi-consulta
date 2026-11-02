@@ -1125,14 +1125,20 @@ fieldset {
 
 .pantalla-agenda {
   max-width: 1280px;
+  padding-top: 16px;
+}
+
+.titol-agenda {
+  margin: 0 8px 0 0;
+  font-size: 1.7rem;
 }
 
 .barra-agenda {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px 20px;
-  margin-bottom: 16px;
+  gap: 10px 14px;
+  margin-bottom: 12px;
 }
 
 .dia-agenda {
@@ -1320,19 +1326,20 @@ fieldset {
   background: var(--cinabri);
 }
 
-/* Targetes de cita: sense vores dures, cantonades rodones i ombra molt suau */
+/* Targetes de cita: sense vores dures, cantonades rodones i ombra molt suau.
+   El text mai en sobresurt: la pantalla decideix quantes línies hi caben
+   (alçada de línia de 15 px i 8 px de marge, com a PantallaAgenda.tsx). */
 .cita-agenda {
   position: absolute;
   z-index: 1;
   overflow: hidden;
   display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  column-gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
   text-align: left;
   font: inherit;
-  font-size: 0.8rem;
-  line-height: 1.28;
+  font-size: 12.5px;
+  line-height: 15px;
   padding: 4px 8px;
   border: none;
   border-radius: 10px;
@@ -1355,43 +1362,37 @@ fieldset {
 }
 
 .cita-agenda .hora {
-  order: 1;
   font-variant-numeric: tabular-nums;
   color: var(--accent-fosc);
   font-weight: 600;
 }
 
-/* Durada al costat de l'hora (si hi cap); el nom i el motiu, una línia cadascun */
+.cita-agenda .nom {
+  font-weight: 600;
+}
+
+.cita-agenda .detall,
 .cita-agenda .durada {
-  order: 2;
   color: var(--tinta-suau);
 }
 
-/* A la setmana les columnes són estretes: la durada no hi cap */
-.agenda-setmana .cita-agenda .durada {
-  display: none;
-}
-
-.cita-agenda .nom,
-.cita-agenda .detall {
-  width: 100%;
+/* Una línia, amb «…» si no hi cap */
+.cita-agenda .linia-targeta,
+.agenda-setmana .cita-agenda > .hora,
+.agenda-setmana .cita-agenda > .detall {
+  flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.cita-agenda .nom {
-  order: 3;
-  font-weight: 600;
-}
-
-.cita-agenda .detall {
-  order: 4;
-  color: var(--tinta-suau);
-}
-
-.cita-agenda .marca-solapa {
-  order: 5;
+/* Fins a N línies (WebkitLineClamp a l'estil), amb «…» */
+.cita-agenda .text-targeta {
+  flex-shrink: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .cita-agenda.estat-feta {
@@ -1422,35 +1423,23 @@ fieldset {
   font-weight: 600;
 }
 
-/* Setmana sense cites: un missatge suau en lloc d'una graella freda */
-.agenda-buida {
-  position: absolute;
-  top: 96px;
-  left: 50%;
-  translate: -50% 0;
-  z-index: 6;
-  width: min(380px, calc(100% - 32px));
+/* Setmana sense cites: una franja estreta sobre la graella, sense tapar res */
+.franja-buida {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 24px;
-  text-align: center;
-  border-radius: calc(var(--radi) * 1.4);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 10px;
+  padding: 6px 8px 6px 18px;
+  border-radius: 999px;
   background: var(--superficie);
-  box-shadow: 0 8px 30px rgb(31 36 33 / 0.12);
-}
-
-.agenda-buida p {
-  margin: 0;
   font-family: var(--lletra-titol);
-  font-size: 1.1rem;
+  color: var(--tinta-suau);
 }
 
-.agenda-buida p.detall {
-  font-family: var(--lletra);
-  font-size: 0.9rem;
-  color: var(--tinta-suau);
+.franja-buida .boto {
+  min-height: 40px;
 }
 
 /* --- Disseny: columna lateral (ordinador) i barra --- */
@@ -2405,4 +2394,16 @@ fieldset {
   top: 12px;
   right: 12px;
   z-index: 5;
+}
+
+/* Tauleta: tota la barra de l'Agenda en una fila (el menú ja diu «Agenda») */
+@media (max-width: 1199px) {
+  .titol-agenda {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }

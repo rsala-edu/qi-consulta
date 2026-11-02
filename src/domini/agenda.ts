@@ -114,3 +114,43 @@ export function minutsDe(hhmmText: string): number {
   const [h, m] = hhmmText.split(':').map(Number)
   return h! * 60 + m!
 }
+
+/** Alçada mínima d'una hora a la graella (px): amb ratolí i amb els dits */
+export const HORA_MINIMA = { ratoli: 48, dits: 56 } as const
+/** Més enllà d'això, les hores no es fan més altes encara que sobri pantalla */
+const HORA_MAXIMA = 120
+
+/**
+ * Alçada d'una hora perquè tota la graella càpiga a l'espai disponible sense
+ * desplaçar-se; si no hi cap, el mínim (i la graella es desplaça).
+ */
+export function alcadaHora(espai: number, minuts: number, minima: number): number {
+  const hores = minuts / 60
+  return Math.min(HORA_MAXIMA, Math.max(minima, Math.floor(espai / hores)))
+}
+
+/**
+ * On comença la vista quan cal desplaçar-se: una hora abans del minut de
+ * referència (l'hora actual o la primera cita), en punt.
+ */
+export function iniciVista(minut: number, rang: { inici: number }): number {
+  return Math.max(rang.inici, Math.floor(minut / 60) * 60 - 60)
+}
+
+export type ContingutTargeta =
+  /** Hora d'inici i nom junts, en una o dues línies */
+  | { tipus: 'curta'; linies: number }
+  /** Nom (fins a dues línies), hora d'inici i, si hi cap, el motiu */
+  | { tipus: 'completa'; liniesNom: number; motiu: boolean }
+
+/**
+ * Què es mostra en una targeta de la setmana segons l'alçada, perquè el text
+ * no en sobresurti mai. Prioritat: nom, hora d'inici, motiu. Les cites de 40
+ * minuts o menys, només l'hora i el nom.
+ */
+export function contingutTargeta(alcada: number, durada: number, alturaLinia: number, marge: number): ContingutTargeta {
+  const linies = Math.max(1, Math.floor((alcada - marge) / alturaLinia))
+  if (durada <= 40 || linies <= 1) return { tipus: 'curta', linies: Math.min(2, linies) }
+  if (linies === 2) return { tipus: 'completa', liniesNom: 1, motiu: false }
+  return { tipus: 'completa', liniesNom: 2, motiu: linies >= 4 }
+}
