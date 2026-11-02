@@ -139,6 +139,16 @@ test('còpia xifrada a Drive, restauració en un altre dispositiu i canvis entre
   await menu(pc, 'Pacients').click()
   await expect(pc.getByRole('link', { name: /Aina Provencal Inventada/ })).toBeVisible()
 
+  // «Recuperar les dades» només surt la primera vegada: en tornar a obrir
+  // l'app al mateix dispositiu, el desbloqueig normal
+  await pc.reload()
+  await expect(pc.getByRole('heading', { name: 'Qi' })).toBeVisible()
+  await expect(pc.getByLabel('Contrasenya', { exact: true })).toBeVisible()
+  await expect(pc.getByText('Recuperar les dades')).toHaveCount(0)
+  await pc.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await pc.getByRole('button', { name: 'Desbloquejar' }).click()
+  await expect(pc.getByRole('button', { name: 'Bloquejar', exact: true })).toBeVisible()
+
   // Un pacient nou a l'ordinador arriba a la tauleta
   await nouPacient(pc, 'Biel', 'Prova Inventat')
   await esperarCopia(pc)
@@ -218,9 +228,49 @@ test('empremta (passkey amb PRF): activar-la i desbloquejar sense contrasenya', 
   await seccio.getByRole('button', { name: 'Continuar' }).click()
   await expect(seccio.getByRole('status')).toHaveText('L\'empremta està activada.')
 
+  // Un dispositiu configurat: només el botó de l'empremta i l'enllaç de la contrasenya
   await page.getByRole('button', { name: 'Bloquejar' }).click()
-  await page.getByRole('button', { name: 'Desbloquejar amb l\'empremta' }).click()
+  const targeta = page.locator('.targeta-desbloqueig')
+  await expect(targeta.getByRole('button')).toHaveText(['Entrar amb l\'empremta', 'Entrar amb la contrasenya'])
+  await expect(page.getByLabel('Contrasenya', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('Recuperar les dades')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Entrar amb l\'empremta' }).click()
   await expect(page.getByRole('button', { name: 'Bloquejar', exact: true })).toBeVisible()
+
+  // També en tornar a obrir l'app; i la contrasenya continua valent
+  await page.reload()
+  await page.getByRole('button', { name: 'Entrar amb la contrasenya' }).click()
+  await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  await expect(page.getByRole('button', { name: 'Bloquejar', exact: true })).toBeVisible()
+})
+
+test('Seguretat: com es protegeixen les dades i minuts del bloqueig automàtic', async ({ page }) => {
+  await crearContrasenya(page)
+  await menu(page, 'Ajustos').click()
+  await page.getByRole('link', { name: /Seguretat i còpia/ }).click()
+  await expect(page.getByRole('region', { name: 'Com es protegeixen les dades' })).toContainText('tancades amb clau')
+  const bloqueig = page.getByRole('region', { name: 'Bloqueig automàtic' })
+  const minuts = bloqueig.getByLabel('Bloquejar després de')
+  await expect(minuts).toHaveValue('10')
+  await minuts.selectOption({ label: '5 minuts' })
+  // Es recorda en aquest dispositiu
+  await page.reload()
+  await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  await menu(page, 'Ajustos').click()
+  await page.getByRole('link', { name: /Seguretat i còpia/ }).click()
+  await expect(page.getByRole('region', { name: 'Bloqueig automàtic' }).getByLabel('Bloquejar després de')).toHaveValue('5')
+})
+
+test('es bloqueja sol després dels minuts sense activitat', async ({ page }) => {
+  await page.clock.install()
+  await crearContrasenya(page)
+  await page.clock.fastForward('09:00')
+  await expect(page.getByRole('heading', { name: 'Avui', exact: true })).toBeVisible()
+  await page.clock.fastForward('01:05')
+  await expect(page.getByRole('heading', { name: 'Qi' })).toBeVisible()
+  await expect(page.getByLabel('Contrasenya', { exact: true })).toBeVisible()
 })
 
 test('Avui: les cites del dia en ordre i «Començar visita» a la següent', async ({ page }) => {

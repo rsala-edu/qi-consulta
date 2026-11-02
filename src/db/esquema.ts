@@ -26,6 +26,8 @@ export type RegistreMeta =
   | { clau: 'secrets'; valor: EmbolcallSecret[] }
   /** Aquest dispositiu s'ha connectat amb el compte de Google de la doctora */
   | { clau: 'google'; valor: { connectatAt: string; ultimaCopia: string | null; sub?: string } }
+  /** Minuts sense activitat abans de bloquejar l'app en aquest dispositiu */
+  | { clau: 'minutsBloqueig'; valor: number }
 
 /** Taules que se sincronitzen amb Google Drive */
 export type TaulaSincronitzada =

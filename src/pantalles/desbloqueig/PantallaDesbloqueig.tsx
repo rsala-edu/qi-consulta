@@ -9,6 +9,7 @@ import { Simbol } from '../../components/Simbol'
 import { ErrorContrasenya } from '../../crypto'
 import { t } from '../../i18n/t'
 import { ErrorClauRecuperacio } from '../../sessio/claus'
+import { fraseEntrada } from '../../sessio/frase'
 
 const MINIM = 8
 
@@ -59,6 +60,7 @@ function FormulariContrasenya({
   const restaurar = mode === 'restaurar'
   const [errorEmpremta, setErrorEmpremta] = useState(false)
   const [ambEmpremta, setAmbEmpremta] = useState(false)
+  const [ambContrasenya, setAmbContrasenya] = useState(false)
   const {
     register,
     handleSubmit,
@@ -98,7 +100,11 @@ function FormulariContrasenya({
 
   const ocupat = isSubmitting || ambEmpremta
   const titol = crear ? t.desbloqueig.titolCrear : restaurar ? t.desbloqueig.titolRestaurar : t.desbloqueig.titolDesbloquejar
-  const intro = crear ? t.desbloqueig.introCrear : restaurar ? t.desbloqueig.introRestaurar : t.desbloqueig.introDesbloquejar
+  const intro = crear ? t.desbloqueig.introCrear : restaurar ? t.desbloqueig.introRestaurar : null
+  // En un dispositiu amb l'empremta activada, només el botó de l'empremta;
+  // la contrasenya, si es tria l'enllaç de sota
+  const ambBotoEmpremta = mode === 'desbloquejar' && empremta && !!onEmpremta
+  const veureContrasenya = !ambBotoEmpremta || ambContrasenya
 
   return (
     <main className="pantalla-desbloqueig">
@@ -109,62 +115,85 @@ function FormulariContrasenya({
             {titol}
           </h1>
         ) : (
-          <>
-            <span className="logotip">
-              <Simbol mida={72} />
-            </span>
-            <h1>{titol}</h1>
-          </>
+          <span className="logotip">
+            <Simbol mida={72} />
+          </span>
         )}
+        <FraseEntrada />
+        {mode !== 'desbloquejar' && <h1>{titol}</h1>}
 
-        {empremta && onEmpremta && (
+        {ambBotoEmpremta && !ambContrasenya && (
           <>
-            <Boto onClick={() => void usarEmpremta()} disabled={ocupat}>
-              {t.desbloqueig.empremta}
-            </Boto>
+            <div className="accions">
+              {ambEmpremta ? (
+                <Indicador text={t.desbloqueig.desbloquejant} />
+              ) : (
+                <Boto className="boto-gran" onClick={() => void usarEmpremta()} disabled={ocupat}>
+                  {t.desbloqueig.empremta}
+                </Boto>
+              )}
+            </div>
             {errorEmpremta && <p role="alert">{t.desbloqueig.errorEmpremta}</p>}
+            <button type="button" className="enllac-secundari" onClick={() => setAmbContrasenya(true)} disabled={ocupat}>
+              {t.desbloqueig.ambContrasenya}
+            </button>
           </>
         )}
 
-        <p>{intro}</p>
+        {veureContrasenya && (
+          <>
+            {intro && <p>{intro}</p>}
 
-        <Camp etiqueta={t.desbloqueig.contrasenya} error={errors.contrasenya?.message}>
-          <input
-            type="password"
-            autoComplete={crear ? 'new-password' : 'current-password'}
-            autoFocus={!empremta}
-            disabled={ocupat}
-            {...register('contrasenya')}
-          />
-        </Camp>
+            <Camp etiqueta={t.desbloqueig.contrasenya} error={errors.contrasenya?.message}>
+              <input
+                type="password"
+                autoComplete={crear ? 'new-password' : 'current-password'}
+                autoFocus
+                disabled={ocupat}
+                {...register('contrasenya')}
+              />
+            </Camp>
 
-        {crear && (
-          <Camp etiqueta={t.desbloqueig.repetirContrasenya} error={errors.repeticio?.message}>
-            <input type="password" autoComplete="new-password" disabled={ocupat} {...register('repeticio')} />
-          </Camp>
-        )}
+            {crear && (
+              <Camp etiqueta={t.desbloqueig.repetirContrasenya} error={errors.repeticio?.message}>
+                <input type="password" autoComplete="new-password" disabled={ocupat} {...register('repeticio')} />
+              </Camp>
+            )}
 
-        {crear && <p className="avis">{t.desbloqueig.avisCrear}</p>}
+            {crear && <p className="avis">{t.desbloqueig.avisCrear}</p>}
 
-        <div className="accions">
-          {isSubmitting ? (
-            <Indicador
-              text={crear ? t.desbloqueig.creant : restaurar ? t.desbloqueig.restaurant : t.desbloqueig.desbloquejant}
-            />
-          ) : (
-            <Boto type="submit" variant={empremta ? 'secundari' : 'principal'} disabled={ocupat}>
-              {crear ? t.desbloqueig.crear : restaurar ? t.desbloqueig.obrir : t.desbloqueig.desbloquejar}
-            </Boto>
-          )}
-        </div>
-        {onOblidada && !crear && (
-          <Boto variant="discret" onClick={onOblidada} disabled={ocupat}>
-            {t.desbloqueig.oblidada}
-          </Boto>
+            <div className="accions">
+              {isSubmitting ? (
+                <Indicador
+                  text={crear ? t.desbloqueig.creant : restaurar ? t.desbloqueig.restaurant : t.desbloqueig.desbloquejant}
+                />
+              ) : (
+                <Boto type="submit" disabled={ocupat}>
+                  {crear ? t.desbloqueig.crear : restaurar ? t.desbloqueig.obrir : t.desbloqueig.desbloquejar}
+                </Boto>
+              )}
+            </div>
+            {onOblidada && !crear && (
+              <button type="button" className="enllac-secundari" onClick={onOblidada} disabled={ocupat}>
+                {t.desbloqueig.oblidada}
+              </button>
+            )}
+            {ambBotoEmpremta && (
+              <button type="button" className="enllac-secundari" onClick={() => setAmbContrasenya(false)} disabled={ocupat}>
+                {t.desbloqueig.tornarEmpremta}
+              </button>
+            )}
+          </>
         )}
       </form>
     </main>
   )
+}
+
+/** Frase sota el logo: una a l'atzar cada vegada que s'obre l'app */
+function FraseEntrada() {
+  const [frase] = useState(fraseEntrada)
+  return <p className="frase-entrada">{frase}</p>
 }
 
 const esquemaRecuperar = z
@@ -206,6 +235,7 @@ function FormulariRecuperacio({
         <span className="logotip">
           <Simbol mida={72} />
         </span>
+        <FraseEntrada />
         <h1>{t.desbloqueig.titolRecuperar}</h1>
         <p>{t.desbloqueig.introRecuperar}</p>
         <Camp etiqueta={t.desbloqueig.clauRecuperacio} error={errors.clau?.message}>
@@ -261,6 +291,7 @@ export function PantallaGoogle({ onConnectar }: { onConnectar(): Promise<void> }
         <span className="logotip">
           <Simbol mida={72} />
         </span>
+        <FraseEntrada />
         <h1>{t.desbloqueig.titolGoogle}</h1>
         <p>{t.desbloqueig.introGoogle}</p>
         {error && <p role="alert">{error}</p>}

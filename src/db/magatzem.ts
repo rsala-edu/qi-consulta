@@ -247,6 +247,24 @@ export async function guardarSecrets(db: QiDB, valor: EmbolcallSecret[]): Promis
   await db.meta.put({ clau: 'secrets', valor })
 }
 
+// --- Bloqueig per inactivitat (ajust d'aquest dispositiu, no és dada de pacient) ---
+
+/** Opcions que es poden triar a Ajustos > Seguretat */
+export const OPCIONS_MINUTS_BLOQUEIG = [5, 10, 15, 30] as const
+export const MINUTS_BLOQUEIG_PER_DEFECTE = 10
+
+export async function llegirMinutsBloqueig(db: QiDB): Promise<number> {
+  const r = await db.meta.get('minutsBloqueig')
+  return r?.clau === 'minutsBloqueig' && (OPCIONS_MINUTS_BLOQUEIG as readonly number[]).includes(r.valor)
+    ? r.valor
+    : MINUTS_BLOQUEIG_PER_DEFECTE
+}
+
+export async function guardarMinutsBloqueig(db: QiDB, minuts: number): Promise<void> {
+  if (!(OPCIONS_MINUTS_BLOQUEIG as readonly number[]).includes(minuts)) throw new Error(`Minuts no vàlids: ${minuts}`)
+  await db.meta.put({ clau: 'minutsBloqueig', valor: minuts })
+}
+
 export interface EstatGoogle {
   connectatAt: string
   ultimaCopia: string | null

@@ -39,6 +39,45 @@
   -webkit-text-size-adjust: 100%;
 }
 
+/* Mode fosc (segons el sistema): tinta sobre paper passa a paper sobre tinta.
+   La paleta es redefineix i tots els tokens la segueixen. El cos i l'orella
+   es continuen veient sobre paper clar (la pell i les etiquetes hi estan
+   pensades). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #151917;
+    --boira: #222a26;
+    --jade: #8cc0ae;
+    --tinta-base: #e9e7e0;
+    --cinabri: #e4826c;
+    --clar: #1c221f;
+    --tinta-suau: #a9b3ad;
+    --linia: #34403a;
+    --accent-fosc: #b4d9cb;
+    --accent-suau: #26332d;
+    --avis-suau: #3b2722;
+  }
+
+  .zona-visor {
+    --paper: #f6f3ec;
+    --boira: #dce5df;
+    --jade: #2f5d50;
+    --tinta-base: #1f2421;
+    --cinabri: #b5432f;
+    --clar: #fcfbf7;
+    --tinta-suau: #59615c;
+    --linia: #cfd9d2;
+    --accent-fosc: #234a3f;
+    --accent-suau: #e6ede8;
+    color: var(--tinta);
+  }
+
+  .estat-costats span.fet {
+    color: var(--paper);
+  }
+}
+
 *,
 *::before,
 *::after {
@@ -97,6 +136,10 @@ a {
   line-height: 1;
   color: var(--jade);
   text-decoration: none;
+}
+
+.logotip picture {
+  display: block;
 }
 
 .logotip img {
@@ -1797,4 +1840,60 @@ fieldset {
 /* Botons de tècnica amb el nom llarg: tota la fila, perquè no es tallin */
 .segmentat.segmentat-graella button.ample {
   grid-column: 1 / -1;
+}
+
+/* --- Pantalla d'entrada: frase, botó gran de l'empremta i enllaços --- */
+
+/* Frase sota el logo: apareix lentament (sense moviment si es demana) */
+.targeta-desbloqueig p.frase-entrada {
+  margin: -6px 0 4px;
+  text-align: center;
+  font-family: var(--lletra-titol);
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--tinta-suau);
+  text-wrap: balance;
+  animation: frase-apareix 2.4s ease-out both;
+}
+
+@keyframes frase-apareix {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .targeta-desbloqueig p.frase-entrada {
+    animation: none;
+  }
+}
+
+/* El més visible: un sol botó gran */
+.targeta-desbloqueig .boto.boto-gran {
+  min-height: 64px;
+  font-size: 1.15rem;
+  border-radius: calc(var(--radi) * 1.6);
+}
+
+/* Opcions secundàries: enllaços discrets, sota el botó */
+.targeta-desbloqueig .enllac-secundari {
+  align-self: center;
+  min-height: var(--toc);
+  padding: 0 12px;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--accent-fosc);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.targeta-desbloqueig .enllac-secundari:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

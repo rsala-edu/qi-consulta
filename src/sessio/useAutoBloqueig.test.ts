@@ -44,4 +44,29 @@ describe('bloqueig automàtic', () => {
     vi.advanceTimersByTime(DEU_MINUTS * 2)
     expect(bloquejar).not.toHaveBeenCalled()
   })
+
+  it('en tornar d\'una altra app, compta el temps real: si ja ha passat, bloqueja de seguida', () => {
+    const bloquejar = vi.fn()
+    renderHook(() => useAutoBloqueig(true, bloquejar, DEU_MINUTS))
+    // En segon pla el navegador atura els temporitzadors: el rellotge avança sense que es disparin
+    vi.setSystemTime(Date.now() + DEU_MINUTS + 5000)
+    const visibilitat = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+    document.dispatchEvent(new Event('visibilitychange'))
+    expect(bloquejar).toHaveBeenCalledOnce()
+    visibilitat.mockRestore()
+  })
+
+  it('si torna abans del límit, no bloqueja i només compta el temps que queda', () => {
+    const bloquejar = vi.fn()
+    renderHook(() => useAutoBloqueig(true, bloquejar, DEU_MINUTS))
+    vi.setSystemTime(Date.now() + 4 * 60_000)
+    const visibilitat = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+    document.dispatchEvent(new Event('visibilitychange'))
+    expect(bloquejar).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(6 * 60_000 - 1)
+    expect(bloquejar).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+    expect(bloquejar).toHaveBeenCalledOnce()
+    visibilitat.mockRestore()
+  })
 })

@@ -5,7 +5,13 @@ import { ErrorDesxifratge } from '../crypto'
 import { clauDeProva, fitxaInventada, pacientInventat } from '../test/dadesInventades'
 import { novaCita } from '../domini/cita'
 import { QiDB } from './esquema'
-import { crearMagatzem, type Magatzem } from './magatzem'
+import {
+  crearMagatzem,
+  guardarMinutsBloqueig,
+  llegirMinutsBloqueig,
+  OPCIONS_MINUTS_BLOQUEIG,
+  type Magatzem,
+} from './magatzem'
 
 let db: QiDB
 let clau: CryptoKey
@@ -146,5 +152,15 @@ describe('cites', () => {
     const p = await magatzem.crearPacient(pacientInventat())
     await expect(magatzem.crearCita({ ...novaCita(p.id, '2026-11-02T10:00'), durada: -5 })).rejects.toThrow()
     expect(await db.cites.count()).toBe(0)
+  })
+})
+
+describe('minuts del bloqueig automàtic', () => {
+  it('per defecte 10; es desa una de les opcions i es rebutja qualsevol altre valor', async () => {
+    expect(await llegirMinutsBloqueig(db)).toBe(10)
+    await guardarMinutsBloqueig(db, 15)
+    expect(await llegirMinutsBloqueig(db)).toBe(15)
+    await expect(guardarMinutsBloqueig(db, 0)).rejects.toThrow()
+    expect(OPCIONS_MINUTS_BLOQUEIG).toEqual([5, 10, 15, 30])
   })
 })

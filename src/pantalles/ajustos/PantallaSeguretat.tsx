@@ -1,4 +1,5 @@
-// Ajustos → Seguretat i còpia: Google Drive, empremta i clau de recuperació.
+// Ajustos → Seguretat i còpia: com es protegeixen les dades, bloqueig automàtic,
+// Google Drive, empremta i clau de recuperació.
 
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -13,11 +14,12 @@ import { useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 import { useSincronia } from '../../sincronia/ContextSincronia'
 import { diaDe } from '../../domini/cita'
+import { OPCIONS_MINUTS_BLOQUEIG } from '../../db/magatzem'
 
 type Accio = 'empremta' | 'clau' | null
 
 export function PantallaSeguretat() {
-  const { db } = useSessio()
+  const { db, minutsBloqueig, canviarMinutsBloqueig } = useSessio()
   const { estat: estatCopia, sincronitzarAra } = useSincronia()
   const [versio, setVersio] = useState(0)
   const [carrega] = useCarrega(async () => {
@@ -45,6 +47,27 @@ export function PantallaSeguretat() {
         ← {t.ajustos.titol}
       </Link>
       <h1>{s.titol}</h1>
+
+      <section className="panell" aria-label={s.proteccio}>
+        <h2>{s.proteccio}</h2>
+        {s.proteccioText.map((p) => (
+          <p key={p}>{p}</p>
+        ))}
+      </section>
+
+      <section className="panell" aria-label={s.bloqueig}>
+        <h2>{s.bloqueig}</h2>
+        <p className="detall">{s.bloqueigDesc}</p>
+        <Camp etiqueta={s.bloqueigDespres}>
+          <select value={minutsBloqueig} onChange={(e) => void canviarMinutsBloqueig(Number(e.target.value))}>
+            {OPCIONS_MINUTS_BLOQUEIG.map((m) => (
+              <option key={m} value={m}>
+                {formatar(s.minuts, { n: String(m) })}
+              </option>
+            ))}
+          </select>
+        </Camp>
+      </section>
 
       <section className="panell" aria-label={s.drive}>
         <h2>{s.drive}</h2>

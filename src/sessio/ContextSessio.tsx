@@ -17,6 +17,9 @@ import {
   guardarEstatGoogle,
   llegirClauEmbolcallada,
   llegirEstatGoogle,
+  guardarMinutsBloqueig,
+  llegirMinutsBloqueig,
+  MINUTS_BLOQUEIG_PER_DEFECTE,
   type Magatzem,
 } from '../db/magatzem'
 import type { FitxerCopia } from '../sincronia/copia'
@@ -48,6 +51,9 @@ interface ValorSessio {
   /** Contrasenya oblidada: clau de recuperació i contrasenya nova */
   recuperar(clauRecuperacio: string, contrasenyaNova: string): Promise<void>
   bloquejar(): void
+  /** Minuts sense activitat abans de bloquejar (Ajustos > Seguretat) */
+  minutsBloqueig: number
+  canviarMinutsBloqueig(minuts: number): Promise<void>
 }
 
 const Context = createContext<ValorSessio | null>(null)
@@ -65,13 +71,31 @@ async function estatBloquejat(db: QiDB): Promise<EstatSessio> {
 export function ProveidorSessio({
   db,
   children,
-  msInactivitat = DEU_MINUTS,
+  msInactivitat,
 }: {
   db: QiDB
   children: ReactNode
+  /** Per a les proves: substitueix l'ajust de minuts */
   msInactivitat?: number
 }) {
   const [estat, setEstat] = useState<EstatSessio>({ tipus: 'carregant' })
+  const [minutsBloqueig, setMinutsBloqueig] = useState(MINUTS_BLOQUEIG_PER_DEFECTE)
+
+  useEffect(() => {
+    let actiu = true
+    void llegirMinutsBloqueig(db).then((m) => actiu && setMinutsBloqueig(m))
+    return () => {
+      actiu = false
+    }
+  }, [db])
+
+  const canviarMinutsBloqueig = useCallback(
+    async (minuts: number) => {
+      await guardarMinutsBloqueig(db, minuts)
+      setMinutsBloqueig(minuts)
+    },
+    [db],
+  )
 
   useEffect(() => {
     let actiu = true
@@ -149,7 +173,7 @@ export function ProveidorSessio({
     void estatBloquejat(db).then((nou) => setEstat((e) => (e.tipus === 'carregant' ? nou : e)))
   }, [db])
 
-  useAutoBloqueig(estat.tipus === 'desbloquejat', bloquejar, msInactivitat)
+  useAutoBloqueig(estat.tipus === 'desbloquejat', bloquejar, msInactivitat ?? minutsBloqueig * 60_000)
 
   const valor = useMemo(
     () => ({
@@ -161,8 +185,21 @@ export function ProveidorSessio({
       desbloquejarAmbEmpremta: desbloquejarEmpremta,
       recuperar,
       bloquejar,
+      minutsBloqueig,
+      canviarMinutsBloqueig,
     }),
-    [estat, db, connectarGoogle, crearContrasenya, desbloquejar, desbloquejarEmpremta, recuperar, bloquejar],
+    [
+      estat,
+      db,
+      connectarGoogle,
+      crearContrasenya,
+      desbloquejar,
+      desbloquejarEmpremta,
+      recuperar,
+      bloquejar,
+      minutsBloqueig,
+      canviarMinutsBloqueig,
+    ],
   )
   return <Context.Provider value={valor}>{children}</Context.Provider>
 }

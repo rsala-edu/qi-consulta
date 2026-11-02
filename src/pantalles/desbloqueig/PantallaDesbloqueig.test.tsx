@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ErrorContrasenya } from '../../crypto'
+import { FRASES_ENTRADA } from '../../i18n/frases'
 import { PantallaDesbloqueig } from './PantallaDesbloqueig'
 
 function promesaPendent() {
@@ -73,7 +74,7 @@ describe('crear contrasenya', () => {
     expect(onCrear).not.toHaveBeenCalled()
   })
 
-  it('mostra l\'indicador mentre prepara el xifratge', async () => {
+  it('mostra l\'indicador mentre prepara l\'app', async () => {
     const usuari = userEvent.setup()
     const pendent = promesaPendent()
     const onCrear = vi.fn(() => pendent.promesa)
@@ -84,7 +85,60 @@ describe('crear contrasenya', () => {
     await usuari.click(screen.getByRole('button', { name: 'Crear i entrar' }))
 
     expect(onCrear).toHaveBeenCalledWith('contrasenya-llarga')
-    expect(await screen.findByRole('status')).toHaveTextContent('Preparant el xifratge…')
+    expect(await screen.findByRole('status')).toHaveTextContent('Preparant l\'app…')
     pendent.resoldre()
+  })
+})
+
+describe('pantalla d\'entrada', () => {
+  it('amb l\'empremta: un sol botó gran i la contrasenya com a enllaç; cap altra opció', async () => {
+    const usuari = userEvent.setup()
+    const onEmpremta = vi.fn(() => Promise.resolve())
+    render(
+      <PantallaDesbloqueig
+        mode="desbloquejar"
+        onCrear={vi.fn()}
+        onDesbloquejar={vi.fn()}
+        empremta
+        onEmpremta={onEmpremta}
+        onRecuperar={vi.fn()}
+      />,
+    )
+    // Només el botó de l'empremta i l'enllaç de la contrasenya
+    expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'Entrar amb l\'empremta',
+      'Entrar amb la contrasenya',
+    ])
+    expect(screen.getByRole('button', { name: 'Entrar amb l\'empremta' })).toHaveClass('boto-gran')
+    expect(screen.queryByLabelText('Contrasenya')).not.toBeInTheDocument()
+    expect(screen.queryByText(/xifr/i)).not.toBeInTheDocument()
+
+    await usuari.click(screen.getByRole('button', { name: 'Entrar amb l\'empremta' }))
+    expect(onEmpremta).toHaveBeenCalledOnce()
+  })
+
+  it('l\'enllaç mostra la contrasenya (amb «He oblidat la contrasenya») i es pot tornar a l\'empremta', async () => {
+    const usuari = userEvent.setup()
+    render(
+      <PantallaDesbloqueig
+        mode="desbloquejar"
+        onCrear={vi.fn()}
+        onDesbloquejar={vi.fn()}
+        empremta
+        onEmpremta={vi.fn()}
+        onRecuperar={vi.fn()}
+      />,
+    )
+    await usuari.click(screen.getByRole('button', { name: 'Entrar amb la contrasenya' }))
+    expect(screen.getByLabelText('Contrasenya')).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'He oblidat la contrasenya' })).toBeInTheDocument()
+    await usuari.click(screen.getByRole('button', { name: 'Tornar a l\'empremta' }))
+    expect(screen.getByRole('button', { name: 'Entrar amb l\'empremta' })).toBeInTheDocument()
+  })
+
+  it('sota el logo, una de les frases', () => {
+    render(<PantallaDesbloqueig mode="desbloquejar" onCrear={vi.fn()} onDesbloquejar={vi.fn()} />)
+    const frase = document.querySelector('.frase-entrada')
+    expect(FRASES_ENTRADA).toContain(frase?.textContent)
   })
 })
