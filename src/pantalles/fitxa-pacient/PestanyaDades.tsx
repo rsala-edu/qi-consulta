@@ -5,11 +5,22 @@ import { formatar, t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
 import { FormulariPacient } from '../pacients/FormulariPacient'
 import { useFitxaPacient } from './PantallaFitxaPacient'
+import { RevisioConflictes } from '../../components/RevisioConflictes'
+import type { CampEnConflicte } from '../../db/magatzem'
+import { ambValor } from '../../sincronia/fusioCamps'
+import { useCarrega } from '../../sessio/useCarrega'
 
 export function PestanyaDades() {
   const magatzem = useMagatzem()
   const { pacient, actualitzarPacient } = useFitxaPacient()
   const [arxivant, setArxivant] = useState(false)
+  const [recuperacions, setRecuperacions] = useState(0)
+  const [carrega, substituir] = useCarrega(() => magatzem.conflictesDe(pacient.id), [magatzem, pacient.id])
+  const conflictes = carrega.estat === 'llest' ? carrega.dades : []
+  const resolt = async (c: CampEnConflicte) => {
+    await magatzem.resoldreConflicte(c.conflicteId, c.camp)
+    substituir(conflictes.filter((x) => !(x.conflicteId === c.conflicteId && x.camp === c.camp)))
+  }
 
   const { id, arxivat } = pacient
 
@@ -25,8 +36,20 @@ export function PestanyaDades() {
 
   return (
     <section>
+      <RevisioConflictes
+        conflictes={conflictes}
+        etiquetes={t.camps.pacient}
+        onQuedar={resolt}
+        onRecuperar={async (c) => {
+          const dades = ambValor(dadesDePacient(pacient), c.camp, c.valor) as ReturnType<typeof dadesDePacient>
+          actualitzarPacient(await magatzem.actualitzarPacient(id, dades))
+          setRecuperacions((n) => n + 1)
+          await resolt(c)
+        }}
+      />
       <FormulariPacient
-        key={id}
+        // Es torna a muntar si les dades canvien des de fora (recuperar una versió)
+        key={`${id}|${recuperacions}`}
         valorsInicials={dadesDePacient(pacient)}
         esborrany={{
           clau: `pacient:${id}:dades`,

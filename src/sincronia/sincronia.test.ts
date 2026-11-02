@@ -11,7 +11,7 @@ import { confirmarCategoria } from '../db/precaucions'
 import { novaCita } from '../domini/cita'
 import { fitxaInventada, pacientInventat } from '../test/dadesInventades'
 import { driveEnMemoria } from '../test/driveEnMemoria'
-import { fusionar, llegirContingut, llegirFitxer, migrarContingut } from './copia'
+import { fusionar, llegirContingut, llegirFitxer } from './copia'
 import { driveGoogle, ErrorAutoritzacio } from './drive'
 import { restaurarCopia } from './recuperacio'
 import { copiaDeDrive, FITXER_PRINCIPAL, sincronitzar } from './sincronitzar'
@@ -215,13 +215,5 @@ describe('client de Google Drive', () => {
     }
   })
 
-  it('fitxes clíniques antigues amb ids diferents per al mateix pacient: la fusió en deixa una (la més nova)', () => {
-    const buit = migrarContingut({ versio: 1, taules: {} })
-    const fitxa = (id: string, modificatAt: string) => ({ id, pacientId: 'p1', creatAt: modificatAt, modificatAt, xifrat: {} })
-    const a = { ...buit, taules: { ...buit.taules, fitxesCliniques: [fitxa('id-a', '2026-11-01T10:00:00Z')] } }
-    const b = { ...buit, taules: { ...buit.taules, fitxesCliniques: [fitxa('id-b', '2026-11-01T11:00:00Z')] } }
-    expect(fusionar(a, b).taules.fitxesCliniques.map((r) => r.id)).toEqual(['id-b'])
-    expect(fusionar(b, a)).toEqual(fusionar(a, b))
-  })
 })
 

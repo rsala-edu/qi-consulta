@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Path } from 'react-hook-form'
 import { AvisDesat } from '../../components/AvisDesat'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
+import { VersioAnterior } from '../../components/VersioAnterior'
+import type { CampEnConflicte } from '../../db/magatzem'
 import { esquemaDadesFitxaClinica, type DadesFitxaClinica } from '../../domini/fitxaClinica'
 import { t } from '../../i18n/t'
 import { useEsborrany, type OpcionsEsborrany } from '../../sessio/useEsborrany'
@@ -12,12 +14,16 @@ interface Props {
   valorsInicials: DadesFitxaClinica
   onDesar(dades: DadesFitxaClinica): Promise<void>
   esborrany: OpcionsEsborrany
+  /** Camps editats en dos dispositius alhora, per revisar */
+  conflictes?: readonly CampEnConflicte[]
+  /** La doctora ha revisat un camp */
+  onResolt?(c: CampEnConflicte): Promise<void>
 }
 
 const CONTRAINDICACIONS = ['anticoagulants', 'embaras', 'marcapassos'] as const
 const HABITS = ['son', 'tabac', 'alcohol', 'exercici'] as const
 
-export function FormulariFitxaClinica({ valorsInicials, onDesar, esborrany }: Props) {
+export function FormulariFitxaClinica({ valorsInicials, onDesar, esborrany, conflictes = [], onResolt }: Props) {
   const [marcaDesat, setMarcaDesat] = useState(0)
   const [errorDesar, setErrorDesar] = useState(false)
   const form = useForm<DadesFitxaClinica>({
@@ -32,6 +38,25 @@ export function FormulariFitxaClinica({ valorsInicials, onDesar, esborrany }: Pr
   } = form
   const control = useEsborrany(form, esborrany)
   const c = t.camps.fitxaClinica
+
+  /** L'altra versió de cada camp en conflicte, al costat del camp */
+  const versions = (camp: string) =>
+    conflictes
+      .filter((x) => x.camp === camp)
+      .map((x) => (
+        <VersioAnterior
+          key={`${x.conflicteId}|${x.camp}`}
+          conflicte={x}
+          onQuedar={() => onResolt?.(x) ?? Promise.resolve()}
+          onRecuperar={async () => {
+            // Es recupera l'altra versió i es desa la fitxa
+            form.setValue(camp as Path<DadesFitxaClinica>, x.valor as never, { shouldDirty: true })
+            await enviar(form.getValues())
+            await onResolt?.(x)
+          }}
+        />
+      ))
+  const enConflicte = (camp: string) => (conflictes.some((x) => x.camp === camp) ? 'camp-en-conflicte' : '')
 
   async function enviar(dades: DadesFitxaClinica) {
     setErrorDesar(false)
@@ -49,6 +74,11 @@ export function FormulariFitxaClinica({ valorsInicials, onDesar, esborrany }: Pr
 
   return (
     <form className="formulari" onSubmit={handleSubmit(enviar)} noValidate>
+      {conflictes.length > 0 && (
+        <p className="avis avis-conflicte" role="status">
+          {t.conflictes.avis}
+        </p>
+      )}
       {control.recuperat && (
         <p className="avis" role="status">
           {t.esborranys.recuperat}
@@ -64,33 +94,51 @@ export function FormulariFitxaClinica({ valorsInicials, onDesar, esborrany }: Pr
             </label>
           ))}
         </div>
-        <Camp etiqueta={c.altresContraindicacions} error={errors.contraindicacions?.altres?.message} ample>
-          <input autoComplete="off" {...register('contraindicacions.altres')} />
-        </Camp>
+        <div className={enConflicte('contraindicacions.altres')}>
+          <Camp etiqueta={c.altresContraindicacions} error={errors.contraindicacions?.altres?.message} ample>
+            <input autoComplete="off" {...register('contraindicacions.altres')} />
+          </Camp>
+          {versions('contraindicacions.altres')}
+        </div>
       </fieldset>
 
       <div className="graella">
-        <Camp etiqueta={c.alergies} error={errors.alergies?.message} ample>
-          <textarea rows={2} {...register('alergies')} />
-        </Camp>
-        <Camp etiqueta={c.medicacioActual} error={errors.medicacioActual?.message} ample>
-          <textarea rows={3} {...register('medicacioActual')} />
-        </Camp>
-        <Camp etiqueta={c.antecedentsPersonals} error={errors.antecedentsPersonals?.message} ample>
-          <textarea rows={4} {...register('antecedentsPersonals')} />
-        </Camp>
-        <Camp etiqueta={c.antecedentsFamiliars} error={errors.antecedentsFamiliars?.message} ample>
-          <textarea rows={3} {...register('antecedentsFamiliars')} />
-        </Camp>
+        <div className={`camp-ample ${enConflicte('alergies')}`}>
+          <Camp etiqueta={c.alergies} error={errors.alergies?.message} ample>
+            <textarea rows={2} {...register('alergies')} />
+          </Camp>
+          {versions('alergies')}
+        </div>
+        <div className={`camp-ample ${enConflicte('medicacioActual')}`}>
+          <Camp etiqueta={c.medicacioActual} error={errors.medicacioActual?.message} ample>
+            <textarea rows={3} {...register('medicacioActual')} />
+          </Camp>
+          {versions('medicacioActual')}
+        </div>
+        <div className={`camp-ample ${enConflicte('antecedentsPersonals')}`}>
+          <Camp etiqueta={c.antecedentsPersonals} error={errors.antecedentsPersonals?.message} ample>
+            <textarea rows={4} {...register('antecedentsPersonals')} />
+          </Camp>
+          {versions('antecedentsPersonals')}
+        </div>
+        <div className={`camp-ample ${enConflicte('antecedentsFamiliars')}`}>
+          <Camp etiqueta={c.antecedentsFamiliars} error={errors.antecedentsFamiliars?.message} ample>
+            <textarea rows={3} {...register('antecedentsFamiliars')} />
+          </Camp>
+          {versions('antecedentsFamiliars')}
+        </div>
       </div>
 
       <fieldset>
         <legend>{c.habits}</legend>
         <div className="graella">
           {HABITS.map((k) => (
-            <Camp key={k} etiqueta={c[k]} error={errors.habits?.[k]?.message}>
-              <input autoComplete="off" {...register(`habits.${k}`)} />
-            </Camp>
+            <div key={k} className={enConflicte(`habits.${k}`)}>
+              <Camp etiqueta={c[k]} error={errors.habits?.[k]?.message}>
+                <input autoComplete="off" {...register(`habits.${k}`)} />
+              </Camp>
+              {versions(`habits.${k}`)}
+            </div>
           ))}
         </div>
       </fieldset>

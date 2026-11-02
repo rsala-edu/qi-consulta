@@ -23,8 +23,8 @@ interface DefinicioTaula {
   /**
    * Camp que la base de dades vol únic (índex &). Si dos dispositius creen,
    * sense haver sincronitzat, un registre per al mateix valor (la fitxa clínica
-   * d'un pacient), es queda el més nou: si no, escriure'ls tots dos falla i la
-   * sincronia queda bloquejada («Drive: error»).
+   * d'un pacient), sincronitzar() els fusiona camp a camp abans (fusioClinica.ts):
+   * escriure'ls tots dos fallaria i la sincronia quedaria bloquejada.
    */
   unic?: string
 }
@@ -39,6 +39,7 @@ export const TAULES: readonly DefinicioTaula[] = [
   { nom: 'categoriesPrecaucio', clau: 'categoria', data: 'confirmadaAt' },
   { nom: 'configuracio', clau: 'clau', data: 'modificatAt' },
   { nom: 'diesTancats', clau: 'dia', data: 'modificatAt' },
+  { nom: 'conflictes', clau: 'id', data: 'modificatAt' },
 ]
 
 type Registre = Record<string, unknown>
@@ -103,25 +104,10 @@ export function fusionar(a: Contingut, b: Contingut): Contingut {
       const ja = perClau.get(clau)
       if (!ja || valor(r, t.data) > valor(ja, t.data)) perClau.set(clau, r)
     }
-    let vius = [...perClau.entries()].filter(([clau, r]) => {
+    const vius = [...perClau.entries()].filter(([clau, r]) => {
       const e = esborrats.get(`${t.nom}:${clau}`)
       return !e || e.esborratAt < valor(r, t.data)
     })
-    if (t.unic) {
-      const camp = t.unic
-      const perValor = new Map<string, [string, Registre]>()
-      for (const entrada of vius) {
-        const v = valor(entrada[1], camp)
-        const ja = perValor.get(v)
-        // El més nou; a igualtat, el de clau més petita (perquè tots dos dispositius triïn el mateix)
-        const guanya =
-          !ja ||
-          valor(entrada[1], t.data) > valor(ja[1], t.data) ||
-          (valor(entrada[1], t.data) === valor(ja[1], t.data) && entrada[0] < ja[0])
-        if (guanya) perValor.set(v, entrada)
-      }
-      vius = [...perValor.values()]
-    }
     taules[t.nom] = vius.sort(([x], [y]) => x.localeCompare(y)).map(([, r]) => r)
   }
   // Un esborrat ja no cal si el registre s'ha tornat a crear després

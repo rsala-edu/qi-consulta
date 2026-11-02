@@ -30,6 +30,12 @@ export type RegistreMeta =
   | { clau: 'minutsBloqueig'; valor: number }
   /** S'ha aplicat el tipus de visita automàtic a les cites que ja hi havia (data) */
   | { clau: 'tipusVisitaAutomatic'; valor: string }
+  /** Hora (d'aquest dispositiu) de l'última sincronia correcta: per saber què s'ha editat als dos llocs */
+  | { clau: 'darreraSincronia'; valor: string }
+  /** Registres clínics (xifrats) tal com van quedar a l'última sincronia: la referència per fusionar */
+  | { clau: 'baseSincronia'; valor: Partial<Record<string, RegistreXifrat[]>> }
+  /** S'han buscat a les còpies de Drive les fitxes clíniques duplicades descartades abans (data i quantes) */
+  | { clau: 'fitxesRecuperades'; valor: { at: string; recuperades: number } }
 
 /** Taules que se sincronitzen amb Google Drive */
 export type TaulaSincronitzada =
@@ -42,6 +48,7 @@ export type TaulaSincronitzada =
   | 'categoriesPrecaucio'
   | 'configuracio'
   | 'diesTancats'
+  | 'conflictes'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -105,13 +112,20 @@ export interface RegistreConfiguracio {
   modificatAt: string
 }
 
+/** Conflicte d'un registre clínic: les versions dels camps que no han guanyat (xifrades) */
+export interface RegistreConflicte extends RegistreXifrat {
+  /** Taula del registre (fitxesCliniques, pacients, cites) */
+  taula: NomTaula
+  registreId: string
+}
+
 /** Dia de consulta tancat (festiu, vacances). No és dada de pacient. */
 export interface RegistreDiaTancat {
   dia: string
   modificatAt: string
 }
 
-export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites'
+export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites' | 'conflictes'
 
 export class QiDB extends Dexie {
   meta!: Table<RegistreMeta, RegistreMeta['clau']>
@@ -128,6 +142,11 @@ export class QiDB extends Dexie {
   categoriesPrecaucio!: Table<RegistreCategoriaPrecaucio, string>
   configuracio!: Table<RegistreConfiguracio, string>
   diesTancats!: Table<RegistreDiaTancat, string>
+  /**
+   * Versions anteriors de camps clínics que s'han editat en dos dispositius
+   * alhora (xifrades): la doctora les revisa. `pacientId` en clar per trobar-les.
+   */
+  conflictes!: Table<RegistreConflicte, string>
 
   constructor(nom = 'qi') {
     super(nom)
@@ -177,6 +196,9 @@ export class QiDB extends Dexie {
     this.version(9).stores({
       configuracio: 'clau',
       diesTancats: 'dia',
+    })
+    this.version(10).stores({
+      conflictes: 'id, registreId',
     })
   }
 }

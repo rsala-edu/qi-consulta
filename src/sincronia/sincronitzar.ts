@@ -14,9 +14,11 @@ import {
   llegirContingut,
   llegirFitxer,
   xifrarCopia,
+  type Contingut,
   type Embolcalls,
   type FitxerCopia,
 } from './copia'
+import { baseDe, fusionarClinics, recuperarFitxesDescartades } from './fusioClinica'
 import type { Drive, FitxerDrive } from './drive'
 
 export const FITXER_PRINCIPAL = 'qi-dades.json'
@@ -49,6 +51,10 @@ export async function copiaDeDrive(drive: Drive): Promise<FitxerCopia | null> {
 export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara: Date = new Date()): Promise<ResultatSincronia> {
   const fitxers = await drive.llistar()
   const principal = fitxers.find((f) => f.name === FITXER_PRINCIPAL)
+  // L'hora d'aquest dispositiu en començar: el que es modifiqui a partir d'ara
+  // és posterior a aquesta sincronia
+  const inici = new Date().toISOString()
+  const darrera = await llegirDarreraSincronia(db)
   const local = await llegirContingut(db)
   let embolcalls = await embolcallsLocals(db)
 
@@ -59,7 +65,10 @@ export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara:
     const fitxer = llegirFitxer(await drive.baixar(principal.id))
     embolcallsRemots = fitxer.embolcalls
     remot = await desxifrarCopia(clau, fitxer)
-    fusionat = fusionar(local, remot)
+    // Les dades clíniques editades als dos dispositius es fusionen camp a camp
+    const base = await db.meta.get('baseSincronia')
+    const clinica = await fusionarClinics(clau, local, remot, darrera, inici, base?.clau === 'baseSincronia' ? base.valor : {})
+    fusionat = fusionar(clinica.local, clinica.remot)
     const nous = fusionarEmbolcalls(embolcalls, fitxer.embolcalls)
     if (JSON.stringify(nous) !== JSON.stringify(embolcalls)) {
       await guardarClauEmbolcallada(db, nous.contrasenya, nous.contrasenyaAt)
@@ -67,6 +76,15 @@ export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara:
       embolcalls = nous
     }
   }
+  // Una sola vegada: les fitxes duplicades que una versió anterior podia haver descartat
+  const recuperacio = await db.meta.get('fitxesRecuperades')
+  let recuperades: number | null = null
+  if (!recuperacio) {
+    const r = await recuperarFitxesDescartades(clau, fusionat, await copiesAnteriors(drive, fitxers, clau), inici)
+    fusionat = r.contingut
+    recuperades = r.recuperades
+  }
+
   const baixat = !iguals(fusionat, local)
   if (baixat) await aplicarContingut(db, fusionat)
 
@@ -84,7 +102,34 @@ export async function sincronitzar(db: QiDB, clau: CryptoKey, drive: Drive, ara:
   }
 
   await copiesPeriodiques(drive, fitxers, text, ara)
+  await db.meta.bulkPut([
+    { clau: 'darreraSincronia', valor: inici },
+    { clau: 'baseSincronia', valor: baseDe(fusionat) },
+  ])
+  if (recuperades !== null) {
+    await db.meta.put({ clau: 'fitxesRecuperades', valor: { at: inici, recuperades } })
+    if (recuperades > 0) console.info(`[Qi] Sincronia: ${recuperades} fitxes clíniques recuperades de les còpies de Drive`)
+  }
   return { baixat, pujat, copiaAt: actual!.modifiedTime }
+}
+
+export async function llegirDarreraSincronia(db: QiDB): Promise<string | null> {
+  const r = await db.meta.get('darreraSincronia')
+  return r?.clau === 'darreraSincronia' ? r.valor : null
+}
+
+/** Les còpies diàries i mensuals de Drive que es poden llegir (les que no, es deixen estar) */
+async function copiesAnteriors(drive: Drive, fitxers: readonly FitxerDrive[], clau: CryptoKey): Promise<Contingut[]> {
+  const copies: Contingut[] = []
+  for (const f of fitxers) {
+    if (!DIARIA.test(f.name) && !MENSUAL.test(f.name)) continue
+    try {
+      copies.push(await desxifrarCopia(clau, llegirFitxer(await drive.baixar(f.id))))
+    } catch {
+      // Una còpia antiga que no es pot llegir no atura la sincronia
+    }
+  }
+  return copies
 }
 
 const diaUtc = (d: Date) => d.toISOString().slice(0, 10)

@@ -719,11 +719,20 @@ fieldset {
 
 /* --- Mapa del cos --- */
 
+/* El mapa ocupa exactament l'espai sota la barra (sigui quina sigui la seva
+   alçada): la pàgina no es desplaça, només la llista de la columna */
+#root:has(> .pantalla-mapa) {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
 .pantalla-mapa {
   padding: 8px var(--espai) var(--espai);
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 62px);
+  flex: 1;
+  min-height: 0;
 }
 
 .capcalera-mapa {
@@ -731,6 +740,34 @@ fieldset {
   align-items: center;
   gap: 8px 24px;
   flex-wrap: wrap;
+}
+
+/* La columna dreta (punt i punts marcats) ocupa tota l'alçada, també la de la
+   franja del títol: hi caben més punts marcats sense desplaçar-se */
+@media (min-width: 901px) {
+  .pantalla-mapa {
+    --alt-capcalera-mapa: 52px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .capcalera-mapa {
+    height: var(--alt-capcalera-mapa);
+    flex-wrap: nowrap;
+    margin-right: calc(360px + 16px);
+    overflow: hidden;
+  }
+
+  .capcalera-mapa .avis {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.85rem;
+    line-height: 1.25;
+  }
+
+  .panell-mapa.amb-pestanyes {
+    margin-top: calc(-1 * var(--alt-capcalera-mapa) - 8px);
+  }
 }
 
 .capcalera-mapa h1 {
@@ -985,19 +1022,84 @@ fieldset {
 /* --- Punts marcats: una línia per punt, per a 20–30 agulles ---
    La secció ocupa la resta de la columna: la capçalera queda fixa i només la
    llista es desplaça (no tota la pàgina). */
-.panell-mapa > .llista-marcats-seccio {
+.panell-mapa > .llista-marcats-seccio,
+.panell-lateral-marcats > .llista-marcats-seccio {
   flex: 1 1 0;
-  min-height: 240px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* --- Columna dreta amb pestanyes: «Punt» i «Marcats (25)» --- */
+.panell-mapa.amb-pestanyes {
+  overflow: hidden;
+  padding-right: 0;
+  gap: 6px;
+}
+
+.pestanyes-panell {
+  flex-shrink: 0;
+  display: flex;
+}
+
+.pestanyes-panell button {
+  flex: 1;
+  min-height: 40px;
+}
+
+.panell-lateral {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panell-lateral[hidden] {
+  display: none;
+}
+
+.panell-lateral-punt {
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.panell-lateral-punt > * {
+  flex-shrink: 0;
+}
+
+/* El comptador fa un petit salt quan canvia */
+.comptador {
+  display: inline-block;
+  margin-left: 0.3em;
+  animation: comptador-salta 0.45s ease-out;
+}
+
+@keyframes comptador-salta {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+    color: var(--accent-fosc);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comptador {
+    animation: none;
+  }
 }
 
 .llista-marcats-capcalera {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-bottom: 6px;
+  gap: 4px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--linia);
 }
 
@@ -1013,7 +1115,7 @@ fieldset {
 }
 
 .llista-marcats-eines select {
-  min-height: 36px;
+  min-height: 32px;
   font-size: 0.85rem;
   padding: 0 8px;
 }
@@ -1021,7 +1123,7 @@ fieldset {
 .enllac-treure-tots {
   flex-shrink: 0;
   white-space: nowrap;
-  min-height: 36px;
+  min-height: 32px;
   padding: 0 8px;
   border: none;
   background: none;
@@ -1064,7 +1166,7 @@ fieldset {
   align-items: center;
   gap: 6px;
   width: 100%;
-  min-height: 34px;
+  min-height: 28px;
   padding: 0 4px;
   border: none;
   background: var(--fons);
@@ -2631,4 +2733,46 @@ fieldset {
 
 .avis-passat {
   color: var(--avis);
+}
+
+/* --- Camps editats en dos dispositius alhora --- */
+.avis-conflicte {
+  padding: 10px 14px;
+  border-radius: var(--radi);
+  background: var(--avis-suau);
+  color: var(--tinta);
+}
+
+.camp-en-conflicte {
+  padding: 8px 10px;
+  margin: -8px -10px;
+  border-radius: var(--radi);
+  box-shadow: inset 3px 0 0 var(--avis);
+  background: color-mix(in srgb, var(--avis-suau) 45%, transparent);
+}
+
+.versio-anterior {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radi);
+  background: var(--superficie);
+}
+
+.versio-anterior p {
+  margin: 0;
+}
+
+.valor-anterior {
+  white-space: pre-wrap;
+  font-style: italic;
+}
+
+.revisio-conflictes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
 }

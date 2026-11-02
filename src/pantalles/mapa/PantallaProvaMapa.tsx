@@ -32,6 +32,7 @@ import { useModelCos } from '../../mapa/useModelCos'
 import { REVISIO_BUIDA, ambPrecaucions, cataleg, cercarPunts, costatsDe, nomMeridia, posicioDe } from '../../punts/cataleg'
 import type { CostatPosicio } from '../../punts/esquema'
 import { LlistaMarcats } from './LlistaMarcats'
+import { PanellLateral, type PestanyaPanell } from './PanellLateral'
 import { nomAmple } from './tecniques'
 import { MarcatgeOrella } from './MarcatgeOrella'
 
@@ -151,6 +152,8 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
     const costat: CostatMarcat =
       existent?.costat ?? (costatTocat === 'E' || costatTocat === 'D' ? costatTocat : 'bilateral')
     setFitxa({ codi, costat, tecnica: existent?.tecnica ?? 'agulla', tocat: { costat: costatTocat, index } })
+    // La fitxa és a la pestanya «Punt»
+    setPestanyaPanell('punt')
   }
 
   function anarAlPunt(codi: string) {
@@ -183,6 +186,15 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
       .find((x) => x.codi === codi)
       ?.posicions.some((q) => q.topologia === model.topologia && q.origen === 'doctora') ?? false
   const jaMarcat = fitxa && puntMarcat(marcats, fitxa.codi)
+
+  // Columna dreta: «Punt» o «Marcats». Si es demana un punt des de la llista
+  // (també des de la de l'orella), es torna a «Punt»
+  const [pestanyaPanell, setPestanyaPanell] = useState<PestanyaPanell>('punt')
+  const [peticioPanell, setPeticioPanell] = useState(0)
+  if (peticio && peticio.n !== peticioPanell) {
+    setPeticioPanell(peticio.n)
+    setPestanyaPanell('punt')
+  }
 
   // Des de la llista de marcats (també quan es ve de la pestanya de l'orella)
   const darreraPeticio = useRef(0)
@@ -228,7 +240,13 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
         </div>
       </div>
 
-      <aside className="panell-mapa">
+      <PanellLateral
+        mapa="cos"
+        pestanya={pestanyaPanell}
+        onPestanya={setPestanyaPanell}
+        total={marcats.length}
+        punt={
+          <>
         <div className="barra-cerca">
           <input
             type="search"
@@ -443,13 +461,21 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
           </section>
         )}
 
+          </>
+        }
+        marcats={
         <LlistaMarcats
+          titolOcult
           marcats={marcats}
-          onVeure={onVeure}
+          onVeure={(m) => {
+            setPestanyaPanell('punt')
+            onVeure(m)
+          }}
           onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
           onTreureTots={() => setMarcats([])}
         />
-      </aside>
+        }
+      />
     </div>
   )
 }

@@ -94,6 +94,7 @@ test('marcar a l\'orella amb les seves tècniques; cos i orella a la mateixa lli
   await fitxa.getByRole('radio', { name: 'Xinxeta (press tack)' }).click()
   await fitxa.getByRole('button', { name: 'Marcar' }).click()
 
+  await page.getByRole('tab', { name: 'Marcats (1)' }).click()
   const marcats = page.getByRole('region', { name: 'Punts marcats' })
   await expect(marcats.getByRole('listitem')).toHaveCount(1)
   await expect(marcats.locator('.fila-marcat')).toHaveAttribute('title', 'TF4 · Shenmen · Orella · Bilateral · Xinxeta (press tack)')
@@ -109,6 +110,7 @@ test('marcar a l\'orella amb les seves tècniques; cos i orella a la mateixa lli
   await page.getByRole('searchbox', { name: /Cerca un punt \(ST36/ }).fill('zusanli')
   await page.getByRole('searchbox', { name: /Cerca un punt \(ST36/ }).press('Enter')
   await page.getByRole('region', { name: 'ST36' }).getByRole('button', { name: 'Marcar' }).click()
+  await page.getByRole('tabpanel', { name: 'Cos' }).getByRole('tab', { name: 'Marcats (2)' }).click()
   const marcatsCos = page.getByRole('tabpanel', { name: 'Cos' }).getByRole('region', { name: 'Punts marcats' })
   await expect(marcatsCos.getByRole('listitem')).toHaveCount(2)
   await expect(marcatsCos).toContainText('TF4')
@@ -200,6 +202,7 @@ test('llista de marcats: una línia per punt, grups plegables, ordre, «Treure t
     await cercar(page, codi)
     await page.getByRole('region', { name: codi }).getByRole('button', { name: 'Marcar' }).click()
   }
+  await page.getByRole('tab', { name: `Marcats (${codis.length})` }).click()
   const llista = page.getByRole('tabpanel', { name: 'Orella' }).getByRole('region', { name: 'Punts marcats' })
   await expect(llista.getByRole('heading')).toHaveText(`Punts marcats (${codis.length})`)
   const files = llista.getByRole('listitem')
@@ -219,7 +222,7 @@ test('llista de marcats: una línia per punt, grups plegables, ordre, «Treure t
   const desplacament = llista.locator('.llista-marcats-desplacament')
   await desplacament.evaluate((e) => e.scrollTo(0, e.scrollHeight))
   expect(await page.evaluate(() => document.scrollingElement!.scrollTop)).toBe(0)
-  await expect(llista.getByRole('heading')).toBeInViewport()
+  await expect(page.getByRole('tab', { name: /^Marcats/ })).toBeInViewport()
 
   // Grup plegable
   await llista.getByRole('button', { name: `Orella (${codis.length})` }).click()
@@ -237,4 +240,34 @@ test('llista de marcats: una línia per punt, grups plegables, ordre, «Treure t
   await llista.getByRole('button', { name: 'Sí, treure\'ls' }).click()
   await expect(files).toHaveCount(0)
   await expect(llista.getByRole('heading')).toHaveText('Punts marcats (0)')
+})
+
+test('columna dreta: pestanyes «Punt» i «Marcats»; amb 25 punts se\'n veuen almenys 12 sense desplaçar-se', async ({ page }) => {
+  await entrar(page)
+  await obrirOrella(page)
+  const codis = ['TF4', 'CO15', 'AH6a', 'HX1', 'LO6', 'AT2', 'TG2l', 'SF1', 'CO4', 'CO10', 'AH9', 'LO1', 'HX2', 'HX3', 'SF2',
+    'AH1', 'AH2', 'TF1', 'TF2', 'TG1', 'AT1', 'CO1', 'CO2', 'CO3', 'LO2']
+  const pestanyaMarcats = page.getByRole('tab', { name: /^Marcats/ })
+  for (const codi of codis) {
+    await cercar(page, codi)
+    await page.getByRole('region', { name: codi }).getByRole('button', { name: 'Marcar' }).click()
+  }
+  // En marcar no es canvia de pestanya; el comptador s'actualitza
+  await expect(page.getByRole('tab', { name: 'Punt', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await expect(pestanyaMarcats).toHaveText(`Marcats (${codis.length})`)
+
+  await pestanyaMarcats.click()
+  const desplacament = page.locator('#mapa-orella .panell-lateral-marcats .llista-marcats-desplacament')
+  const caixa = (await desplacament.boundingBox())!
+  const sencers = await page.locator('#mapa-orella .panell-lateral-marcats .llista-marcats li').evaluateAll(
+    (li, limit) => li.filter((x) => x.getBoundingClientRect().bottom <= limit + 0.5).length,
+    caixa.y + caixa.height,
+  )
+  expect(sencers, `files visibles a ${page.viewportSize()!.width}×${page.viewportSize()!.height} (${JSON.stringify(caixa)})`).toBeGreaterThanOrEqual(12)
+  expect(await page.evaluate(() => document.scrollingElement!.scrollTop)).toBe(0)
+
+  // Tocar una fila porta al punt i torna a «Punt»
+  await page.locator('#mapa-orella .panell-lateral-marcats .fila-marcat', { hasText: 'CO15' }).click()
+  await expect(page.getByRole('tab', { name: 'Punt', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('region', { name: 'CO15' }).getByRole('button', { name: 'Actualitzar' })).toBeVisible()
 })

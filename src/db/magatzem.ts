@@ -1,6 +1,7 @@
 // Accés a les dades de pacient. Tot el que entra i surt passa per src/crypto:
 // aquí no es guarda mai res en clar, excepte els identificadors i les dates.
 
+import type { DadesConflicte } from '../sincronia/fusioClinica'
 import type { z } from 'zod'
 import { desxifrarJson, xifrarJson, type ClauEmbolcallada, type EmbolcallSecret } from '../crypto'
 import {
@@ -22,7 +23,7 @@ import { registrarEsborrats } from './esborrats'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
 
 /** Les dades associades lliguen cada text xifrat a la seva taula i al seu id. */
-function context(taula: NomTaula, id: string): string {
+export function context(taula: NomTaula, id: string): string {
   return `qi:${taula}:${id}`
 }
 
@@ -54,6 +55,18 @@ export interface Magatzem {
   crearCita(dades: DadesCita): Promise<Cita>
   actualitzarCita(id: string, dades: DadesCita): Promise<Cita>
   esborrarCita(id: string): Promise<void>
+  /** Camps d'un registre clínic editats en dos dispositius alhora, encara per revisar */
+  conflictesDe(registreId: string): Promise<CampEnConflicte[]>
+  /** La doctora ha revisat el camp (s'hagi quedat la versió actual o hagi recuperat l'altra) */
+  resoldreConflicte(conflicteId: string, camp: string): Promise<void>
+}
+
+/** Un camp amb dues versions: la que hi ha i l'altra, que no va guanyar */
+export interface CampEnConflicte {
+  conflicteId: string
+  camp: string
+  valor: unknown
+  versioAt: string
 }
 
 export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
@@ -215,6 +228,33 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     async esborrarCita(id) {
       await db.cites.delete(id)
       await registrarEsborrats(db, 'cites', [id])
+    },
+
+    async conflictesDe(registreId) {
+      const registres = await db.conflictes.where('registreId').equals(registreId).toArray()
+      const camps: CampEnConflicte[] = []
+      for (const r of registres.sort((a, b) => a.creatAt.localeCompare(b.creatAt))) {
+        const d = (await desxifrarJson(clau, r.xifrat, context('conflictes', r.id))) as DadesConflicte
+        for (const c of d.camps) camps.push({ conflicteId: r.id, camp: c.camp, valor: c.valor, versioAt: d.versioAt })
+      }
+      return camps
+    },
+
+    async resoldreConflicte(conflicteId, camp) {
+      const r = await db.conflictes.get(conflicteId)
+      if (!r) return
+      const d = (await desxifrarJson(clau, r.xifrat, context('conflictes', r.id))) as DadesConflicte
+      const resta = d.camps.filter((c) => c.camp !== camp)
+      if (resta.length === 0) {
+        await db.conflictes.delete(conflicteId)
+        await registrarEsborrats(db, 'conflictes', [conflicteId])
+        return
+      }
+      await db.conflictes.put({
+        ...r,
+        modificatAt: araIso(),
+        xifrat: await xifrarJson(clau, { ...d, camps: resta }, context('conflictes', r.id)),
+      })
     },
   }
   return magatzem

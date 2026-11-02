@@ -17,6 +17,8 @@ interface Props {
   onVeure(m: PuntMarcat): void
   onTreure(m: PuntMarcat): void
   onTreureTots(): void
+  /** La pestanya ja diu quants n'hi ha: el títol només per als lectors de pantalla */
+  titolOcult?: boolean
 }
 
 /** Posició de cada punt al catàleg (els meridians en ordre, i dins de cada un, els punts) */
@@ -26,7 +28,7 @@ const ORDRE_ORELLA = new Map(PUNTS_ORELLA.map((p, i) => [p.codi, i]))
 const nomDe = (m: PuntMarcat) =>
   (m.mapa === 'orella' ? puntOrella(m.codi)?.nom : cataleg.punts.find((x) => x.codi === m.codi)?.pinyin) ?? ''
 
-export function LlistaMarcats({ marcats, onVeure, onTreure, onTreureTots }: Props) {
+export function LlistaMarcats({ marcats, onVeure, onTreure, onTreureTots, titolOcult = false }: Props) {
   const [ordre, setOrdre] = useState<Ordre>('meridia')
   const [plegats, setPlegats] = useState<ReadonlySet<Mapa>>(new Set())
   const [confirmant, setConfirmant] = useState(false)
@@ -46,7 +48,7 @@ export function LlistaMarcats({ marcats, onVeure, onTreure, onTreureTots }: Prop
   return (
     <section className="llista-marcats-seccio" aria-label={m.marcats}>
       <div className="llista-marcats-capcalera">
-        <h2>{formatar(m.marcatsAmbTotal, { n: String(marcats.length) })}</h2>
+        <h2 className={titolOcult ? 'sr-only' : undefined}>{formatar(m.marcatsAmbTotal, { n: String(marcats.length) })}</h2>
         {marcats.length > 0 && (
           <div className="llista-marcats-eines">
             <select aria-label={m.ordre} value={ordre} onChange={(e) => setOrdre(e.target.value as Ordre)}>

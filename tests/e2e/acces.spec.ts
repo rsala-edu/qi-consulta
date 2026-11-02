@@ -340,3 +340,64 @@ test('«Drive: error»: la píndola explica el motiu, l\'última còpia correcta
   await esperarCopia(page)
   await expect(panell.getByRole('status')).toHaveText('La còpia de Google Drive està al dia.')
 })
+
+test('la mateixa fitxa clínica editada en dos dispositius: no es perd res i la doctora tria', async ({ page, google, browser }, info) => {
+  await crearContrasenya(page)
+  await nouPacient(page, 'Aina', 'Provencal Inventada')
+  await page.getByRole('link', { name: 'Fitxa clínica' }).click()
+  await page.getByLabel('Medicació actual').fill('Cap')
+  await page.getByRole('button', { name: 'Desar' }).click()
+  await esperarCopia(page)
+
+  // Segon dispositiu
+  const pc = await segonDispositiu(browser, google, info.project.use)
+  await pc.goto('/qi-consulta/')
+  await continuarAmbGoogle(pc)
+  await pc.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await pc.getByRole('button', { name: 'Obrir' }).click()
+  await expect(pc.getByRole('heading', { name: 'Avui', exact: true })).toBeVisible()
+
+  /** Sincronitza ara i espera que la còpia de Drive s'hagi baixat (i, si cal, pujat) */
+  const sincronitzarAra = async (p: Page) => {
+    await expect(p.locator('.indicador-copia')).not.toHaveText('Drive: desant…')
+    const baixada = p.waitForResponse((r) => r.url().includes('alt=media'))
+    await p.locator('.indicador-copia').click()
+    await p.getByRole('dialog', { name: 'Còpia a Google Drive' }).getByRole('button', { name: 'Desar ara a Drive' }).click()
+    await baixada
+    await esperarCopia(p)
+    await p.keyboard.press('Escape')
+  }
+  // Tots dos canvien la medicació, sense haver-se sincronitzat entre ells
+  const desarMedicacio = async (p: Page, valor: string) => {
+    await menu(p, 'Pacients').click()
+    await p.getByRole('link', { name: /Aina Provencal Inventada/ }).click()
+    await p.getByRole('link', { name: 'Fitxa clínica' }).click()
+    await p.getByLabel('Medicació actual').fill(valor)
+    await p.getByRole('button', { name: 'Desar' }).click()
+    await expect(p.getByText('Desat', { exact: true })).toBeVisible()
+  }
+  await desarMedicacio(page, 'Paracetamol')
+  await desarMedicacio(pc, 'Ibuprofèn')
+  await sincronitzarAra(page)
+  await sincronitzarAra(pc)
+
+  // La tauleta rep la fusió: guanya la més nova (Ibuprofèn) i l'altra queda per revisar
+  await sincronitzarAra(page)
+  await menu(page, 'Avui').click()
+  await menu(page, 'Pacients').click()
+  await page.getByRole('link', { name: /Aina Provencal Inventada/ }).click()
+  await page.getByRole('link', { name: 'Fitxa clínica' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'editat en dos dispositius' })).toHaveText(
+    'Aquesta fitxa s\'ha editat en dos dispositius alhora. Revisa els camps marcats.',
+  )
+  await expect(page.getByLabel('Medicació actual')).toHaveValue('Ibuprofèn')
+  const versio = page.locator('.versio-anterior[data-camp="medicacioActual"]')
+  await expect(versio.locator('.valor-anterior')).toHaveText('Paracetamol')
+
+  // Recuperar l'altra: el camp torna a Paracetamol i l'avís desapareix
+  await versio.getByRole('button', { name: 'Recuperar l\'altra' }).click()
+  await expect(page.getByLabel('Medicació actual')).toHaveValue('Paracetamol')
+  await expect(page.locator('.versio-anterior')).toHaveCount(0)
+  await expect(page.getByText('editat en dos dispositius')).toHaveCount(0)
+  await pc.context().close()
+})

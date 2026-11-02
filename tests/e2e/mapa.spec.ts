@@ -87,6 +87,8 @@ test('marcatge: anar a un punt, marcar-lo amb una tècnica i treure\'l', async (
   await fitxa.getByRole('radio', { name: 'Moxa' }).click()
   await fitxa.getByRole('button', { name: 'Marcar' }).click()
 
+  // La llista és a la pestanya «Marcats» de la columna
+  await page.getByRole('tab', { name: 'Marcats (1)' }).click()
   const marcats = page.getByRole('region', { name: 'Punts marcats' })
   await expect(marcats.getByRole('listitem')).toHaveCount(1)
   await expect(marcats.locator('.fila-marcat')).toHaveAttribute('title', 'ST36 · Zusanli · Cos · Bilateral · Moxa')
@@ -97,6 +99,7 @@ test('marcatge: anar a un punt, marcar-lo amb una tècnica i treure\'l', async (
   await expect(fitxa.getByRole('button', { name: 'Actualitzar' })).toBeVisible()
   await fitxa.getByRole('radio', { name: 'Agulla' }).click()
   await fitxa.getByRole('button', { name: 'Actualitzar' }).click()
+  await page.getByRole('tab', { name: 'Marcats (1)' }).click()
   await expect(marcats.locator('.fila-marcat')).toHaveAttribute('title', /Bilateral · Agulla$/)
 
   await marcats.getByRole('button', { name: 'Treure ST36' }).click()

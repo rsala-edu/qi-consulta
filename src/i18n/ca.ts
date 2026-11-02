@@ -93,6 +93,14 @@ export const ca = {
     confirmarArxivar: 'Arxivar aquest pacient? No s\'esborra: el podràs recuperar des de la llista.',
     avisArxivat: 'Aquest pacient és a l\'arxiu.',
   },
+  conflictes: {
+    avis: 'Aquesta fitxa s\'ha editat en dos dispositius alhora. Revisa els camps marcats.',
+    avisRegistre: 'Aquestes dades s\'han editat en dos dispositius alhora. Revisa els camps marcats.',
+    altraVersio: 'L\'altra versió (desada el {quan}):',
+    buit: '(buit)',
+    quedarMe: 'Quedar-me aquesta',
+    recuperar: 'Recuperar l\'altra',
+  },
   camps: {
     pacient: {
       nom: 'Nom',
@@ -176,6 +184,9 @@ export const ca = {
     avisProva: 'Pantalla de prova: els punts marcats no es desen.',
     marcats: 'Punts marcats',
     marcatsAmbTotal: 'Punts marcats ({n})',
+    panell: 'Punt i punts marcats',
+    pestanyaPunt: 'Punt',
+    pestanyaMarcats: 'Marcats',
     grupMarcats: '{mapa} ({n})',
     ordre: 'Ordre',
     ordres: { meridia: 'Per meridià', marcatge: 'Per ordre de marcatge' },

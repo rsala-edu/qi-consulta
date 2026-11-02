@@ -49,6 +49,9 @@ import { useMagatzem, useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 import { FormulariCita } from './FormulariCita'
 import { Minicalendari } from './Minicalendari'
+import { RevisioConflictes } from '../../components/RevisioConflictes'
+import type { CampEnConflicte } from '../../db/magatzem'
+import { ambValor } from '../../sincronia/fusioCamps'
 import { useAvisTipus } from './AvisTipus'
 import { recalcularTipusVisita } from '../../db/tipusVisita'
 
@@ -281,6 +284,10 @@ export function PantallaAgenda() {
                 onComencar={() => navegar(`/pacients/${obert.cita.pacientId}/cites`)}
                 onEditar={() => setObert({ tipus: 'editar', cita: obert.cita })}
                 onTancar={() => setObert(null)}
+                onCanviada={() => {
+                  setObert(null)
+                  setVersio((n) => n + 1)
+                }}
               />
             ) : (
               <FormulariCita
@@ -335,16 +342,36 @@ function FitxaCita({
   onComencar,
   onEditar,
   onTancar,
+  onCanviada,
 }: {
   cita: Cita
   esAvui: boolean
   onComencar(): void
   onEditar(): void
   onTancar(): void
+  /** S'ha recuperat una versió anterior d'un camp */
+  onCanviada(): void
 }) {
   const c = t.cites
+  const magatzem = useMagatzem()
+  const [carrega, substituir] = useCarrega(() => magatzem.conflictesDe(cita.id), [magatzem, cita.id])
+  const conflictes = carrega.estat === 'llest' ? carrega.dades : []
+  const resolt = async (x: CampEnConflicte) => {
+    await magatzem.resoldreConflicte(x.conflicteId, x.camp)
+    substituir(conflictes.filter((y) => !(y.conflicteId === x.conflicteId && y.camp === x.camp)))
+  }
   return (
     <div className="fitxa-cita">
+      <RevisioConflictes
+        conflictes={conflictes}
+        etiquetes={{ inici: `${c.data} · ${c.hora}`, durada: c.durada, motiu: c.motiu, notes: c.notes, estat: c.estat, tipus: c.tipus }}
+        onQuedar={resolt}
+        onRecuperar={async (x) => {
+          await magatzem.actualitzarCita(cita.id, ambValor({ ...cita }, x.camp, x.valor) as unknown as Cita)
+          await resolt(x)
+          onCanviada()
+        }}
+      />
       <p className="fitxa-cita-hora">
         {diaLlarg(cita.inici.slice(0, 10))} · {hora(cita.inici)}–{hora(fiDe(cita))} ·{' '}
         {formatar(c.minuts, { n: String(cita.durada) })}

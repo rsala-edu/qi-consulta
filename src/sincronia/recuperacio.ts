@@ -11,6 +11,7 @@ import type { QiDB } from '../db/esquema'
 import { guardarClauEmbolcallada, guardarSecrets } from '../db/magatzem'
 import { aplicarContingut, desxifrarCopia, ErrorCopiaDanyada, ErrorCopiaVersio, llegirFitxer, type FitxerCopia } from './copia'
 import { ErrorAutoritzacio, ErrorDrive, type Drive } from './drive'
+import { baseDe } from './fusioClinica'
 import { ErrorGoogle } from './google'
 import { FITXER_PRINCIPAL } from './sincronitzar'
 
@@ -95,5 +96,10 @@ export async function restaurarCopia(db: QiDB, clau: CryptoKey, fitxer: FitxerCo
   await pas('E', async () => {
     await guardarClauEmbolcallada(db, fitxer.embolcalls.contrasenya, fitxer.embolcalls.contrasenyaAt)
     await guardarSecrets(db, fitxer.embolcalls.secrets)
+    // El que hi ha ara és el de Drive: el punt de partida per a la pròxima sincronia
+    await db.meta.bulkPut([
+      { clau: 'darreraSincronia', valor: new Date().toISOString() },
+      { clau: 'baseSincronia', valor: baseDe(contingut) },
+    ])
   })
 }

@@ -23,6 +23,7 @@ import { ZONES_ORELLA, type ZonaOrella } from '../../orella/dibuix'
 import { useCorreccionsOrella } from '../../orella/useCorreccionsOrella'
 import type { CostatOrella } from '../../orella/vista'
 import { LlistaMarcats } from './LlistaMarcats'
+import { PanellLateral, type PestanyaPanell } from './PanellLateral'
 import { nomAmple } from './tecniques'
 
 const TECNIQUES = TECNIQUES_DEL_MAPA.orella
@@ -72,6 +73,8 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
   function obrirFitxa(codi: string) {
     const existent = puntMarcat(marcats, codi, 'orella')
     setFitxa({ codi, costat: existent?.costat ?? costatVist, tecnica: existent?.tecnica ?? 'agulla' })
+    // La fitxa és a la pestanya «Punt»
+    setPestanyaPanell('punt')
   }
 
   function anarAlPunt(codi: string) {
@@ -86,9 +89,11 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
 
   // Des de la llista de marcats (també quan es ve de la pestanya del cos):
   // primer l'estat (l'orella marcada i la fitxa), després la càmera
+  const [pestanyaPanell, setPestanyaPanell] = useState<PestanyaPanell>('punt')
   const [peticioVista, setPeticioVista] = useState(0)
   if (peticio && peticio.n !== peticioVista) {
     setPeticioVista(peticio.n)
+    setPestanyaPanell('punt')
     const m = puntMarcat(marcats, peticio.codi, 'orella')
     if (m && m.costat !== 'bilateral') setCostatVist(m.costat)
     if (zona && puntOrella(peticio.codi)?.zona !== zona) setZona('')
@@ -155,7 +160,13 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
         </div>
       </div>
 
-      <aside className="panell-mapa">
+      <PanellLateral
+        mapa="orella"
+        pestanya={pestanyaPanell}
+        onPestanya={setPestanyaPanell}
+        total={marcats.length}
+        punt={
+          <>
         <p className="detall">{t.orella.estandard}</p>
         <div className="barra-cerca">
           <input
@@ -296,13 +307,21 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
           </section>
         )}
 
+          </>
+        }
+        marcats={
         <LlistaMarcats
+          titolOcult
           marcats={marcats}
-          onVeure={onVeure}
+          onVeure={(m) => {
+            setPestanyaPanell('punt')
+            onVeure(m)
+          }}
           onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
           onTreureTots={() => setMarcats([])}
         />
-      </aside>
+        }
+      />
     </div>
   )
 }
