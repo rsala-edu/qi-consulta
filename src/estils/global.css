@@ -700,6 +700,23 @@ fieldset {
   background: var(--accent-suau);
 }
 
+/* Pantalla estreta (tauleta vertical): la navegació baixa a una fila pròpia */
+@media (max-width: 760px) {
+  .barra-app {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .barra-app .logotip {
+    margin-right: auto;
+  }
+
+  .navegacio {
+    order: 5;
+    flex-basis: 100%;
+  }
+}
+
 /* --- Mapa del cos --- */
 
 .pantalla-mapa {
@@ -1118,11 +1135,6 @@ fieldset {
   margin-bottom: 16px;
 }
 
-.grup-botons {
-  display: flex;
-  gap: 6px;
-}
-
 .dia-agenda {
   font-weight: 400;
   font-size: 1.15rem;
@@ -1159,46 +1171,77 @@ fieldset {
   color: var(--accent-fosc);
 }
 
-/* La graella es desplaça dins seu (no la pàgina) si no hi cap */
+/* Graella: es desplaça dins seu (no la pàgina), amb la capçalera dels dies i
+   la columna de les hores sempre a la vista */
+.contenidor-graella {
+  position: relative;
+}
+
 .agenda {
+  --boira-suau: color-mix(in srgb, var(--boira) 55%, var(--clar));
   display: grid;
-  grid-template-columns: 52px repeat(var(--dies, 1), minmax(0, 1fr));
+  grid-template-columns: 56px repeat(var(--dies, 1), minmax(0, 1fr));
   background: var(--clar);
-  border: 1px solid var(--linia);
-  border-radius: var(--radi);
-  overflow-x: auto;
+  border-radius: calc(var(--radi) * 1.4);
+  overflow: auto;
   max-width: 100%;
+  max-height: max(420px, calc(100dvh - 250px));
+  overscroll-behavior: contain;
 }
 
 .agenda.agenda-setmana {
-  grid-template-columns: 52px repeat(7, minmax(96px, 1fr));
+  grid-template-columns: 56px repeat(7, minmax(104px, 1fr));
 }
 
 .agenda-capcalera {
-  height: 40px;
+  height: 52px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  gap: 2px;
+  font-size: 0.9rem;
   color: var(--tinta-suau);
-  border-bottom: 1px solid var(--linia);
   position: sticky;
   top: 0;
   background: var(--clar);
-  z-index: 2;
+  z-index: 3;
+  box-shadow: 0 1px 0 var(--linia);
 }
 
-.agenda-dia .agenda-capcalera::first-letter {
+.agenda-hores {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: var(--clar);
+}
+
+.agenda-hores .agenda-capcalera {
+  z-index: 5;
+}
+
+.agenda-dia .nom-dia::first-letter {
   text-transform: uppercase;
 }
 
-.agenda-dia.avui .agenda-capcalera {
-  color: var(--accent-fosc);
+/* Avui: el dia en jade, dins una píndola */
+.agenda-dia.avui .nom-dia {
+  color: var(--paper);
+  background: var(--accent);
+  border-radius: 999px;
+  padding: 2px 12px;
   font-weight: 600;
 }
 
+.marca-tancat {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tinta-suau);
+}
+
 .agenda-dia {
-  border-left: 1px solid var(--linia);
+  border-left: 1px solid color-mix(in srgb, var(--linia) 60%, transparent);
   min-width: 0;
 }
 
@@ -1208,7 +1251,7 @@ fieldset {
 
 .agenda-hores span {
   position: absolute;
-  right: 8px;
+  right: 10px;
   transform: translateY(-50%);
   font-size: 0.75rem;
   color: var(--tinta-suau);
@@ -1219,75 +1262,416 @@ fieldset {
   transform: none;
 }
 
+/* Fora de l'horari i dies tancats: ombrejats, però es poden fer servir */
+.fora-horari {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: var(--boira-suau);
+  pointer-events: none;
+}
+
+.agenda-dia.tancat .agenda-cos {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--boira-suau) 0 8px,
+    color-mix(in srgb, var(--boira) 80%, var(--clar)) 8px 16px
+  );
+}
+
 .franja {
   position: absolute;
   left: 0;
   right: 0;
   border: none;
-  border-top: 1px dotted transparent;
   background: none;
   padding: 0;
   cursor: pointer;
 }
 
 .franja.en-punt {
-  border-top: 1px solid var(--linia);
+  border-top: 1px solid color-mix(in srgb, var(--linia) 70%, transparent);
 }
 
 .franja:hover,
 .franja:focus-visible {
-  background: var(--accent-suau);
+  background: color-mix(in srgb, var(--accent-suau) 80%, transparent);
 }
 
+/* Línia de l'hora actual: fina i cinabri, només avui */
+.linia-ara {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px solid var(--cinabri);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.linia-ara::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cinabri);
+}
+
+/* Targetes de cita: sense vores dures, cantonades rodones i ombra molt suau */
 .cita-agenda {
   position: absolute;
   z-index: 1;
   overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  column-gap: 6px;
   text-align: left;
   font: inherit;
   font-size: 0.8rem;
-  line-height: 1.3;
-  padding: 3px 6px;
-  border: 1px solid var(--accent);
-  border-left-width: 4px;
-  border-radius: 6px;
-  background: var(--accent-suau);
+  line-height: 1.28;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 10px;
+  background: var(--boira);
   color: var(--tinta);
+  box-shadow: 0 1px 3px rgb(31 36 33 / 0.08);
   cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.cita-agenda:hover {
+  box-shadow: 0 3px 10px rgb(31 36 33 / 0.14);
+}
+
+.cita-agenda.tipus-primera {
+  background: var(--accent-suau);
+  box-shadow:
+    inset 3px 0 0 var(--accent),
+    0 1px 3px rgb(31 36 33 / 0.08);
 }
 
 .cita-agenda .hora {
+  order: 1;
   font-variant-numeric: tabular-nums;
   color: var(--accent-fosc);
+  font-weight: 600;
+}
+
+/* Durada al costat de l'hora (si hi cap); el nom i el motiu, una línia cadascun */
+.cita-agenda .durada {
+  order: 2;
+  color: var(--tinta-suau);
+}
+
+/* A la setmana les columnes són estretes: la durada no hi cap */
+.agenda-setmana .cita-agenda .durada {
+  display: none;
+}
+
+.cita-agenda .nom,
+.cita-agenda .detall {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cita-agenda .nom {
+  order: 3;
   font-weight: 600;
 }
 
 .cita-agenda .detall {
+  order: 4;
   color: var(--tinta-suau);
 }
 
+.cita-agenda .marca-solapa {
+  order: 5;
+}
+
 .cita-agenda.estat-feta {
-  background: var(--clar);
+  opacity: 0.55;
 }
 
 .cita-agenda.estat-anullada,
 .cita-agenda.estat-noPresentat {
-  background: var(--fons);
-  border-color: var(--linia);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--linia);
   color: var(--tinta-suau);
   text-decoration: line-through;
 }
 
+.cita-agenda.estat-anullada .hora,
+.cita-agenda.estat-noPresentat .hora {
+  color: var(--tinta-suau);
+}
+
 .cita-agenda.solapa {
-  border-color: var(--avis);
+  box-shadow:
+    inset 3px 0 0 var(--avis),
+    0 1px 3px rgb(31 36 33 / 0.08);
 }
 
 .marca-solapa {
   color: var(--avis);
   font-weight: 600;
+}
+
+/* Setmana sense cites: un missatge suau en lloc d'una graella freda */
+.agenda-buida {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 6;
+  width: min(380px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  border-radius: calc(var(--radi) * 1.4);
+  background: var(--superficie);
+  box-shadow: 0 8px 30px rgb(31 36 33 / 0.12);
+}
+
+.agenda-buida p {
+  margin: 0;
+  font-family: var(--lletra-titol);
+  font-size: 1.1rem;
+}
+
+.agenda-buida p.detall {
+  font-family: var(--lletra);
+  font-size: 0.9rem;
+  color: var(--tinta-suau);
+}
+
+/* --- Disseny: columna lateral (ordinador) i barra --- */
+
+.disseny-agenda {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.pantalla-agenda.amb-lateral {
+  max-width: 1440px;
+}
+
+.pantalla-agenda.amb-lateral .disseny-agenda {
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+
+.agenda-lateral {
+  position: sticky;
+  top: 16px;
+  padding: 16px;
+  border-radius: calc(var(--radi) * 1.4);
+  background: var(--superficie);
+}
+
+.boto-rodo {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.boto-rodo:hover {
+  background: var(--accent-suau);
+}
+
+.grup-botons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.desplegable-calendari {
+  position: relative;
+}
+
+.panell-desplegable {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: 300px;
+  padding: 16px;
+  border-radius: calc(var(--radi) * 1.4);
+  background: var(--superficie);
+  box-shadow: 0 12px 40px rgb(31 36 33 / 0.18);
+}
+
+/* --- Minicalendari --- */
+
+.minicalendari-capcalera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.minicalendari-mes {
+  font-family: var(--lletra-titol);
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.minicalendari-graella {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.minicalendari-dia-setmana {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--tinta-suau);
+  padding: 4px 0;
+}
+
+.minicalendari-dia {
+  position: relative;
+  aspect-ratio: 1;
+  min-height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.minicalendari-dia:hover {
+  background: var(--accent-suau);
+}
+
+.minicalendari-dia.altre-mes {
+  color: color-mix(in srgb, var(--tinta-suau) 60%, transparent);
+}
+
+.minicalendari-dia.visible {
+  background: color-mix(in srgb, var(--accent-suau) 70%, transparent);
+}
+
+.minicalendari-dia.tancat {
+  text-decoration: line-through;
+  color: var(--tinta-suau);
+}
+
+.minicalendari-dia.avui {
+  color: var(--cinabri);
+  font-weight: 700;
+}
+
+.minicalendari-dia.triat {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.punt-cites {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.enllac-tancat {
+  margin-top: 10px;
+  line-height: 1.35;
+  min-height: 44px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--radi);
+  background: none;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--accent-fosc);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.enllac-tancat::first-letter {
+  text-transform: uppercase;
+}
+
+/* --- Fitxa de cita --- */
+
+.fitxa-cita {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fitxa-cita p {
+  margin: 0;
+}
+
+.fitxa-cita-hora::first-letter {
+  text-transform: uppercase;
+}
+
+.avis-horari {
+  color: var(--avis);
+}
+
+/* --- Ajustos > Agenda --- */
+
+.fila-camps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.dies-laborables {
+  border: none;
+  padding: 0;
+  margin: 16px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.dies-laborables legend {
+  margin-bottom: 8px;
+  color: var(--tinta-suau);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .dialeg-cita {

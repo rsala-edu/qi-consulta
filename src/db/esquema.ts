@@ -38,6 +38,8 @@ export type TaulaSincronitzada =
   | 'calibratgeOrella'
   | 'precaucions'
   | 'categoriesPrecaucio'
+  | 'configuracio'
+  | 'diesTancats'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -91,6 +93,22 @@ export interface RegistreCategoriaPrecaucio {
   confirmadaAt: string
 }
 
+/**
+ * Configuració de la consulta compartida entre dispositius (l'horari de
+ * l'agenda). No és dada de pacient.
+ */
+export interface RegistreConfiguracio {
+  clau: 'horari'
+  valor: unknown
+  modificatAt: string
+}
+
+/** Dia de consulta tancat (festiu, vacances). No és dada de pacient. */
+export interface RegistreDiaTancat {
+  dia: string
+  modificatAt: string
+}
+
 export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites'
 
 export class QiDB extends Dexie {
@@ -106,6 +124,8 @@ export class QiDB extends Dexie {
   /** Excepcions per punt */
   precaucions!: Table<RegistrePrecaucio, string>
   categoriesPrecaucio!: Table<RegistreCategoriaPrecaucio, string>
+  configuracio!: Table<RegistreConfiguracio, string>
+  diesTancats!: Table<RegistreDiaTancat, string>
 
   constructor(nom = 'qi') {
     super(nom)
@@ -151,6 +171,10 @@ export class QiDB extends Dexie {
     })
     this.version(8).stores({
       calibratgeOrella: 'codi',
+    })
+    this.version(9).stores({
+      configuracio: 'clau',
+      diesTancats: 'dia',
     })
   }
 }

@@ -78,8 +78,11 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await expect(dia.getByRole('button', { name: /Se solapa/ })).toHaveCount(2)
 
   // Moure la del Biel a les 11:00: ja no se solapa
+  // Tocar la cita n'obre la fitxa; «Editar» obre el formulari
   await dia.getByRole('button', { name: /10:30–11:30 Biel/ }).click()
   dialeg = page.getByRole('dialog', { name: 'Cita de Biel Prova Inventat' })
+  await expect(dialeg).toContainText('Primera visita')
+  await dialeg.getByRole('button', { name: 'Editar' }).click()
   await dialeg.getByLabel('Hora').fill('11:00')
   await expect(dialeg.getByRole('alert')).toHaveCount(0)
   await dialeg.getByRole('button', { name: 'Desar' }).click()
@@ -92,7 +95,7 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await expect(dia.getByRole('button', { name: /Aina|Biel/ })).toHaveCount(2)
   const dimarts = page.getByRole('region', { name: 'Cites del dimarts, 3 de novembre de 2026' })
   await expect(dimarts.locator('.cita-agenda')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Següent' }).click()
+  await page.getByRole('button', { name: 'Següent', exact: true }).click()
   await expect(page.getByRole('region', { name: 'Cites del dilluns, 9 de novembre de 2026' })).toBeVisible()
 
   // Pestanya Cites de l'Aina: marcar la cita com a feta

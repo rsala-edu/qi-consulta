@@ -52,7 +52,7 @@ export function IconaTema({ tema }: { tema: Tema }) {
           {[225, 270, 315].map((a) => (
             <line key={a} x1="12" y1="2.4" x2="12" y2="4.4" transform={`rotate(${a} 12 12)`} />
           ))}
-          <path d="M12 3.2a8.8 8.8 0 0 1 0 17.6a6 6.6 0 0 0 0-17.6Z" fill="currentColor" fillOpacity={0.18} />
+          <path d="M12 3.2a8.8 8.8 0 0 1 0 17.6a6 6.6 0 0 0 0-17.6Z" fill="currentColor" fillOpacity={0.35} />
           <line x1="12" y1="2.2" x2="12" y2="21.8" strokeOpacity={0.35} />
         </>
       )}

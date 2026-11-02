@@ -7,6 +7,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
+import { avisHorari, hhmm, type Horari } from '../../domini/agenda'
 import { cercarPacients } from '../../domini/cercaPacients'
 import {
   DURADA_PER_DEFECTE,
@@ -42,6 +43,9 @@ interface Props {
   onCancellar(): void
   onEsborrar?(): Promise<void>
   onCrearPacient?(nom: string, telefon: string): Promise<Pacient>
+  /** Per avisar (sense impedir-ho) d'una cita en un dia tancat o fora d'horari */
+  horari?: Horari
+  diesTancats?: ReadonlySet<string>
 }
 
 export function FormulariCita({
@@ -54,6 +58,8 @@ export function FormulariCita({
   onCancellar,
   onEsborrar,
   onCrearPacient,
+  horari,
+  diesTancats = new Set<string>(),
 }: Props) {
   const c = t.cites
   const [nous, setNous] = useState<Pacient[]>([])
@@ -93,6 +99,10 @@ export function FormulariCita({
   const errorTipus = errorSeguiment({ id, pacientId, inici, tipus, estat }, altres)
   const primera = errorTipus === 'anteriorAPrimera' ? primeraVisita(pacientId, altres, id) : undefined
   const [intentat, setIntentat] = useState(false)
+  const avis =
+    horari && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(inici) && Number.isFinite(durada) && durada > 0
+      ? avisHorari({ inici, durada }, horari, diesTancats)
+      : null
 
   function canviarAPrimera() {
     setValue('tipus', 'primera', { shouldDirty: true })
@@ -205,6 +215,11 @@ export function FormulariCita({
           {formatar(c.solapa, {
             llista: encavalcades.map((x) => `${nomDe(x.pacientId)} (${horaDe(x.inici)}–${horaDe(fiDe(x))})`).join(', '),
           })}
+        </p>
+      )}
+      {avis && horari && (
+        <p className="avis avis-horari" role="status">
+          {formatar(c.avisHorari[avis], { horari: `${hhmm(horari.inici)}–${hhmm(horari.fi)}` })}
         </p>
       )}
       {errorDesar && <p role="alert">{t.app.errorInesperat}</p>}

@@ -21,6 +21,7 @@ import { ProveidorSincronia } from './sincronia/ContextSincronia'
 import { IndicadorCopia } from './components/IndicadorCopia'
 import { BotoTema } from './components/BotoTema'
 import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
+import { PantallaAjustAgenda } from './pantalles/ajustos/PantallaAjustAgenda'
 
 // Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
 const PantallaCalibratge = lazy(() =>
@@ -133,6 +134,7 @@ function PortaOberta() {
             <Route path="ajustos/precaucions" element={<PantallaPrecaucions />} />
             <Route path="ajustos/seguretat" element={<PantallaSeguretat />} />
             <Route path="ajustos/aparenca" element={<PantallaAparenca />} />
+            <Route path="ajustos/agenda" element={<PantallaAjustAgenda />} />
             <Route path="*" element={<Navigate to="/avui" replace />} />
           </Route>
         </Routes>
