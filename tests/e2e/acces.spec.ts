@@ -224,6 +224,11 @@ test('empremta (passkey amb PRF): activar-la i desbloquejar sense contrasenya', 
 })
 
 test('Avui: les cites del dia en ordre i «Començar visita» a la següent', async ({ page }) => {
+  // Rellotge fix a les 12:00 d'avui: la cita de les 00:05 sempre ha passat i
+  // la de les 23:10 sempre és la següent, sigui l'hora que sigui de la prova
+  const migdia = new Date()
+  migdia.setHours(12, 0, 0, 0)
+  await page.clock.setFixedTime(migdia)
   await crearContrasenya(page)
   await nouPacient(page, 'Aina', 'Provencal Inventada')
   await nouPacient(page, 'Biel', 'Prova Inventat')
@@ -249,7 +254,7 @@ test('Avui: les cites del dia en ordre i «Començar visita» a la següent', as
   await expect(cites.nth(0)).toContainText('00:05–01:05')
   await expect(cites.nth(0)).toContainText('Aina Provencal Inventada')
   await expect(cites.nth(1)).toContainText('23:10–00:10')
-  // La de les 00:05 ja ha passat (si no és just passada la mitjanit): la següent és la del Biel
+  // A les 12:00, la de les 00:05 ja ha passat: la següent és la del Biel
   await expect(page.getByRole('button', { name: 'Començar visita' })).toHaveCount(1)
   await expect(cites.nth(1).getByRole('button', { name: 'Començar visita' })).toBeVisible()
   await cites.nth(1).getByRole('button', { name: 'Començar visita' }).click()

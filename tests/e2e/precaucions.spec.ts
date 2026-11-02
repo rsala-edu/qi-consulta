@@ -53,7 +53,7 @@ test('confirmar categories, fer una excepció i veure-ho a la fitxa del punt', a
   await page.getByLabel('Contrasenya').fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Desbloquejar' }).click()
   await expect(page.getByRole('status')).toHaveText('1 de 7 categories confirmades')
-  await menu(page, 'Mapa (prova)').click()
+  await menu(page, 'Mapa').click()
   await expect(page.getByTestId('visor3d')).toHaveAttribute('data-moviment', 'no')
 
   const st9Nota = await anarAlPunt(page, 'ST9')

@@ -16,7 +16,7 @@ async function entrar(page: Page) {
 }
 
 async function obrirOrella(page: Page) {
-  await page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: 'Mapa (prova)' }).click()
+  await page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: 'Mapa', exact: true }).click()
   await page.getByRole('tab', { name: 'Orella' }).click()
   await expect(page.getByTestId('visor-orella')).toHaveAttribute('data-punts', '84')
 }
@@ -170,3 +170,58 @@ async function textosTallats(grup: Locator): Promise<(string | null)[]> {
     }),
   )
 }
+
+test('el nom «Lòbul» es veu sencer a totes dues orelles', async ({ page }) => {
+  await entrar(page)
+  await obrirOrella(page)
+  const visor = page.getByTestId('visor-orella')
+  for (const orella of ['Orella esquerra', 'Orella dreta']) {
+    await page.getByRole('radio', { name: orella }).click()
+    const caixa = (await visor.boundingBox())!
+    const lobul = (await visor.getByText('Lòbul', { exact: true }).boundingBox())!
+    expect(lobul.y + lobul.height, orella).toBeLessThanOrEqual(caixa.y + caixa.height - 2)
+    expect(lobul.y, orella).toBeGreaterThanOrEqual(caixa.y)
+  }
+  await expect(page.getByRole('searchbox', { name: /Cerca un punt de l'orella/ })).toHaveAttribute(
+    'placeholder',
+    'Cerca (TF4, shenmen)',
+  )
+})
+
+test('llista de marcats: cada fila amb les mateixes tres línies, sigui quin sigui el text', async ({ page }) => {
+  await entrar(page)
+  await obrirOrella(page)
+  // Un nom curt (TF4) i un de llarg i amb codi per confirmar (TG2l)
+  for (const codi of ['TF4', 'TG2l']) {
+    await cercar(page, codi)
+    const fitxa = page.getByRole('region', { name: codi })
+    if (codi === 'TG2l') await expect(fitxa).toContainText('Codi per confirmar')
+    await fitxa.getByRole('radio', { name: 'Electroestimulació' }).click()
+    await fitxa.getByRole('button', { name: 'Marcar' }).click()
+  }
+  const files = page.getByRole('tabpanel', { name: 'Orella' }).getByRole('list', { name: 'Punts marcats' }).getByRole('listitem')
+  await expect(files).toHaveCount(2)
+  await expect(files.nth(1)).toContainText('Orella · Esquerre · Electroestimulació')
+
+  const alcada = page.viewportSize()!.height
+  for (const amplada of [768, 1024, 1440]) {
+    await page.setViewportSize({ width: amplada, height: alcada })
+    const disposicio = await files.evaluateAll((lis) =>
+      lis.map((li) => {
+        const linies = [...li.children].map((c) => c.getBoundingClientRect())
+        const caixa = li.getBoundingClientRect()
+        return {
+          linies: linies.length,
+          alcades: linies.map((r) => Math.round(r.height)),
+          // «Veure» i «Treure» a la dreta
+          botonsDreta: Math.round(caixa.right - linies[2]!.right) <= 1,
+        }
+      }),
+    )
+    expect(disposicio[0], `amplada ${amplada}px`).toEqual(disposicio[1])
+    expect(disposicio[0]!.linies).toBe(3)
+    expect(disposicio[0]!.botonsDreta).toBe(true)
+    // Les línies de text no salten: una sola línia cadascuna
+    expect(Math.max(disposicio[0]!.alcades[0]!, disposicio[0]!.alcades[1]!)).toBeLessThan(32)
+  }
+})

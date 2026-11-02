@@ -26,6 +26,7 @@ import { Box3, Group, Mesh, Raycaster, Vector2, Vector3, type BufferGeometry } f
 import { t } from '../../i18n/t'
 import { azimutMesProper, CAMERA, nivellEtiquetes, VISTES, vistaCapAlPunt, type Vista } from '../camera'
 import { colocarEtiquetes, type EtiquetaColocada } from '../etiquetes'
+import { textEtiqueta, type EtiquetesPerNivell } from '../etiquetaPunt'
 import { mesProperAlToc, projectarVisibles, type ProjeccioPantalla } from '../seleccio'
 
 export interface MarcadorVisor {
@@ -34,10 +35,8 @@ export interface MarcadorVisor {
   normal: Vector3
   /** Color del marcador; si és undefined, color neutre (no marcat) */
   color?: string
-  /** Text a zoom mitjà (codi) */
-  etiqueta: string
-  /** Text a molt zoom (codi i pinyin) */
-  etiquetaLlarga: string
+  /** Text de l'etiqueta per a cada nivell de zoom (null: sense etiqueta) */
+  etiquetes: EtiquetesPerNivell
   destacat?: boolean
 }
 
@@ -77,6 +76,18 @@ const COLOR_PELL = '#e9d8c8'
 const COLOR_RECORREGUT = '#2f5d50'
 const MOVIMENT_MAXIM_TOC = 8 // px
 const RADI_SELECCIO = 28 // px
+
+/**
+ * La càmera només gira al voltant de l'eix vertical: l'angle polar queda fix
+ * (horitzontal; des de dalt en anar a un punt del peu).
+ */
+function fixarPolar(c: CameraControlsImpl, polar: number) {
+  c.minPolarAngle = polar
+  c.maxPolarAngle = polar
+}
+
+/** Els marcadors creixen una mica amb la distància perquè es continuïn veient */
+const escalaMarcadors = (distancia: number) => Math.min(1.6, Math.max(0.45, distancia / 2.2))
 
 type ProjeccioMarcador = ProjeccioPantalla<string>
 
@@ -142,8 +153,7 @@ const Escena = memo(function Escena({
     const c = controls.current
     if (!c) return
     const A = CameraControlsImpl.ACTION
-    c.minPolarAngle = CAMERA.polar
-    c.maxPolarAngle = CAMERA.polar
+    fixarPolar(c, CAMERA.polar)
     c.minDistance = CAMERA.distanciaMinima
     c.maxDistance = CAMERA.distanciaMaxima
     c.dollyToCursor = true
@@ -179,6 +189,7 @@ const Escena = memo(function Escena({
       visor.dataset.azimut = c.azimuthAngle.toFixed(3)
       visor.dataset.alcada = objectiu.y.toFixed(3)
       visor.dataset.distancia = c.distance.toFixed(3)
+      visor.dataset.polar = c.polarAngle.toFixed(3)
       visor.dataset.moviment = 'no'
     }
     c.addEventListener('transitionstart', moure)
@@ -195,16 +206,20 @@ const Escena = memo(function Escena({
     anarA(punt, normal) {
       const c = controls.current
       if (!c) return
-      const { camera: cam, objectiu } = vistaCapAlPunt(punt, normal, c.azimuthAngle)
+      const { camera: cam, objectiu, polar } = vistaCapAlPunt(punt, normal, c.azimuthAngle)
+      fixarPolar(c, polar)
       void c.setLookAt(cam.x, cam.y, cam.z, objectiu.x, objectiu.y, objectiu.z, true)
     },
     vista(v) {
       const c = controls.current
-      if (c) void c.rotateAzimuthTo(azimutMesProper(c.azimuthAngle, VISTES[v]), true)
+      if (!c) return
+      fixarPolar(c, CAMERA.polar)
+      void c.rotateTo(azimutMesProper(c.azimuthAngle, VISTES[v]), CAMERA.polar, true)
     },
     restablir() {
       const c = controls.current
       if (!c) return
+      fixarPolar(c, CAMERA.polar)
       const a = c.azimuthAngle
       const d = CAMERA.distanciaInicial
       const h = CAMERA.alcadaInicial
@@ -227,7 +242,9 @@ const Escena = memo(function Escena({
   const ultimes = useRef('')
   const actualitzarEtiquetes = useCallback(() => {
     const c = controls.current
-    const nivell = nivellEtiquetes(c ? c.distance : CAMERA.distanciaInicial, etiquetesSempre)
+    const distancia = c ? c.distance : CAMERA.distanciaInicial
+    const nivell = nivellEtiquetes(distancia, etiquetesSempre)
+    const pixelsPerMetre = size.height / (2 * Math.tan((CAMERA.fov * Math.PI) / 360))
     const perId = new Map(marcadors.map((m) => [m.id, m]))
     // Primer el punt destacat, després els més propers a la càmera
     const ordenades =
@@ -242,13 +259,13 @@ const Escena = memo(function Escena({
             .slice(0, 80)
             .map((p) => {
               const m = perId.get(p.dada)!
-              return {
-                id: p.dada,
-                x: p.x,
-                y: p.y,
-                text: nivell === 'codi' ? m.etiqueta : m.etiquetaLlarga,
-                curt: m.etiqueta,
-              }
+              const text = textEtiqueta(m.etiquetes, nivell)
+              // Mida del marcador a la pantalla, perquè cap etiqueta el tapi
+              const a = aspecteMarcador(m)
+              const radiMon = (a.anell?.[1] ?? a.vora ?? a.radi) * escalaMarcadors(distancia)
+              const radi = (radiMon * pixelsPerMetre) / p.profunditat
+              // Sense text, el punt continua ocupant lloc
+              return { id: p.dada, x: p.x, y: p.y, text: text?.text ?? '', curt: text?.curt, radi }
             })
     const noves = colocarEtiquetes(ordenades, size.width, size.height)
     const clau = JSON.stringify(noves)
@@ -261,8 +278,7 @@ const Escena = memo(function Escena({
   const pendent = useRef(false)
   useFrame(() => {
     const c = controls.current
-    const d = c ? c.distance : CAMERA.distanciaInicial
-    const escala = Math.min(1.6, Math.max(0.45, d / 2.2))
+    const escala = escalaMarcadors(c ? c.distance : CAMERA.distanciaInicial)
     grupMarcadors.current?.children.forEach((o) => o.scale.setScalar(escala))
     if (!pendent.current) {
       pendent.current = true

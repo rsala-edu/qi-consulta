@@ -23,21 +23,26 @@ export function LlistaMarcats({ marcats, onVeure, onTreure }: Props) {
         {marcats.map((m) => {
           const nom =
             m.mapa === 'orella' ? puntOrella(m.codi)?.nom : cataleg.punts.find((x) => x.codi === m.codi)?.pinyin
+          const detall = `${m.mapa === 'orella' ? t.orella.titol : t.mapa.pestanyaCos} · ${t.mapa.costat[m.costat]} · ${nomTecnica(m)}`
+          // Sempre tres línies: el text massa llarg s'escurça (amb el sencer al title)
           return (
             <li key={`${m.mapa}|${m.codi}`}>
-              <span className="punt-color" style={{ background: COLOR_TECNICA[m.tecnica] }} />
-              <span className="codi">{m.codi}</span>
-              <span className="pinyin">{nom}</span>
-              <span className="detall">
-                {m.mapa === 'orella' ? `${t.orella.titol} · ` : ''}
-                {t.mapa.costat[m.costat]} · {nomTecnica(m)}
+              <span className="marcat-linia" title={`${m.codi} · ${nom ?? ''}`}>
+                <span className="punt-color" style={{ background: COLOR_TECNICA[m.tecnica] }} />
+                <span className="codi">{m.codi}</span>
+                <span className="pinyin">{nom}</span>
               </span>
-              <Boto variant="discret" onClick={() => onVeure(m)}>
-                {t.mapa.veure}
-              </Boto>
-              <Boto variant="discret" onClick={() => onTreure(m)}>
-                {t.mapa.treure}
-              </Boto>
+              <span className="marcat-linia detall" title={detall}>
+                {detall}
+              </span>
+              <span className="marcat-accions">
+                <Boto variant="discret" onClick={() => onVeure(m)}>
+                  {t.mapa.veure}
+                </Boto>
+                <Boto variant="discret" onClick={() => onTreure(m)}>
+                  {t.mapa.treure}
+                </Boto>
+              </span>
             </li>
           )
         })}

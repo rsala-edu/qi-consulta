@@ -845,12 +845,45 @@ fieldset {
 }
 
 .llista-marcats li {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
   padding: 6px 0 6px 10px;
   border-bottom: 1px solid var(--linia);
+}
+
+/* Cada fila té sempre les mateixes tres línies: color, codi i nom; mapa,
+   costat i tècnica; «Veure» i «Treure» a la dreta. El text que no hi cap
+   s'escurça amb «…» en lloc de saltar de línia. */
+.llista-marcats .marcat-linia {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.llista-marcats .marcat-linia > * {
+  flex-shrink: 0;
+}
+
+.llista-marcats .marcat-linia > .pinyin {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.llista-marcats span.marcat-linia.detall {
+  display: block;
+}
+
+.llista-marcats .marcat-accions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 .llista-marcats .boto {

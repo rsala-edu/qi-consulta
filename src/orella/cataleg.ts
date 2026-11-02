@@ -24,6 +24,8 @@ export const esquemaPuntOrella = z.object({
   y: z.number(),
   /** A la cara interna del tragus o de l'antitragus: al dibuix, a la vora */
   caraInterna: z.literal(true).optional(),
+  /** Codi que la doctora ha de confirmar amb el seu llibre */
+  codiPerConfirmar: z.literal(true).optional(),
 })
 
 export type PuntOrella = z.infer<typeof esquemaPuntOrella>
@@ -168,6 +170,13 @@ const LO: Fila[] = [
   ['LO7,8,9', 'Amígdala', 'Biantaoti', '扁桃体', 174, 420, 'Al lòbul, a la fila de baix (els tres quadres).'],
 ]
 
+/**
+ * Les fonts no coincideixen en aquests dos codis (sovint s'escriuen TG21 i
+ * AT11): es deixen amb la «l» (lower) com les altres terminacions de
+ * l'estàndard, fins que la doctora els confirmi.
+ */
+const CODIS_PER_CONFIRMAR = new Set(['TG2l', 'AT1l'])
+
 export const PUNTS_ORELLA: readonly PuntOrella[] = [
   ...HX.map((f) => fila('HX', f)),
   ...SF.map((f) => fila('SF', f)),
@@ -179,7 +188,9 @@ export const PUNTS_ORELLA: readonly PuntOrella[] = [
   ...AT_INTERNA.map((f) => fila('AT', f, true)),
   ...CO.map((f) => fila('CO', f)),
   ...LO.map((f) => fila('LO', f)),
-].map((p) => esquemaPuntOrella.parse(p))
+]
+  .map((p) => (CODIS_PER_CONFIRMAR.has(p.codi) ? { ...p, codiPerConfirmar: true as const } : p))
+  .map((p) => esquemaPuntOrella.parse(p))
 
 export function puntOrella(codi: string): PuntOrella | undefined {
   return PUNTS_ORELLA.find((p) => p.codi === codi)

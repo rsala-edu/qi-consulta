@@ -159,3 +159,10 @@ describe('cerca i correccions', () => {
     for (const z of ZONES_ORELLA as readonly ZonaOrella[]) expect(POLIGONS[z].length).toBeGreaterThan(0)
   })
 })
+
+describe('codis per confirmar', () => {
+  it('TG2l i AT1l porten la «l» (lower) i queden marcats per confirmar', () => {
+    const perConfirmar = PUNTS_ORELLA.filter((p) => p.codiPerConfirmar).map((p) => p.codi)
+    expect(perConfirmar.sort()).toEqual(['AT1l', 'TG2l'])
+  })
+})

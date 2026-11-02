@@ -96,3 +96,24 @@ describe('etiqueta curta de reserva', () => {
     expect(col.find((e) => e.id === 'a')!.text).toBe('BL31')
   })
 })
+
+describe('mida dels punts i punts sense etiqueta', () => {
+  it('un punt sense text no porta etiqueta, però cap altra etiqueta el tapa', () => {
+    // Un punt sense etiqueta just a la dreta d'un altre: l'etiqueta va a l'esquerra
+    const col = colocarEtiquetes(
+      [
+        { id: 'a', x: 400, y: 300, text: 'ST36' },
+        { id: 'b', x: 425, y: 300, text: '' },
+      ],
+      800,
+      600,
+    )
+    expect(col.map((e) => e.id)).toEqual(['a'])
+    expect(col[0]!.esquerra).toBeLessThan(400)
+  })
+
+  it('l\'etiqueta se separa més d\'un punt gran', () => {
+    const [e] = colocarEtiquetes([{ id: 'a', x: 100, y: 100, text: 'ST36', radi: 14 }], 800, 600)
+    expect(e!.esquerra).toBeGreaterThanOrEqual(100 + 14)
+  })
+})

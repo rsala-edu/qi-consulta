@@ -160,7 +160,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
         <div className="barra-cerca">
           <input
             type="search"
-            aria-label={t.orella.cercar}
+            aria-label={t.orella.cercarEtiqueta}
             placeholder={t.orella.cercar}
             value={consulta}
             onChange={(e) => setConsulta(e.target.value)}
@@ -227,6 +227,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
             </p>
             <p>{puntFitxa.localitzacio}</p>
             {puntFitxa.caraInterna && <p className="detall">{t.orella.caraInterna}</p>}
+            {puntFitxa.codiPerConfirmar && <p className="etiqueta-origen">{t.orella.codiPerConfirmar}</p>}
             {correccions.has(puntFitxa.codi) && <p className="etiqueta-origen">{t.mapa.origen.doctora}</p>}
 
             <div className="segmentat" role="radiogroup" aria-label={t.mapa.costatTitol}>

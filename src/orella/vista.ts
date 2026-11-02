@@ -2,8 +2,11 @@
 // a la pantalla. Les coordenades «del dibuix» són les de l'orella esquerra
 // (src/orella/dibuix.ts); l'orella dreta es mostra en mirall.
 
-/** Part del dibuix que es mostra sencera (amb marge per als noms de les zones) */
-export const LIMITS = { x1: -20, x2: 360, y1: 0, y2: 466 } as const
+/**
+ * Part del dibuix que es mostra sencera, amb marge per als noms de les zones
+ * (per sota, perquè «Lòbul», a y = 462, es vegi sencer també a la tauleta)
+ */
+export const LIMITS = { x1: -20, x2: 360, y1: 0, y2: 488 } as const
 export const ESCALA_MAXIMA = 6
 
 export type CostatOrella = 'E' | 'D'

@@ -2,7 +2,7 @@
 import { BufferGeometry, Float32BufferAttribute, PerspectiveCamera, Vector3 } from 'three'
 import { describe, expect, it } from 'vitest'
 import { esquemaPosicio3D } from '../punts/esquema'
-import { azimutMesProper, nivellEtiquetes, VISTES, vistaCapAlPunt } from './camera'
+import { azimutMesProper, CAMERA, nivellEtiquetes, VISTA_PEU, VISTES, vistaCapAlPunt } from './camera'
 import {
   nombreTriangles,
   normalTriangle,
@@ -131,11 +131,12 @@ describe('càmera', () => {
   it('mostra més informació com més a prop', () => {
     expect(nivellEtiquetes(4.4)).toBe('cap')
     expect(nivellEtiquetes(1.5)).toBe('codi')
-    expect(nivellEtiquetes(0.6)).toBe('pinyin')
+    expect(nivellEtiquetes(0.75)).toBe('pinyin')
+    expect(nivellEtiquetes(0.4)).toBe('detall')
     // amb el cos sencer, només si hi ha un meridià filtrat
-    expect(nivellEtiquetes(4.4, true)).toBe('codi')
+    expect(nivellEtiquetes(4.4, true)).toBe('cos')
     expect(nivellEtiquetes(2.0)).toBe('cap')
-    expect(nivellEtiquetes(2.0, true)).toBe('codi')
+    expect(nivellEtiquetes(2.0, true)).toBe('cos')
   })
 
   it('per anar a un punt, la càmera es posa davant la pell, a la mateixa alçada', () => {
@@ -146,8 +147,22 @@ describe('càmera', () => {
   })
 
   it('si la pell mira amunt, manté la direcció actual', () => {
-    const { camera } = vistaCapAlPunt(new Vector3(0, 0.05, 0.1), new Vector3(0, 1, 0), Math.PI / 2, 0.5)
+    const { camera } = vistaCapAlPunt(new Vector3(0, 1.7, 0.1), new Vector3(0, 1, 0), Math.PI / 2, 0.5)
     expect(camera.x).toBeCloseTo(0.5)
+  })
+
+  it('els punts del dors del peu es miren des de dalt i més a prop', () => {
+    // Bafeng: a l'empenya, prop dels dits
+    const punt = new Vector3(0.19, 0.026, 0.156)
+    const { camera, objectiu, polar } = vistaCapAlPunt(punt, new Vector3(0.2, 0.65, 0.73), 0)
+    expect(objectiu).toEqual(punt)
+    expect(polar).toBeCloseTo(VISTA_PEU.polar)
+    expect(camera.distanceTo(punt)).toBeCloseTo(VISTA_PEU.distancia)
+    expect(camera.y - punt.y).toBeCloseTo(VISTA_PEU.distancia * Math.cos(VISTA_PEU.polar)) // des de dalt
+    expect(camera.z).toBeGreaterThan(punt.z) // i des de davant
+    // La planta (KI1) i el mal·lèol continuen amb la càmera horitzontal
+    expect(vistaCapAlPunt(new Vector3(0.18, 0.007, 0.1), new Vector3(0, -1, 0), 0).polar).toBeCloseTo(CAMERA.polar)
+    expect(vistaCapAlPunt(new Vector3(0.21, 0.065, 0.02), new Vector3(1, 0, 0), 0).camera.y).toBeCloseTo(0.065)
   })
 })
 

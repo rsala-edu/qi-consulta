@@ -52,7 +52,7 @@ async function anarAlPunt(page: Page, consulta: string) {
 }
 
 async function obrirMapa(page: Page) {
-  await menu(page, 'Mapa (prova)').click()
+  await menu(page, 'Mapa').click()
   await visorLlest(page, PUNTS_AL_MODEL)
 }
 
@@ -330,4 +330,66 @@ test('els punts extraordinaris tenen grup propi al filtre i cap línia de meridi
   await correccio.getByRole('button', { name: 'Fet' }).click()
   await anarAlPunt(page, 'EX-HN3')
   await expect(page.getByRole('region', { name: 'EX-HN3' }).getByRole('heading')).toContainText('Yintang')
+})
+
+/** Rectangles de les etiquetes visibles que se superposen */
+async function etiquetesSolapades(page: Page): Promise<string[]> {
+  return page.locator('.etiqueta-punt').evaluateAll((els) => {
+    const r = els.map((e) => ({ t: e.textContent ?? '', b: e.getBoundingClientRect() }))
+    const solapades: string[] = []
+    for (let i = 0; i < r.length; i++)
+      for (let j = i + 1; j < r.length; j++) {
+        const a = r[i]!.b
+        const b = r[j]!.b
+        if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom)
+          solapades.push(`${r[i]!.t} / ${r[j]!.t}`)
+      }
+    return solapades
+  })
+}
+
+test('Jiaji: una sola etiqueta per costat i, ampliant, el nivell de cada punt', async ({ page }) => {
+  test.skip(test.info().project.name === 'tauleta', 'A la tauleta no hi ha roda')
+  await entrar(page)
+  await obrirMapa(page)
+  await page.getByLabel('Meridià').selectOption({ label: 'EX · Extraordinaris' })
+  await visorLlest(page, 164)
+  await anarAlPunt(page, 'jiaji')
+  // Amb l'esquena sencera: «EX-B2 · Jiaji» una vegada per costat, cap «EX-B2» sol
+  const grup = page.locator('.etiqueta-punt').filter({ hasText: /^EX-B2 · Jiaji$/ })
+  await expect(grup).toHaveCount(2)
+  await expect(page.locator('.etiqueta-punt').filter({ hasText: /^EX-B2$/ })).toHaveCount(0)
+  await expect(page.locator('.etiqueta-punt').filter({ hasText: /^(T\d+|L\d)$/ })).toHaveCount(0)
+
+  // Ampliant: el nivell (T1…L5) a cada punt, i ja no el nom del grup
+  const c = await centreVisor(page)
+  await page.mouse.move(c.x, c.y)
+  await page.mouse.wheel(0, -500)
+  const visor = page.getByTestId('visor3d')
+  await expect.poll(async () => Number(await visor.getAttribute('data-distancia'))).toBeLessThan(0.55)
+  await visorLlest(page)
+  await expect.poll(() => page.locator('.etiqueta-punt').filter({ hasText: /^(T\d+|L\d)$/ }).count()).toBeGreaterThan(5)
+  await expect(grup).toHaveCount(0)
+  expect(await etiquetesSolapades(page)).toEqual([])
+})
+
+test('el peu es mira des de dalt i de més a prop, i les etiquetes no es trepitgen', async ({ page }) => {
+  await entrar(page)
+  await obrirMapa(page)
+  await page.getByLabel('Meridià').selectOption({ label: 'EX · Extraordinaris' })
+  await visorLlest(page, 164)
+  await anarAlPunt(page, 'bafeng')
+  const visor = page.getByTestId('visor3d')
+  expect(Number(await visor.getAttribute('data-polar'))).toBeLessThan(1)
+  expect(Number(await visor.getAttribute('data-distancia'))).toBeLessThan(0.5)
+  // Una etiqueta per grup i per costat, sense solapar-se
+  await expect(page.locator('.etiqueta-punt').filter({ hasText: /^EX-LE10 · Bafeng$/ }).first()).toBeVisible()
+  expect(await page.locator('.etiqueta-punt').filter({ hasText: /EX-LE10/ }).count()).toBeLessThanOrEqual(2)
+  expect(await page.locator('.etiqueta-punt').filter({ hasText: /EX-LE12/ }).count()).toBeLessThanOrEqual(2)
+  expect(await etiquetesSolapades(page)).toEqual([])
+  // «Davant» torna a la càmera horitzontal
+  await page.getByRole('button', { name: 'Davant', exact: true }).click()
+  await page.waitForTimeout(400)
+  await visorLlest(page)
+  expect(Number(await visor.getAttribute('data-polar'))).toBeCloseTo(Math.PI / 2, 2)
 })

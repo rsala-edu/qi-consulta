@@ -4,7 +4,8 @@
 // a l'esquerra; els de la dreta, a la dreta), perquè les etiquetes de dues
 // columnes properes (BL31–BL35 al sacre) no es barregin. Si no en troba cap
 // de lliure, no es mostra. Les primeres de la llista (més importants) trien
-// primer.
+// primer. Una entrada sense text no porta etiqueta, però el seu punt també
+// ocupa lloc.
 
 export interface EtiquetaEntrada {
   id: string
@@ -14,6 +15,8 @@ export interface EtiquetaEntrada {
   text: string
   /** Text més curt (només el codi) per si el llarg no hi cap */
   curt?: string
+  /** Radi del punt a la pantalla (px); per defecte, RADI_PUNT */
+  radi?: number
 }
 
 export interface EtiquetaColocada {
@@ -57,17 +60,15 @@ export function colocarEtiquetes(
   mida: MidaEtiquetes = MIDA_PER_DEFECTE,
 ): EtiquetaColocada[] {
   // Els punts mateixos també ocupen lloc: cap etiqueta en pot tapar cap
-  const punts: Array<Rect & { id: string }> = entrades.map((e) => ({
-    id: e.id,
-    x1: e.x - RADI_PUNT,
-    y1: e.y - RADI_PUNT,
-    x2: e.x + RADI_PUNT,
-    y2: e.y + RADI_PUNT,
-  }))
+  const punts: Array<Rect & { id: string }> = entrades.map((e) => {
+    const r = Math.max(RADI_PUNT, e.radi ?? 0)
+    return { id: e.id, x1: e.x - r, y1: e.y - r, x2: e.x + r, y2: e.y + r }
+  })
   const centre = entrades.reduce((s, e) => s + e.x, 0) / Math.max(1, entrades.length)
   const ocupats: Rect[] = []
   const resultat: EtiquetaColocada[] = []
   for (const e of entrades) {
+    if (!e.text) continue
     const textos = e.curt && e.curt !== e.text ? [e.text, e.curt] : [e.text]
     for (const text of textos) {
       const r = colocarUna(e, text, centre, punts, ocupats, amplada, alcada, mida)
@@ -92,7 +93,8 @@ function colocarUna(
 ): Rect | null {
   const w = text.length * mida.caracter + mida.marge
   const h = mida.alt
-  const s = mida.separacio
+  // La separació creix amb el punt: l'etiqueta no el toca
+  const s = Math.max(mida.separacio, (e.radi ?? 0) + 4)
   const dreta: Array<[number, number]> = [
     [e.x + s, e.y - h / 2],
     [e.x + s, e.y - h - 1], // dreta, una mica amunt

@@ -22,6 +22,7 @@ import { formatar, t } from '../../i18n/t'
 import { BarraVistes } from '../../mapa/components/BarraVistes'
 import { Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
 import { posicio3D, posicioDesDePunt } from '../../mapa/geometria/baricentriques'
+import { etiquetesDelPunt } from '../../mapa/etiquetaPunt'
 import { idMarcador, llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from '../../mapa/marcadors'
 import type { ModelCos } from '../../mapa/model'
 import { useCalibracions } from '../../mapa/useCalibracions'
@@ -139,8 +140,7 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
           normal: p.normal,
           color: tecnica && COLOR_TECNICA[tecnica],
           destacat: correccio ? p.id === idMarcador(correccio.codi, correccio.costat, correccio.index) : fitxa?.codi === p.punt.codi,
-          etiqueta: p.punt.codi,
-          etiquetaLlarga: `${p.punt.codi} · ${p.punt.pinyin}`,
+          etiquetes: etiquetesDelPunt(p.punt, p.index),
         }
       }),
     [visibles, marcats, fitxa?.codi, correccio],
