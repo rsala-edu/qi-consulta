@@ -23,6 +23,7 @@ import {
   type RefObject,
 } from 'react'
 import { Box3, Group, Mesh, Raycaster, Vector2, Vector3, type BufferGeometry } from 'three'
+import { LimitError } from '../../components/LimitError'
 import { t } from '../../i18n/t'
 import { azimutMesProper, CAMERA, nivellEtiquetes, VISTES, vistaCapAlPunt, type Vista } from '../camera'
 import { colocarEtiquetes, type EtiquetaColocada } from '../etiquetes'
@@ -103,6 +104,8 @@ export function Visor3D({ ref, ...props }: Props) {
 
   return (
     <div className="visor3d" data-testid="visor3d" data-marcadors={props.marcadors.length} data-moviment="no">
+      {/* Sense WebGL (o si l'escena peta) només cau el cos: la resta del mapa continua */}
+      <LimitError codi="UI-COS3D" alternativa={<ErrorCos3D />}>
       <Canvas
         frameloop="demand"
         dpr={[1, 2]}
@@ -112,6 +115,7 @@ export function Visor3D({ ref, ...props }: Props) {
       >
         <Escena {...props} control={control} onEtiquetes={setEtiquetes} />
       </Canvas>
+      </LimitError>
       <div className="visor3d-etiquetes" aria-hidden="true">
         {etiquetes.map((e) => (
           <span key={e.id} className="etiqueta-punt" style={{ transform: `translate(${e.esquerra}px, ${e.dalt}px)` }}>
@@ -119,6 +123,15 @@ export function Visor3D({ ref, ...props }: Props) {
           </span>
         ))}
       </div>
+    </div>
+  )
+}
+
+/** Al lloc del cos, quan no es pot dibuixar (sense WebGL o el model no carrega) */
+export function ErrorCos3D() {
+  return (
+    <div className="visor3d-error" role="alert">
+      <p>{t.errorPantalla.cos3D}</p>
     </div>
   )
 }

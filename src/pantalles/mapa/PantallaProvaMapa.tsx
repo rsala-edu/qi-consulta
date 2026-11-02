@@ -20,7 +20,7 @@ import {
 } from '../../domini/puntMarcat'
 import { formatar, t } from '../../i18n/t'
 import { BarraVistes } from '../../mapa/components/BarraVistes'
-import { Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
+import { ErrorCos3D, Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
 import { posicio3D, posicioDesDePunt } from '../../mapa/geometria/baricentriques'
 import { etiquetesDelPunt } from '../../mapa/etiquetaPunt'
 import { idMarcador, llegirIdMarcador, puntsSobreModel, recorregutsMeridia } from '../../mapa/marcadors'
@@ -75,11 +75,15 @@ export function PantallaProvaMapa() {
       </div>
       {/* El cos es queda muntat (i carregat) quan es mira l'orella */}
       <div id="mapa-cos" role="tabpanel" aria-labelledby="pestanya-cos" className="panell-pestanya" hidden={pestanya !== 'cos'}>
-        {carrega.estat === 'carregant' && <Indicador text={t.mapa.carregantModel} />}
-        {carrega.estat === 'error' && <p role="alert">{t.app.errorInesperat}</p>}
-        {carrega.estat === 'llest' && (
-          <Marcatge model={carrega.dades} marcats={marcats} setMarcats={setMarcats} peticio={peticions.cos} onVeure={veure} />
-        )}
+        {/* El cercador i la llista funcionen encara que el cos no es pugui carregar */}
+        <Marcatge
+          model={carrega.estat === 'llest' ? carrega.dades : null}
+          carregant={carrega.estat === 'carregant'}
+          marcats={marcats}
+          setMarcats={setMarcats}
+          peticio={peticions.cos}
+          onVeure={veure}
+        />
       </div>
       {pestanya === 'orella' && (
         <div id="mapa-orella" role="tabpanel" aria-labelledby="pestanya-orella" className="panell-pestanya">
@@ -106,16 +110,18 @@ interface Correccio {
 }
 
 interface PropsMarcatge {
-  model: ModelCos
+  /** null mentre es carrega o si no s'ha pogut carregar */
+  model: ModelCos | null
+  carregant: boolean
   marcats: PuntMarcat[]
   setMarcats: Dispatch<SetStateAction<PuntMarcat[]>>
   peticio: Peticio
   onVeure(m: PuntMarcat): void
 }
 
-function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatge) {
+function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure }: PropsMarcatge) {
   const visor = useRef<ControlVisor>(null)
-  const { efectiu: calibrat, desar, restablir } = useCalibracions(model.topologia)
+  const { efectiu: calibrat, desar, restablir } = useCalibracions(model?.topologia ?? '')
   const { revisio } = usePrecaucions()
   const efectiu = useMemo(() => ambPrecaucions(calibrat, revisio ?? REVISIO_BUIDA), [calibrat, revisio])
   const [correccio, setCorreccio] = useState<Correccio | null>(null)
@@ -123,7 +129,7 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
   const [consulta, setConsulta] = useState('')
   const [fitxa, setFitxa] = useState<FitxaOberta | null>(null)
 
-  const tots = useMemo(() => puntsSobreModel(efectiu, model), [efectiu, model])
+  const tots = useMemo(() => (model ? puntsSobreModel(efectiu, model) : []), [efectiu, model])
   const visibles = useMemo(() => (meridia ? tots.filter((p) => p.punt.meridia === meridia) : tots), [tots, meridia])
   const recorreguts = useMemo(
     () =>
@@ -163,7 +169,7 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
   }
 
   function corregir(punt: TocPell, immediat: boolean) {
-    if (!correccio) return
+    if (!correccio || !model) return
     const { codi, costat, index } = correccio
     const pos = posicioDesDePunt(model.geometria, punt.triangle, punt.punt)
     desar(codi, costat, posicio3D(model.topologia, costat, pos, 'doctora', index), immediat, index)
@@ -179,12 +185,12 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
   const puntFitxa = efectiu.punts.find((p) => p.codi === (correccio?.codi ?? fitxa?.codi))
   const origenDe = (codi: string, costat: CostatPosicio, index = 0) => {
     const p = efectiu.punts.find((x) => x.codi === codi)
-    return p ? posicioDe(p, model.topologia, costat, index)?.origen : undefined
+    return p && model ? posicioDe(p, model.topologia, costat, index)?.origen : undefined
   }
   const corregitPerLaDoctora = (codi: string) =>
     efectiu.punts
       .find((x) => x.codi === codi)
-      ?.posicions.some((q) => q.topologia === model.topologia && q.origen === 'doctora') ?? false
+      ?.posicions.some((q) => q.topologia === model?.topologia && q.origen === 'doctora') ?? false
   const jaMarcat = fitxa && puntMarcat(marcats, fitxa.codi)
 
   // Columna dreta: «Punt» o «Marcats». Si es demana un punt des de la llista
@@ -208,9 +214,10 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
     <div className="disseny-mapa">
       <div className="columna-visor">
         <div className="zona-visor">
-          {!model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
-          {tots.length === 0 && <p className="avis avis-flotant avis-segon">{t.mapa.sensePosicions}</p>}
-          <Visor3D
+          {model && !model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
+          {model && tots.length === 0 && <p className="avis avis-flotant avis-segon">{t.mapa.sensePosicions}</p>}
+          {!model && (carregant ? <Indicador text={t.mapa.carregantModel} /> : <ErrorCos3D />)}
+          {model && <Visor3D
             ref={visor}
             geometria={model.geometria}
             marcadors={marcadors}
@@ -224,7 +231,7 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
             onTocarPell={(toc) => corregir(toc, true)}
             arrossegable={correccio ? idMarcador(correccio.codi, correccio.costat, correccio.index) : null}
             onArrossegar={(toc) => corregir(toc, false)}
-          />
+          />}
         </div>
         {/* Fora del dibuix, perquè no tapin el cos */}
         <div className="barra-visor">
@@ -436,6 +443,7 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
                 {t.mapa.tancar}
               </Boto>
             </div>
+            {model && (
             <div className="accions accions-esquerra">
               <Boto
                 variant="discret"
@@ -458,6 +466,7 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
                 {t.mapa.corregir}
               </Boto>
             </div>
+            )}
           </section>
         )}
 

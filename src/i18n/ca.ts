@@ -11,6 +11,14 @@ export const ca = {
     cancellar: 'Cancel·lar',
     errorInesperat: 'Hi ha hagut un error inesperat. Torna-ho a provar.',
   },
+  errorPantalla: {
+    missatge: 'Aquesta pantalla ha tingut un problema. Les dades estan bé.',
+    tornarCarregar: 'Tornar a carregar',
+    copiarCodi: 'Copiar el codi',
+    codiCopiat: 'Codi copiat',
+    codi: 'Codi',
+    cos3D: 'No s\'ha pogut mostrar el cos en 3D en aquest navegador. L\'orella, la cerca i la llista de punts continuen funcionant.',
+  },
   desbloqueig: {
     titolCrear: 'Benvinguda a Qi',
     introCrear: 'Crea la contrasenya per obrir l\'app.',

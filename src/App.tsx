@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect } from 'react'
-import { HashRouter, Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { HashRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router'
+import { LimitError } from './components/LimitError'
 import { Boto } from './components/Boto'
 import { Simbol } from './components/Simbol'
 import { Indicador } from './components/Indicador'
@@ -72,6 +73,19 @@ function Marc() {
   )
 }
 
+/**
+ * Cada pantalla, amb el seu límit d'error: si peta, la barra de navegació es
+ * manté i, en canviar de ruta, es torna a provar.
+ */
+function P({ codi, children }: { codi: string; children: ReactNode }) {
+  const { pathname } = useLocation()
+  return (
+    <LimitError codi={codi} clau={pathname}>
+      {children}
+    </LimitError>
+  )
+}
+
 /** Mentre l'app és bloquejada no es munta cap pantalla amb dades. */
 function Porta() {
   const { estat } = useSessio()
@@ -124,23 +138,23 @@ function PortaOberta() {
         <Routes>
           <Route element={<Marc />}>
             <Route index element={<Navigate to="/avui" replace />} />
-            <Route path="avui" element={<PantallaAvui />} />
-            <Route path="agenda" element={<PantallaAgenda />} />
-            <Route path="pacients" element={<PantallaPacients />} />
-            <Route path="pacients/nou" element={<PantallaNouPacient />} />
-            <Route path="pacients/:id" element={<PantallaFitxaPacient />}>
+            <Route path="avui" element={<P codi="UI-AVUI"><PantallaAvui /></P>} />
+            <Route path="agenda" element={<P codi="UI-AGENDA"><PantallaAgenda /></P>} />
+            <Route path="pacients" element={<P codi="UI-PACIENTS"><PantallaPacients /></P>} />
+            <Route path="pacients/nou" element={<P codi="UI-NOU"><PantallaNouPacient /></P>} />
+            <Route path="pacients/:id" element={<P codi="UI-FITXA"><PantallaFitxaPacient /></P>}>
               <Route index element={<Navigate to="dades" replace />} />
-              <Route path="dades" element={<PestanyaDades />} />
-              <Route path="fitxa-clinica" element={<PestanyaFitxaClinica />} />
-              <Route path="cites" element={<PestanyaCites />} />
+              <Route path="dades" element={<P codi="UI-FITXA-DADES"><PestanyaDades /></P>} />
+              <Route path="fitxa-clinica" element={<P codi="UI-FITXA-CLINICA"><PestanyaFitxaClinica /></P>} />
+              <Route path="cites" element={<P codi="UI-FITXA-CITES"><PestanyaCites /></P>} />
             </Route>
-            <Route path="mapa" element={<PantallaProvaMapa />} />
-            <Route path="ajustos" element={<PantallaAjustos />} />
-            <Route path="ajustos/calibratge" element={<PantallaCalibratge />} />
-            <Route path="ajustos/precaucions" element={<PantallaPrecaucions />} />
-            <Route path="ajustos/seguretat" element={<PantallaSeguretat />} />
-            <Route path="ajustos/aparenca" element={<PantallaAparenca />} />
-            <Route path="ajustos/agenda" element={<PantallaAjustAgenda />} />
+            <Route path="mapa" element={<P codi="UI-MAPA"><PantallaProvaMapa /></P>} />
+            <Route path="ajustos" element={<P codi="UI-AJUSTOS"><PantallaAjustos /></P>} />
+            <Route path="ajustos/calibratge" element={<P codi="UI-CALIBRATGE"><PantallaCalibratge /></P>} />
+            <Route path="ajustos/precaucions" element={<P codi="UI-PRECAUCIONS"><PantallaPrecaucions /></P>} />
+            <Route path="ajustos/seguretat" element={<P codi="UI-SEGURETAT"><PantallaSeguretat /></P>} />
+            <Route path="ajustos/aparenca" element={<P codi="UI-APARENCA"><PantallaAparenca /></P>} />
+            <Route path="ajustos/agenda" element={<P codi="UI-AJUST-AGENDA"><PantallaAjustAgenda /></P>} />
             <Route path="*" element={<Navigate to="/avui" replace />} />
           </Route>
         </Routes>

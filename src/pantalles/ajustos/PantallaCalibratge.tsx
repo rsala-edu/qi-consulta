@@ -9,6 +9,7 @@ import { Indicador } from "../../components/Indicador";
 import { formatar, t } from "../../i18n/t";
 import { BarraVistes } from "../../mapa/components/BarraVistes";
 import {
+  ErrorCos3D,
   Visor3D,
   type ControlVisor,
   type MarcadorVisor,
@@ -48,7 +49,7 @@ export function PantallaCalibratge() {
       {carrega.estat === "carregant" && (
         <Indicador text={t.mapa.carregantModel} />
       )}
-      {carrega.estat === "error" && <p role="alert">{t.app.errorInesperat}</p>}
+      {carrega.estat === "error" && <ErrorCos3D />}
       {carrega.estat === "llest" && <Calibratge model={carrega.dades} />}
     </main>
   );

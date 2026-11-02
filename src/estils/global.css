@@ -2776,3 +2776,29 @@ fieldset {
   gap: 8px;
   margin-bottom: 16px;
 }
+
+/* Una pantalla ha fallat (LimitError): la barra es manté i aquí surt l'avís */
+.pantalla-error {
+  padding: 24px 16px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.error-pantalla {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: var(--radi);
+  background: var(--avis-suau);
+  color: var(--tinta);
+}
+
+/* El cos 3D no s'ha pogut dibuixar: missatge al lloc del cos */
+.visor3d-error {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+}

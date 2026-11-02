@@ -35,6 +35,10 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Proves del flux complet
         run: npm run test:e2e
+      # Totes les pantalles amb el build de producció (perfil buit, amb dades i
+      # sense WebGL): cap error a la consola i la barra sempre visible
+      - name: Proves amb el build de producció
+        run: npm run test:e2e:produccio
       - name: Informe de Playwright (si falla)
         if: failure()
         uses: actions/upload-artifact@v7
