@@ -25,7 +25,7 @@ import {
 import type { FitxerCopia } from '../sincronia/copia'
 import { driveGoogle } from '../sincronia/drive'
 import { acceptarPermis, googleConfigurat, iniciarSessioGoogle, tokenGoogle } from '../sincronia/google'
-import { copiaDeDrive, restaurarCopia } from '../sincronia/sincronitzar'
+import { copiaPerRecuperar, obrirClauMestra, restaurarCopia } from '../sincronia/recuperacio'
 import { desbloquejarAmbEmpremta, recuperarAmbClau, teClauRecuperacio, teEmpremta } from './claus'
 import { useAutoBloqueig } from './useAutoBloqueig'
 
@@ -122,7 +122,7 @@ export function ProveidorSessio({
     await guardarEstatGoogle(db, { connectatAt: new Date().toISOString(), ultimaCopia: anterior?.ultimaCopia ?? null, sub })
     // Dispositiu nou: si ja hi ha dades a Drive, es restauren
     if (!(await llegirClauEmbolcallada(db))) {
-      const fitxer = await copiaDeDrive(driveGoogle(tokenGoogle))
+      const fitxer = await copiaPerRecuperar(driveGoogle(tokenGoogle))
       setEstat(fitxer ? { tipus: 'restaurar', fitxer } : { tipus: 'sense-configurar' })
     }
   }, [db, estat.tipus])
@@ -140,7 +140,7 @@ export function ProveidorSessio({
   const desbloquejar = useCallback(
     async (contrasenya: string) => {
       if (estat.tipus === 'restaurar') {
-        const clau = await desbloquejarClauMestra(estat.fitxer.embolcalls.contrasenya, contrasenya)
+        const clau = await obrirClauMestra(estat.fitxer, contrasenya)
         await restaurarCopia(db, clau, estat.fitxer)
         return obrir(clau)
       }

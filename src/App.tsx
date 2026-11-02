@@ -105,6 +105,7 @@ function PortaOberta() {
           onDesbloquejar={desbloquejar}
           empremta={estat.tipus === 'bloquejat' && estat.empremta}
           onEmpremta={desbloquejarAmbEmpremta}
+          onTornarGoogle={estat.tipus === 'restaurar' ? () => void connectarGoogle() : undefined}
           onRecuperar={
             (estat.tipus === 'restaurar' && estat.fitxer.embolcalls.secrets.some((x) => x.tipus === 'recuperacio')) ||
             (estat.tipus === 'bloquejat' && estat.recuperacio)

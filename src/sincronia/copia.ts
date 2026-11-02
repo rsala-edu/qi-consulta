@@ -117,10 +117,11 @@ export async function aplicarContingut(db: QiDB, c: Contingut): Promise<void> {
   await db.transaction('rw', [...TAULES.map((t) => t.nom), 'esborrats'], async () => {
     for (const t of TAULES) {
       const taula = db.table(t.nom)
-      const noves = new Set(c.taules[t.nom].map((r) => valor(r, t.clau)))
+      const registres = c.taules[t.nom] ?? []
+      const noves = new Set(registres.map((r) => valor(r, t.clau)))
       const sobren = ((await taula.toCollection().primaryKeys()) as string[]).filter((k) => !noves.has(String(k)))
       await taula.bulkDelete(sobren)
-      await taula.bulkPut(c.taules[t.nom])
+      await taula.bulkPut(registres)
     }
     await db.esborrats.clear()
     await db.esborrats.bulkPut(c.esborrats)
@@ -131,14 +132,65 @@ export async function xifrarCopia(clau: CryptoKey, contingut: Contingut, embolca
   return { format: 'qi-copia', versio: 1, embolcalls, xifrat: await xifrarJson(clau, contingut, CONTEXT) }
 }
 
+/** La còpia és d'una versió de l'app més nova, amb un format que aquesta no entén */
+export class ErrorCopiaVersio extends Error {
+  constructor() {
+    super('Còpia d\'una versió més nova de l\'app')
+    this.name = 'ErrorCopiaVersio'
+  }
+}
+
+/** La còpia no té el format esperat o no es pot desxifrar amb la clau correcta */
+export class ErrorCopiaDanyada extends Error {
+  constructor() {
+    super('Còpia danyada')
+    this.name = 'ErrorCopiaDanyada'
+  }
+}
+
 export function llegirFitxer(text: string): FitxerCopia {
-  return esquemaFitxerCopia.parse(JSON.parse(text)) as unknown as FitxerCopia
+  let json: unknown
+  try {
+    json = JSON.parse(text)
+  } catch {
+    throw new ErrorCopiaDanyada()
+  }
+  const r = esquemaFitxerCopia.safeParse(json)
+  if (r.success) return r.data as unknown as FitxerCopia
+  const v = json as { format?: unknown; versio?: unknown } | null
+  if (v?.format === 'qi-copia' && typeof v.versio === 'number' && v.versio > 1) throw new ErrorCopiaVersio()
+  throw new ErrorCopiaDanyada()
+}
+
+/**
+ * Porta el contingut d'una còpia al format actual. Les còpies fetes per
+ * versions anteriors no tenen les taules que s'han afegit després (l'orella,
+ * l'horari, els dies tancats): són buides, no un error.
+ */
+export function migrarContingut(c: unknown): Contingut {
+  if (typeof c !== 'object' || c === null) throw new ErrorCopiaDanyada()
+  const { versio, taules, esborrats } = c as Partial<Record<keyof Contingut, unknown>>
+  if (typeof versio === 'number' && versio > 1) throw new ErrorCopiaVersio()
+  if (versio !== 1 || typeof taules !== 'object' || taules === null) throw new ErrorCopiaDanyada()
+  if (esborrats !== undefined && !Array.isArray(esborrats)) throw new ErrorCopiaDanyada()
+  const totes = {} as Contingut['taules']
+  for (const t of TAULES) {
+    const registres = (taules as Record<string, unknown>)[t.nom] ?? []
+    if (!Array.isArray(registres)) throw new ErrorCopiaDanyada()
+    totes[t.nom] = registres as Registre[]
+  }
+  return { versio: 1, taules: totes, esborrats: (esborrats ?? []) as RegistreEsborrat[] }
 }
 
 export async function desxifrarCopia(clau: CryptoKey, fitxer: FitxerCopia): Promise<Contingut> {
-  const c = (await desxifrarJson(clau, fitxer.xifrat, CONTEXT)) as Contingut
-  if (c.versio !== 1) throw new Error('Versió de còpia desconeguda')
-  return c
+  let c: unknown
+  try {
+    c = await desxifrarJson(clau, fitxer.xifrat, CONTEXT)
+  } catch {
+    // La clau és la bona (s'ha obert amb la contrasenya): el contingut és el que falla
+    throw new ErrorCopiaDanyada()
+  }
+  return migrarContingut(c)
 }
 
 /** Embolcalls: la contrasenya més nova i la unió de les altres maneres d'obrir. */

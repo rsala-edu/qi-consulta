@@ -10,6 +10,8 @@ import { ErrorContrasenya } from '../../crypto'
 import { t } from '../../i18n/t'
 import { ErrorClauRecuperacio } from '../../sessio/claus'
 import { fraseEntrada } from '../../sessio/frase'
+import { ErrorRecuperacio } from '../../sincronia/recuperacio'
+import { MissatgeErrorRecuperacio } from './ErrorRecuperacio'
 
 const MINIM = 8
 
@@ -39,12 +41,20 @@ interface Props {
   onEmpremta?(): Promise<void>
   /** Es pot recuperar amb la clau impresa */
   onRecuperar?(clau: string, contrasenyaNova: string): Promise<void>
+  /** Recuperació: tornar a entrar amb Google si la sessió de Drive ha caducat */
+  onTornarGoogle?(): void
 }
 
 export function PantallaDesbloqueig(props: Props) {
   const [recuperant, setRecuperant] = useState(false)
   if (recuperant && props.onRecuperar)
-    return <FormulariRecuperacio onRecuperar={props.onRecuperar} onTornar={() => setRecuperant(false)} />
+    return (
+      <FormulariRecuperacio
+        onRecuperar={props.onRecuperar}
+        onTornar={() => setRecuperant(false)}
+        onTornarGoogle={props.onTornarGoogle}
+      />
+    )
   return <FormulariContrasenya {...props} onOblidada={props.onRecuperar ? () => setRecuperant(true) : undefined} />
 }
 
@@ -55,12 +65,14 @@ function FormulariContrasenya({
   empremta = false,
   onEmpremta,
   onOblidada,
+  onTornarGoogle,
 }: Props & { onOblidada?: () => void }) {
   const crear = mode === 'crear'
   const restaurar = mode === 'restaurar'
   const [errorEmpremta, setErrorEmpremta] = useState(false)
   const [ambEmpremta, setAmbEmpremta] = useState(false)
   const [ambContrasenya, setAmbContrasenya] = useState(false)
+  const [errorRecuperacio, setErrorRecuperacio] = useState<ErrorRecuperacio | null>(null)
   const {
     register,
     handleSubmit,
@@ -80,9 +92,16 @@ function FormulariContrasenya({
       if (crear) await onCrear(contrasenya)
       else await onDesbloquejar(contrasenya)
     } catch (e) {
-      const missatge = e instanceof ErrorContrasenya ? t.desbloqueig.contrasenyaIncorrecta : t.app.errorInesperat
+      // Contrasenya incorrecta: al camp. Altres errors de la recuperació: el seu missatge
+      const contrasenyaMal =
+        e instanceof ErrorContrasenya || (e instanceof ErrorRecuperacio && e.tipus === 'contrasenya')
+      if (!contrasenyaMal && e instanceof ErrorRecuperacio) {
+        setErrorRecuperacio(e)
+        return
+      }
+      setErrorRecuperacio(null)
       resetField('contrasenya')
-      setError('contrasenya', { message: missatge })
+      setError('contrasenya', { message: contrasenyaMal ? t.desbloqueig.contrasenyaIncorrecta : t.app.errorInesperat })
       setFocus('contrasenya')
     }
   }
@@ -162,6 +181,8 @@ function FormulariContrasenya({
 
             {crear && <p className="avis">{t.desbloqueig.avisCrear}</p>}
 
+            {errorRecuperacio && <MissatgeErrorRecuperacio error={errorRecuperacio} onTornarGoogle={onTornarGoogle} />}
+
             <div className="accions">
               {isSubmitting ? (
                 <Indicador
@@ -207,10 +228,13 @@ const esquemaRecuperar = z
 function FormulariRecuperacio({
   onRecuperar,
   onTornar,
+  onTornarGoogle,
 }: {
   onRecuperar(clau: string, contrasenyaNova: string): Promise<void>
   onTornar(): void
+  onTornarGoogle?(): void
 }) {
+  const [errorRecuperacio, setErrorRecuperacio] = useState<ErrorRecuperacio | null>(null)
   const {
     register,
     handleSubmit,
@@ -225,6 +249,8 @@ function FormulariRecuperacio({
     try {
       await onRecuperar(v.clau, v.contrasenya)
     } catch (e) {
+      if (e instanceof ErrorRecuperacio) return setErrorRecuperacio(e)
+      setErrorRecuperacio(null)
       setError('clau', { message: e instanceof ErrorClauRecuperacio ? t.desbloqueig.clauIncorrecta : t.app.errorInesperat })
     }
   }
@@ -255,6 +281,7 @@ function FormulariRecuperacio({
         <Camp etiqueta={t.desbloqueig.repetirContrasenya} error={errors.repeticio?.message}>
           <input type="password" autoComplete="new-password" disabled={isSubmitting} {...register('repeticio')} />
         </Camp>
+        {errorRecuperacio && <MissatgeErrorRecuperacio error={errorRecuperacio} onTornarGoogle={onTornarGoogle} />}
         <div className="accions">
           {isSubmitting ? <Indicador text={t.desbloqueig.recuperant} /> : <Boto type="submit">{t.desbloqueig.recuperar}</Boto>}
         </div>
@@ -270,16 +297,22 @@ function FormulariRecuperacio({
 export function PantallaGoogle({ onConnectar }: { onConnectar(): Promise<void> }) {
   const [connectant, setConnectant] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorRecuperacio, setErrorRecuperacio] = useState<ErrorRecuperacio | null>(null)
 
   function connectar() {
     setError(null)
+    setErrorRecuperacio(null)
     setConnectant(true)
     // La finestra de Google s'obre dins el mateix toc
     onConnectar().then(
       () => setConnectant(false),
       (e: unknown) => {
-        const motiu = (e as { motiu?: keyof typeof t.desbloqueig.errorsGoogle }).motiu
-        setError(motiu ? t.desbloqueig.errorsGoogle[motiu] : t.app.errorInesperat)
+        // Llegir la còpia de Drive (dispositiu nou): el missatge de cada cas
+        if (e instanceof ErrorRecuperacio) setErrorRecuperacio(e)
+        else {
+          const motiu = (e as { motiu?: keyof typeof t.desbloqueig.errorsGoogle }).motiu
+          setError(motiu ? t.desbloqueig.errorsGoogle[motiu] : t.app.errorInesperat)
+        }
         setConnectant(false)
       },
     )
@@ -295,11 +328,14 @@ export function PantallaGoogle({ onConnectar }: { onConnectar(): Promise<void> }
         <h1>{t.desbloqueig.titolGoogle}</h1>
         <p>{t.desbloqueig.introGoogle}</p>
         {error && <p role="alert">{error}</p>}
+        {errorRecuperacio && <MissatgeErrorRecuperacio error={errorRecuperacio} />}
         <div className="accions">
           {connectant ? (
             <Indicador text={t.desbloqueig.connectantGoogle} />
           ) : (
-            <Boto onClick={connectar}>{t.desbloqueig.continuarGoogle}</Boto>
+            <Boto onClick={connectar}>
+              {errorRecuperacio?.tipus === 'drive' ? t.desbloqueig.tornarGoogle : t.desbloqueig.continuarGoogle}
+            </Boto>
           )}
         </div>
       </div>

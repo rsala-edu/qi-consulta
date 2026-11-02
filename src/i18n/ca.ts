@@ -39,6 +39,17 @@ export const ca = {
       cancellat: 'No s\'ha completat l\'entrada amb Google. Torna-ho a provar.',
       xarxa: 'No s\'ha pogut connectar amb Google. Comprova la connexió a internet.',
     },
+    errorsRecuperacio: {
+      drive: 'No s\'ha pogut connectar amb Google Drive. Potser la sessió ha caducat.',
+      versio:
+        'Aquesta còpia l\'ha feta una versió més nova de Qi, que aquesta app encara no entén. Tanca l\'app, torna-la a obrir perquè s\'actualitzi i torna-ho a provar. La còpia de Drive no s\'ha tocat.',
+      danyada: 'La còpia de Google Drive està danyada i no es pot obrir. No s\'ha tocat res de Drive.',
+      inesperat: 'Hi ha hagut un error inesperat. Torna-ho a provar. Si torna a passar, envia aquest codi:',
+    },
+    codiError: 'Codi de l\'error',
+    copiarCodi: 'Copiar el codi',
+    codiCopiat: 'Copiat',
+    tornarGoogle: 'Tornar a entrar amb Google',
     titolRestaurar: 'Recuperar les dades',
     introRestaurar:
       'A Google Drive hi ha una còpia de les dades de Qi. Escriu la contrasenya per obrir-la en aquest dispositiu.',

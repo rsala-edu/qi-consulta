@@ -13,7 +13,8 @@ import { pacientInventat } from '../test/dadesInventades'
 import { driveEnMemoria } from '../test/driveEnMemoria'
 import { fusionar, llegirContingut, llegirFitxer } from './copia'
 import { driveGoogle, ErrorAutoritzacio } from './drive'
-import { copiaDeDrive, FITXER_PRINCIPAL, restaurarCopia, sincronitzar } from './sincronitzar'
+import { restaurarCopia } from './recuperacio'
+import { copiaDeDrive, FITXER_PRINCIPAL, sincronitzar } from './sincronitzar'
 
 const IT = 1_000
 const CONTRASENYA = 'contrasenya-de-prova'

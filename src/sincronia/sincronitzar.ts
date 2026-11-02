@@ -104,13 +104,4 @@ async function copiesPeriodiques(drive: Drive, fitxers: FitxerDrive[], text: str
   }
 }
 
-/**
- * Dispositiu nou: escriu a la base de dades local la còpia de Drive, ja oberta
- * amb la clau mestra, i els seus embolcalls.
- */
-export async function restaurarCopia(db: QiDB, clau: CryptoKey, fitxer: FitxerCopia): Promise<void> {
-  const contingut = await desxifrarCopia(clau, fitxer)
-  await aplicarContingut(db, contingut)
-  await guardarClauEmbolcallada(db, fitxer.embolcalls.contrasenya, fitxer.embolcalls.contrasenyaAt)
-  await guardarSecrets(db, fitxer.embolcalls.secrets)
-}
+// La recuperació en un dispositiu nou és a recuperacio.ts, pas a pas.

@@ -2407,3 +2407,35 @@ fieldset {
     white-space: nowrap;
   }
 }
+
+/* Error en recuperar les dades: missatge, codi copiable i, si cal, tornar a Google */
+.error-recuperacio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radi);
+  background: var(--avis-suau);
+}
+
+.targeta-desbloqueig .error-recuperacio p {
+  color: var(--tinta);
+}
+
+.codi-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.codi-error code {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  user-select: all;
+}
+
+.codi-error .enllac-secundari {
+  min-height: 36px;
+}
