@@ -335,6 +335,17 @@ export const ca = {
     imprimirClau: 'Imprimeix la clau de recuperació, per si un dia oblides la contrasenya.',
     anarSeguretat: 'Anar a Seguretat',
   },
+  tema: {
+    etiqueta: 'Tema: {tema}',
+    noms: { sistema: 'com el sistema', clar: 'clar', fosc: 'fosc' },
+    opcions: { sistema: 'Com el sistema', clar: 'Clar', fosc: 'Fosc' },
+  },
+  aparenca: {
+    titol: 'Aparença',
+    desc: 'Tema clar, fosc o com el sistema.',
+    tema: 'Tema',
+    temaDesc: 'També el pots canviar amb la icona de la barra de dalt. Es recorda en aquest dispositiu.',
+  },
   seguretat: {
     titol: 'Seguretat i còpia',
     desc: 'Com es protegeixen les dades, bloqueig, Google Drive, empremta i clau de recuperació.',

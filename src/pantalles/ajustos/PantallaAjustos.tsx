@@ -13,6 +13,12 @@ export function PantallaAjustos() {
           </Link>
         </li>
         <li>
+          <Link to="/ajustos/aparenca">
+            <span className="nom">{t.aparenca.titol}</span>
+            <span className="detall">{t.aparenca.desc}</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/ajustos/precaucions">
             <span className="nom">{t.ajustos.precaucions}</span>
             <span className="detall">{t.ajustos.precaucionsDesc}</span>

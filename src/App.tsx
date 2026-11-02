@@ -19,6 +19,8 @@ import { PantallaSeguretat } from './pantalles/ajustos/PantallaSeguretat'
 import { PantallaAvui } from './pantalles/avui/PantallaAvui'
 import { ProveidorSincronia } from './sincronia/ContextSincronia'
 import { IndicadorCopia } from './components/IndicadorCopia'
+import { BotoTema } from './components/BotoTema'
+import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
 
 // Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
 const PantallaCalibratge = lazy(() =>
@@ -50,6 +52,7 @@ function Marc() {
             <NavLink to="/ajustos">{t.navegacio.ajustos}</NavLink>
           </nav>
           <IndicadorCopia />
+          <BotoTema />
           <Boto variant="discret" onClick={bloquejar}>
             {t.app.bloquejar}
           </Boto>
@@ -65,6 +68,19 @@ function Marc() {
 
 /** Mentre l'app és bloquejada no es munta cap pantalla amb dades. */
 function Porta() {
+  const { estat } = useSessio()
+  if (estat.tipus === 'desbloquejat') return <PortaOberta />
+  return (
+    <>
+      <div className="tema-entrada">
+        <BotoTema petit />
+      </div>
+      <PortaOberta />
+    </>
+  )
+}
+
+function PortaOberta() {
   const { estat, connectarGoogle, crearContrasenya, desbloquejar, desbloquejarAmbEmpremta, recuperar } = useSessio()
   switch (estat.tipus) {
     case 'carregant':
@@ -116,6 +132,7 @@ function Porta() {
             <Route path="ajustos/calibratge" element={<PantallaCalibratge />} />
             <Route path="ajustos/precaucions" element={<PantallaPrecaucions />} />
             <Route path="ajustos/seguretat" element={<PantallaSeguretat />} />
+            <Route path="ajustos/aparenca" element={<PantallaAparenca />} />
             <Route path="*" element={<Navigate to="/avui" replace />} />
           </Route>
         </Routes>

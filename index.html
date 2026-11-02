@@ -8,6 +8,14 @@
     <link rel="icon" type="image/svg+xml" href="/logo/qi-icona.svg" />
     <link rel="apple-touch-icon" href="/logo/qi-icona-180.png" />
     <title>Qi</title>
+    <!-- Tema triat en aquest dispositiu (src/tema/tema.ts), abans de pintar res -->
+    <script>
+      try {
+        var tema = localStorage.getItem('qi.tema')
+        if (tema === 'clar') document.documentElement.dataset.theme = 'light'
+        if (tema === 'fosc') document.documentElement.dataset.theme = 'dark'
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -39,12 +39,13 @@
   -webkit-text-size-adjust: 100%;
 }
 
-/* Mode fosc (segons el sistema): tinta sobre paper passa a paper sobre tinta.
-   La paleta es redefineix i tots els tokens la segueixen. El cos i l'orella
-   es continuen veient sobre paper clar (la pell i les etiquetes hi estan
-   pensades). */
+/* Mode fosc: tinta sobre paper passa a paper sobre tinta. La paleta es
+   redefineix i tots els tokens la segueixen. El cos i l'orella es continuen
+   veient sobre paper clar (la pell i les etiquetes hi estan pensades).
+   Segueix el sistema, llevat que s'hagi triat «Clar» o «Fosc» amb la icona
+   del tema (data-theme a <html>, src/tema/tema.ts). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     color-scheme: dark;
     --paper: #151917;
     --boira: #222a26;
@@ -59,7 +60,7 @@
     --avis-suau: #3b2722;
   }
 
-  .zona-visor {
+  :root:not([data-theme='light']) .zona-visor {
     --paper: #f6f3ec;
     --boira: #dce5df;
     --jade: #2f5d50;
@@ -70,11 +71,101 @@
     --linia: #cfd9d2;
     --accent-fosc: #234a3f;
     --accent-suau: #e6ede8;
+    /* Els tokens es calculen a l'arrel: aquí cal tornar-los a posar */
+    --fons: #f6f3ec;
+    --superficie: #dce5df;
+    --tinta: #1f2421;
+    --accent: #2f5d50;
+    --error: #b5432f;
+    --avis: #b5432f;
     color: var(--tinta);
   }
 
-  .estat-costats span.fet {
+  :root:not([data-theme='light']) .estat-costats span.fet {
     color: var(--paper);
+  }
+
+  :root:not([data-theme='light']) .simbol-tema-clar {
+    display: none !important;
+  }
+
+  :root:not([data-theme='light']) .simbol-tema-fosc {
+    display: block !important;
+  }
+}
+
+:root[data-theme='dark'] {
+    color-scheme: dark;
+    --paper: #151917;
+    --boira: #222a26;
+    --jade: #8cc0ae;
+    --tinta-base: #e9e7e0;
+    --cinabri: #e4826c;
+    --clar: #1c221f;
+    --tinta-suau: #a9b3ad;
+    --linia: #34403a;
+    --accent-fosc: #b4d9cb;
+    --accent-suau: #26332d;
+    --avis-suau: #3b2722;
+}
+
+:root[data-theme='dark'] .zona-visor {
+    --paper: #f6f3ec;
+    --boira: #dce5df;
+    --jade: #2f5d50;
+    --tinta-base: #1f2421;
+    --cinabri: #b5432f;
+    --clar: #fcfbf7;
+    --tinta-suau: #59615c;
+    --linia: #cfd9d2;
+    --accent-fosc: #234a3f;
+    --accent-suau: #e6ede8;
+    /* Els tokens es calculen a l'arrel: aquí cal tornar-los a posar */
+    --fons: #f6f3ec;
+    --superficie: #dce5df;
+    --tinta: #1f2421;
+    --accent: #2f5d50;
+    --error: #b5432f;
+    --avis: #b5432f;
+    color: var(--tinta);
+}
+
+:root[data-theme='dark'] .estat-costats span.fet {
+  color: var(--paper);
+}
+
+:root[data-theme='dark'] .simbol-tema-clar {
+  display: none !important;
+}
+
+:root[data-theme='dark'] .simbol-tema-fosc {
+  display: block !important;
+}
+
+/* Símbol: la versió clara amb el tema fosc */
+.simbol-tema-fosc {
+  display: none !important;
+}
+
+/* Canvi de tema: transició suau dels colors (sense, si es demana menys moviment) */
+html.canvi-tema,
+html.canvi-tema *,
+html.canvi-tema *::before,
+html.canvi-tema *::after {
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease,
+    fill 0.4s ease,
+    stroke 0.4s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.canvi-tema,
+  html.canvi-tema *,
+  html.canvi-tema *::before,
+  html.canvi-tema *::after {
+    transition: none !important;
   }
 }
 
@@ -136,10 +227,6 @@ a {
   line-height: 1;
   color: var(--jade);
   text-decoration: none;
-}
-
-.logotip picture {
-  display: block;
 }
 
 .logotip img {
@@ -1896,4 +1983,42 @@ fieldset {
 .targeta-desbloqueig .enllac-secundari:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* --- Icona del tema --- */
+
+.boto-tema {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.boto-tema:hover {
+  background: var(--accent-suau);
+}
+
+.boto-tema.petit {
+  width: 40px;
+  height: 40px;
+  color: var(--tinta-suau);
+}
+
+.boto-tema.petit svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* A la pantalla d'entrada, petita a la cantonada de dalt a la dreta */
+.tema-entrada {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
 }
