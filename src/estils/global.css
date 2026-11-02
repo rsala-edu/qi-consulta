@@ -982,60 +982,182 @@ fieldset {
   background: var(--superficie);
 }
 
+/* --- Punts marcats: una línia per punt, per a 20–30 agulles ---
+   La secció ocupa la resta de la columna: la capçalera queda fixa i només la
+   llista es desplaça (no tota la pàgina). */
+.panell-mapa > .llista-marcats-seccio {
+  flex: 1 1 0;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.llista-marcats-capcalera {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--linia);
+}
+
+.llista-marcats-capcalera h2 {
+  margin: 0;
+}
+
+.llista-marcats-eines {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.llista-marcats-eines select {
+  min-height: 36px;
+  font-size: 0.85rem;
+  padding: 0 8px;
+}
+
+.enllac-treure-tots {
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-height: 36px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--avis);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.confirmar-treure {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  padding: 8px 10px;
+  border-radius: var(--radi);
+  background: var(--avis-suau);
+  font-size: 0.9rem;
+}
+
+.confirmar-treure .boto {
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.llista-marcats-desplacament {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.grup-marcats-capcalera {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 4px;
+  border: none;
+  background: var(--fons);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--tinta-suau);
+  text-align: left;
+  cursor: pointer;
+}
+
+.grup-marcats-capcalera .fletxa {
+  width: 12px;
+}
+
 .llista-marcats {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .llista-marcats li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2px;
-  padding: 6px 0 6px 10px;
-  border-bottom: 1px solid var(--linia);
+  display: flex;
+  align-items: center;
+  height: 36px;
+  border-bottom: 1px solid color-mix(in srgb, var(--linia) 60%, transparent);
 }
 
-/* Cada fila té sempre les mateixes tres línies: color, codi i nom; mapa,
-   costat i tècnica; «Veure» i «Treure» a la dreta. El text que no hi cap
-   s'escurça amb «…» en lloc de saltar de línia. */
-.llista-marcats .marcat-linia {
+.fila-marcat {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
+  padding: 0 6px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--tinta);
+  text-align: left;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: pointer;
 }
 
-.llista-marcats .marcat-linia > * {
+.fila-marcat:hover {
+  background: var(--accent-suau);
+}
+
+.fila-marcat .punt-color {
   flex-shrink: 0;
+  margin: 0;
 }
 
-.llista-marcats .marcat-linia > .pinyin {
-  flex-shrink: 1;
+.fila-marcat .codi {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.fila-marcat .nom {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--tinta-suau);
 }
 
-.llista-marcats span.marcat-linia.detall {
-  display: block;
+.fila-marcat .costat {
+  flex-shrink: 0;
+  width: 1.4em;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--tinta-suau);
 }
 
-.llista-marcats .marcat-accions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 4px;
+.treure-marcat {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--tinta-suau);
+  cursor: pointer;
 }
 
-.llista-marcats .boto {
-  min-height: 44px;
-  padding: 0 12px;
+.treure-marcat:hover {
+  background: var(--avis-suau);
+  color: var(--avis);
 }
 
 /* Al panell, cap bloc s'ha d'encongir (la llista de punts quedava amb alçada 0) */
@@ -1814,8 +1936,12 @@ fieldset {
 
 /* --- Còpia a Google Drive --- */
 
-.indicador-copia {
+.indicador-copia-arrel {
+  position: relative;
   margin-left: auto;
+}
+
+.indicador-copia {
   border: 1px solid var(--linia);
   background: transparent;
   border-radius: 999px;
@@ -1829,6 +1955,7 @@ fieldset {
 }
 
 .indicador-copia.estat-cal-connectar,
+.indicador-copia.estat-sense-connexio,
 .indicador-copia.estat-error {
   color: var(--avis);
   border-color: var(--avis);
@@ -2438,4 +2565,70 @@ fieldset {
 
 .codi-error .enllac-secundari {
   min-height: 36px;
+}
+
+/* Panell de la píndola de Drive */
+.panell-copia {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: min(360px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: calc(var(--radi) * 1.4);
+  background: var(--superficie);
+  box-shadow: 0 12px 40px rgb(31 36 33 / 0.18);
+}
+
+.panell-copia h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.panell-copia p {
+  margin: 0;
+}
+
+/* Tipus de visita calculat (no editable) */
+.tipus-calculat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tipus-calculat .etiqueta-camp {
+  font-size: 0.9rem;
+  color: var(--tinta-suau);
+}
+
+.tipus-calculat output {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: var(--radi);
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+  font-weight: 600;
+}
+
+/* Avís discret quan el recàlcul canvia una altra cita */
+.avis-tipus-visita {
+  margin: 0 0 12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+  font-size: 0.92rem;
+}
+
+.avis-tipus-visita p {
+  margin: 0;
+}
+
+.avis-passat {
+  color: var(--avis);
 }

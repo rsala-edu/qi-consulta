@@ -22,6 +22,7 @@ import {
   quanCanviiElPermis,
   tokenGoogle,
 } from './google'
+import { classificarErrorSincronia, type ErrorSincronia } from './motiuSincronia'
 import { sincronitzar } from './sincronitzar'
 
 export type EstatSincronia =
@@ -39,6 +40,8 @@ interface ValorSincronia {
   ultimaCopia: string | null
   /** Hi ha canvis locals que encara no són a Drive */
   pendent: boolean
+  /** Si l'última sincronia ha fallat: el motiu (sense cap dada clínica) */
+  error: ErrorSincronia | null
   /** S'ha de cridar des d'un toc */
   connectar(): Promise<void>
   sincronitzarAra(): Promise<void>
@@ -60,6 +63,7 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   const [estat, setEstat] = useState<EstatSincronia>(googleConfigurat() ? 'cal-connectar' : 'sense-google')
   const [ultimaCopia, setUltimaCopia] = useState<string | null>(null)
   const [pendent, setPendent] = useState(false)
+  const [error, setError] = useState<ErrorSincronia | null>(null)
   const enCurs = useRef(false)
   const pendentRef = useRef(false)
   const temporitzador = useRef<number | undefined>(undefined)
@@ -102,6 +106,7 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         await guardarEstatGoogle(db, nou)
         google.current = nou
         setUltimaCopia(r.copiaAt)
+        setError(null)
         setEstat('al-dia')
       } while (pendentRef.current && tokenGoogle())
       setPendent(false)
@@ -109,7 +114,10 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       if (e instanceof ErrorAutoritzacio) {
         oblidarPermis()
         sensePermis()
-      } else setEstat('error')
+      } else {
+        setError(classificarErrorSincronia(e))
+        setEstat('error')
+      }
     } finally {
       enCurs.current = false
     }
@@ -192,6 +200,13 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
     }
   }, [db, sincronitzarAra])
 
+  // Sense connexió: es torna a provar sol quan torna la connexió
+  useEffect(() => {
+    const enLinia = () => void sincronitzarAra()
+    window.addEventListener('online', enLinia)
+    return () => window.removeEventListener('online', enLinia)
+  }, [sincronitzarAra])
+
   // Reserva manual. En arribar el permís, la subscripció de dalt ja sincronitza
   const connectar = useCallback(async () => {
     await connectarGoogle()
@@ -200,8 +215,8 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   }, [connectarGoogle, db])
 
   const valor = useMemo(
-    () => ({ estat, ultimaCopia, pendent, connectar, sincronitzarAra }),
-    [estat, ultimaCopia, pendent, connectar, sincronitzarAra],
+    () => ({ estat, ultimaCopia, pendent, error, connectar, sincronitzarAra }),
+    [estat, ultimaCopia, pendent, error, connectar, sincronitzarAra],
   )
   return <Context.Provider value={valor}>{children}</Context.Provider>
 }

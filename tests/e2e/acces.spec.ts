@@ -104,7 +104,11 @@ test('si la renovació silenciosa falla, queda «Drive: connectar» com a reserv
   await menu(page, 'Avui').click()
   expect(google.autoritzacions.filter((a) => a.prompt === 'none')).toHaveLength(1)
 
+  // La píndola obre el panell amb el motiu i el botó per tornar a entrar
   await indicador.click()
+  const panell = page.getByRole('dialog', { name: 'Còpia a Google Drive' })
+  await expect(panell.getByRole('status')).toHaveText('Cal tornar a entrar amb Google.')
+  await panell.getByRole('button', { name: 'Tornar a entrar amb Google' }).click()
   await esperarCopia(page)
   expect(google.autoritzacions.at(-1)!.prompt).toBeNull()
 })
@@ -153,6 +157,7 @@ test('còpia xifrada a Drive, restauració en un altre dispositiu i canvis entre
   await nouPacient(pc, 'Biel', 'Prova Inventat')
   await esperarCopia(pc)
   await page.locator('.indicador-copia').click()
+  await page.getByRole('dialog', { name: 'Còpia a Google Drive' }).getByRole('button', { name: 'Desar ara a Drive' }).click()
   await esperarCopia(page)
   await menu(page, 'Pacients').click()
   await expect(page.getByRole('link', { name: /Biel Prova Inventat/ })).toBeVisible()
@@ -293,8 +298,8 @@ test('Avui: les cites del dia en ordre i «Començar visita» a la següent', as
     await dialeg.getByRole('searchbox', { name: 'Cerca el pacient' }).fill(qui!)
     await dialeg.locator('.resultats-pacient button').first().click()
     await dialeg.getByLabel('Hora').fill(hora!)
-    await dialeg.getByLabel('Tipus').selectOption('primera')
-    await dialeg.getByRole('button', { name: 'Desar' }).click()
+    // A les 12:00, la de les 00:05 ja ha passat: es registra com a visita ja feta
+    await dialeg.getByRole('button', { name: hora === '00:05' ? 'Registrar com a visita ja feta' : 'Desar' }).click()
     await expect(dialeg).toBeHidden()
   }
 
@@ -303,10 +308,35 @@ test('Avui: les cites del dia en ordre i «Començar visita» a la següent', as
   await expect(cites).toHaveCount(2)
   await expect(cites.nth(0)).toContainText('00:05–01:05')
   await expect(cites.nth(0)).toContainText('Aina Provencal Inventada')
+  await expect(cites.nth(0)).toContainText('Feta')
   await expect(cites.nth(1)).toContainText('23:10–00:10')
   // A les 12:00, la de les 00:05 ja ha passat: la següent és la del Biel
   await expect(page.getByRole('button', { name: 'Començar visita' })).toHaveCount(1)
   await expect(cites.nth(1).getByRole('button', { name: 'Començar visita' })).toBeVisible()
   await cites.nth(1).getByRole('button', { name: 'Començar visita' }).click()
   await expect(page.getByRole('heading', { name: 'Biel Prova Inventat' })).toBeVisible()
+})
+
+test('«Drive: error»: la píndola explica el motiu, l\'última còpia correcta i deixa tornar-ho a provar', async ({ page, google }) => {
+  await crearContrasenya(page)
+  await nouPacient(page, 'Aina', 'Provencal Inventada', '600 111 222')
+  await esperarCopia(page)
+  // Drive comença a fallar
+  google.fallaDrive = 503
+  await nouPacient(page, 'Biel', 'Prova Inventat')
+  const indicador = page.locator('.indicador-copia')
+  await expect(indicador).toHaveText('Drive: error', { timeout: 20_000 })
+  await indicador.click()
+  const panell = page.getByRole('dialog', { name: 'Còpia a Google Drive' })
+  await expect(panell.getByRole('status')).toHaveText('Google Drive no ha respost bé. Es tornarà a provar d\'aquí a una estona.')
+  await expect(panell).toContainText('Última còpia correcta:')
+  await expect(panell).toContainText('Codi: DRV-503')
+  // Cap dada clínica al panell
+  for (const dada of ['Aina', 'Biel', '600 111 222']) await expect(panell).not.toContainText(dada)
+
+  // Drive torna: «Tornar-ho a provar» ho desa
+  google.fallaDrive = null
+  await panell.getByRole('button', { name: 'Tornar-ho a provar' }).click()
+  await esperarCopia(page)
+  await expect(panell.getByRole('status')).toHaveText('La còpia de Google Drive està al dia.')
 })

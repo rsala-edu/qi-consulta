@@ -73,7 +73,6 @@ test('tocar un espai buit crea una cita amb el dia i l\'hora posats', async ({ p
   await expect(dialeg.getByLabel('Hora')).toHaveValue('11:15')
   await dialeg.getByRole('searchbox', { name: 'Cerca el pacient' }).fill('aina')
   await dialeg.getByRole('button', { name: /Aina Provencal Inventada/ }).click()
-  await dialeg.getByLabel('Tipus').selectOption('primera')
   await dialeg.getByLabel('Motiu').fill('Acúfens')
   await dialeg.getByRole('button', { name: 'Desar' }).click()
   await expect(dialeg).toBeHidden()
@@ -136,18 +135,17 @@ test('el minicalendari salta a qualsevol dia i marca un dia com a tancat', async
   // Una cita en un dia tancat: avisa, però deixa desar-la
   await dia.getByRole('button', { name: 'Nova cita el dimarts, 8 de desembre de 2026 a les 10:00' }).click()
   const dialeg = page.getByRole('dialog', { name: 'Nova cita' })
-  await expect(dialeg.getByRole('status')).toHaveText(
+  await expect(dialeg.getByRole('status').filter({ hasText: /^Atenció/ })).toHaveText(
     'Atenció: aquest dia la consulta està tancada. Es pot desar igualment.',
   )
   // Fora d'horari en un dia obert, també
   await dialeg.getByLabel('Data').fill('2026-12-09')
   await dialeg.getByLabel('Hora').fill('20:30')
-  await expect(dialeg.getByRole('status')).toContainText('fora de l\'horari de consulta (09:00–20:00)')
+  await expect(dialeg.getByRole('status').filter({ hasText: /^Atenció/ })).toContainText('fora de l\'horari de consulta (09:00–20:00)')
   await dialeg.getByLabel('Data').fill('2026-12-08')
   await dialeg.getByLabel('Hora').fill('10:00')
   await dialeg.getByRole('searchbox', { name: 'Cerca el pacient' }).fill('biel')
   await dialeg.getByRole('button', { name: /Biel Prova Inventat/ }).click()
-  await dialeg.getByLabel('Tipus').selectOption('primera')
   await dialeg.getByRole('button', { name: 'Desar' }).click()
   await expect(dia.getByRole('button', { name: /10:00–11:00 Biel/ })).toBeVisible()
 
@@ -240,4 +238,86 @@ test('quan cal desplaçar-se, la vista comença una hora abans de l\'hora actual
   const h10 = (await page.locator('.agenda-hores span', { hasText: '10:00' }).boundingBox())!
   expect(h10.y + h10.height / 2 - (caixa.y + 52)).toBeGreaterThanOrEqual(0)
   expect(h10.y + h10.height / 2 - (caixa.y + 52)).toBeLessThan(14)
+})
+
+/** Crea una cita des del botó «Nova cita» */
+async function crearCita(page: Page, qui: string, dia: string, hora: string, boto = 'Desar') {
+  await page.getByRole('main').getByRole('button', { name: 'Nova cita', exact: true }).first().click()
+  const d = page.getByRole('dialog', { name: 'Nova cita' })
+  await d.getByLabel('Data').fill(dia)
+  await d.getByLabel('Hora').fill(hora)
+  await d.getByRole('searchbox', { name: 'Cerca el pacient' }).fill(qui)
+  await d.locator('.resultats-pacient button').first().click()
+  await d.getByRole('button', { name: boto }).click()
+  await expect(d).toBeHidden()
+}
+
+test('tipus de visita automàtic: una cita abans de la primera la passa a seguiment; anul·lar-la ho desfà', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Aina', 'Provencal Inventada')
+  await menu(page, 'Agenda').click()
+  await crearCita(page, 'aina', '2026-11-04', '10:00')
+  const setmana = (hora: string) => page.locator(`.cita-agenda[title^="${hora}–"]`)
+  await expect(setmana('10:00')).toHaveAttribute('title', /Primera visita/)
+
+  // Una de nova abans: passa a ser la primera, i l'altra, seguiment (amb avís)
+  await crearCita(page, 'aina', '2026-11-03', '17:00')
+  await expect(page.getByText('La cita del dc. 4/11 ha passat a seguiment')).toBeVisible()
+  await expect(setmana('17:00')).toHaveAttribute('title', /Primera visita/)
+  await expect(setmana('10:00')).toHaveAttribute('title', /Seguiment/)
+
+  // Nova cita en un altre episodi: primera visita encara que n'hi hagi d'anteriors
+  await page.getByRole('main').getByRole('button', { name: 'Nova cita', exact: true }).first().click()
+  let d = page.getByRole('dialog', { name: 'Nova cita' })
+  await d.getByLabel('Data').fill('2026-11-06')
+  await d.getByLabel('Hora').fill('12:00')
+  await d.getByRole('searchbox', { name: 'Cerca el pacient' }).fill('aina')
+  await d.locator('.resultats-pacient button').first().click()
+  await expect(d.getByRole('status', { name: 'Tipus' })).toHaveText('Seguiment')
+  await d.getByLabel('Nou episodi (primera visita per un problema nou)').check()
+  await expect(d.getByRole('status', { name: 'Tipus' })).toHaveText('Primera visita')
+  await d.getByRole('button', { name: 'Desar' }).click()
+  await expect(setmana('12:00')).toHaveAttribute('title', /Primera visita/)
+
+  // Anul·lar la primera visita: la següent torna a ser la primera
+  await setmana('17:00').click()
+  d = page.getByRole('dialog', { name: 'Cita de Aina Provencal Inventada' })
+  await d.getByRole('button', { name: 'Editar' }).click()
+  await d.getByLabel('Estat').selectOption('anullada')
+  await d.getByRole('button', { name: 'Desar' }).click()
+  await expect(page.getByText('La cita del dc. 4/11 ha passat a primera visita')).toBeVisible()
+  await expect(setmana('10:00')).toHaveAttribute('title', /Primera visita/)
+  // La del nou episodi continua essent primera visita
+  await expect(setmana('12:00')).toHaveAttribute('title', /Primera visita/)
+})
+
+test('cites en el passat: es registren com a visita ja feta', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Biel', 'Prova Inventat')
+  await menu(page, 'Agenda').click()
+  // Tocar un espai buit d'aquest matí (ara són les 16:20): el formulari en mode «visita ja feta»
+  const dimarts = page.getByRole('region', { name: 'Cites del dimarts, 3 de novembre de 2026' })
+  await dimarts.getByRole('button', { name: 'Nova cita el dimarts, 3 de novembre de 2026 a les 10:00' }).click()
+  const d = page.getByRole('dialog', { name: 'Nova cita' })
+  await expect(d.getByText('Aquesta hora ja ha passat.')).toBeVisible()
+  await expect(d.getByRole('button', { name: 'Desar' })).toHaveCount(0)
+  // Dins dels 15 minuts de marge (16:10), es pot desar com a programada
+  await d.getByLabel('Hora').fill('16:10')
+  await expect(d.getByText('Aquesta hora ja ha passat.')).toHaveCount(0)
+  await expect(d.getByRole('button', { name: 'Desar' })).toBeVisible()
+  await d.getByLabel('Hora').fill('10:00')
+  await d.getByRole('searchbox', { name: 'Cerca el pacient' }).fill('biel')
+  await d.locator('.resultats-pacient button').first().click()
+  await d.getByRole('button', { name: 'Registrar com a visita ja feta' }).click()
+  await expect(d).toBeHidden()
+  await expect(page.locator('.cita-agenda[title^="10:00–"]')).toHaveAttribute('title', /Primera visita · Feta/)
+
+  // Moure una cita programada al passat: també es registra com a feta
+  await crearCita(page, 'biel', '2026-11-05', '11:00')
+  await page.locator('.cita-agenda[title^="11:00–"]').click()
+  const f = page.getByRole('dialog', { name: 'Cita de Biel Prova Inventat' })
+  await f.getByRole('button', { name: 'Editar' }).click()
+  await f.getByLabel('Data').fill('2026-11-02')
+  await expect(f.getByText('Aquesta hora ja ha passat.')).toBeVisible()
+  await expect(f.getByRole('button', { name: 'Registrar com a visita ja feta' })).toBeVisible()
 })

@@ -20,11 +20,18 @@ interface DefinicioTaula {
   clau: string
   /** Camp amb la data de l'últim canvi */
   data: string
+  /**
+   * Camp que la base de dades vol únic (índex &). Si dos dispositius creen,
+   * sense haver sincronitzat, un registre per al mateix valor (la fitxa clínica
+   * d'un pacient), es queda el més nou: si no, escriure'ls tots dos falla i la
+   * sincronia queda bloquejada («Drive: error»).
+   */
+  unic?: string
 }
 
 export const TAULES: readonly DefinicioTaula[] = [
   { nom: 'pacients', clau: 'id', data: 'modificatAt' },
-  { nom: 'fitxesCliniques', clau: 'id', data: 'modificatAt' },
+  { nom: 'fitxesCliniques', clau: 'id', data: 'modificatAt', unic: 'pacientId' },
   { nom: 'cites', clau: 'id', data: 'modificatAt' },
   { nom: 'calibratge', clau: 'id', data: 'modificatAt' },
   { nom: 'calibratgeOrella', clau: 'codi', data: 'modificatAt' },
@@ -96,13 +103,26 @@ export function fusionar(a: Contingut, b: Contingut): Contingut {
       const ja = perClau.get(clau)
       if (!ja || valor(r, t.data) > valor(ja, t.data)) perClau.set(clau, r)
     }
-    taules[t.nom] = [...perClau.entries()]
-      .filter(([clau, r]) => {
-        const e = esborrats.get(`${t.nom}:${clau}`)
-        return !e || e.esborratAt < valor(r, t.data)
-      })
-      .sort(([x], [y]) => x.localeCompare(y))
-      .map(([, r]) => r)
+    let vius = [...perClau.entries()].filter(([clau, r]) => {
+      const e = esborrats.get(`${t.nom}:${clau}`)
+      return !e || e.esborratAt < valor(r, t.data)
+    })
+    if (t.unic) {
+      const camp = t.unic
+      const perValor = new Map<string, [string, Registre]>()
+      for (const entrada of vius) {
+        const v = valor(entrada[1], camp)
+        const ja = perValor.get(v)
+        // El més nou; a igualtat, el de clau més petita (perquè tots dos dispositius triïn el mateix)
+        const guanya =
+          !ja ||
+          valor(entrada[1], t.data) > valor(ja[1], t.data) ||
+          (valor(entrada[1], t.data) === valor(ja[1], t.data) && entrada[0] < ja[0])
+        if (guanya) perValor.set(v, entrada)
+      }
+      vius = [...perValor.values()]
+    }
+    taules[t.nom] = vius.sort(([x], [y]) => x.localeCompare(y)).map(([, r]) => r)
   }
   // Un esborrat ja no cal si el registre s'ha tornat a crear després
   return { versio: 1, taules, esborrats: [...esborrats.values()].sort((x, y) => x.id.localeCompare(y.id)) }

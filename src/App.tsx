@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import { Boto } from './components/Boto'
 import { Simbol } from './components/Simbol'
@@ -18,6 +18,7 @@ import { PantallaPrecaucions } from './pantalles/ajustos/PantallaPrecaucions'
 import { PantallaSeguretat } from './pantalles/ajustos/PantallaSeguretat'
 import { PantallaAvui } from './pantalles/avui/PantallaAvui'
 import { ProveidorSincronia } from './sincronia/ContextSincronia'
+import { migrarTipusVisita } from './db/tipusVisita'
 import { IndicadorCopia } from './components/IndicadorCopia'
 import { BotoTema } from './components/BotoTema'
 import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
@@ -35,8 +36,12 @@ import { ProveidorEsborranys } from './sessio/ContextEsborranys'
 import { ProveidorSessio, useMagatzem, useSessio } from './sessio/ContextSessio'
 
 function Marc() {
-  const { bloquejar } = useSessio()
+  const { bloquejar, db } = useSessio()
   const magatzem = useMagatzem()
+  // Una sola vegada per dispositiu: el tipus de visita automàtic a les cites que ja hi havia
+  useEffect(() => {
+    void migrarTipusVisita(db, magatzem).catch(() => {})
+  }, [db, magatzem])
   return (
     <ProveidorSincronia>
       <ProveidorEsborranys magatzem={magatzem}>

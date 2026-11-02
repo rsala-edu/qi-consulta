@@ -2,6 +2,7 @@
 // locals, desa el resultat i el torna a pujar xifrat. A més de la còpia
 // actual, en guarda una de diària (30 dies) i una de mensual (12 mesos).
 
+import { ErrorDrive } from './drive'
 import { guardarClauEmbolcallada, guardarSecrets, llegirClauEmbolcallada, llegirClauMestraAt, llegirSecrets } from '../db/magatzem'
 import type { QiDB } from '../db/esquema'
 import {
@@ -100,7 +101,12 @@ async function copiesPeriodiques(drive: Drive, fitxers: FitxerDrive[], text: str
   for (const f of fitxers) {
     const diari = DIARIA.exec(f.name)?.[1]
     const mensual = MENSUAL.exec(f.name)?.[1]
-    if ((diari && diari < limitDiari) || (mensual && mensual < limitMensual)) await drive.esborrar(f.id)
+    if ((diari && diari < limitDiari) || (mensual && mensual < limitMensual)) {
+      // Si l'altre dispositiu ja l'ha esborrada, no és cap error
+      await drive.esborrar(f.id).catch((e: unknown) => {
+        if (!(e instanceof ErrorDrive && e.estat === 404)) throw e
+      })
+    }
   }
 }
 

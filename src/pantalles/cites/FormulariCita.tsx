@@ -1,8 +1,11 @@
-// Formulari d'una cita (nova o existent): pacient, dia, hora, durada, tipus,
-// estat, motiu i notes. Avisa si se solapa amb una altra cita.
+// Formulari d'una cita (nova o existent): pacient, dia, hora, durada, estat,
+// motiu i notes. El tipus (primera visita o seguiment) es calcula sol; la
+// casella «Nou episodi» en fa una primera visita. Avisa si se solapa amb una
+// altra cita, si és fora d'horari i si l'hora ja ha passat (llavors es
+// registra com a visita ja feta).
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { Boto } from '../../components/Boto'
@@ -11,23 +14,27 @@ import { avisHorari, hhmm, type Horari } from '../../domini/agenda'
 import { cercarPacients } from '../../domini/cercaPacients'
 import {
   DURADA_PER_DEFECTE,
+  horaPassada,
   ESTATS_CITA,
-  errorSeguiment,
   esquemaDadesCita,
   fiDe,
-  primeraVisita,
   solapaments,
-  TIPUS_CITA,
   type Cita,
   type DadesCita,
+  type TipusCita,
 } from '../../domini/cita'
+import { tipusCalculats } from '../../domini/tipusVisita'
 import { dadesPacientBuides, esquemaDadesPacient, nomComplet, type Pacient } from '../../domini/pacient'
-import { diaLlarg, formatar, hora as horaDe, t } from '../../i18n/t'
+import { formatar, hora as horaDe, t } from '../../i18n/t'
+
+const DATA_HORA = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
 
 const esquemaFormulari = esquemaDadesCita.omit({ inici: true, sessioId: true }).extend({
   dia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t.errors.dataInvalida),
   hora: z.string().regex(/^\d{2}:\d{2}$/, t.errors.horaInvalida),
+  nouEpisodi: z.boolean(),
 })
+
 type ValorsFormulari = z.infer<typeof esquemaFormulari>
 
 interface Props {
@@ -46,6 +53,8 @@ interface Props {
   /** Per avisar (sense impedir-ho) d'una cita en un dia tancat o fora d'horari */
   horari?: Horari
   diesTancats?: ReadonlySet<string>
+  /** L'hora actual (per a les proves) */
+  ara?: Date
 }
 
 export function FormulariCita({
@@ -60,7 +69,11 @@ export function FormulariCita({
   onCrearPacient,
   horari,
   diesTancats = new Set<string>(),
+  ara: araProp,
 }: Props) {
+  // L'hora d'obrir el formulari
+  const [araObrir] = useState(() => new Date())
+  const ara = araProp ?? araObrir
   const c = t.cites
   const [nous, setNous] = useState<Pacient[]>([])
   const tots = [...pacients, ...nous]
@@ -82,11 +95,12 @@ export function FormulariCita({
       estat: inicial.estat,
       motiu: inicial.motiu,
       notes: inicial.notes,
+      nouEpisodi: inicial.nouEpisodi ?? false,
     },
   })
-  const [pacientId, dia, hora, durada, estat, tipus] = useWatch({
+  const [pacientId, dia, hora, durada, estat, nouEpisodi] = useWatch({
     control,
-    name: ['pacientId', 'dia', 'hora', 'durada', 'estat', 'tipus'],
+    name: ['pacientId', 'dia', 'hora', 'durada', 'estat', 'nouEpisodi'],
   })
 
   const pacient = tots.find((p) => p.id === pacientId)
@@ -95,19 +109,38 @@ export function FormulariCita({
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(inici) && Number.isFinite(durada) && durada > 0
       ? solapaments({ id, inici, durada, estat }, altres)
       : []
-  // Un seguiment ha de ser posterior a la primera visita del pacient
-  const errorTipus = errorSeguiment({ id, pacientId, inici, tipus, estat }, altres)
-  const primera = errorTipus === 'anteriorAPrimera' ? primeraVisita(pacientId, altres, id) : undefined
-  const [intentat, setIntentat] = useState(false)
+  // Programada a una hora que ja ha passat: es registra com a visita ja feta
+  const passada = estat === 'programada' && DATA_HORA.test(inici) && horaPassada(inici, ara)
+  const estatFinal = passada ? 'feta' : estat
+  // El tipus es calcula sol (la més antiga és la primera visita); les fetes no canvien
+  const tipus: TipusCita =
+    id && inicial.estat === 'feta'
+      ? inicial.tipus
+      : (tipusCalculats([
+          ...altres.filter((x) => x.id !== id),
+          // Una cita que es marca (o es registra) ara com a feta es calcula com les programades
+          {
+            id: id ?? '·nova',
+            pacientId,
+            inici,
+            tipus: inicial.tipus,
+            estat: estatFinal === 'feta' ? 'programada' : estatFinal,
+            nouEpisodi,
+          },
+        ]).get(id ?? '·nova') ?? inicial.tipus)
+  // Si la durada no s'ha tocat, segueix la del tipus (60 o 40 minuts). En una
+  // cita nova, des del principi; en una que ja existeix, només si canvia el tipus
+  const tipusAnterior = useRef(id ? tipus : inicial.tipus)
+  useEffect(() => {
+    if (tipusAnterior.current === tipus) return
+    tipusAnterior.current = tipus
+    if (!dirtyFields.durada) setValue('durada', DURADA_PER_DEFECTE[tipus])
+  }, [tipus, dirtyFields.durada, setValue])
   const avis =
     horari && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(inici) && Number.isFinite(durada) && durada > 0
       ? avisHorari({ inici, durada }, horari, diesTancats)
       : null
 
-  function canviarAPrimera() {
-    setValue('tipus', 'primera', { shouldDirty: true })
-    if (!dirtyFields.durada) setValue('durada', DURADA_PER_DEFECTE.primera)
-  }
   const nomDe = (pid: string) => {
     const p = tots.find((x) => x.id === pid)
     return p ? nomComplet(p) : '—'
@@ -115,11 +148,9 @@ export function FormulariCita({
 
   async function enviar(v: ValorsFormulari) {
     setErrorDesar(false)
-    setIntentat(true)
-    if (errorTipus) return
     const { dia: d, hora: h, ...resta } = v
     try {
-      await onDesar({ ...resta, inici: `${d}T${h}`, sessioId: inicial.sessioId })
+      await onDesar({ ...resta, tipus, estat: estatFinal, inici: `${d}T${h}`, sessioId: inicial.sessioId })
     } catch {
       setErrorDesar(true)
     }
@@ -160,22 +191,10 @@ export function FormulariCita({
         <Camp etiqueta={c.hora} error={errors.hora?.message}>
           <input type="time" step={300} {...register('hora')} />
         </Camp>
-        <Camp etiqueta={c.tipus}>
-          <select
-            {...register('tipus', {
-              // Si la durada no s'ha tocat, segueix la del tipus (60 o 40 minuts)
-              onChange: (e: { target: { value: keyof typeof DURADA_PER_DEFECTE } }) => {
-                if (!dirtyFields.durada) setValue('durada', DURADA_PER_DEFECTE[e.target.value])
-              },
-            })}
-          >
-            {TIPUS_CITA.map((x) => (
-              <option key={x} value={x}>
-                {c.tipusNoms[x]}
-              </option>
-            ))}
-          </select>
-        </Camp>
+        <div className="camp tipus-calculat">
+          <span className="etiqueta-camp">{c.tipus}</span>
+          <output aria-label={c.tipus}>{c.tipusNoms[tipus]}</output>
+        </div>
         <Camp etiqueta={c.durada} error={errors.durada?.message}>
           <input type="number" min={5} max={480} step={5} {...register('durada', { valueAsNumber: true })} />
         </Camp>
@@ -196,19 +215,18 @@ export function FormulariCita({
         <Camp etiqueta={c.notes} ample>
           <textarea rows={2} {...register('notes')} />
         </Camp>
+        {!(id && inicial.estat === 'feta') && (
+          <label className="casella camp-ample">
+            <input type="checkbox" {...register('nouEpisodi')} />
+            {c.nouEpisodi}
+          </label>
+        )}
       </div>
 
-      {errorTipus && (
-        <div className={`avis avis-tipus${intentat ? ' insistent' : ''}`} role="alert">
-          <p>
-            {errorTipus === 'sensePrimera'
-              ? c.errorSensePrimera
-              : formatar(c.errorAnteriorAPrimera, { dia: `${diaLlarg(primera!.inici)}, ${horaDe(primera!.inici)}` })}
-          </p>
-          <Boto variant="secundari" onClick={canviarAPrimera}>
-            {c.canviarAPrimera}
-          </Boto>
-        </div>
+      {passada && (
+        <p className="avis avis-passat" role="status">
+          {c.horaPassada}
+        </p>
       )}
       {encavalcades.length > 0 && (
         <p className="avis" role="alert">
@@ -226,7 +244,7 @@ export function FormulariCita({
 
       <div className="accions accions-esquerra">
         <Boto type="submit" disabled={isSubmitting}>
-          {isSubmitting ? t.app.desant : t.app.desar}
+          {isSubmitting ? t.app.desant : passada ? c.registrarFeta : t.app.desar}
         </Boto>
         <Boto variant="discret" onClick={onCancellar}>
           {t.app.cancellar}

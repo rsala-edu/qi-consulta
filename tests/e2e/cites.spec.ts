@@ -12,6 +12,8 @@ const menu = (page: Page, nom: string) =>
 const DIA = '2026-11-02'
 
 async function entrar(page: Page) {
+  // Rellotge fix: el diumenge abans, perquè les cites de la prova siguin futures
+  await page.clock.setFixedTime(new Date(2026, 10, 1, 8, 0))
   await page.goto('/qi-consulta/')
   await continuarAmbGoogle(page)
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
@@ -45,12 +47,12 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await expect(page.getByRole('heading', { name: 'dilluns, 2 de novembre de 2026' })).toBeVisible()
   const dia = page.getByRole('region', { name: 'Cites del dilluns, 2 de novembre de 2026' })
 
-  // Tocar la franja de les 10:00 i triar l'Aina: primera visita (60 min)
+  // Tocar la franja de les 10:00 i triar l'Aina: és la seva primera cita, primera visita (60 min)
   await dia.getByRole('button', { name: 'Nova cita el dilluns, 2 de novembre de 2026 a les 10:00' }).click()
   let dialeg = page.getByRole('dialog', { name: 'Nova cita' })
   await dialeg.getByRole('searchbox', { name: 'Cerca el pacient' }).fill('aina')
   await dialeg.getByRole('button', { name: /Aina Provencal Inventada/ }).click()
-  await dialeg.getByLabel('Tipus').selectOption('primera')
+  await expect(dialeg.getByRole('status', { name: 'Tipus' })).toHaveText('Primera visita')
   await expect(dialeg.getByLabel('Durada (minuts)')).toHaveValue('60')
   await dialeg.getByLabel('Motiu').fill('Acúfens')
   await dialeg.getByRole('button', { name: 'Desar' }).click()
@@ -65,13 +67,8 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await dialeg.getByLabel('Hora').fill('10:30')
   await dialeg.getByRole('searchbox', { name: 'Cerca el pacient' }).fill('biel')
   await dialeg.getByRole('button', { name: /Biel Prova Inventat/ }).click()
-  // El Biel encara no té cap primera visita: no pot ser de seguiment
-  const avisTipus = dialeg.getByRole('alert').filter({ hasText: 'encara no té cap primera visita' })
-  await expect(avisTipus).toBeVisible()
-  await dialeg.getByRole('button', { name: 'Desar' }).click()
-  await expect(dialeg).toBeVisible()
-  await dialeg.getByRole('button', { name: 'Canviar a «Primera visita»' }).click()
-  await expect(avisTipus).toHaveCount(0)
+  // El Biel encara no té cap cita: primera visita, sola
+  await expect(dialeg.getByRole('status', { name: 'Tipus' })).toHaveText('Primera visita')
   await expect(dialeg.getByLabel('Durada (minuts)')).toHaveValue('60')
   await expect(dialeg.getByRole('alert')).toHaveText('Atenció: se solapa amb Aina Provencal Inventada (10:00–11:00).')
   await dialeg.getByRole('button', { name: 'Desar' }).click()
@@ -112,7 +109,7 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await page.getByLabel('Estat').selectOption('feta')
   await page.getByRole('button', { name: 'Desar' }).click()
   await expect(historial).toContainText('Feta')
-  await expect(page.getByRole('status')).toHaveText('Fetes: 1 · Anul·lades: 0 · No presentat: 0')
+  await expect(page.getByRole('status').filter({ hasText: /^Fetes:/ })).toHaveText('Fetes: 1 · Anul·lades: 0 · No presentat: 0')
 
   // Nova cita des de la fitxa: el pacient ja hi és; després no presentat
   await page.getByRole('button', { name: 'Nova cita' }).click()
@@ -125,7 +122,7 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await historial.getByRole('listitem').filter({ hasText: '9 de novembre' }).getByRole('button', { name: 'Editar' }).click()
   await page.getByLabel('Estat').selectOption('noPresentat')
   await page.getByRole('button', { name: 'Desar' }).click()
-  await expect(page.getByRole('status')).toHaveText('Fetes: 1 · Anul·lades: 0 · No presentat: 1')
+  await expect(page.getByRole('status').filter({ hasText: /^Fetes:/ })).toHaveText('Fetes: 1 · Anul·lades: 0 · No presentat: 1')
 
   // Es conserva després de tancar l'app
   await page.reload()

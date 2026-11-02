@@ -34,6 +34,8 @@ export const esquemaDadesCita = z.object({
   notes: z.string().trim(),
   /** La sessió clínica que s'hi va fer (quan n'hi ha) */
   sessioId: z.string().nullable(),
+  /** Primera visita per un problema nou, encara que n'hi hagi d'anteriors (les cites antigues no el tenen) */
+  nouEpisodi: z.boolean().default(false),
 })
 export type DadesCita = z.infer<typeof esquemaDadesCita>
 
@@ -44,7 +46,17 @@ export type CitaGuardada = z.infer<typeof esquemaCitaGuardada>
 export type Cita = Registre & DadesCita
 
 export function novaCita(pacientId: string, inici: string, tipus: TipusCita = 'seguiment'): DadesCita {
-  return { pacientId, inici, durada: DURADA_PER_DEFECTE[tipus], tipus, estat: 'programada', motiu: '', notes: '', sessioId: null }
+  return {
+    pacientId,
+    inici,
+    durada: DURADA_PER_DEFECTE[tipus],
+    tipus,
+    estat: 'programada',
+    motiu: '',
+    notes: '',
+    sessioId: null,
+    nouEpisodi: false,
+  }
 }
 
 // --- Dates locals ---------------------------------------------------------
@@ -102,6 +114,14 @@ export function minutDelDia(diaHora: string): number {
 
 export function fiDe(c: Pick<DadesCita, 'inici' | 'durada'>): string {
   return sumarMinuts(c.inici, c.durada)
+}
+
+/** Una cita programada pot començar com a molt 15 minuts abans d'ara (la visita que comença ara mateix) */
+export const TOLERANCIA_PASSAT = 15
+
+/** Si una cita programada comença a una hora que ja ha passat (llavors es registra com a feta) */
+export function horaPassada(inici: string, ara: Date): boolean {
+  return inici < diaHoraDe(new Date(ara.getTime() - TOLERANCIA_PASSAT * 60_000))
 }
 
 // --- Solapaments ----------------------------------------------------------

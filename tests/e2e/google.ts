@@ -25,6 +25,8 @@ export interface GoogleSimulat {
   durada: number
   /** La renovació silenciosa (prompt=none) falla, com si Google hagués de preguntar */
   silenciosaFalla: boolean
+  /** Si no és null, Drive respon amb aquest estat (per simular que falla) */
+  fallaDrive: number | null
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' }
@@ -56,6 +58,7 @@ export async function simularGoogle(context: BrowserContext, google: GoogleSimul
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: CORS })
     const u = new URL(req.url())
     google.peticions.push(`${req.method()} ${u.pathname}`)
+    if (google.fallaDrive !== null) return route.fulfill({ status: google.fallaDrive, headers: CORS, body: '' })
     const id = /\/files\/([^/]+)$/.exec(u.pathname)?.[1]
     const json = (cos: unknown) => route.fulfill({ headers: CORS, json: cos })
 
@@ -87,7 +90,7 @@ export async function simularGoogle(context: BrowserContext, google: GoogleSimul
 }
 
 export function nouGoogle(correu = CORREU_DOCTORA): GoogleSimulat {
-  return { correu, fitxers: new Map(), peticions: [], autoritzacions: [], durada: 3599, silenciosaFalla: false }
+  return { correu, fitxers: new Map(), peticions: [], autoritzacions: [], durada: 3599, silenciosaFalla: false, fallaDrive: null }
 }
 
 /** Totes les proves tenen Google simulat (cada una el seu Drive buit). */

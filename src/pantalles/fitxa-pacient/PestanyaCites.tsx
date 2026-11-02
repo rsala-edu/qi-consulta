@@ -8,7 +8,6 @@ import { Indicador } from '../../components/Indicador'
 import {
   diaDe,
   diaHoraDe,
-  errorSeguiment,
   fiDe,
   novaCita,
   ordenarHistorial,
@@ -21,6 +20,8 @@ import { useMagatzem } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 import { FormulariCita } from '../cites/FormulariCita'
 import { useFitxaPacient } from './PantallaFitxaPacient'
+import { useAvisTipus } from '../cites/AvisTipus'
+import { recalcularTipusVisita } from '../../db/tipusVisita'
 
 type Obert = { tipus: 'nova' } | { tipus: 'editar'; cita: Cita } | null
 
@@ -41,6 +42,7 @@ export function PestanyaCites() {
     const [cites, pacients] = await Promise.all([magatzem.llistarCites('0000', '9999'), magatzem.llistarPacients()])
     return { cites, pacients }
   }, [magatzem, pacient.id, versio])
+  const [avisTipus, mostrarAvisTipus] = useAvisTipus()
 
   if (carrega.estat === 'carregant') return <Indicador text={t.app.carregant} />
   if (carrega.estat === 'error') return <p role="alert">{t.app.errorInesperat}</p>
@@ -50,9 +52,8 @@ export function PestanyaCites() {
   const propera = properaCita(cites, ara)
   const recompte = recompteCites(cites)
   const historial = ordenarHistorial(cites, ara)
-  // Cita nova: «Primera visita» si encara no en té cap; si no, seguiment
+  // El tipus de la cita nova el calcula el formulari (primera visita o seguiment)
   const iniciNova = propostaInici()
-  const tipusNova = errorSeguiment(novaCita(pacient.id, iniciNova), totes) ? 'primera' : 'seguiment'
   const desat = () => {
     setObert(null)
     setVersio((n) => n + 1)
@@ -79,6 +80,7 @@ export function PestanyaCites() {
         })}
       </p>
 
+      {avisTipus}
       {obert && (
         <section
           className="panell"
@@ -88,20 +90,24 @@ export function PestanyaCites() {
           <FormulariCita
             key={obert.tipus === 'nova' ? 'nova' : obert.cita.id}
             id={obert.tipus === 'editar' ? obert.cita.id : undefined}
-            inicial={obert.tipus === 'nova' ? novaCita(pacient.id, iniciNova, tipusNova) : obert.cita}
+            inicial={obert.tipus === 'nova' ? novaCita(pacient.id, iniciNova) : obert.cita}
             pacients={pacients}
             pacientFix
             altres={totes}
             onCancellar={() => setObert(null)}
             onDesar={async (dades) => {
-              if (obert.tipus === 'nova') await magatzem.crearCita(dades)
-              else await magatzem.actualitzarCita(obert.cita.id, dades)
+              const desada =
+                obert.tipus === 'nova'
+                  ? await magatzem.crearCita(dades)
+                  : await magatzem.actualitzarCita(obert.cita.id, dades)
+              mostrarAvisTipus((await recalcularTipusVisita(magatzem, [pacient.id])).filter((c) => c.id !== desada.id))
               desat()
             }}
             onEsborrar={
               obert.tipus === 'editar'
                 ? async () => {
                     await magatzem.esborrarCita(obert.cita.id)
+                    mostrarAvisTipus(await recalcularTipusVisita(magatzem, [pacient.id]))
                     desat()
                   }
                 : undefined

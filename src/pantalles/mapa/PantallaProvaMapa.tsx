@@ -443,7 +443,12 @@ function Marcatge({ model, marcats, setMarcats, peticio, onVeure }: PropsMarcatg
           </section>
         )}
 
-        <LlistaMarcats marcats={marcats} onVeure={onVeure} onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))} />
+        <LlistaMarcats
+          marcats={marcats}
+          onVeure={onVeure}
+          onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
+          onTreureTots={() => setMarcats([])}
+        />
       </aside>
     </div>
   )

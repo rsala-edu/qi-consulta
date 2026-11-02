@@ -49,6 +49,8 @@ import { useMagatzem, useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 import { FormulariCita } from './FormulariCita'
 import { Minicalendari } from './Minicalendari'
+import { useAvisTipus } from './AvisTipus'
+import { recalcularTipusVisita } from '../../db/tipusVisita'
 
 type Obert =
   | { tipus: 'nova'; inici: string }
@@ -138,6 +140,7 @@ export function PantallaAgenda() {
   // Des de l'accés ràpid «Nova cita» (Avui) s'obre directament el formulari
   const [obert, setObert] = useState<Obert>(() => (params.get('nova') ? { tipus: 'nova', inici: `${dia}T10:00` } : null))
   const [versio, setVersio] = useState(0)
+  const [avisTipus, mostrarAvisTipus] = useAvisTipus()
 
   const [carrega, substituir] = useCarrega(
     async () => {
@@ -195,6 +198,7 @@ export function PantallaAgenda() {
 
   return (
     <main className={`pantalla pantalla-agenda${ambLateral ? ' amb-lateral' : ''}`}>
+      {avisTipus}
       <div className="disseny-agenda">
         {ambLateral && <aside className="agenda-lateral">{minicalendari}</aside>}
 
@@ -289,8 +293,13 @@ export function PantallaAgenda() {
                 diesTancats={carrega.dades.diesTancats}
                 onCancellar={() => setObert(null)}
                 onDesar={async (dades: DadesCita) => {
-                  if (obert.tipus === 'nova') await magatzem.crearCita(dades)
-                  else await magatzem.actualitzarCita(obert.cita.id, dades)
+                  const desada =
+                    obert.tipus === 'nova'
+                      ? await magatzem.crearCita(dades)
+                      : await magatzem.actualitzarCita(obert.cita.id, dades)
+                  // El tipus de visita de les altres cites del pacient es recalcula sol
+                  const afectats = new Set([dades.pacientId, ...(obert.tipus === 'editar' ? [obert.cita.pacientId] : [])])
+                  mostrarAvisTipus((await recalcularTipusVisita(magatzem, afectats)).filter((c) => c.id !== desada.id))
                   setObert(null)
                   if (!dies.includes(dades.inici.slice(0, 10))) anar(dades.inici.slice(0, 10))
                   setVersio((n) => n + 1)
@@ -299,6 +308,7 @@ export function PantallaAgenda() {
                   obert.tipus === 'editar'
                     ? async () => {
                         await magatzem.esborrarCita(obert.cita.id)
+                        mostrarAvisTipus(await recalcularTipusVisita(magatzem, [obert.cita.pacientId]))
                         setObert(null)
                         setVersio((n) => n + 1)
                       }

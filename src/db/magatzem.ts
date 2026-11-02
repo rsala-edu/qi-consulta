@@ -147,7 +147,8 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       await pacientExistent(pacientId)
       const valid = esquemaDadesFitxaClinica.parse(dades)
       const existent = await db.fitxesCliniques.where('pacientId').equals(pacientId).first()
-      const id = existent?.id ?? nouId()
+      // Un id que depèn del pacient: si dos dispositius creen la fitxa alhora, és la mateixa
+      const id = existent?.id ?? `fitxa-${pacientId}`
       const creatAt = existent?.creatAt ?? araIso()
       const modificatAt = araIso()
       await db.fitxesCliniques.put({

@@ -9,9 +9,9 @@ import { QiDB } from '../db/esquema'
 import { crearMagatzem, guardarClauEmbolcallada, llegirClauEmbolcallada } from '../db/magatzem'
 import { confirmarCategoria } from '../db/precaucions'
 import { novaCita } from '../domini/cita'
-import { pacientInventat } from '../test/dadesInventades'
+import { fitxaInventada, pacientInventat } from '../test/dadesInventades'
 import { driveEnMemoria } from '../test/driveEnMemoria'
-import { fusionar, llegirContingut, llegirFitxer } from './copia'
+import { fusionar, llegirContingut, llegirFitxer, migrarContingut } from './copia'
 import { driveGoogle, ErrorAutoritzacio } from './drive'
 import { restaurarCopia } from './recuperacio'
 import { copiaDeDrive, FITXER_PRINCIPAL, sincronitzar } from './sincronitzar'
@@ -193,4 +193,35 @@ describe('client de Google Drive', () => {
     const caducat = driveGoogle(() => 't', (async () => new Response('', { status: 401 })) as typeof fetch)
     await expect(caducat.llistar()).rejects.toThrow(ErrorAutoritzacio)
   })
+
+  it('si tots dos dispositius creen la fitxa clínica del mateix pacient, la sincronia no es bloqueja: guanya la més nova', async () => {
+    const drive = driveEnMemoria()
+    const a = await dispositiuA()
+    const p = await a.magatzem.crearPacient(pacientInventat())
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    const b = await dispositiuNou(drive)
+
+    // Cadascun obre la fitxa clínica del pacient per primer cop, sense haver sincronitzat
+    await a.magatzem.desarFitxaClinica(p.id, { ...fitxaInventada(), antecedentsPersonals: 'Escrit a la tauleta' })
+    await new Promise((r) => setTimeout(r, 5))
+    await b.magatzem.desarFitxaClinica(p.id, { ...fitxaInventada(), antecedentsPersonals: 'Escrit a l\'ordinador' })
+
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    await sincronitzar(b.db, b.clau, drive, DIA)
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    for (const d of [a, b]) {
+      expect(await d.db.fitxesCliniques.count()).toBe(1)
+      expect((await d.magatzem.obtenirFitxaClinica(p.id))?.antecedentsPersonals).toBe('Escrit a l\'ordinador')
+    }
+  })
+
+  it('fitxes clíniques antigues amb ids diferents per al mateix pacient: la fusió en deixa una (la més nova)', () => {
+    const buit = migrarContingut({ versio: 1, taules: {} })
+    const fitxa = (id: string, modificatAt: string) => ({ id, pacientId: 'p1', creatAt: modificatAt, modificatAt, xifrat: {} })
+    const a = { ...buit, taules: { ...buit.taules, fitxesCliniques: [fitxa('id-a', '2026-11-01T10:00:00Z')] } }
+    const b = { ...buit, taules: { ...buit.taules, fitxesCliniques: [fitxa('id-b', '2026-11-01T11:00:00Z')] } }
+    expect(fusionar(a, b).taules.fitxesCliniques.map((r) => r.id)).toEqual(['id-b'])
+    expect(fusionar(b, a)).toEqual(fusionar(a, b))
+  })
 })
+

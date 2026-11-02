@@ -28,6 +28,8 @@ export type RegistreMeta =
   | { clau: 'google'; valor: { connectatAt: string; ultimaCopia: string | null; sub?: string } }
   /** Minuts sense activitat abans de bloquejar l'app en aquest dispositiu */
   | { clau: 'minutsBloqueig'; valor: number }
+  /** S'ha aplicat el tipus de visita automàtic a les cites que ja hi havia (data) */
+  | { clau: 'tipusVisitaAutomatic'; valor: string }
 
 /** Taules que se sincronitzen amb Google Drive */
 export type TaulaSincronitzada =

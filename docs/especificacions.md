@@ -303,3 +303,5 @@ Aquestes decisions s'han de prendre abans de la Fase 1 o durant aquesta fase. Le
 Funcionalitats que es poden afegir més endavant si la doctora les necessita.
 
 - [ ] Orella: cara posterior (P1–P5 i PS) i arrel de l'orella (R1–R3) de l'estàndard GB/T 13734-2008, amb un segon dibuix de la cara posterior (9 punts)
+- [ ] Cara posterior de l'orella: segon dibuix pla segons GB/T 13734-2008 i botó «Girar l'orella» amb animació de gir.
+- [ ] Revisar l'empremta amb la doctora a la tauleta.

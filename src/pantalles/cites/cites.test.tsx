@@ -29,6 +29,8 @@ function formulari(props: Partial<Parameters<typeof FormulariCita>[0]> = {}) {
       altres={[citaBiel]}
       onDesar={onDesar}
       onCancellar={() => {}}
+      // Rellotge fix: el dia abans de les cites de la prova
+      ara={new Date(2026, 10, 1, 8, 0)}
       {...props}
     />,
     magatzem,
@@ -52,12 +54,47 @@ describe('formulari de cita', () => {
     })
   })
 
-  it('la primera visita dura 60 minuts i el seguiment 40, si no es toca la durada', async () => {
+  it('el tipus es calcula sol i la durada el segueix (60 la primera visita, 40 el seguiment)', async () => {
     const usuari = userEvent.setup()
-    formulari({ inicial: novaCita(aina.id, '2026-11-02T09:00') })
+    // El Biel ja té una cita el 2/11 a les 10:00: una de posterior és seguiment
+    formulari({ inicial: novaCita(biel.id, '2026-11-05T09:00', 'primera') })
+    expect(screen.getByRole('status', { name: 'Tipus' })).toHaveTextContent('Seguiment')
     expect(screen.getByLabelText('Durada (minuts)')).toHaveValue(40)
-    await usuari.selectOptions(screen.getByLabelText('Tipus'), 'primera')
+    // Abans de la seva primera visita: passa a ser la primera
+    await usuari.clear(screen.getByLabelText('Data'))
+    await usuari.type(screen.getByLabelText('Data'), '2026-11-02')
+    expect(screen.getByRole('status', { name: 'Tipus' })).toHaveTextContent('Primera visita')
     expect(screen.getByLabelText('Durada (minuts)')).toHaveValue(60)
+    // No es pot triar a mà
+    expect(screen.queryByRole('combobox', { name: 'Tipus' })).not.toBeInTheDocument()
+  })
+
+  it('nou episodi: primera visita encara que n\'hi hagi d\'anteriors', async () => {
+    const usuari = userEvent.setup()
+    const onDesar = formulari({ inicial: novaCita(biel.id, '2026-11-20T09:00') })
+    expect(screen.getByRole('status', { name: 'Tipus' })).toHaveTextContent('Seguiment')
+    await usuari.click(screen.getByLabelText('Nou episodi (primera visita per un problema nou)'))
+    expect(screen.getByRole('status', { name: 'Tipus' })).toHaveTextContent('Primera visita')
+    await usuari.click(screen.getByRole('button', { name: 'Desar' }))
+    expect(onDesar).toHaveBeenCalledWith(expect.objectContaining({ tipus: 'primera', nouEpisodi: true, durada: 60 }))
+  })
+
+  it('una hora que ja ha passat es registra com a visita ja feta (15 minuts de marge)', async () => {
+    const usuari = userEvent.setup()
+    const ara = new Date(2026, 10, 2, 12, 0)
+    const onDesar = formulari({ inicial: novaCita(aina.id, '2026-11-02T11:40'), ara })
+    // 11:40 és més de 15 minuts abans de les 12:00
+    expect(screen.getByText('Aquesta hora ja ha passat.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Desar' })).not.toBeInTheDocument()
+    // 11:50 és dins del marge: la visita que comença ara mateix
+    await usuari.clear(screen.getByLabelText('Hora'))
+    await usuari.type(screen.getByLabelText('Hora'), '11:50')
+    expect(screen.queryByText('Aquesta hora ja ha passat.')).not.toBeInTheDocument()
+    await usuari.clear(screen.getByLabelText('Hora'))
+    await usuari.type(screen.getByLabelText('Hora'), '09:00')
+    await usuari.click(screen.getByRole('button', { name: 'Registrar com a visita ja feta' }))
+    // La primera cita de l'Aina: primera visita, encara que es registri com a feta
+    expect(onDesar).toHaveBeenCalledWith(expect.objectContaining({ estat: 'feta', tipus: 'primera', inici: '2026-11-02T09:00' }))
   })
 
   it('avisa si se solapa amb una altra cita, i es pot desar igualment', async () => {
@@ -94,38 +131,5 @@ describe('formulari de cita', () => {
     await usuari.click(screen.getByRole('button', { name: 'Desar' }))
     const nou = (await magatzem.llistarPacients()).find((p) => p.nom === 'Carme')!
     expect(onDesar).toHaveBeenCalledWith(expect.objectContaining({ pacientId: nou.id }))
-  })
-
-  it('no deixa desar un seguiment si el pacient encara no té cap primera visita, i proposa canviar-la', async () => {
-    const usuari = userEvent.setup()
-    const onDesar = formulari({ inicial: novaCita(aina.id, '2026-11-02T09:00') })
-    const avis = screen.getByRole('alert')
-    expect(avis).toHaveTextContent('Aquest pacient encara no té cap primera visita')
-    await usuari.click(screen.getByRole('button', { name: 'Desar' }))
-    expect(onDesar).not.toHaveBeenCalled()
-
-    await usuari.click(screen.getByRole('button', { name: 'Canviar a «Primera visita»' }))
-    expect(screen.getByLabelText('Tipus')).toHaveValue('primera')
-    expect(screen.getByLabelText('Durada (minuts)')).toHaveValue(60)
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    await usuari.click(screen.getByRole('button', { name: 'Desar' }))
-    expect(onDesar).toHaveBeenCalledWith(expect.objectContaining({ tipus: 'primera', durada: 60 }))
-  })
-
-  it('un seguiment anterior a la primera visita tampoc es pot desar; posterior, sí', async () => {
-    const usuari = userEvent.setup()
-    const primera = await magatzem.crearCita(novaCita(aina.id, '2026-11-05T09:00', 'primera'))
-    const onDesar = formulari({ inicial: novaCita(aina.id, '2026-11-02T09:00'), altres: [citaBiel, primera] })
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Aquesta cita és anterior a la primera visita del pacient (dijous, 5 de novembre de 2026, 09:00)',
-    )
-    await usuari.click(screen.getByRole('button', { name: 'Desar' }))
-    expect(onDesar).not.toHaveBeenCalled()
-
-    await usuari.clear(screen.getByLabelText('Data'))
-    await usuari.type(screen.getByLabelText('Data'), '2026-11-12')
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    await usuari.click(screen.getByRole('button', { name: 'Desar' }))
-    expect(onDesar).toHaveBeenCalledWith(expect.objectContaining({ tipus: 'seguiment', inici: '2026-11-12T09:00' }))
   })
 })

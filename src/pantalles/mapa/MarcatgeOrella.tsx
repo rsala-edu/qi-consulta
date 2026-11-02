@@ -300,6 +300,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
           marcats={marcats}
           onVeure={onVeure}
           onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
+          onTreureTots={() => setMarcats([])}
         />
       </aside>
     </div>
