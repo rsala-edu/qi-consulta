@@ -5,7 +5,7 @@ on són les dades, quan i com es posen d'acord els dispositius, què passa amb
 els comptes de Google i què no funciona bé avui. Totes les afirmacions es poden
 comprovar amb les proves indicades a cada apartat.
 
-> **Estat (6/11/2026):** els **blocs 1 i 2** estan fets. Bloc 1 (pèrdua o
+> **Estat (6/11/2026):** els **blocs 1, 2 i 3** estan fets (apartats 8.9 a 8.12). Bloc 1 (pèrdua o
 > barreja de dades): cua de canvis pendents, un espai per compte, canvis
 > pendents en tancar i el format 2 de Drive (cada fitxer amb un sol autor,
 > rellotge lògic per camp). Bloc 2: avís de rellotge desfasat, actualitzacions
@@ -243,7 +243,7 @@ i PC 2— i un mòbil, contra el Drive simulat `tests/e2e/drive-realista.ts`) i
 encara comencen per «FALLA» comproven un comportament incorrecte que no s'ha
 arreglat: quan s'arregli, s'han de girar.
 
-| | Escenari | Revisió (7cb340f) | Després del bloc 1 | Prova |
+| | Escenari | Revisió (7cb340f) | Ara (blocs 1–3) | Prova |
 |---|---|---|---|---|
 | a | Dispositiu nou (mòbil): Google, contrasenya i ho recupera tot | ✅ (però vegeu n) | ✅ | `a)` |
 | b | Dos dispositius oberts: la cita arriba sola a l'altre | ⚠️ ≤ 5 min; la pantalla oberta no es refresca | ✅ ≤ 5 min i la pantalla oberta es refresca sola (bloc 2); amb un formulari a mig fer, franja «Veure'ls» i en desar no es trepitja res | `b)`, `b2)`, `b3)` |
@@ -253,7 +253,12 @@ arreglat: quan s'arregli, s'han de girar.
 | f | Un dia sense connexió i reconnexió | ✅ | ✅ | `f)` |
 | g | Rellotge 10 minuts endarrerit | ❌ | ✅ esborrat i canvi posterior guanyen (HLC); avís de rellotge desfasat (bloc 2) | `g1)`, `g2)`, motor |
 | h | Dos dispositius pugen alhora | ⚠️ el segon trepitja el primer | ✅ cadascú escriu el seu diari | `h)`, motor |
-| h2 | Errors 429/503 | ⚠️ sense reintent immediat | ⚠️ igual (bloc 3, punt 10) | `h2)` |
+| h2 | Errors 429/503 | ⚠️ sense reintent immediat | ✅ es torna a provar sol: 5 s, 15 s, 45 s, 2 min, 5 min | `h2)` |
+| b4 | Tornar a la pestanya | ⚠️ esperava els 5 minuts | ✅ es miren els canvis de seguida | `b4)` |
+| i2 | Una versió antiga escriu a qi-dades.json després de migrar | — | ✅ se n'importen els canvis, arriben als altres, torna l'avís i surt «Un dispositiu amb una versió antiga ha escrit dades. Actualitza'l» | motor |
+| m2 | Tancar la pestanya just després de desar | ⚠️ | ✅ el diari es puja amb keepalive (si fa menys de 60 KB; si no, en tornar a obrir) | `m2)`, motor |
+| — | Neteja de marques d'esborrat | ⚠️ no es netejaven | ✅ quan tots els dispositius coneguts les han vistes | motor |
+| — | Desvincular aquest dispositiu | — | ✅ només sense res pendent, amb contrasenya i «DESVINCULAR»; Drive no es toca | `desvincular.test.ts` |
 | i | Versió antiga i versió nova | ❌ | ✅ taules i camps desconeguts es conserven; versió mínima per escriure; les versions d'abans hi veuen DRV-V; la versió nova es detecta amb l'app oberta (bloc 2) | motor, `produccio-actualitzacio` |
 | j | Tancar el navegador mentre puja | ✅ | ✅ | `j)` |
 | k | Esborrar les dades del navegador | ⚠️ es perdia el pendent | ✅ el que la píndola diu «al dia» (≈3 s després de desar) es recupera; en amagar la pestanya es puja de seguida | `k)`, `k2)` |
@@ -261,7 +266,7 @@ arreglat: quan s'arregli, s'han de girar.
 | m | Finestra d'incògnit | ⚠️ | ✅ avís fix; si es tanca amb canvis pendents, el navegador ho avisa | `m)` |
 | n | Desar mentre sincronitza | ❌ | ✅ mai se substitueix cap taula; el canvi es conserva i es puja | `n)`, motor |
 
-Resultat el 6/11/2026, després del bloc 2: 582 proves unitàries, 139 E2E (tots
+Resultat el 6/11/2026, després del bloc 3: 589 proves unitàries, 141 E2E (tots
 dos perfils) i 7 E2E amb el build de producció passen.
 
 **Prova real (6/11):** el Firefox amb la versió 7cb340f i el Chrome amb la
@@ -318,16 +323,16 @@ canvis, desapareixia. Amb el motor nou ja no pot passar.
 
 **Prioritat 3 — comoditat i manteniment**
 
-10. Sincronitzar en tornar a la pestanya i reintentar sol (amb espera
+✅ 10. Sincronitzar en tornar a la pestanya i reintentar sol (amb espera
     creixent) els errors temporals 429 i 503.
-11. **Proposta: «Tornar a connectar amb Google»** sempre a mà (Ajustos > Drive):
+✅ 11. **Proposta: «Tornar a connectar amb Google»** sempre a mà (Ajustos > Drive):
     renova el permís sense tocar dades. Ha d'anar amb la comprovació del
     compte (punt 2).
-12. **Proposta: «Desvincular aquest dispositiu»**: només si no hi ha res
+✅ 12. **Proposta: «Desvincular aquest dispositiu»**: només si no hi ha res
     pendent i Drive té l'última versió (comprovat just abans), amb contrasenya
     i confirmació; esborra la base de dades local i les claus. Recomanació:
     també treure l'empremta registrada.
-13. Netejar les marques d'esborrat velles i les còpies `qi-danyada-*`; no
+✅ 13. Netejar les marques d'esborrat velles i les còpies `qi-danyada-*`; no
     baixar la còpia sencera si no ha canviat (mirar-ne la versió abans);
     evitar còpies diàries i principals duplicades.
 
@@ -572,8 +577,10 @@ Fet tal com es descriu a 8.1–8.6, amb aquestes precisions:
 - **Rellotge (punt 5):** l'app compara l'hora del dispositiu amb la de Google:
   la capçalera `Date` de les respostes, si el navegador la deixa llegir, i si
   no, l'hora que Drive posa al fitxer que l'app acaba d'escriure. Si el
-  desfasament passa de 2 minuts, surt la franja «El rellotge d'aquest
-  dispositiu va 10 minuts endarrerit…».
+  desfasament passa de 2 minuts, surt l'avís «El rellotge d'aquest dispositiu
+  va 10 minuts endarrerit…» a la pantalla Avui i al panell de la píndola (amb
+  els altres avisos de la còpia; una franja a totes les pantalles restava massa
+  espai a l'agenda).
 - **Actualitzacions (punt 7, `src/actualitzacio/`):** el service worker el
   registra l'app, amb `updateViaCache: 'none'`. Es busca una versió nova en
   obrir l'app, en tornar a la pestanya i cada 30 minuts, i també es mira
@@ -596,6 +603,81 @@ Fet tal com es descriu a 8.1–8.6, amb aquestes precisions:
 - **Panell (punt 9):** «Última sincronia d'aquest dispositiu: …» i «Últim canvi
   a Drive (qualsevol dispositiu): …». Els detalls tècnics diuen «última
   sincronia», la mateixa hora que la primera línia.
+
+### 8.11 Com ha quedat (bloc 3)
+
+- **Tornar a la pestanya i reintents (punt 10):** en tornar a la pestanya es
+  sincronitza de seguida (com a molt un cop cada 15 s). Davant un error
+  temporal (429, 5xx o sense connexió) es torna a provar sol, esperant 5 s,
+  15 s, 45 s, 2 min i després cada 5 min, fins que va bé.
+- **«Tornar a connectar amb Google» (punt 11):** al panell de la píndola i a
+  Ajustos > Drive. Renova el permís sense tocar cap dada. Si s'hi entra amb un
+  altre compte, el permís no es fa servir (8.6).
+- **«Desvincular aquest dispositiu» (punt 12, Ajustos > Seguretat):** només es
+  pot si la píndola diu «al dia» i no queda res a la cua. Demana la contrasenya
+  i que s'escrigui «DESVINCULAR», sincronitza un últim cop, torna a comprovar
+  que no queda res pendent i esborra la base de dades d'aquest compte (dades,
+  clau, empremta i ajustos d'aquest navegador). Drive no es toca. L'empremta:
+  sense la seva part desada aquí ja no obre res, i si el navegador ho permet
+  (`signalUnknownCredential`), se li demana que la retiri del gestor de claus.
+- **Neteja (punt 13):** cada marca d'esborrat porta el dispositiu i el número
+  de la cua que la va crear, i cada diari diu fins a quin número ha vist els
+  diaris dels altres. Una marca es treu quan tots els dispositius coneguts
+  l'han vista i ja no és a la cua pròpia. Un dispositiu que fa més de 180 dies
+  que no escriu deixa de comptar; si torna, es queda només amb el que té a la
+  cua i ho torna a llegir tot de Drive, per no ressuscitar res. Les marques
+  del format 1 (sense origen) es treuen passats 180 dies. Les còpies
+  `qi-danyada-*` s'esborren passats 30 dies. Si res no ha canviat a Drive, no
+  es baixa res (només es llista).
+- **Tancar la pestanya:** uns 300 ms després de cada desada, l'app deixa
+  preparat el diari xifrat. En tancar la pestanya (`pagehide`), si n'hi ha de
+  pendent i el diari fa menys de 60 KB, es puja amb `fetch` + `keepalive`, que
+  el navegador acaba encara que la pàgina ja no hi sigui. Si és més gran, no
+  es pot. Aleshores el navegador ja haurà avisat dels canvis pendents
+  (`beforeunload`), i es pujarà en tornar a obrir l'app: res no surt de la cua
+  fins que és a Drive. Limitació de la prova: Playwright no deixa sortir les
+  peticions d'una pàgina que es tanca, i per això la prova llança l'esdeveniment
+  `pagehide`.
+
+### 8.12 Preguntes
+
+**A. Versions antigues ja instal·lades que continuen escrivint a
+qi-dades.json després de migrar.** La versió nova vigila qi-dades.json a
+cada sincronia (en compara la `version` de Drive). Si hi troba dades del
+format 1 en lloc de l'avís:
+
+- n'importa els canvis amb la fusió normal (registre a registre, sense
+  substituir res) i els apunta a la cua, perquè arribin als altres
+  dispositius;
+- hi torna a posar l'avís, de manera que aquella versió veu «Actualitzar
+  l'app» (DRV-V) a la sincronia següent;
+- mostra «Un dispositiu amb una versió antiga ha escrit dades. Actualitza'l»
+  fins que la doctora toca «Entesos».
+
+Si el que hi ha escrit no es pot obrir (una altra clau o a mig escriure), no
+s'atura res: es guarda a part (`qi-v1-<data i hora>.json`) i surt el mateix
+avís. Proves a `motor.test.ts`. Les versions de l'app d'abans de 7cb340f que
+no entenen el format 2 llegeixen l'avís com a «còpia danyada» (DRV-C) o «d'una
+versió més nova» (DRV-V). En tots dos casos no hi escriuen.
+
+**B. Mida a Drive.** Mesurada amb el format 2 per a un any d'ús normal: 150
+pacients amb fitxa i 780 cites (15 per setmana), cadascuna amb el motiu i unes
+notes amb uns 15 punts. Els punts marcats encara no es desen: arribaran amb les
+sessions de l'etapa 3, i les notes en fan el paper. La foto fa **2,1 MB**
+(amb les versions per camp xifrades).
+
+- Fotos: una de nova cada dia que hi ha canvis; es guarden les dues últimes
+  generacions (≈ 4 MB).
+- Còpies: 31 diàries i 13 mensuals, cadascuna una foto (≈ 92 MB).
+- Diaris: un per dispositiu, amb només el que encara no és a cap foto
+  (normalment pocs KB; s'escurça uns 10 minuts després de cada foto).
+- **Total al cap d'un any: uns 100 MB.** Creix de manera lineal (uns 100 MB
+  més cada any, sobretot per les còpies diàries i mensuals). Ocupa espai del
+  compte de Google de la doctora.
+- Trànsit: una sincronia normal només llista els fitxers i baixa els diaris
+  que han canviat. Un dispositiu puja una foto i la còpia diària (≈ 4 MB) com
+  a molt un cop al dia. Un dispositiu nou baixa les fotos de la generació més
+  nova i els diaris.
 
 ---
 

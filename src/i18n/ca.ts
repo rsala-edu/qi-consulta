@@ -8,6 +8,8 @@ export const ca = {
     canvisAltreDispositiu: 'Hi ha canvis d\'un altre dispositiu',
     veureCanvis: 'Veure\'ls',
     versioNova: 'Hi ha una versió nova',
+    versioAntiga: 'Un dispositiu amb una versió antiga ha escrit dades. Actualitza\'l.',
+    entesos: 'Entesos',
     actualitzar: 'Actualitzar',
     finestraPrivada: 'Finestra privada: espera que la píndola digui «al dia» abans de tancar.',
     bloquejar: 'Bloquejar',
@@ -402,6 +404,11 @@ export const ca = {
     capCanviDrive: 'A Drive encara no hi ha cap canvi.',
     codi: 'Codi: {codi}',
     tornarHoAProvar: 'Tornar-ho a provar',
+    tornarConnectar: 'Tornar a connectar amb Google',
+    tornarConnectarDesc:
+      'Si Google demana tornar a entrar o la còpia no avança, renova el permís. No es toca cap dada; ha de ser el mateix compte de Google.',
+    connectat: 'Connectat.',
+    noConnectat: 'No s\'ha pogut connectar amb Google.',
     nomesLectura:
       'Una versió més nova de Qi ha escrit a Google Drive. Aquesta app encara les pot llegir, però no hi pot desar canvis: el que desis queda en aquest dispositiu fins que actualitzis l\'app.',
     tornarGoogle: 'Tornar a entrar amb Google',
@@ -502,6 +509,15 @@ export const ca = {
       'La còpia de Google Drive va tancada amb la mateixa clau. Si perds la tauleta, les dades no es perden: entres amb la contrasenya en un altre dispositiu i les recuperes.',
       'Per això és important no oblidar la contrasenya i guardar la clau de recuperació impresa.',
     ],
+    desvincular: {
+      titol: 'Desvincular aquest dispositiu',
+      desc: 'Esborra d\'aquest navegador les dades d\'aquest compte, la contrasenya i l\'empremta. Google Drive no es toca: les podràs recuperar en qualsevol dispositiu amb la contrasenya.',
+      primerDrive: 'Abans cal que tot sigui a Google Drive: espera que la píndola digui «Drive: al dia».',
+      escriu: 'Escriu {paraula} per confirmar-ho',
+      boto: 'Desvincular i esborrar les dades d\'aquest dispositiu',
+      fent: 'Desvinculant…',
+      pendents: 'Encara hi ha {n} canvis pendents de pujar a Google Drive. No s\'ha esborrat res.',
+    },
     persistencia: 'Emmagatzematge del navegador',
     estatsPersistencia: {
       concedida: 'Persistent: el navegador no esborrarà les dades d\'aquest dispositiu encara que li falti espai.',

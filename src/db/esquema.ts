@@ -47,8 +47,10 @@ export interface EstatDrive {
   aplicats: Record<string, string>
   /** Identificador del fitxer de diari propi a Drive */
   diariPropi?: string
-  /** Fins a quin seq del diari de cada dispositiu s'ha llegit */
+  /** Fins a quin seq del diari de cada dispositiu s'ha llegit (o el cobreix una foto aplicada) */
   vistos: Record<string, number>
+  /** El que diu el diari de cada altre dispositiu: fins on ha vist els dels altres, i quan va escriure */
+  diaris?: Record<string, { vistos: Record<string, number>; modificat: string }>
   /** Últim canvi a Drive (qualsevol dispositiu): la data de modificació més nova */
   ultimCanvi?: string
 }
@@ -95,6 +97,8 @@ export type RegistreMeta =
   | { clau: 'desfasRellotge'; valor: { ms: number; at: string } }
   /** Els registres d'abans del format 2 ja tenen versions (data) */
   | { clau: 'versionsLocals'; valor: string }
+  /** Quan s'ha vist que un dispositiu amb una versió antiga escrivia a qi-dades.json (fins que la doctora ho tanca) */
+  | { clau: 'versioAntigaAt'; valor: string }
   | { clau: 'persistencia'; valor: { estat: 'concedida' | 'no-concedida' | 'no-disponible'; at: string } }
 
 /** Taules que se sincronitzen amb Google Drive */
@@ -119,6 +123,9 @@ export interface RegistreEsborrat {
   esborratAt: string
   /** Versió (HLC) de l'esborrat; les marques d'abans no en tenen (es fa servir esborratAt) */
   hlc?: string
+  /** Dispositiu que l'ha fet i el seu número de seqüència: per saber quan tots l'han vist i es pot netejar */
+  origen?: string
+  seq?: number
 }
 
 /**

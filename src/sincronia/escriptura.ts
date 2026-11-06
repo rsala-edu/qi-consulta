@@ -138,14 +138,18 @@ export async function desarSencer(db: QiDB, taula: TaulaSincronitzada, registre:
 /** Esborra registres: es treuen i queda la marca d'esborrat (amb HLC) perquè s'esborrin a tot arreu */
 export async function esborrarRegistres(db: QiDB, taula: TaulaSincronitzada, claus: readonly string[]): Promise<void> {
   if (claus.length === 0) return
-  const { rellotge } = await rellotgeDe(db)
+  const { rellotge, dispositiu } = await rellotgeDe(db)
   const h = rellotge.nou()
   const esborratAt = new Date().toISOString()
   const t = db.table(taula)
   await db.transaction('rw', [t, db.esborrats, db.canvisPropis, db.meta], async () => {
     await t.bulkDelete([...claus])
-    await db.esborrats.bulkPut(claus.map((clau): RegistreEsborrat => ({ id: `${taula}:${clau}`, taula, clau, esborratAt, hlc: h })))
     await encuar(db, claus.map((clau) => ({ taula, clau })), h)
+    // Amb el número de la cua: quan tots els dispositius l'hagin vist, es podrà netejar
+    const entrades = await db.canvisPropis.bulkGet(claus.map((clau) => `${taula}:${clau}`))
+    await db.esborrats.bulkPut(
+      claus.map((clau, i): RegistreEsborrat => ({ id: `${taula}:${clau}`, taula, clau, esborratAt, hlc: h, origen: dispositiu, seq: entrades[i]!.seq })),
+    )
   })
 }
 

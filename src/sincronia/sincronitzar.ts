@@ -67,6 +67,10 @@ const COMPACTAR_CADA = 24 * 3_600_000
 const DIARIS_GRANS = 500
 /** El diari propi només s'escurça quan les fotos que el cobreixen fa aquest temps que existeixen */
 const MARGE_ESCURCAR = 10 * 60_000
+/** Un dispositiu que fa aquest temps que no escriu deixa de comptar per netejar marques d'esborrat */
+export const OBLIDAT = 180 * 86_400_000
+/** Com a molt, cada quan es reescriu el diari només per dir fins on s'ha vist */
+const ESCRIURE_VISTOS_CADA = 6 * 3_600_000
 
 export interface ResultatSincronia {
   /** S'han rebut canvis d'un altre dispositiu */
@@ -77,6 +81,8 @@ export interface ResultatSincronia {
   copiaAt: string
   /** Drive demana una versió més nova de l'app per escriure: no s'ha pujat res */
   nomesLectura: boolean
+  /** Una versió antiga de l'app ha escrit a qi-dades.json després de migrar (se n'han importat els canvis) */
+  versioAntiga: boolean
 }
 
 /** Què se sap de la còpia de Drive, per als detalls tècnics (sense cap dada) */
@@ -171,7 +177,15 @@ async function embolcallsLocals(db: QiDB): Promise<Embolcalls> {
   return { contrasenya, contrasenyaAt: await llegirClauMestraAt(db), secrets: await llegirSecrets(db) }
 }
 
-export async function llegirEstatDrive(db: QiDB): Promise<EstatDrive & { embolcallsPujats?: string; cobertures?: Record<string, Record<string, number>>; minima?: number }> {
+export async function llegirEstatDrive(db: QiDB): Promise<
+  EstatDrive & {
+    embolcallsPujats?: string
+    vistosPujats?: string
+    diariEscritAt?: string
+    cobertures?: Record<string, Record<string, number>>
+    minima?: number
+  }
+> {
   const r = await db.meta.get('estatDrive')
   return r?.clau === 'estatDrive' ? (r.valor as never) : { aplicats: {}, vistos: {} }
 }
@@ -224,9 +238,11 @@ async function sincronitzarAra(
   estat.cobertures ??= {}
   let canviats = 0
   let migrant = false
+  let versioAntiga = false
 
   // Els registres d'abans de la versió 2 reben versions (i el que no s'havia pujat, a la cua)
   await versionsLocals(db, clau)
+  await refetSiOblidat(db, estat)
 
   const v1 = fitxers.find((f) => f.name === NOM_V1)
   const te2 = fitxers.some((f) => RE_FOTO.test(f.name) || RE_DIARI.test(f.name))
@@ -247,7 +263,19 @@ async function sincronitzarAra(
           await apartarDanyat(drive, v1, false)
         }
       }
-      canviats += await aplicarV1(db, clau, drive, fitxers, textV1, { absorbir: te2, ara })
+      if (te2) {
+        // Una versió antiga de l'app hi ha escrit després de migrar: se n'importen
+        // els canvis (si es poden obrir) i es diu, perquè s'actualitzi aquell dispositiu
+        versioAntiga = true
+        try {
+          canviats += await aplicarV1(db, clau, drive, fitxers, textV1, { absorbir: true, ara })
+        } catch (e) {
+          if (!(e instanceof Error && ['ErrorClauDiferent', 'ErrorCopiaDanyada', 'ErrorCopiaVersio'].includes(e.name))) throw e
+          // No es pot obrir (una altra clau, a mig escriure): es guarda a part, no s'atura res
+          await drive.crear(`qi-v1-${new Date().toISOString().replace(/[:.]/g, '-')}.json`, textV1)
+        }
+        await db.meta.put({ clau: 'versioAntigaAt', valor: new Date().toISOString() })
+      } else canviats += await aplicarV1(db, clau, drive, fitxers, textV1, { absorbir: false, ara })
       migrant = true
     } else estat.aplicats[v1.id] = versioDe(v1)
   }
@@ -281,6 +309,8 @@ async function sincronitzarAra(
       const { c } = await llegir(f)
       const foto = c as FitxerFoto
       estat.cobertures[f.id] = foto.cobertura
+      // El que cobreix la foto també s'ha vist
+      for (const [d, n] of Object.entries(foto.cobertura)) if (d !== dispositiu) estat.vistos[d] = Math.max(estat.vistos[d] ?? 0, n)
       canviats += (await aplicarRemots(db, clau, entradesDe(await obrirFoto(clau, foto)))).canviats
       estat.aplicats[f.id] = versioDe(f)
     } catch (e) {
@@ -297,6 +327,7 @@ async function sincronitzarAra(
       const entrades = await obrirDiari(clau, c as never)
       canviats += (await aplicarRemots(db, clau, entrades as EntradaRemota[])).canviats
       estat.vistos[m[1]!] = Math.max(estat.vistos[m[1]!] ?? 0, entrades.reduce((x, e) => Math.max(x, e.seq), 0))
+      ;(estat.diaris ??= {})[m[1]!] = { vistos: (c as { vistos?: Record<string, number> }).vistos ?? {}, modificat: f.modifiedTime }
       estat.aplicats[f.id] = versioDe(f)
     } catch (e) {
       if (!copiaAnterior || !(e instanceof Error && e.name === 'ErrorCopiaDanyada')) throw e
@@ -325,7 +356,7 @@ async function sincronitzarAra(
       { clau: 'darreraSincronia', valor: inici },
       { clau: 'hlc', valor: rellotge.actual },
     ])
-    return { baixat: canviats > 0, pujat, copiaAt: ultimCanvi || inici, nomesLectura }
+    return { baixat: canviats > 0, pujat, copiaAt: ultimCanvi || inici, nomesLectura, versioAntiga }
   }
   if (nomesLlegir || nomesLectura) return acabar(false)
 
@@ -335,7 +366,11 @@ async function sincronitzarAra(
   const pujatFins = ((await db.meta.get('pujatFins'))?.valor as number | undefined) ?? 0
   const propis = await db.canvisPropis.toArray()
   const textEmbolcalls = JSON.stringify(embolcalls)
-  const calDiari = propis.some((p) => p.seq > pujatFins) || !estat.diariPropi || estat.embolcallsPujats !== textEmbolcalls || migrant
+  // També, de tant en tant, si s'han vist canvis nous dels altres: perquè sàpiguen
+  // fins on ho ha vist aquest dispositiu (per netejar les marques d'esborrat)
+  const vistosNous = JSON.stringify(estat.vistos) !== estat.vistosPujats && Date.now() - Date.parse(estat.diariEscritAt ?? '1970-01-01') > ESCRIURE_VISTOS_CADA
+  const calDiari =
+    propis.some((p) => p.seq > pujatFins) || !estat.diariPropi || estat.embolcallsPujats !== textEmbolcalls || migrant || vistosNous
   const anotarHora = async (f: FitxerDrive) => {
     if (f.modifiedTime > ultimCanvi) ultimCanvi = f.modifiedTime
     // L'hora de Drive del fitxer que s'acaba d'escriure: per saber si el rellotge d'aquí va desfasat
@@ -343,15 +378,7 @@ async function sincronitzarAra(
     if (Number.isFinite(ms)) await db.meta.put({ clau: 'desfasRellotge', valor: { ms, at: new Date().toISOString() } })
   }
   if (calDiari) {
-    const entrades: EntradaDiari[] = []
-    for (const p of propis) {
-      const registre = TAULES.some((t) => t.nom === p.taula)
-        ? ((await db.table(p.taula).get(p.clau)) as Registre | undefined)
-        : ((await db.desconegudes.get(p.id))?.registre as Registre | undefined)
-      const esborrat = await db.esborrats.get(p.id)
-      entrades.push({ taula: p.taula, clau: p.clau, seq: p.seq, ...(registre ? { registre } : esborrat ? { esborrat } : {}) })
-    }
-    const text = JSON.stringify(await xifrarDiari(clau, { dispositiu, embolcalls, vistFins: rellotge.actual, ara }, entrades))
+    const text = await textDiari(db, clau, { dispositiu, embolcalls, vistFins: rellotge.actual, vistos: { ...estat.vistos }, ara })
     let escrit: FitxerDrive
     try {
       escrit = estat.diariPropi ? await drive.actualitzar(estat.diariPropi, text) : await drive.crear(nomDiari(dispositiu), text)
@@ -363,6 +390,8 @@ async function sincronitzarAra(
     estat.diariPropi = escrit.id
     estat.aplicats[escrit.id] = versioDe(escrit)
     estat.embolcallsPujats = textEmbolcalls
+    estat.vistosPujats = JSON.stringify(estat.vistos)
+    estat.diariEscritAt = new Date().toISOString()
     await db.meta.put({ clau: 'pujatFins', valor: N })
     await anotarHora(escrit)
     pujat = true
@@ -433,10 +462,91 @@ async function sincronitzarAra(
     const danyada = RE_DANYADA.exec(f.name)?.[1]
     if ((diari && diari < limitDiari) || (mensual && mensual < limitMensual) || (danyada && danyada < limitDanyada)) await esborrar(f)
   }
+  await netejarEsborrats(db, estat, dispositiu, fitxers)
   return acabar(pujat)
 }
 
+/**
+ * Neteja de marques d'esborrat (docs/sincronia.md, 8.7). Una marca es pot
+ * treure quan tots els dispositius coneguts l'han vista: cada diari diu fins a
+ * quin número de seqüència ha vist els dels altres, i cada marca porta el
+ * dispositiu i el número que la va crear. Un dispositiu que fa més de 180 dies
+ * que no escriu deixa de comptar (si torna, es refà: refetSiOblidat). Les marques
+ * del format 1 (sense origen) es treuen passats 180 dies. Mai es treu una marca
+ * que encara és a la cua del diari propi.
+ */
+async function netejarEsborrats(db: QiDB, estat: Awaited<ReturnType<typeof llegirEstatDrive>>, dispositiu: string, fitxers: readonly FitxerDrive[]) {
+  const limit = Date.now() - OBLIDAT
+  const coneguts = Object.entries(estat.diaris ?? {}).filter(
+    ([d, x]) => d !== dispositiu && fitxers.some((f) => f.name === nomDiari(d)) && Date.parse(x.modificat) > limit,
+  )
+  const aLaCua = new Set((await db.canvisPropis.toArray()).map((c) => c.id))
+  const treure: string[] = []
+  for (const e of (await db.esborrats.toArray()) as RegistreEsborrat[]) {
+    if (aLaCua.has(e.id)) continue
+    const vista =
+      e.origen && e.seq
+        ? coneguts.every(([d, x]) => d === e.origen || (x.vistos[e.origen!] ?? 0) >= e.seq!)
+        : Date.parse(e.esborratAt) < limit
+    if (vista) treure.push(e.id)
+  }
+  if (treure.length > 0) await db.esborrats.bulkDelete(treure)
+}
+
+/**
+ * Un dispositiu que fa més de 180 dies que no sincronitza pot tenir registres
+ * que els altres ja han esborrat (i les marques ja s'han netejat): es queda
+ * només amb el que té a la cua (els seus canvis) i ho torna a llegir tot.
+ */
+async function refetSiOblidat(db: QiDB, estat: Awaited<ReturnType<typeof llegirEstatDrive>>): Promise<void> {
+  const darrera = await llegirDarreraSincronia(db)
+  if (!darrera || Date.parse(darrera) > Date.now() - OBLIDAT) return
+  const aLaCua = new Set((await db.canvisPropis.toArray()).map((c) => c.id))
+  for (const t of TAULES) {
+    const taula = db.table(t.nom)
+    const claus = ((await taula.toCollection().primaryKeys()) as string[]).filter((k) => !aLaCua.has(`${t.nom}:${k}`))
+    await taula.bulkDelete(claus)
+  }
+  await db.esborrats.clear()
+  await db.desconegudes.clear()
+  estat.aplicats = {}
+  estat.cobertures = {}
+}
+
 /** Es guarda una còpia del fitxer danyat (qi-danyada-*) i, si cal, s'esborra */
+/** El diari propi tal com s'ha de pujar: l'estat actual de cada registre de la cua */
+async function textDiari(
+  db: QiDB,
+  clau: CryptoKey,
+  d: { dispositiu: string; embolcalls: Embolcalls; vistFins: string | null; vistos: Record<string, number>; ara?: Date },
+): Promise<string> {
+  const entrades: EntradaDiari[] = []
+  for (const p of await db.canvisPropis.toArray()) {
+    const registre = TAULES.some((t) => t.nom === p.taula)
+      ? ((await db.table(p.taula).get(p.clau)) as Registre | undefined)
+      : ((await db.desconegudes.get(p.id))?.registre as Registre | undefined)
+    const esborrat = await db.esborrats.get(p.id)
+    entrades.push({ taula: p.taula, clau: p.clau, seq: p.seq, ...(registre ? { registre } : esborrat ? { esborrat } : {}) })
+  }
+  return JSON.stringify(await xifrarDiari(clau, d, entrades))
+}
+
+/** Pujades amb `keepalive` (en tancar la pestanya): el navegador les limita a uns 64 KB */
+export const MIDA_MAXIMA_KEEPALIVE = 60_000
+
+/**
+ * El diari propi a punt per pujar-lo en tancar la pestanya (fetch keepalive),
+ * si ja n'hi ha un a Drive i és prou petit. null: no es pot; es pujarà en
+ * tornar a obrir l'app (i el navegador ja ha avisat dels canvis pendents).
+ */
+export async function diariPerTancar(db: QiDB, clau: CryptoKey): Promise<{ id: string; text: string } | null> {
+  const estat = await llegirEstatDrive(db)
+  if (!estat.diariPropi) return null
+  const { dispositiu, rellotge } = await rellotgeDe(db)
+  const text = await textDiari(db, clau, { dispositiu, embolcalls: await embolcallsLocals(db), vistFins: rellotge.actual, vistos: { ...estat.vistos } })
+  return text.length <= MIDA_MAXIMA_KEEPALIVE ? { id: estat.diariPropi, text } : null
+}
+
 async function apartarDanyat(drive: Drive, f: FitxerDrive, treure = true): Promise<void> {
   const text = await drive.baixar(f.id)
   await drive.crear(`qi-danyada-${new Date().toISOString().replace(/[:.]/g, '-')}.json`, text)

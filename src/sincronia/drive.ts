@@ -16,6 +16,8 @@ export interface Drive {
   crear(nom: string, contingut: string): Promise<FitxerDrive>
   actualitzar(id: string, contingut: string): Promise<FitxerDrive>
   esborrar(id: string): Promise<void>
+  /** Només Drive de Google: pujada en tancar la pestanya (keepalive) */
+  actualitzarEnTancar?(id: string, contingut: string): boolean
 }
 
 /** El permís de Google ha caducat o s'ha retirat: cal tornar a connectar. */
@@ -98,6 +100,22 @@ export function driveGoogle(
         body: contingut,
       })
       return (await r.json()) as FitxerDrive
+    },
+
+    /**
+     * Puja un fitxer en tancar la pestanya: la petició continua encara que la
+     * pàgina es tanqui (keepalive, com a molt ~64 KB). No s'espera la resposta.
+     */
+    actualitzarEnTancar(id, contingut) {
+      const t = token()
+      if (!t) return false
+      void fetchFn(`${PUJADA}/${encodeURIComponent(id)}?uploadType=media&fields=${CAMPS}`, {
+        method: 'PATCH',
+        keepalive: true,
+        headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: contingut,
+      }).catch(() => {})
+      return true
     },
 
     async esborrar(id) {

@@ -14,6 +14,8 @@ import { continuarAmbGoogle, expect as expectBase, nouGoogle, simularGoogle, tes
 const PA = 'contrasenya-del-firefox'
 const PB = 'contrasenya-del-chrome'
 const expect = expectBase.configure({ timeout: 15_000 })
+// Dos navegadors per prova: amb totes les proves alhora, poden trigar més de 30 s
+test.describe.configure({ timeout: 90_000 })
 const ARA = new Date(2026, 10, 2, 8, 0)
 
 const menu = (page: Page, nom: string) =>

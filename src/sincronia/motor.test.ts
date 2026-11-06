@@ -13,7 +13,7 @@ import { ErrorClauDiferent, ErrorCopiaDanyada, ErrorCopiaVersio, llegirContingut
 import { desarPerCamp, pendentsDePujar } from './escriptura'
 import { llegirFitxer2, nomFoto, obrirFoto, xifrarFoto, type FitxerFoto } from './format2'
 import { copiaPerRecuperar, obrirClauMestra, restaurarCopia } from './recuperacio'
-import { FITXER_PRINCIPAL, sincronitzar } from './sincronitzar'
+import { diariPerTancar, FITXER_PRINCIPAL, MIDA_MAXIMA_KEEPALIVE, sincronitzar } from './sincronitzar'
 
 const IT = 1_000
 const P = 'contrasenya-de-prova'
@@ -346,6 +346,59 @@ describe('compactació', () => {
   })
 })
 
+describe('pujada en tancar la pestanya', () => {
+  it('el diari a punt per pujar amb keepalive només si fa menys de 60 KB; si no, es pujarà en tornar a obrir', async () => {
+    const drive = driveEnMemoria()
+    const a = await primer()
+    await a.m.crearPacient(pacientInventat())
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    const p = await a.m.crearPacient(pacientInventat({ nom: 'Bernat' }))
+    const petit = await diariPerTancar(a.db, a.clau)
+    expect(petit?.text.length).toBeLessThan(MIDA_MAXIMA_KEEPALIVE)
+    expect(petit?.text).not.toContain('Bernat')
+    for (let i = 0; i < 60; i++) await a.m.crearCita({ ...novaCita(p.id, '2026-11-04T17:00'), notes: 'Notes inventades '.repeat(10) })
+    expect(await diariPerTancar(a.db, a.clau)).toBeNull()
+    // Res no es perd: és a la cua i es puja a la sincronia següent
+    expect(await pendentsDePujar(a.db)).toBe(61)
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    expect(await pendentsDePujar(a.db)).toBe(0)
+  })
+})
+
+describe('neteja de marques d\'esborrat', () => {
+  it('una marca només es treu quan tots els dispositius coneguts l\'han vista, i res no torna', async () => {
+    const drive = driveEnMemoria()
+    const a = await primer()
+    const p = await a.m.crearPacient(pacientInventat())
+    const c = await a.m.crearCita(novaCita(p.id, '2026-11-04T17:00'))
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    const b = await nou(drive)
+    const d = await nou(drive)
+    await sincronitzar(b.db, b.clau, drive, DIA)
+    await sincronitzar(d.db, d.clau, drive, DIA)
+    // A esborra la cita; B ho veu, D (que no s'obre) encara no
+    await a.m.esborrarCita(c.id)
+    const dia = (n: number) => new Date(DIA.getTime() + n * 86_400_000)
+    await sincronitzar(a.db, a.clau, drive, dia(1))
+    await sincronitzar(b.db, b.clau, drive, dia(1))
+    await b.m.crearPacient(pacientInventat({ nom: 'Bernat' }))
+    await sincronitzar(b.db, b.clau, drive, dia(1))
+    for (const n of [2, 3]) await sincronitzar(a.db, a.clau, drive, dia(n))
+    expect(await a.db.esborrats.get(`cites:${c.id}`)).toBeDefined()
+    // D s'obre, ho veu i ho diu al seu diari
+    await sincronitzar(d.db, d.clau, drive, dia(3))
+    await d.m.crearPacient(pacientInventat({ nom: 'Carla' }))
+    await sincronitzar(d.db, d.clau, drive, dia(3))
+    for (const n of [4, 5]) {
+      await sincronitzar(a.db, a.clau, drive, dia(n))
+      await sincronitzar(b.db, b.clau, drive, dia(n))
+    }
+    expect(await a.db.esborrats.get(`cites:${c.id}`)).toBeUndefined()
+    // La cita no torna enlloc, ni en un dispositiu nou
+    for (const x of [a, b, d, await nou(drive)]) expect(await x.m.obtenirCita(c.id)).toBeUndefined()
+  })
+})
+
 describe('versions de l\'app', () => {
   it('i) una taula que aquesta versió no coneix es conserva i torna a sortir a les seves fotos', async () => {
     const drive = driveEnMemoria()
@@ -451,6 +504,51 @@ describe('migració des del format 1', () => {
     const c = await nou(drive)
     expect(await noms(c)).toEqual(['Aina', 'Bernat'])
     expect((await c.m.obtenirPacient(p.id))?.nom).toBe('Aina')
+  })
+
+  it('A) una versió antiga que encara escriu a qi-dades.json després de migrar: se n\'importen els canvis, arriben als altres i es diu', async () => {
+    const drive = driveEnMemoria()
+    const a = await primer()
+    await a.m.crearPacient(pacientInventat())
+    const embolcalls = { contrasenya: (await llegirClauEmbolcallada(a.db))!, contrasenyaAt: await llegirClauMestraAt(a.db), secrets: [] }
+    await drive.crear(FITXER_PRINCIPAL, JSON.stringify(await xifrarCopia(a.clau, await llegirContingut(a.db), embolcalls)))
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    const b = await nou(drive)
+    // Un dispositiu amb la versió d'abans (sense cap protecció) hi torna a escriure, amb un pacient nou
+    const vell = await primer()
+    await guardarClauEmbolcallada(vell.db, (await llegirClauEmbolcallada(a.db))!)
+    await crearMagatzem(vell.db, a.clau).crearPacient(pacientInventat({ nom: 'Vell' }))
+    const v1 = fitxer(drive, /^qi-dades\.json$/)[0]!
+    v1.contingut = JSON.stringify(await xifrarCopia(a.clau, await llegirContingut(vell.db), embolcalls))
+    v1.version = String(Number(v1.version) + 1)
+
+    const r = await sincronitzar(a.db, a.clau, drive, DIA)
+    expect(r.versioAntiga).toBe(true)
+    expect(await noms(a)).toEqual(['Aina', 'Vell'])
+    expect((await a.db.meta.get('versioAntigaAt'))?.valor).toBeDefined()
+    // Torna a haver-hi l'avís (la versió antiga s'atura amb DRV-V)
+    expect(() => llegirFitxer(v1.contingut)).toThrow(ErrorCopiaVersio)
+    // I arriba als altres dispositius
+    await sincronitzar(b.db, b.clau, drive, DIA)
+    expect(await noms(b)).toEqual(['Aina', 'Vell'])
+  })
+
+  it('A) si el que hi escriu la versió antiga no es pot obrir (una altra clau), no s\'atura res i es guarda a part', async () => {
+    const drive = driveEnMemoria()
+    const a = await primer()
+    await a.m.crearPacient(pacientInventat())
+    const embolcalls = { contrasenya: (await llegirClauEmbolcallada(a.db))!, contrasenyaAt: await llegirClauMestraAt(a.db), secrets: [] }
+    await drive.crear(FITXER_PRINCIPAL, JSON.stringify(await xifrarCopia(a.clau, await llegirContingut(a.db), embolcalls)))
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    const altre = await primer()
+    const v1 = fitxer(drive, /^qi-dades\.json$/)[0]!
+    const text = JSON.stringify(await xifrarCopia(altre.clau, await llegirContingut(altre.db), embolcalls))
+    v1.contingut = text
+    v1.version = String(Number(v1.version) + 1)
+    const r = await sincronitzar(a.db, a.clau, drive, DIA)
+    expect(r.versioAntiga).toBe(true)
+    expect(fitxer(drive, /^qi-v1-.*T/).map((f) => f.contingut)).toEqual([text])
+    expect(() => llegirFitxer(v1.contingut)).toThrow(ErrorCopiaVersio)
   })
 
   it('un dispositiu del format 1 amb canvis sense pujar els puja en actualitzar-se', async () => {

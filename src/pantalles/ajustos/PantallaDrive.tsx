@@ -10,6 +10,7 @@ import { Boto } from '../../components/Boto'
 import { descarregarText } from '../../components/descarregar'
 import { DetallsTecnics } from '../../components/DetallsTecnics'
 import { EstatCopia } from '../../components/EstatCopia'
+import { BotoTornarConnectar } from '../../components/BotoTornarConnectar'
 import { FormulariCredencial } from '../../components/FormulariCredencial'
 import { formatar, t } from '../../i18n/t'
 import { useClauMestra, useSessio } from '../../sessio/ContextSessio'
@@ -125,6 +126,10 @@ export function PantallaDrive() {
         <section className="panell">
           <EstatCopia />
           {estat === 'al-dia' && <p>{d.totBe}</p>}
+          <p className="detall">{t.sincronia.tornarConnectarDesc}</p>
+          <div className="accions accions-esquerra">
+            <BotoTornarConnectar />
+          </div>
         </section>
       )}
       <DetallsTecnics />

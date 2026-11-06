@@ -13,7 +13,7 @@ import { guardarEstatGoogle, llegirEstatGoogle, type EstatGoogle } from '../db/m
 import { useClauMestra, useSessio } from '../sessio/ContextSessio'
 import { pendentsDePujar } from './escriptura'
 import { ProveidorRevisio } from './revisio'
-import { driveGoogle, ErrorAutoritzacio } from './drive'
+import { driveGoogle, ErrorAutoritzacio, ErrorDrive } from './drive'
 import {
   acceptarPermis,
   calRenovarPermis,
@@ -25,7 +25,7 @@ import {
   tokenGoogle,
 } from './google'
 import { classificarErrorSincronia, type ErrorSincronia } from './motiuSincronia'
-import { ErrorSenseCopiaAnterior, llegirDarreraSincronia, sincronitzar, type InfoDrive } from './sincronitzar'
+import { diariPerTancar, ErrorSenseCopiaAnterior, llegirDarreraSincronia, sincronitzar, type InfoDrive } from './sincronitzar'
 
 export type EstatSincronia =
   /** Google no està configurat en aquesta versió (proves locals) */
@@ -66,11 +66,22 @@ interface ValorSincronia {
   nomesLectura: boolean
   /** Desfasament del rellotge respecte de Google (ms; positiu: avançat), si se sap */
   desfasMs: number | null
+  /** Un dispositiu amb una versió antiga de l'app ha escrit dades a Drive */
+  versioAntiga: boolean
+  tancarAvisVersioAntiga(): void
 }
 
 const Context = createContext<ValorSincronia | null>(null)
 
 export const ESPERA_DESPRES_DE_DESAR = 3_000
+/** Esperes abans de tornar-ho a provar després d'un error temporal */
+export const REINTENTS = [5_000, 15_000, 45_000, 120_000, 300_000]
+const ESPERA_TORNADA = 15_000
+
+/** Drive saturat (429), un error del servidor (5xx) o sense connexió: es pot tornar a provar */
+function esTemporal(e: unknown, motiu: string): boolean {
+  return motiu === 'xarxa' || (e instanceof ErrorDrive && (e.estat === 429 || e.estat >= 500))
+}
 const CADA = 5 * 60_000
 /** Després d'una renovació silenciosa fallida, no es torna a provar fins al cap de deu minuts */
 const ESPERA_DESPRES_DE_FALLAR = 10 * 60_000
@@ -91,6 +102,12 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   /** S'ha entrat amb un compte de Google que no és el d'aquest espai (el seu identificador) */
   const [altreCompte, setAltreCompte] = useState<string | null>(null)
   const enCurs = useRef(false)
+  /** Un dispositiu amb una versió antiga ha escrit a qi-dades.json (fins que la doctora ho tanca) */
+  const [versioAntiga, setVersioAntiga] = useState(false)
+  const tancarAvisVersioAntiga = useCallback(() => {
+    setVersioAntiga(false)
+    void db.meta.delete('versioAntigaAt')
+  }, [db])
   /** Puja cada cop que la sincronia aplica canvis d'un altre dispositiu */
   const [revisio, setRevisio] = useState(0)
   /** Quant va desfasat el rellotge d'aquest dispositiu respecte de Google (ms; positiu: avançat) */
@@ -111,6 +128,14 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   }, [clau])
   const pendentRef = useRef(false)
   const temporitzador = useRef<number | undefined>(undefined)
+  /** Reintents seguits després d'un error temporal (i el seu temporitzador) */
+  const reintent = useRef(0)
+  const temporitzadorReintent = useRef<number | undefined>(undefined)
+  /** El diari propi a punt per pujar-lo en tancar la pestanya (keepalive) */
+  const perTancar = useRef<{ id: string; text: string } | null>(null)
+  const temporitzadorTancar = useRef<number | undefined>(undefined)
+  /** Quan s'ha sincronitzat per últim cop en tornar a la pestanya */
+  const tornadaAt = useRef(0)
   /** Estat desat de Google: si aquest dispositiu ja s'hi ha connectat (i la pista del compte) */
   const google = useRef<EstatGoogle | null>(null)
   const renovant = useRef(false)
@@ -167,9 +192,13 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         // Desfasament del rellotge: la capçalera Date de Google o, si no es pot
         // llegir, l'hora de Drive del fitxer que s'acaba d'escriure (ja desada)
         if (horaGoogle !== null) await db.meta.put({ clau: 'desfasRellotge', valor: { ms: horaGoogle, at: new Date().toISOString() } })
+        if (r.versioAntiga) setVersioAntiga(true)
         const d = await db.meta.get('desfasRellotge')
         setDesfasMs(d?.clau === 'desfasRellotge' ? d.valor.ms : null)
         ambCopiaAnterior = false
+        reintent.current = 0
+        window.clearTimeout(temporitzadorReintent.current)
+      window.clearTimeout(temporitzadorTancar.current)
         await db.meta.delete('errorSincroniaDesDe')
         setErrorDesDe(null)
         setDarreraCorrecta(await llegirDarreraSincronia(db))
@@ -200,8 +229,17 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         // Res no ha canviat: continua l'error d'abans (còpia danyada)
         setEstat('error')
       } else {
-        setError(classificarErrorSincronia(e))
+        const motiu = classificarErrorSincronia(e)
+        setError(motiu)
         setEstat('error')
+        // Errors temporals (Drive saturat o sense connexió): es torna a provar sol,
+        // cada cop esperant més (5 s, 15 s, 45 s, 2 min, 5 min…)
+        if (esTemporal(e, motiu.motiu)) {
+          const espera = REINTENTS[Math.min(reintent.current, REINTENTS.length - 1)]!
+          reintent.current++
+          window.clearTimeout(temporitzadorReintent.current)
+          temporitzadorReintent.current = window.setTimeout(() => void sincronitzarAmbRef.current(false), espera)
+        }
       }
       await anotarError()
       // S'ha demanat una altra sincronia mentre aquesta fallava (per exemple, amb
@@ -241,6 +279,7 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       if (!actiu) return
       setDarreraCorrecta(d)
       setDesfasMs(r?.clau === 'desfasRellotge' ? r.valor.ms : null)
+      void db.meta.get('versioAntigaAt').then((v) => actiu && setVersioAntiga(v !== undefined))
       setErrorDesDe(e?.clau === 'errorSincroniaDesDe' ? e.valor : null)
     })
     void llegirEstatGoogle(db).then((g) => {
@@ -300,6 +339,14 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         setPendent(true)
         void comptarPendents()
       })
+      // El diari a punt per si es tanca la pestanya abans de pujar-lo
+      window.clearTimeout(temporitzadorTancar.current)
+      temporitzadorTancar.current = window.setTimeout(() => {
+        void diariPerTancar(db, clauRef.current).then(
+          (d) => (perTancar.current = d),
+          () => (perTancar.current = null),
+        )
+      }, 300)
       window.clearTimeout(temporitzador.current)
       temporitzador.current = window.setTimeout(() => void sincronitzarAra(), ESPERA_DESPRES_DE_DESAR)
     }
@@ -311,6 +358,7 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       cua.hook('creating').unsubscribe(canvi)
       cua.hook('updating').unsubscribe(canvi)
       window.clearInterval(interval)
+      window.clearTimeout(temporitzadorReintent.current)
       // En bloquejar amb canvis pendents, es pugen ara
       if (temporitzador.current !== undefined && pendentRef.current) void sincronitzarAra()
       window.clearTimeout(temporitzador.current)
@@ -323,9 +371,20 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   useEffect(() => {
     const amagada = () => {
       if (document.visibilityState === 'hidden' && pendentRef.current) void sincronitzarAra()
+      // En tornar a la pestanya, es miren els canvis dels altres dispositius de seguida
+      // (com a molt un cop cada 15 segons)
+      if (document.visibilityState === 'visible' && Date.now() - tornadaAt.current > ESPERA_TORNADA) {
+        tornadaAt.current = Date.now()
+        void sincronitzarAra()
+      }
     }
     const sortint = () => {
-      if (pendentRef.current) void sincronitzarAra()
+      if (!pendentRef.current) return
+      // Es tanca la pestanya: el diari (si és prou petit) es puja amb keepalive,
+      // que el navegador acaba encara que la pàgina ja no hi sigui. Si no es pot,
+      // es pujarà en tornar a obrir l'app (el navegador ja ha avisat)
+      if (perTancar.current) driveGoogle(tokenGoogle).actualitzarEnTancar?.(perTancar.current.id, perTancar.current.text)
+      void sincronitzarAra()
     }
     const tancant = (e: BeforeUnloadEvent) => {
       if (!pendentRef.current && !enCurs.current) return
@@ -385,6 +444,8 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       pendents,
       nomesLectura,
       desfasMs,
+      versioAntiga,
+      tancarAvisVersioAntiga,
     }),
     [
       estat,
@@ -401,6 +462,8 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       pendents,
       nomesLectura,
       desfasMs,
+      versioAntiga,
+      tancarAvisVersioAntiga,
     ],
   )
   return (

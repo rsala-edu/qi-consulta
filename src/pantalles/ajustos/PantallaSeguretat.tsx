@@ -25,6 +25,7 @@ import { activarEmpremta, desactivarEmpremta, novaClauRecuperacio, teClauRecuper
 import { useClauMestra, useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 import { demanarPersistencia, estatPersistencia } from '../../sessio/persistencia'
+import { desvincular, ErrorPendents, PARAULA_CONFIRMACIO } from '../../sessio/desvincular'
 import { useSincronia } from '../../sincronia/ContextSincronia'
 import { diaDe } from '../../domini/cita'
 import { OPCIONS_MINUTS_BLOQUEIG } from '../../db/magatzem'
@@ -121,6 +122,8 @@ export function PantallaSeguretat() {
 
       <CopiaEnFitxer />
 
+      <Desvincular />
+
       {carrega.estat === 'carregant' && <Indicador text={t.app.carregant} />}
       {carrega.estat === 'llest' && (
         <>
@@ -174,6 +177,74 @@ export function PantallaSeguretat() {
         </>
       )}
     </main>
+  )
+}
+
+/** «Desvincular aquest dispositiu»: només si tot és a Drive, amb la contrasenya i «DESVINCULAR» */
+function Desvincular() {
+  const { db } = useSessio()
+  const { estat, pendents, sincronitzarAra } = useSincronia()
+  const [obert, setObert] = useState(false)
+  const [contrasenya, setContrasenya] = useState('')
+  const [paraula, setParaula] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [fent, setFent] = useState(false)
+  const s = t.seguretat.desvincular
+  const tot = estat === 'al-dia' && pendents === 0
+  return (
+    <section className="panell" aria-label={s.titol}>
+      <h2>{s.titol}</h2>
+      <p>{s.desc}</p>
+      {!obert ? (
+        <Boto variant="discret" onClick={() => setObert(true)}>
+          {s.titol}
+        </Boto>
+      ) : (
+        <form
+          className="formulari"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault()
+            setError(null)
+            setFent(true)
+            const sincronitzar = async () => {
+              await sincronitzarAra()
+              return true
+            }
+            desvincular(db, contrasenya, sincronitzar).then(
+              () => window.location.replace(`${import.meta.env.BASE_URL}#/`),
+              (e: unknown) => {
+                setFent(false)
+                setError(
+                  e instanceof ErrorContrasenya
+                    ? t.desbloqueig.contrasenyaIncorrecta
+                    : e instanceof ErrorPendents
+                      ? formatar(s.pendents, { n: String(e.pendents) })
+                      : t.app.errorInesperat,
+                )
+              },
+            )
+          }}
+        >
+          {!tot && <p role="alert">{s.primerDrive}</p>}
+          <Camp etiqueta={t.desbloqueig.contrasenya}>
+            <input type="password" autoComplete="current-password" value={contrasenya} onChange={(e) => setContrasenya(e.target.value)} />
+          </Camp>
+          <Camp etiqueta={formatar(s.escriu, { paraula: PARAULA_CONFIRMACIO })}>
+            <input type="text" autoComplete="off" value={paraula} onChange={(e) => setParaula(e.target.value)} />
+          </Camp>
+          {error && <p role="alert">{error}</p>}
+          <div className="accions accions-esquerra">
+            <Boto type="submit" disabled={fent || !tot || paraula !== PARAULA_CONFIRMACIO || contrasenya === ''}>
+              {fent ? s.fent : s.boto}
+            </Boto>
+            <Boto variant="discret" onClick={() => setObert(false)} disabled={fent}>
+              {t.app.cancellar}
+            </Boto>
+          </div>
+        </form>
+      )}
+    </section>
   )
 }
 

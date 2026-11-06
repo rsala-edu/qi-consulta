@@ -12,6 +12,8 @@ import { actualitzarApp } from '../sincronia/actualitzarApp'
 import { diesSenseCopia, textSenseCopia } from '../sincronia/senseCopia'
 import { Boto } from './Boto'
 import { DetallsTecnics } from './DetallsTecnics'
+import { BotoTornarConnectar } from './BotoTornarConnectar'
+import { AvisRellotge } from './AvisRellotge'
 import { useSessio } from '../sessio/ContextSessio'
 
 function quan(iso: string): string {
@@ -102,6 +104,7 @@ export function IndicadorCopia() {
           {dies && <p className="avis-fort">{textSenseCopia(dies)}</p>}
           <p role="status">{missatge}</p>
           {nomesLectura && <p className="avis-fort">{s.nomesLectura}</p>}
+          <AvisRellotge />
           {altreCompte && (
             <div className="avis-fort" role="alert">
               <p>{s.altreCompte}</p>
@@ -161,6 +164,7 @@ export function IndicadorCopia() {
             ) : estat !== 'sincronitzant' ? (
               <Boto onClick={() => void sincronitzarAra()}>{estat === 'error' ? s.tornarHoAProvar : s.desarAra}</Boto>
             ) : null}
+            {!calGoogle && <BotoTornarConnectar />}
             <Boto variant="discret" onClick={() => setObert(false)}>
               {s.tancar}
             </Boto>

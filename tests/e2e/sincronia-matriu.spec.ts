@@ -448,7 +448,8 @@ test('g2) amb el rellotge 10 minuts endarrerit, un canvi posterior guanya als do
   await sincronitzar(mon, pc2)
   await obrirPacient(pc2.page, /Aina/)
   await expect(pc2.page.getByLabel('Telèfon', { exact: true })).toHaveValue('611 111 111')
-  // L'app avisa que el rellotge va desfasat (comparant amb l'hora de Google)
+  // L'app avisa que el rellotge va desfasat (comparant amb l'hora de Google), a la pantalla Avui
+  for (const x of [pc1, pc2]) await menu(x.page, 'Avui').click()
   await expect(pc2.page.getByRole('note')).toHaveText(/El rellotge d'aquest dispositiu va 10 minuts endarrerit/)
   await expect(pc1.page.getByRole('note')).toHaveCount(0)
   // Després (de veritat), el PC 2 el corregeix
@@ -493,27 +494,41 @@ test('h) dos dispositius que pugen alhora no es trepitgen: cadascú escriu el se
   ])
 })
 
-test('h2) Drive respon 429 i 503: queda «Drive: error» fins al pròxim intent, que va bé (sense reintent automàtic immediat)', async ({
-  browser,
-}, info) => {
+test('h2) Drive respon 429 i 503: es torna a provar sol, cada cop esperant més, fins que va bé', async ({ browser }, info) => {
   const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
-  mon.errors.push({ estat: 429, dispositiu: 'pc1' })
+  mon.errors.push({ estat: 429, dispositiu: 'pc1' }, { estat: 503, dispositiu: 'pc1' }, { estat: 503, metode: 'PATCH', dispositiu: 'pc1' })
+  const n = pujades(mon, pc1)
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
   await expect(pindola(pc1.page)).toHaveText('Drive: error', { timeout: 20_000 })
   await pindola(pc1.page).click()
   await expect(pc1.page.getByRole('dialog', { name: 'Còpia a Google Drive' })).toContainText('DRV-429')
   await pc1.page.keyboard.press('Escape')
-  mon.errors.push({ estat: 503, metode: 'PATCH', dispositiu: 'pc1' })
-  await pindola(pc1.page).click()
-  await pc1.page.getByRole('button', { name: 'Tornar-ho a provar' }).click()
-  await expect(pc1.page.getByRole('dialog', { name: 'Còpia a Google Drive' })).toContainText('DRV-503')
-  // Al cap de 5 minuts (interval) torna a provar sol i va bé
-  const n = pujades(mon, pc1)
-  await pc1.page.keyboard.press('Escape')
-  await pc1.page.clock.runFor(CADA)
+  // Sense tocar res: 5 s, 15 s i 45 s després
+  for (const espera of [5_000, 15_000, 45_000]) {
+    const abans = peticionsDe(mon, 'pc1').length
+    await pc1.page.clock.runFor(espera)
+    await expect.poll(() => peticionsDe(mon, 'pc1').length).toBeGreaterThan(abans)
+  }
   await expect.poll(() => pujades(mon, pc1)).toBeGreaterThan(n)
   await expect(pindola(pc1.page)).toHaveText('Drive: al dia')
+  expect(mon.errors).toEqual([])
+})
+
+test('b4) en tornar a la pestanya es miren de seguida els canvis dels altres (sense esperar els 5 minuts)', async ({ browser }, info) => {
+  const mon = nouMonAlDia()
+  const pc1 = await primerDispositiu(browser, info, mon)
+  const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
+  await recuperar(pc2)
+  await obrirSetmana(pc2.page)
+  await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
+  await sincronitzar(mon, pc1)
+  await pc2.page.clock.runFor(20_000)
+  await pc2.page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true })
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
+  await expect.poll(() => citesVisibles(pc2.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
 })
 
 test('j) es tanca el navegador mentre puja: Drive queda sencer amb la versió d\'abans i, en tornar a obrir, es puja', async ({
@@ -778,6 +793,32 @@ test('m) finestra privada: avís fix; si es tanca amb canvis pendents, el navega
   await altra.page.getByRole('button', { name: 'Continuar amb Google' }).click()
   await altra.page.getByLabel('Contrasenya', { exact: true }).fill(P)
   await altra.page.getByRole('button', { name: 'Obrir' }).click()
+  expect(await citesDeLaSetmana(altra.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
+})
+
+test('m2) en tancar la pestanya just després de desar, el diari es puja de seguida amb keepalive', async ({ browser }, info) => {
+  const mon = nouMonAlDia()
+  const pc1 = await primerDispositiu(browser, info, mon)
+  await pc1.context.close()
+  const incognit = await dispositiu(browser, info, mon, 'incognit', 'pc')
+  await recuperar(incognit)
+  // Ja té el seu diari a Drive (la primera sincronia el crea)
+  await expect.poll(() => peticionsDe(mon, 'incognit').some((p) => p.metode === 'POST')).toBe(true)
+  await novaCita(incognit.page, 'Aina', '2026-11-04', '17:00')
+  // L'app prepara el diari uns 300 ms després de desar; després s'aturen els
+  // temporitzadors de la pàgina: la pujada normal (3 s) no pot arribar a temps
+  await incognit.page.waitForTimeout(800)
+  const ara = await incognit.page.evaluate(() => Date.now())
+  await incognit.page.clock.pauseAt(new Date(ara + 1_000))
+  const abans = peticionsDe(mon, 'incognit').length
+  // La pàgina es tanca (Playwright no deixa sortir les peticions d'una pàgina
+  // que es tanca, i per això es llança l'esdeveniment del navegador, pagehide)
+  await incognit.page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide')))
+  // La primera petició és la pujada del diari (keepalive), abans de cap altra
+  await expect.poll(() => peticionsDe(mon, 'incognit').slice(abans)[0]?.metode).toBe('PATCH')
+  await incognit.context.close()
+  const altra = await dispositiu(browser, info, mon, 'altra', 'pc')
+  await recuperar(altra)
   expect(await citesDeLaSetmana(altra.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
 })
 

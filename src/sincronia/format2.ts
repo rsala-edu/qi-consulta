@@ -76,6 +76,8 @@ export interface FitxerDiari extends Capcalera {
   vistFins: Hlc | null
   /** El seq més alt del diari */
   seqMax: number
+  /** Fins a quin seq ha vist (aplicat) els diaris dels altres dispositius: per netejar marques d'esborrat */
+  vistos?: Record<string, number>
 }
 
 export interface FitxerFoto extends Capcalera {
@@ -171,13 +173,14 @@ async function capcalera(clau: CryptoKey, d: DadesCapcalera) {
 
 export async function xifrarDiari(
   clau: CryptoKey,
-  d: DadesCapcalera & { vistFins: Hlc | null },
+  d: DadesCapcalera & { vistFins: Hlc | null; vistos?: Record<string, number> },
   entrades: EntradaDiari[],
 ): Promise<FitxerDiari> {
   return {
     ...(await capcalera(clau, d)),
     tipus: 'diari',
     vistFins: d.vistFins,
+    ...(d.vistos ? { vistos: d.vistos } : {}),
     seqMax: entrades.reduce((m, e) => Math.max(m, e.seq), 0),
     xifrat: await xifrarJson(clau, entrades, CONTEXT_DIARI),
   }

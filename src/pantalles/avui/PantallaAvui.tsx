@@ -1,6 +1,7 @@
 // Pantalla d'inici: les cites del dia, en ordre, amb «Començar visita» a la
 // següent; accessos ràpids; i l'estat de la còpia a Google Drive.
 
+import { AvisRellotge } from '../../components/AvisRellotge'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { EstatCopia } from '../../components/EstatCopia'
@@ -39,6 +40,7 @@ export function PantallaAvui() {
       </header>
 
       <AvisSenseCopia />
+      <AvisRellotge />
 
       {carrega.estat === 'carregant' && <Indicador text={t.app.carregant} />}
       {carrega.estat === 'error' && <p role="alert">{t.app.errorInesperat}</p>}

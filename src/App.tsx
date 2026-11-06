@@ -23,7 +23,6 @@ import { googleConfigurat } from './sincronia/google'
 import { migrarTipusVisita } from './db/tipusVisita'
 import { IndicadorCopia } from './components/IndicadorCopia'
 import { AvisFinestraPrivada } from './components/AvisFinestraPrivada'
-import { AvisRellotge } from './components/AvisRellotge'
 import { AvisCanvis } from './components/AvisCanvis'
 import { BotoTema } from './components/BotoTema'
 import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
@@ -32,6 +31,7 @@ import { PantallaDrive } from './pantalles/ajustos/PantallaDrive'
 import { PantallaQuantA } from './pantalles/ajustos/PantallaQuantA'
 import { ProveidorActualitzacio, useActualitzacio } from './actualitzacio/actualitzacio'
 import { AvisVersioNova } from './components/AvisVersioNova'
+import { AvisVersioAntiga } from './components/AvisVersioAntiga'
 
 // Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
 const PantallaCalibratge = lazy(() =>
@@ -73,8 +73,8 @@ function Marc() {
           </Boto>
         </header>
         <AvisVersioNova />
+        <AvisVersioAntiga />
         <AvisFinestraPrivada />
-        <AvisRellotge />
         <AvisCanvis />
         <Suspense fallback={<Indicador text={t.app.carregant} />}>
           <Outlet />
