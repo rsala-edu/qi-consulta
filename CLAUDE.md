@@ -18,3 +18,5 @@ valoracions, sessions i punts d'acupuntura. Especificacions: docs/especificacion
 - Cap recurs carregat d'internet en temps d'execució (tipografies i icones locals)
 - Interfície en català, amb els textos en un fitxer de traduccions
 - Cada funcionalitat nova amb proves; npm test ha de passar abans de cada commit
+- Després de cada push, esperar el resultat de GitHub Actions (gh run watch). Cap feina no està acabada ni «publicada» fins que el CI és verd i la versió de GitHub Pages (version.json) coincideix amb el commit. Si el CI falla, dir-ho el primer de tot al resum
+- No fer cap push mentre el CI d'un altre commit encara corre si se n'ha d'informar del resultat (un push nou cancel·la l'anterior)
