@@ -593,7 +593,7 @@ test('k) s\'esborren les dades del navegador: es recupera de Drive tot el que la
   // Una cita nova: la píndola diu que encara no és a Drive…
   const n = pujades(mon, pc1)
   await novaCita(pc1.page, 'Aina', '2026-11-05', '10:00')
-  await expect(pindola(pc1.page)).toHaveText(/pendents|desant/)
+  await expect(pindola(pc1.page)).toHaveText(/pendents? de pujar|desant/)
   // …i en uns 3 segons (sense tocar res) ja hi és
   await esperarPujada(mon, pc1, n)
   // S'esborren les dades del lloc (com «Esborrar dades de navegació»)
