@@ -679,6 +679,52 @@ sessions de l'etapa 3, i les notes en fan el paper. La foto fa **2,1 MB**
   a molt un cop al dia. Un dispositiu nou baixa les fotos de la generació més
   nova i els diaris.
 
+### 8.13 Si un navegador es queda amb una versió antiga
+
+Des de la versió `3d99274`, l'app detecta sola les versions noves: surt la
+franja «Hi ha una versió nova · Actualitzar», o s'actualitza sola si està
+bloquejada. Un navegador que encara té una versió **anterior** al sistema nou
+(per exemple `2ac5318`) no té aquesta franja.
+
+En aquests navegadors, la versió nova ja s'ha baixat, però queda esperant que
+es tanquin totes les pestanyes de l'app. Mentrestant, recarregar no serveix
+(prova del 6/11 amb el Firefox). Només cal fer-ho una vegada: a partir d'aquí,
+la franja ja surt sola.
+
+Com saber quina versió hi ha: Ajustos > Quant a (o els «Detalls tècnics» del
+panell de la píndola, si encara no hi ha Quant a).
+
+**Les dades no es perden:** són a la base de dades del navegador, que aquests
+passos no toquen, i el que no s'havia pujat és a la cua. **No** facis
+«Esborrar les dades del lloc» ni «Esborrar l'historial i les galetes»: aquests
+sí que esborren les dades d'aquest dispositiu.
+
+1. **Primer, el més senzill (qualsevol navegador):** tanca **totes** les
+   pestanyes i finestres de Qi (també la de l'app instal·lada, si n'hi ha) i
+   torna-la a obrir. La versió que esperava passa a ser l'activa.
+2. **Si continua igual, Chrome (ordinador):**
+   - Obre `chrome://serviceworker-internals`, cerca `rsala-edu.github.io/qi-consulta`
+     i prem **Unregister**. També es pot fer des de les eines de
+     desenvolupador (F12) > Application > Service workers > **Unregister**.
+   - Tanca la pestanya de Qi i torna-la a obrir.
+3. **Si continua igual, Firefox (ordinador):**
+   - Obre `about:serviceworkers` (o `about:debugging#/runtime/this-firefox`,
+     apartat «Service Workers»), cerca `rsala-edu.github.io` i prem
+     **Unregister**.
+   - Tanca la pestanya de Qi i torna-la a obrir.
+4. **Navegador del mòbil:** tanca la pestanya (i l'app instal·lada, si n'hi ha;
+   a Android, des de les apps recents) i torna-la a obrir. Si continua igual,
+   a Chrome per a Android: Configuració > Configuració de llocs > Totes les
+   dades dels llocs > rsala-edu.github.io. **Aquí no** premis «Esborra»: això
+   esborraria les dades del dispositiu. Val més esperar o fer servir l'ordinador.
+5. **Comprovar-ho:** després d'entrar, Ajustos > Quant a ha de dir la versió
+   que es veu a `https://rsala-edu.github.io/qi-consulta/version.json`, i la
+   píndola s'ha de posar «Drive: al dia». Si hi havia canvis pendents, es pugen
+   sols.
+
+Una finestra privada (incògnit) no té aquest problema: comença sempre sense
+cap versió desada.
+
 ---
 
 ## Part tècnica
