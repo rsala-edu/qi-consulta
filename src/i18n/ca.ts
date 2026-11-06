@@ -493,6 +493,7 @@ export const ca = {
     novaAmb: 'Hi ha una versió nova: {versio}',
     buscar: 'Buscar actualitzacions',
     buscant: 'Buscant…',
+    provaActualitzacio: 'Prova d\'actualització 1',
   },
   aparenca: {
     titol: 'Aparença',

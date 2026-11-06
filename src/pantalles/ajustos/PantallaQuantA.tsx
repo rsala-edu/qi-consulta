@@ -24,6 +24,7 @@ export function PantallaQuantA() {
       <section className="panell" aria-label={q.versio}>
         <h2>{q.versio}</h2>
         <p data-testid="versio-app">{formatar(q.versioApp, { versio: VERSIO_APP })}</p>
+        <p className="detall">{q.provaActualitzacio}</p>
         {data && <p className="detall">{formatar(q.compilada, { data: new Date(data).toLocaleString('ca') })}</p>}
         <p className="detall">
           {formatar(q.format, { format: String(VERSIO_FORMAT), nivell: String(NIVELL_APP), base: String(db.verno) })}
