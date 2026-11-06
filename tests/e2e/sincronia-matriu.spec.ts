@@ -217,7 +217,7 @@ async function canviarDeCompte(x: Disp) {
 
 // ---------------------------------------------------------------------------
 
-test('a) dispositiu nou (navegador del mòbil): Google i contrasenya, i ho recupera tot', async ({ browser }, info) => {
+test('a) dispositiu nou (navegador del mòbil): Google i contrasenya, i ho recupera tot @essencial', async ({ browser }, info) => {
   const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
@@ -334,7 +334,7 @@ test('c) dos dispositius editen camps diferents de la mateixa fitxa: es conserve
   }
 })
 
-test('d) dos dispositius editen el mateix camp: guanya el més nou i l\'altre queda per revisar als dos', async ({ browser }, info) => {
+test('d) dos dispositius editen el mateix camp: guanya el més nou i l\'altre queda per revisar als dos @essencial', async ({ browser }, info) => {
   const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')

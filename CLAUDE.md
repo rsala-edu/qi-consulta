@@ -18,5 +18,10 @@ valoracions, sessions i punts d'acupuntura. Especificacions: docs/especificacion
 - Cap recurs carregat d'internet en temps d'execució (tipografies i icones locals)
 - Interfície en català, amb els textos en un fitxer de traduccions
 - Cada funcionalitat nova amb proves; npm test ha de passar abans de cada commit
-- Després de cada push, esperar el resultat de GitHub Actions (gh run watch). Cap feina no està acabada ni «publicada» fins que el CI és verd i la versió de GitHub Pages (version.json) coincideix amb el commit. Si el CI falla, dir-ho el primer de tot al resum
-- No fer cap push mentre el CI d'un altre commit encara corre si se n'ha d'informar del resultat (un push nou cancel·la l'anterior)
+- Abans de cada push, executar en local la tanda completa: npm run lint, npm test, npx playwright test i npm run test:e2e:produccio
+- CI amb dos workflows. «Publicar» (lint, unitàries, E2E @essencial, producció i build) bloqueja el desplegament. «Proves completes» (totes les E2E, en 4 shards) no bloqueja
+- Després de cada push, esperar «Publicar» (gh run watch). Una versió no està publicada fins que «Publicar» és verd i version.json de GitHub Pages coincideix amb el commit. Si falla, dir-ho el primer de tot al resum
+- Abans de començar la part següent, comprovar que «Proves completes» és verd. Si ha fallat, dir-ho el primer de tot i arreglar-ho abans de continuar amb res més
+- No fer cap push nou fins que el «Publicar» anterior ha acabat (un push nou el cancel·la). Mentrestant es pot continuar treballant en local
+- Els commits que només toquen docs/ o fitxers .md no executen el CI ni publiquen (paths-ignore): per a aquests no cal esperar res
+- Treballar per parts, amb un commit per part i un resum curt de cada una quan el CI és verd

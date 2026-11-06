@@ -33,7 +33,7 @@ async function contingutBrutIndexedDB(page: Page): Promise<string> {
   })
 }
 
-test('desbloquejar → crear pacient → editar la fitxa clínica', async ({ page }) => {
+test('desbloquejar → crear pacient → editar la fitxa clínica @essencial', async ({ page }) => {
   await page.goto('/qi-consulta/')
 
   // 1. Primera vegada: crear la contrasenya

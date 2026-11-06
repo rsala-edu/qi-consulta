@@ -1,0 +1,50 @@
+# «Proves completes»: totes les E2E (tauleta i ordinador), repartides en 4
+# màquines en paral·lel. No bloqueja la publicació (això ho fa «Publicar»),
+# però s'ha de comprovar que és verd abans de començar la feina següent.
+name: Proves completes
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
+  pull_request:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proves-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Proves del flux complet (part ${{ matrix.part }} de 4)
+        run: npx playwright test --shard=${{ matrix.part }}/4
+      - name: Informe de Playwright (si falla)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ matrix.part }}
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

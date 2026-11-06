@@ -1,26 +1,33 @@
-# Proves i publicació a GitHub Pages a cada push a main.
-# Si alguna prova falla, no es publica.
-name: Proves i publicació
+# «Publicar»: el que bloqueja el desplegament a GitHub Pages. Ha de ser curt
+# (objectiu: 5 minuts o menys). Lint, tipus, proves unitàries, una tanda curta
+# d'E2E essencials (les marcades @essencial i les del build de producció) i el
+# build. Totes les E2E són al workflow «Proves completes» (proves.yml), que no
+# bloqueja.
+#
+# Res d'instal·lar navegadors: el job corre dins la imatge oficial de
+# Playwright, que ja els porta (ha de ser la mateixa versió que package.json).
+name: Publicar
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: publicar-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  proves:
+  comprovar:
     runs-on: ubuntu-latest
-    # Les E2E fan uns 13 minuts i la preparació del runner, de 7 a 10: 20 minuts no hi cabien (e139138)
-    timeout-minutes: 40
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -28,40 +35,18 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Lint
+        run: npm run lint
       - name: Tipus
         run: npm run typecheck
       - name: Proves unitàries
         run: npm test
-      - name: Navegador per a Playwright
-        run: npx playwright install --with-deps chromium
-      - name: Proves del flux complet
-        run: npm run test:e2e
-      # Totes les pantalles amb el build de producció (perfil buit, amb dades i
-      # sense WebGL): cap error a la consola i la barra sempre visible
-      - name: Proves amb el build de producció
+      - name: E2E essencials
+        run: npx playwright test --project=escriptori --grep @essencial
+      - name: E2E amb el build de producció
         run: npm run test:e2e:produccio
-      - name: Informe de Playwright (si falla)
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report
-          path: |
-            playwright-report
-            test-results
-          retention-days: 7
-
-  compilar:
-    needs: proves
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run build
+      - name: Build per a GitHub Pages
+        run: npm run build
         env:
           # SHA-256 dels correus que poden entrar, separats per comes (variable
           # del repositori; mai els correus en clar)
@@ -70,9 +55,18 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+      - name: Informe de Playwright (si falla)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-publicar
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
 
-  publicar:
-    needs: compilar
+  desplegar:
+    needs: comprovar
     runs-on: ubuntu-latest
     permissions:
       pages: write
