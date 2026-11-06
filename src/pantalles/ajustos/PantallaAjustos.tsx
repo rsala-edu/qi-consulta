@@ -31,6 +31,12 @@ export function PantallaAjustos() {
           </Link>
         </li>
         <li>
+          <Link to="/ajustos/quant-a">
+            <span className="nom">{t.quantA.titol}</span>
+            <span className="detall">{t.quantA.desc}</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/ajustos/calibratge">
             <span className="nom">{t.ajustos.calibratge}</span>
             <span className="detall">{t.ajustos.calibratgeDesc}</span>

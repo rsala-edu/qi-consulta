@@ -23,10 +23,15 @@ import { googleConfigurat } from './sincronia/google'
 import { migrarTipusVisita } from './db/tipusVisita'
 import { IndicadorCopia } from './components/IndicadorCopia'
 import { AvisFinestraPrivada } from './components/AvisFinestraPrivada'
+import { AvisRellotge } from './components/AvisRellotge'
+import { AvisCanvis } from './components/AvisCanvis'
 import { BotoTema } from './components/BotoTema'
 import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
 import { PantallaAjustAgenda } from './pantalles/ajustos/PantallaAjustAgenda'
 import { PantallaDrive } from './pantalles/ajustos/PantallaDrive'
+import { PantallaQuantA } from './pantalles/ajustos/PantallaQuantA'
+import { ProveidorActualitzacio, useActualitzacio } from './actualitzacio/actualitzacio'
+import { AvisVersioNova } from './components/AvisVersioNova'
 
 // Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
 const PantallaCalibratge = lazy(() =>
@@ -67,7 +72,10 @@ function Marc() {
             {t.app.bloquejar}
           </Boto>
         </header>
+        <AvisVersioNova />
         <AvisFinestraPrivada />
+        <AvisRellotge />
+        <AvisCanvis />
         <Suspense fallback={<Indicador text={t.app.carregant} />}>
           <Outlet />
         </Suspense>
@@ -105,6 +113,12 @@ function EspaiObert({ children }: { children: ReactNode }) {
 /** Mentre l'app és bloquejada no es munta cap pantalla amb dades. */
 function Porta() {
   const { estat } = useSessio()
+  const { versioNova, actualitzar } = useActualitzacio()
+  // Bloquejada (o encara no oberta): s'actualitza sola. Les dades són a
+  // IndexedDB i el que no s'ha pujat, a la cua
+  useEffect(() => {
+    if (versioNova && estat.tipus !== 'desbloquejat' && estat.tipus !== 'carregant') actualitzar()
+  }, [versioNova, estat.tipus, actualitzar])
   if (estat.tipus === 'desbloquejat') return <PortaOberta />
   return (
     <>
@@ -173,6 +187,7 @@ function PortaOberta() {
             <Route path="ajustos/drive" element={<P codi="UI-DRIVE"><PantallaDrive /></P>} />
             <Route path="ajustos/aparenca" element={<P codi="UI-APARENCA"><PantallaAparenca /></P>} />
             <Route path="ajustos/agenda" element={<P codi="UI-AJUST-AGENDA"><PantallaAjustAgenda /></P>} />
+            <Route path="ajustos/quant-a" element={<P codi="UI-QUANT-A"><PantallaQuantA /></P>} />
             <Route path="*" element={<Navigate to="/avui" replace />} />
           </Route>
         </Routes>
@@ -183,11 +198,13 @@ function PortaOberta() {
 export function App({ db }: { db: QiDB | null }) {
   return (
     <HashRouter>
-      <ProveidorSessio db={db}>
-        <EspaiObert>
-          <Porta />
-        </EspaiObert>
-      </ProveidorSessio>
+      <ProveidorActualitzacio>
+        <ProveidorSessio db={db}>
+          <EspaiObert>
+            <Porta />
+          </EspaiObert>
+        </ProveidorSessio>
+      </ProveidorActualitzacio>
     </HashRouter>
   )
 }

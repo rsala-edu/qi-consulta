@@ -337,7 +337,8 @@ test('«Drive: error»: la píndola explica el motiu, l\'última còpia correcta
   await indicador.click()
   const panell = page.getByRole('dialog', { name: 'Còpia a Google Drive' })
   await expect(panell.getByRole('status')).toHaveText('Google Drive no ha respost bé. Es tornarà a provar d\'aquí a una estona.')
-  await expect(panell).toContainText('Última còpia correcta:')
+  await expect(panell).toContainText('Última sincronia d\'aquest dispositiu:')
+  await expect(panell).toContainText('Últim canvi a Drive (qualsevol dispositiu):')
   await expect(panell).toContainText('Codi: DRV-503')
   // Cap dada clínica al panell
   for (const dada of ['Aina', 'Biel', '600 111 222']) await expect(panell).not.toContainText(dada)

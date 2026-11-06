@@ -60,6 +60,7 @@ export async function recorrerPantalles(page: Page) {
   await anar(page, '/ajustos/drive', 'Còpia a Google Drive')
   await anar(page, '/ajustos/aparenca', 'Aparença')
   await anar(page, '/ajustos/agenda', 'Agenda')
+  await anar(page, '/ajustos/quant-a', 'Quant a')
 }
 
 export function posarCopia(google: GoogleSimulat) {

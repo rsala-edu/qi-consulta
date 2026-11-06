@@ -56,6 +56,8 @@ export interface Mon {
   retenirPatch: number
   /** Permisos revocats (com si la persona hagués tancat la sessió de Google) */
   revocats: Set<string>
+  /** Hora de Google (ms): la de les dates dels fitxers i la capçalera Date */
+  ara: () => number
 }
 
 export interface Dispositiu {
@@ -74,12 +76,21 @@ const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
   'Access-Control-Allow-Methods': '*',
-  'Access-Control-Expose-Headers': 'ETag',
+  'Access-Control-Expose-Headers': 'ETag, Date',
 }
 
 export function nouMon(): Mon {
   retingudes = []
-  return { drives: new Map(), tokens: new Map(), peticions: [], errors: [], latenciaMs: 150, retenirPatch: 0, revocats: new Set() }
+  return {
+    drives: new Map(),
+    tokens: new Map(),
+    peticions: [],
+    errors: [],
+    latenciaMs: 150,
+    retenirPatch: 0,
+    revocats: new Set(),
+    ara: () => Date.now(),
+  }
 }
 
 export function nouDispositiu(nom: string, correu: string): Dispositiu {
@@ -105,7 +116,7 @@ let retingudes: (() => void)[] = []
 export async function simularDispositiu(context: BrowserContext, mon: Mon, disp: Dispositiu): Promise<void> {
   // Rellotge del servidor (real, no el de la pàgina): com Drive
   let pas = 0
-  const ara = () => new Date(Date.now() + pas++).toISOString()
+  const ara = () => new Date(mon.ara() + pas++).toISOString()
   const sense = ({ contingut: _c, ...f }: FitxerReal) => f
 
   await context.route('https://accounts.google.com/**', async (route) => {
@@ -157,9 +168,10 @@ export async function simularDispositiu(context: BrowserContext, mon: Mon, disp:
 
     const fitxers = driveDe(mon, correu)
     const id = /\/files\/([^/]+)$/.exec(u.pathname)?.[1]
+    const data = { Date: new Date(mon.ara()).toUTCString() }
     const json = (cos: unknown, f?: FitxerReal) => {
       anotar(200)
-      return route.fulfill({ headers: { ...CORS, ...(f ? { ETag: etag(f) } : {}) }, json: cos })
+      return route.fulfill({ headers: { ...CORS, ...data, ...(f ? { ETag: etag(f) } : {}) }, json: cos })
     }
 
     if (req.method() === 'GET' && !id) return json({ files: [...fitxers.values()].map(sense) })
@@ -170,7 +182,7 @@ export async function simularDispositiu(context: BrowserContext, mon: Mon, disp:
         return route.fulfill({ status: 404, headers: CORS })
       }
       anotar(200)
-      return route.fulfill({ headers: { ...CORS, ETag: etag(f) }, body: f.contingut })
+      return route.fulfill({ headers: { ...CORS, ...data, ETag: etag(f) }, body: f.contingut })
     }
     if (req.method() === 'POST') {
       const parts = req.postData()!.split(/--qi-[0-9a-f-]+/)

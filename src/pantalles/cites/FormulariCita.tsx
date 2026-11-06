@@ -7,6 +7,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { useFormulariBrut } from '../../sincronia/revisio'
 import { z } from 'zod'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
@@ -82,7 +83,7 @@ export function FormulariCita({
     handleSubmit,
     setValue,
     control,
-    formState: { errors, isSubmitting, dirtyFields },
+    formState: { errors, isSubmitting, dirtyFields, isDirty },
   } = useForm<ValorsFormulari>({
     resolver: zodResolver(esquemaFormulari),
     defaultValues: {
@@ -97,6 +98,8 @@ export function FormulariCita({
       nouEpisodi: inicial.nouEpisodi ?? false,
     },
   })
+  // Amb canvis sense desar, les pantalles no es refresquen soles (revisio.tsx)
+  useFormulariBrut(isDirty)
   const [pacientId, dia, hora, durada, estat, nouEpisodi] = useWatch({
     control,
     name: ['pacientId', 'dia', 'hora', 'durada', 'estat', 'nouEpisodi'],

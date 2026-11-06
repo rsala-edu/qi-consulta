@@ -12,6 +12,7 @@ import { createContext, useCallback, useContext, useEffect, useLayoutEffect, use
 import { guardarEstatGoogle, llegirEstatGoogle, type EstatGoogle } from '../db/magatzem'
 import { useClauMestra, useSessio } from '../sessio/ContextSessio'
 import { pendentsDePujar } from './escriptura'
+import { ProveidorRevisio } from './revisio'
 import { driveGoogle, ErrorAutoritzacio } from './drive'
 import {
   acceptarPermis,
@@ -63,6 +64,8 @@ interface ValorSincronia {
   pendents: number
   /** Drive demana una versió més nova de l'app per escriure: no es puja res */
   nomesLectura: boolean
+  /** Desfasament del rellotge respecte de Google (ms; positiu: avançat), si se sap */
+  desfasMs: number | null
 }
 
 const Context = createContext<ValorSincronia | null>(null)
@@ -88,6 +91,10 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   /** S'ha entrat amb un compte de Google que no és el d'aquest espai (el seu identificador) */
   const [altreCompte, setAltreCompte] = useState<string | null>(null)
   const enCurs = useRef(false)
+  /** Puja cada cop que la sincronia aplica canvis d'un altre dispositiu */
+  const [revisio, setRevisio] = useState(0)
+  /** Quant va desfasat el rellotge d'aquest dispositiu respecte de Google (ms; positiu: avançat) */
+  const [desfasMs, setDesfasMs] = useState<number | null>(null)
   /** Registres de la cua que encara no són a Drive */
   const [pendents, setPendents] = useState(0)
   /** Drive demana una versió més nova de l'app per escriure */
@@ -152,7 +159,16 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         pendentRef.current = false
         setEstat('sincronitzant')
         usada = clauRef.current
-        const r = await sincronitzar(db, usada, driveGoogle(tokenGoogle), { informar: setInfoDrive, copiaAnterior: ambCopiaAnterior })
+        let horaGoogle: number | null = null
+        const r = await sincronitzar(db, usada, driveGoogle(tokenGoogle, undefined, (g, aqui) => (horaGoogle = aqui - g)), {
+          informar: setInfoDrive,
+          copiaAnterior: ambCopiaAnterior,
+        })
+        // Desfasament del rellotge: la capçalera Date de Google o, si no es pot
+        // llegir, l'hora de Drive del fitxer que s'acaba d'escriure (ja desada)
+        if (horaGoogle !== null) await db.meta.put({ clau: 'desfasRellotge', valor: { ms: horaGoogle, at: new Date().toISOString() } })
+        const d = await db.meta.get('desfasRellotge')
+        setDesfasMs(d?.clau === 'desfasRellotge' ? d.valor.ms : null)
         ambCopiaAnterior = false
         await db.meta.delete('errorSincroniaDesDe')
         setErrorDesDe(null)
@@ -161,6 +177,8 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         const nou = { ...anterior, connectatAt: anterior?.connectatAt ?? new Date().toISOString(), ultimaCopia: r.copiaAt }
         await guardarEstatGoogle(db, nou)
         google.current = nou
+        // Canvis d'un altre dispositiu: les pantalles obertes es refresquen (revisio.tsx)
+        if (r.baixat) setRevisio((n) => n + 1)
         setUltimaCopia(r.copiaAt)
         setNomesLectura(r.nomesLectura)
         setError(null)
@@ -219,9 +237,10 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         setPendent(true)
       }
     })
-    void Promise.all([llegirDarreraSincronia(db), db.meta.get('errorSincroniaDesDe')]).then(([d, e]) => {
+    void Promise.all([llegirDarreraSincronia(db), db.meta.get('errorSincroniaDesDe'), db.meta.get('desfasRellotge')]).then(([d, e, r]) => {
       if (!actiu) return
       setDarreraCorrecta(d)
+      setDesfasMs(r?.clau === 'desfasRellotge' ? r.valor.ms : null)
       setErrorDesDe(e?.clau === 'errorSincroniaDesDe' ? e.valor : null)
     })
     void llegirEstatGoogle(db).then((g) => {
@@ -365,6 +384,7 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       altreCompte,
       pendents,
       nomesLectura,
+      desfasMs,
     }),
     [
       estat,
@@ -380,9 +400,14 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       altreCompte,
       pendents,
       nomesLectura,
+      desfasMs,
     ],
   )
-  return <Context.Provider value={valor}>{children}</Context.Provider>
+  return (
+    <Context.Provider value={valor}>
+      <ProveidorRevisio revisio={revisio}>{children}</ProveidorRevisio>
+    </Context.Provider>
+  )
 }
 
 export function useSincronia(): ValorSincronia {

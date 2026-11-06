@@ -1,10 +1,9 @@
-/** Busca la versió nova de l'app (service worker) i torna a carregar */
+import { actualitzarAra, buscarVersioNova } from '../actualitzacio/actualitzacio'
+
+/** Busca la versió nova de l'app (service worker), hi passa i torna a carregar */
 export async function actualitzarApp(): Promise<void> {
-  try {
-    const registre = await navigator.serviceWorker?.getRegistration()
-    await registre?.update()
-  } catch {
-    // Sense service worker (o sense connexió): es torna a carregar igualment
-  }
-  window.location.reload()
+  await buscarVersioNova()
+  // Una mica de temps perquè s'instal·li, si n'hi ha una de nova
+  await new Promise((r) => setTimeout(r, 2_000))
+  actualitzarAra()
 }

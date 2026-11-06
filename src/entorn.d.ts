@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_HASHOS_CORREUS_PERMESOS?: string
   /** Commit de la versió (vite.config.ts), per als detalls tècnics */
   readonly VITE_VERSIO_APP?: string
+  /** Data i hora de la compilació (ISO) */
+  readonly VITE_DATA_APP?: string
 }
 
 interface ImportMeta {

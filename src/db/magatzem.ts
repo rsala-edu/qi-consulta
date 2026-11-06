@@ -41,12 +41,13 @@ export interface Magatzem {
   llistarPacients(): Promise<Pacient[]>
   obtenirPacient(id: string): Promise<Pacient | undefined>
   crearPacient(dades: DadesPacient): Promise<Pacient>
-  actualitzarPacient(id: string, dades: DadesPacient): Promise<Pacient>
+  /** `inicial`: les dades quan es va obrir el formulari (només es desa el que s'ha canviat) */
+  actualitzarPacient(id: string, dades: DadesPacient, inicial?: DadesPacient): Promise<Pacient>
   arxivarPacient(id: string, arxivat: boolean): Promise<Pacient>
   /** La doctora ha revisat que les dues fitxes són persones diferents: es treu l'avís de totes dues */
   descartarDuplicat(id: string, altreId: string): Promise<Pacient>
   obtenirFitxaClinica(pacientId: string): Promise<FitxaClinica>
-  desarFitxaClinica(pacientId: string, dades: DadesFitxaClinica): Promise<FitxaClinica>
+  desarFitxaClinica(pacientId: string, dades: DadesFitxaClinica, inicial?: DadesFitxaClinica): Promise<FitxaClinica>
   llistarEsborranys(): Promise<Esborrany[]>
   desarEsborrany(clau: string, esborrany: EsborranyGuardat): Promise<void>
   esborrarEsborrany(clau: string): Promise<void>
@@ -55,7 +56,7 @@ export interface Magatzem {
   citesDelPacient(pacientId: string): Promise<Cita[]>
   obtenirCita(id: string): Promise<Cita | undefined>
   crearCita(dades: DadesCita): Promise<Cita>
-  actualitzarCita(id: string, dades: DadesCita): Promise<Cita>
+  actualitzarCita(id: string, dades: DadesCita, inicial?: DadesCita): Promise<Cita>
   esborrarCita(id: string): Promise<void>
   /** Camps d'un registre clínic editats en dos dispositius alhora, encara per revisar */
   conflictesDe(registreId: string): Promise<CampEnConflicte[]>
@@ -81,11 +82,13 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     id: string,
     creatAt: string,
     dades: PacientGuardat,
+    inicial?: PacientGuardat,
   ): Promise<Pacient> {
     const valid = esquemaPacientGuardat.parse(dades)
     const modificatAt = araIso()
-    await desarPerCamp(db, clau, 'pacients', { id, creatAt, modificatAt }, valid, Object.keys(esquemaPacientGuardat.shape))
-    return { id, creatAt, modificatAt, ...valid }
+    await desarPerCamp(db, clau, 'pacients', { id, creatAt, modificatAt }, valid, Object.keys(esquemaPacientGuardat.shape), inicial)
+    // El que ha quedat de veritat (amb el que hagi arribat d'un altre dispositiu)
+    return inicial ? pacientExistent(id) : { id, creatAt, modificatAt, ...valid }
   }
 
   async function pacientExistent(id: string): Promise<Pacient> {
@@ -99,7 +102,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, inici: r.inici!, ...dades }
   }
 
-  async function guardarCita(id: string, creatAt: string, dades: DadesCita): Promise<Cita> {
+  async function guardarCita(id: string, creatAt: string, dades: DadesCita, inicial?: DadesCita): Promise<Cita> {
     const valid = esquemaDadesCita.parse(dades)
     await pacientExistent(valid.pacientId)
     const { pacientId, inici, ...resta } = valid
@@ -111,7 +114,9 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       { id, creatAt, modificatAt, pacientId, inici },
       esquemaCitaGuardada.parse(resta),
       Object.keys(esquemaCitaGuardada.shape),
+      inicial,
     )
+    if (inicial) return (await magatzem.obtenirCita(id))!
     return { id, creatAt, modificatAt, ...valid }
   }
 
@@ -131,14 +136,14 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       return guardarPacient(nouId(), ara, { ...dades, arxivat: false })
     },
 
-    async actualitzarPacient(id, dades) {
+    async actualitzarPacient(id, dades, inicial) {
       const actual = await pacientExistent(id)
-      return guardarPacient(id, actual.creatAt, {
-        ...dades,
+      const extres = {
         arxivat: actual.arxivat,
         // L'avís de possible duplicat es manté fins que la doctora el revisa
         ...(actual.revisarDuplicat ? { revisarDuplicat: actual.revisarDuplicat } : {}),
-      })
+      }
+      return guardarPacient(id, actual.creatAt, { ...dades, ...extres }, inicial ? { ...inicial, ...extres } : undefined)
     },
 
     async arxivarPacient(id, arxivat) {
@@ -170,7 +175,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId, ...dades }
     },
 
-    async desarFitxaClinica(pacientId, dades) {
+    async desarFitxaClinica(pacientId, dades, inicial) {
       await pacientExistent(pacientId)
       const valid = esquemaDadesFitxaClinica.parse(dades)
       const existent = await db.fitxesCliniques.where('pacientId').equals(pacientId).first()
@@ -185,8 +190,9 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
         { id, pacientId, creatAt, modificatAt },
         valid,
         Object.keys(esquemaDadesFitxaClinica.shape),
+        inicial ? { ...inicial, pacientId } : undefined,
       )
-      return { id, pacientId, creatAt, modificatAt, ...valid }
+      return inicial ? magatzem.obtenirFitxaClinica(pacientId) : { id, pacientId, creatAt, modificatAt, ...valid }
     },
 
     async llistarEsborranys() {
@@ -234,10 +240,10 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       return guardarCita(nouId(), araIso(), dades)
     },
 
-    async actualitzarCita(id, dades) {
+    async actualitzarCita(id, dades, inicial) {
       const actual = await db.cites.get(id)
       if (!actual) throw new Error(`No existeix la cita ${id}`)
-      return guardarCita(id, actual.creatAt, dades)
+      return guardarCita(id, actual.creatAt, dades, inicial)
     },
 
     async esborrarCita(id) {

@@ -158,7 +158,7 @@ test('clau diferent (DRV-K): fusionar les dades del Chrome amb les de Drive; els
   await expect(panell).toContainText('Codi: DRV-K')
   // Detalls tècnics: versions i empremtes curtes de les claus (diferents), sense cap dada
   const detalls = await panell.getByTestId('detalls-tecnics').textContent()
-  expect(detalls).toMatch(/^Qi \S+ · format 2 \(base de dades v\d+\) · Drive: format 2, clau [0-9A-F]{4} · dispositiu: clau [0-9A-F]{4} · última còpia correcta: \S+$/)
+  expect(detalls).toMatch(/^Qi \S+ · format 2 \(base de dades v\d+\) · Drive: format 2, clau [0-9A-F]{4} · dispositiu: clau [0-9A-F]{4} · última sincronia: \S+$/)
   const [, clauDrive, clauDispositiu] = /Drive: format 2, clau (\w{4}) · dispositiu: clau (\w{4})/.exec(detalls!)!
   expect(clauDrive).not.toBe(clauDispositiu)
   expect(detalls).not.toMatch(/Aina|Bernat/)

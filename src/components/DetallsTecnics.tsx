@@ -28,7 +28,7 @@ export function textDetalls(d: {
     `format ${FORMAT_COPIA} (base de dades v${d.baseDades})`,
     drive,
     `dispositiu: clau ${empremtaCurta(d.clauLocal)}`,
-    `última còpia correcta: ${d.darreraCorrecta ?? 'cap'}`,
+    `última sincronia: ${d.darreraCorrecta ?? 'cap'}`,
   ].join(' · ')
 }
 

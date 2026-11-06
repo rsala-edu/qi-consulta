@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useFormulariBrut } from '../../sincronia/revisio'
 import { useForm } from 'react-hook-form'
 import { AvisDesat } from '../../components/AvisDesat'
 import { Boto } from '../../components/Boto'
@@ -6,7 +7,7 @@ import { Camp } from '../../components/Camp'
 import { esquemaDadesPacient, SEXES, type DadesPacient } from '../../domini/pacient'
 import { t } from '../../i18n/t'
 import { useEsborrany, type OpcionsEsborrany } from '../../sessio/useEsborrany'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Props {
   valorsInicials: DadesPacient
@@ -29,6 +30,17 @@ export function FormulariPacient({ valorsInicials, onDesar, esborrany, textBoto 
     formState: { errors, isSubmitting },
   } = form
   const control = useEsborrany(form, esborrany)
+  // Amb canvis sense desar, les pantalles no es refresquen soles (revisio.tsx)
+  useFormulariBrut(form.formState.isDirty)
+  // Si les dades canvien des de fora (un altre dispositiu), s'actualitzen els
+  // camps que no s'han tocat i es conserven els que s'estan escrivint
+  const textInicials = JSON.stringify(valorsInicials)
+  const primeresInicials = useRef(textInicials)
+  useEffect(() => {
+    if (textInicials === primeresInicials.current) return
+    primeresInicials.current = textInicials
+    form.reset(JSON.parse(textInicials) as typeof valorsInicials, { keepDirtyValues: true })
+  }, [textInicials, form])
   const c = t.camps.pacient
 
   async function enviar(dades: DadesPacient) {

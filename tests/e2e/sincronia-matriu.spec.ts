@@ -45,6 +45,8 @@ test.beforeEach(({}, info) => {
   t0 = Date.now()
 })
 const horaComuna = (desfasMs = 0) => new Date(ARA.getTime() + (Date.now() - t0) + desfasMs)
+/** Un món (comptes i Drive) amb l'hora de Google igual que la dels dispositius */
+const nouMonAlDia = () => ({ ...nouMon(), ara: () => horaComuna().getTime() })
 
 async function dispositiu(
   browser: Browser,
@@ -216,7 +218,7 @@ async function canviarDeCompte(x: Disp) {
 // ---------------------------------------------------------------------------
 
 test('a) dispositiu nou (navegador del mòbil): Google i contrasenya, i ho recupera tot', async ({ browser }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
   await obrirPacient(pc1.page, /Aina Provencal Inventada/)
@@ -236,10 +238,10 @@ test('a) dispositiu nou (navegador del mòbil): Google i contrasenya, i ho recup
   for (const f of driveDe(mon, CORREU_DOCTORA).values()) expect(f.contingut).not.toMatch(/Aina|Penicil/)
 })
 
-test('b) tres dispositius oberts: una cita creada al PC 1 arriba sola a la tauleta i al PC 2 en ≤ 5 minuts; la pantalla oberta no es refresca', async ({
+test('b) tres dispositius oberts: una cita creada al PC 1 arriba sola a la tauleta i al PC 2 en ≤ 5 minuts, i l\'agenda oberta es refresca sola', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const tauleta = await dispositiu(browser, info, mon, 'tauleta', 'tauleta')
   const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
@@ -261,18 +263,58 @@ test('b) tres dispositius oberts: una cita creada al PC 1 arriba sola a la taule
   await Promise.all(tots.map((x) => x.page.clock.runFor(CADA)))
   await expect.poll(() => peticionsDe(mon, 'tauleta').length).toBeGreaterThan(peticionsTauleta)
   await expect(pindola(tauleta.page)).toHaveText('Drive: al dia')
-  // FALLA (pantalles obertes): la tauleta ja té la cita, però l'agenda oberta no la mostra
-  await tauleta.page.waitForTimeout(1_000)
-  expect(await citesVisibles(tauleta.page)).toEqual([])
-  // Canviant de pantalla, hi és
-  await expect.poll(() => citesDeLaSetmana(tauleta.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
-  await expect.poll(() => citesDeLaSetmana(pc2.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
+  // L'agenda oberta es refresca sola, sense tocar res
+  await expect.poll(() => citesVisibles(tauleta.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
+  await expect.poll(() => citesVisibles(pc2.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
+})
+
+test('b2) amb un formulari a mig fer no es toca res: surt «Hi ha canvis d\'un altre dispositiu · Veure\'ls»', async ({ browser }, info) => {
+  const mon = nouMonAlDia()
+  const pc1 = await primerDispositiu(browser, info, mon)
+  const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
+  await recuperar(pc2)
+  // Al PC 2 la doctora escriu el telèfon i encara no ha desat
+  await obrirPacient(pc2.page, /Aina/)
+  await pc2.page.getByLabel('Telèfon', { exact: true }).fill('622 222 222')
+  // Mentrestant, el PC 1 hi canvia la professió
+  await editarCamp(pc1.page, /Aina/, 'Professió', 'Mestra (inventat)')
+  await sincronitzar(mon, pc1)
+  await sincronitzar(mon, pc2)
+  const franja = pc2.page.getByRole('status').filter({ hasText: 'Hi ha canvis d\'un altre dispositiu' })
+  await expect(franja).toBeVisible()
+  // El que escrivia continua igual
+  await expect(pc2.page.getByLabel('Telèfon', { exact: true })).toHaveValue('622 222 222')
+  await expect(pc2.page.getByLabel('Professió', { exact: true })).toHaveValue('')
+  // En desar, només es desa el que ha canviat ella: la professió del PC 1 no es trepitja
+  await pc2.page.getByRole('button', { name: 'Desar' }).click()
+  await expect(pc2.page.getByText('Desat')).toBeVisible()
+  await expect(franja).toHaveCount(0)
+  await expect(pc2.page.getByLabel('Professió', { exact: true })).toHaveValue('Mestra (inventat)')
+  await sincronitzar(mon, pc2)
+  await sincronitzar(mon, pc1)
+  await obrirPacient(pc1.page, /Aina/)
+  await expect(pc1.page.getByLabel('Telèfon', { exact: true })).toHaveValue('622 222 222')
+  await expect(pc1.page.getByLabel('Professió', { exact: true })).toHaveValue('Mestra (inventat)')
+})
+
+test('b3) «Veure\'ls» mostra els canvis que han arribat mentre hi havia un formulari a mig fer', async ({ browser }, info) => {
+  const mon = nouMonAlDia()
+  const pc1 = await primerDispositiu(browser, info, mon)
+  const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
+  await recuperar(pc2)
+  await obrirPacient(pc2.page, /Aina/)
+  await pc2.page.getByLabel('Telèfon', { exact: true }).fill('622 222 222')
+  await editarCamp(pc1.page, /Aina/, 'Professió', 'Mestra (inventat)')
+  await sincronitzar(mon, pc1)
+  await sincronitzar(mon, pc2)
+  await pc2.page.getByRole('button', { name: 'Veure\'ls' }).click()
+  await expect(pc2.page.getByLabel('Professió', { exact: true })).toHaveValue('Mestra (inventat)')
 })
 
 test('c) dos dispositius editen camps diferents de la mateixa fitxa: es conserven tots dos, sense conflicte', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
   await recuperar(pc2)
@@ -293,7 +335,7 @@ test('c) dos dispositius editen camps diferents de la mateixa fitxa: es conserve
 })
 
 test('d) dos dispositius editen el mateix camp: guanya el més nou i l\'altre queda per revisar als dos', async ({ browser }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
   await recuperar(pc2)
@@ -313,7 +355,7 @@ test('d) dos dispositius editen el mateix camp: guanya el més nou i l\'altre qu
 })
 
 test('e) un dispositiu esborra una cita; l\'altre, que era sense connexió, no la torna a fer aparèixer', async ({ browser }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
   await novaCita(pc1.page, 'Aina', '2026-11-05', '10:00')
@@ -345,7 +387,7 @@ test('e) un dispositiu esborra una cita; l\'altre, que era sense connexió, no l
 test('f) un dispositiu treballa sense connexió tot un dia i després es reconnecta: tot arriba a Drive i a l\'altre', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const tauleta = await dispositiu(browser, info, mon, 'tauleta', 'tauleta')
   await recuperar(tauleta)
@@ -379,7 +421,7 @@ test('f) un dispositiu treballa sense connexió tot un dia i després es reconne
 })
 
 test('g1) amb el rellotge 10 minuts endarrerit, una cita esborrada no torna a aparèixer', async ({ browser }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
   await sincronitzar(mon, pc1)
@@ -396,7 +438,7 @@ test('g1) amb el rellotge 10 minuts endarrerit, una cita esborrada no torna a ap
 })
 
 test('g2) amb el rellotge 10 minuts endarrerit, un canvi posterior guanya als dos dispositius', async ({ browser }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc', { desfasMs: -10 * 60_000 })
   await recuperar(pc2)
@@ -406,6 +448,9 @@ test('g2) amb el rellotge 10 minuts endarrerit, un canvi posterior guanya als do
   await sincronitzar(mon, pc2)
   await obrirPacient(pc2.page, /Aina/)
   await expect(pc2.page.getByLabel('Telèfon', { exact: true })).toHaveValue('611 111 111')
+  // L'app avisa que el rellotge va desfasat (comparant amb l'hora de Google)
+  await expect(pc2.page.getByRole('note')).toHaveText(/El rellotge d'aquest dispositiu va 10 minuts endarrerit/)
+  await expect(pc1.page.getByRole('note')).toHaveCount(0)
   // Després (de veritat), el PC 2 el corregeix
   await editarCamp(pc2.page, /Aina/, 'Telèfon', '622 222 222')
   await sincronitzar(mon, pc2)
@@ -421,7 +466,7 @@ test('g2) amb el rellotge 10 minuts endarrerit, un canvi posterior guanya als do
 test('h) dos dispositius que pugen alhora no es trepitgen: cadascú escriu el seu diari', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
   await recuperar(pc2)
@@ -451,7 +496,7 @@ test('h) dos dispositius que pugen alhora no es trepitgen: cadascú escriu el se
 test('h2) Drive respon 429 i 503: queda «Drive: error» fins al pròxim intent, que va bé (sense reintent automàtic immediat)', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   mon.errors.push({ estat: 429, dispositiu: 'pc1' })
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
@@ -475,7 +520,7 @@ test('j) es tanca el navegador mentre puja: Drive queda sencer amb la versió d\
   browser,
   playwright,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const dir = mkdtempSync(join(tmpdir(), 'qi-perfil-'))
   try {
     const obrirPerfil = async () => {
@@ -526,7 +571,7 @@ test('j) es tanca el navegador mentre puja: Drive queda sencer amb la versió d\
 test('k) s\'esborren les dades del navegador: es recupera de Drive tot el que la píndola ja deia «al dia» (uns 3 segons després de desar)', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
   await sincronitzar(mon, pc1)
@@ -547,7 +592,7 @@ test('k) s\'esborren les dades del navegador: es recupera de Drive tot el que la
 })
 
 test('k2) en amagar la pestanya, el que hi ha pendent es puja de seguida (sense esperar)', async ({ browser }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   // Els temporitzadors de la pàgina, aturats: només pot pujar per haver amagat la pestanya
   const ara = await pc1.page.evaluate(() => Date.now())
@@ -568,7 +613,7 @@ const basesDeDades = (page: Page) => page.evaluate(async () => (await indexedDB.
 test('l) el permís d\'un altre compte de Google no es fa servir: res no va al seu Drive i les dades no es toquen', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
 
   // El compte de la doctora ja no és actiu en aquest navegador (n'ha sortit);
@@ -606,7 +651,7 @@ test('l) el permís d\'un altre compte de Google no es fa servir: res no va al s
 test('l2) si l\'altre compte té dades seves, no s\'ofereix mai fusionar-les: «Canviar a aquell compte» obre el seu espai', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   // Un altre navegador, amb el compte de proves i dades pròpies
   const altre = await dispositiu(browser, info, mon, 'altre', 'pc', { correu: CORREU_PROVES })
   await crear(altre)
@@ -641,7 +686,7 @@ test('l2) si l\'altre compte té dades seves, no s\'ofereix mai fusionar-les: «
 test('l3) dos comptes al mateix navegador, entrant i sortint l\'un rere l\'altre: cadascun amb la seva contrasenya i sense veure mai les dades de l\'altre', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   await pc1.page.getByRole('button', { name: 'Bloquejar' }).click()
 
@@ -694,7 +739,7 @@ test('l3) dos comptes al mateix navegador, entrant i sortint l\'un rere l\'altre
 test('m) finestra privada: avís fix; si es tanca amb canvis pendents, el navegador avisa; i en tancar-la no queda res', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   await pc1.context.close()
 
@@ -739,7 +784,7 @@ test('m) finestra privada: avís fix; si es tanca amb canvis pendents, el navega
 test('n) el que es desa mentre una sincronia aplica canvis de Drive no es perd i es puja', async ({
   browser,
 }, info) => {
-  const mon = nouMon()
+  const mon = nouMonAlDia()
   const pc1 = await primerDispositiu(browser, info, mon)
   const pc2 = await dispositiu(browser, info, mon, 'pc2', 'pc')
   await recuperar(pc2)

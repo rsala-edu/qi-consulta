@@ -5,9 +5,12 @@ on són les dades, quan i com es posen d'acord els dispositius, què passa amb
 els comptes de Google i què no funciona bé avui. Totes les afirmacions es poden
 comprovar amb les proves indicades a cada apartat.
 
-> **Estat (6/11/2026):** el **bloc 1** (pèrdua o barreja de dades) està fet:
-> cua de canvis pendents, un espai per compte, canvis pendents en tancar i el
-> format 2 de Drive (cada fitxer amb un sol autor, rellotge lògic per camp).
+> **Estat (6/11/2026):** els **blocs 1 i 2** estan fets. Bloc 1 (pèrdua o
+> barreja de dades): cua de canvis pendents, un espai per compte, canvis
+> pendents en tancar i el format 2 de Drive (cada fitxer amb un sol autor,
+> rellotge lògic per camp). Bloc 2: avís de rellotge desfasat, actualitzacions
+> de l'app sense recarregar, pantalles que es refresquen soles i el panell amb
+> les dues hores clares.
 > Els apartats 1 a 5 descriuen la situació de la revisió, abans d'arreglar-ho;
 > el que ha canviat és a la matriu (apartat 6), a la llista (apartat 7) i al
 > disseny (apartat 8).
@@ -243,23 +246,29 @@ arreglat: quan s'arregli, s'han de girar.
 | | Escenari | Revisió (7cb340f) | Després del bloc 1 | Prova |
 |---|---|---|---|---|
 | a | Dispositiu nou (mòbil): Google, contrasenya i ho recupera tot | ✅ (però vegeu n) | ✅ | `a)` |
-| b | Dos dispositius oberts: la cita arriba sola a l'altre | ⚠️ ≤ 5 min; la pantalla oberta no es refresca | ⚠️ igual (bloc 2, punt 8) | `b)` |
+| b | Dos dispositius oberts: la cita arriba sola a l'altre | ⚠️ ≤ 5 min; la pantalla oberta no es refresca | ✅ ≤ 5 min i la pantalla oberta es refresca sola (bloc 2); amb un formulari a mig fer, franja «Veure'ls» i en desar no es trepitja res | `b)`, `b2)`, `b3)` |
 | c | Camps diferents de la mateixa fitxa | ✅ | ✅ | `c)`, motor |
 | d | Mateix camp: conflicte per revisar | ✅ | ✅ (un sol conflicte, igual als dos) | `d)`, motor |
 | e | Esborrar una cita amb l'altre sense connexió | ✅ | ✅ | `e)`, motor |
 | f | Un dia sense connexió i reconnexió | ✅ | ✅ | `f)` |
-| g | Rellotge 10 minuts endarrerit | ❌ | ✅ esborrat i canvi posterior guanyen (HLC) | `g1)`, `g2)`, motor |
+| g | Rellotge 10 minuts endarrerit | ❌ | ✅ esborrat i canvi posterior guanyen (HLC); avís de rellotge desfasat (bloc 2) | `g1)`, `g2)`, motor |
 | h | Dos dispositius pugen alhora | ⚠️ el segon trepitja el primer | ✅ cadascú escriu el seu diari | `h)`, motor |
 | h2 | Errors 429/503 | ⚠️ sense reintent immediat | ⚠️ igual (bloc 3, punt 10) | `h2)` |
-| i | Versió antiga i versió nova | ❌ | ✅ taules i camps desconeguts es conserven; versió mínima per escriure; les versions d'abans hi veuen DRV-V. ⚠️ Service worker: bloc 2, punt 7 | motor |
+| i | Versió antiga i versió nova | ❌ | ✅ taules i camps desconeguts es conserven; versió mínima per escriure; les versions d'abans hi veuen DRV-V; la versió nova es detecta amb l'app oberta (bloc 2) | motor, `produccio-actualitzacio` |
 | j | Tancar el navegador mentre puja | ✅ | ✅ | `j)` |
 | k | Esborrar les dades del navegador | ⚠️ es perdia el pendent | ✅ el que la píndola diu «al dia» (≈3 s després de desar) es recupera; en amagar la pestanya es puja de seguida | `k)`, `k2)` |
 | l | Dos comptes al mateix navegador | ❌ | ✅ un espai per compte; el permís d'un altre compte no es fa servir mai | `l)`, `l2)`, `l3)` |
 | m | Finestra d'incògnit | ⚠️ | ✅ avís fix; si es tanca amb canvis pendents, el navegador ho avisa | `m)` |
 | n | Desar mentre sincronitza | ❌ | ✅ mai se substitueix cap taula; el canvi es conserva i es puja | `n)`, motor |
 
-Resultat el 6/11/2026, després del bloc 1: 580 proves unitàries, 137 E2E (tots
-dos perfils) i 6 E2E amb el build de producció passen.
+Resultat el 6/11/2026, després del bloc 2: 582 proves unitàries, 139 E2E (tots
+dos perfils) i 7 E2E amb el build de producció passen.
+
+**Prova real (6/11):** el Firefox amb la versió 7cb340f i el Chrome amb la
+nova. El Chrome va migrar Drive; el Firefox va mostrar DRV-V i no hi va
+escriure res. En recarregar es va actualitzar sol i la cita que hi havia creat
+amb la versió vella va pujar. Fins que no es va recarregar, però, continuava
+amb la versió vella: és el que arregla el punt 7.
 
 **La prova que fallava de tant en tant.** En 50 execucions seguides de la
 matriu (amb el codi de la revisió), 844 proves van passar i 6 van fallar:
@@ -294,16 +303,16 @@ canvis, desapareixia. Amb el motor nou ja no pot passar.
 
 **Prioritat 2 — dades incorrectes o versions velles**
 
-5. **Rellotges** (g): no dependre només del rellotge del dispositiu (corregir-lo
+✅ 5. **Rellotges** (g): no dependre només del rellotge del dispositiu (corregir-lo
    amb l'hora de Drive o fer servir un comptador per registre).
-6. **Versions** (i): conservar les taules i els camps que una versió no coneix;
+✅ 6. **Versions** (i): conservar les taules i els camps que una versió no coneix;
    apujar el número de format quan calgui perquè surti «Actualitzar l'app».
-7. **Chrome amb una versió antiga dies seguits** (ja conegut): buscar
+✅ 7. **Chrome amb una versió antiga dies seguits** (ja conegut): buscar
    actualitzacions periòdicament i en tornar a la pestanya, i oferir «Hi ha una
    versió nova: tornar a carregar».
-8. **Pantalles obertes** (ja conegut): tornar-les a carregar quan la sincronia
+✅ 8. **Pantalles obertes** (ja conegut): tornar-les a carregar quan la sincronia
    porta canvis.
-9. **«Última còpia correcta»** (ja conegut): mostrar la mateixa hora que els
+✅ 9. **«Última còpia correcta»** (ja conegut): mostrar la mateixa hora que els
    detalls tècnics (l'última sincronia correcta d'aquest dispositiu) i, a part,
    si cal, l'hora de l'últim canvi a Drive.
 
@@ -557,6 +566,36 @@ Fet tal com es descriu a 8.1–8.6, amb aquestes precisions:
   d'escriure), la pujada amb `keepalive` en tancar, l'actualització del
   service worker, el refresc de les pantalles obertes, el reintent amb espera
   creixent i la neteja de marques d'esborrat.
+
+### 8.10 Com ha quedat (bloc 2)
+
+- **Rellotge (punt 5):** l'app compara l'hora del dispositiu amb la de Google:
+  la capçalera `Date` de les respostes, si el navegador la deixa llegir, i si
+  no, l'hora que Drive posa al fitxer que l'app acaba d'escriure. Si el
+  desfasament passa de 2 minuts, surt la franja «El rellotge d'aquest
+  dispositiu va 10 minuts endarrerit…».
+- **Actualitzacions (punt 7, `src/actualitzacio/`):** el service worker el
+  registra l'app, amb `updateViaCache: 'none'`. Es busca una versió nova en
+  obrir l'app, en tornar a la pestanya i cada 30 minuts, i també es mira
+  `version.json` (amb `cache: 'no-store'`). Quan n'hi ha una de nova, surt la
+  franja «Hi ha una versió nova · Actualitzar». Si l'app està bloquejada, o
+  encara no s'ha obert, s'actualitza sola. La versió es veu a Ajustos > Quant
+  a. GitHub Pages no deixa canviar les capçaleres de memòria cau
+  d'`index.html` ni del manifest: no cal, perquè les serveix el service
+  worker, i aquest només es renova amb una versió nova.
+- **Pantalles (punt 8, `src/sincronia/revisio.tsx`):** quan la sincronia porta
+  canvis, les pantalles es tornen a carregar soles, sense passar per
+  «carregant». Si hi ha un formulari a mig fer, no es toca res i surt la franja
+  «Hi ha canvis d'un altre dispositiu · Veure'ls». «Veure'ls» actualitza els
+  camps que no s'han tocat i conserva els que s'estan escrivint.
+- **Trobat i arreglat en fer el punt 8:** en desar un formulari, abans es
+  desaven tots els camps tal com eren en obrir-lo. Si mentrestant havia
+  arribat un canvi d'un altre dispositiu en un camp que la doctora no havia
+  tocat, es trepitjava. Ara només compten com a canvis els camps que ha
+  modificat respecte del que tenia en obrir el formulari (prova `b2)`).
+- **Panell (punt 9):** «Última sincronia d'aquest dispositiu: …» i «Últim canvi
+  a Drive (qualsevol dispositiu): …». Els detalls tècnics diuen «última
+  sincronia», la mateixa hora que la primera línia.
 
 ---
 

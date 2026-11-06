@@ -32,6 +32,7 @@ export function IndicadorCopia() {
     provarCopiesAnteriors,
     senseCopiaDesDe,
     altreCompte,
+    darreraCorrecta,
   } = useSincronia()
   const { canviarAlCompte } = useSessio()
   const [obert, setObert] = useState(false)
@@ -112,8 +113,9 @@ export function IndicadorCopia() {
           {provant === 'fet' && <p role="status">{s.copiaAnteriorFeta}</p>}
           {provant === 'cap' && <p role="alert">{s.capCopiaAnterior}</p>}
           <p className="detall">
-            {ultimaCopia ? formatar(s.ultimaCorrecta, { quan: quan(ultimaCopia) }) : s.capCopia}
+            {darreraCorrecta ? formatar(s.ultimaSincronia, { quan: quan(darreraCorrecta) }) : s.capCopia}
           </p>
+          <p className="detall">{ultimaCopia ? formatar(s.ultimCanviDrive, { quan: quan(ultimaCopia) }) : s.capCanviDrive}</p>
           {estat === 'error' && error && error.motiu !== 'xarxa' && (
             <p className="detall">{formatar(s.codi, { codi: error.codi })}</p>
           )}

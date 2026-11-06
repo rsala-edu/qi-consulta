@@ -99,7 +99,7 @@ export function PestanyaCites() {
               const desada =
                 obert.tipus === 'nova'
                   ? await magatzem.crearCita(dades)
-                  : await magatzem.actualitzarCita(obert.cita.id, dades)
+                  : await magatzem.actualitzarCita(obert.cita.id, dades, obert.cita)
               mostrarAvisTipus((await recalcularTipusVisita(magatzem, [pacient.id])).filter((c) => c.id !== desada.id))
               desat()
             }}

@@ -28,7 +28,7 @@ export function PestanyaFitxaClinica() {
           descripcio: formatar(t.esborranys.fitxaClinicaDe, { nom: nomComplet(pacient) }),
         }}
         onDesar={async (noves) => {
-          await magatzem.desarFitxaClinica(pacient.id, noves)
+          await magatzem.desarFitxaClinica(pacient.id, noves, dades)
         }}
         conflictes={carrega.dades.conflictes}
         onResolt={async (c) => {

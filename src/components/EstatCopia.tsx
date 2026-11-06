@@ -1,4 +1,5 @@
-// Estat de la còpia a Google Drive: «Última còpia: fa 2 minuts», o un botó
+// Estat de la còpia a Google Drive: «Última sincronia d'aquest dispositiu: fa
+// 2 minuts», o un botó
 // per connectar quan el permís de Google ha caducat.
 
 import { useEffect, useState } from 'react'
@@ -7,7 +8,7 @@ import { ATRIBUT_CONNECTAR, useSincronia } from '../sincronia/ContextSincronia'
 import { Boto } from './Boto'
 
 export function EstatCopia() {
-  const { estat, ultimaCopia, connectar, sincronitzarAra } = useSincronia()
+  const { estat, darreraCorrecta, connectar, sincronitzarAra } = useSincronia()
   const [error, setError] = useState(false)
   // Torna a dibuixar cada minut perquè «fa X minuts» es mantingui al dia
   const [ara, setAra] = useState(() => Date.now())
@@ -27,8 +28,8 @@ export function EstatCopia() {
             ? s.calConnectar
             : estat === 'error'
               ? s.error
-              : ultimaCopia
-                ? formatar(s.ultimaCopia, { quan: faTemps(ultimaCopia, ara) })
+              : darreraCorrecta
+                ? formatar(s.ultimaCopia, { quan: faTemps(darreraCorrecta, ara) })
                 : s.capCopia}
       </span>
       {estat === 'cal-connectar' && (

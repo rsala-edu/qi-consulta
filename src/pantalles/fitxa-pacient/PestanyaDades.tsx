@@ -50,14 +50,16 @@ export function PestanyaDades() {
         }}
       />
       <FormulariPacient
-        // Es torna a muntar si les dades canvien des de fora (recuperar una versió)
+        // Es torna a muntar si es recupera una versió anterior d'un camp. Els
+        // canvis d'un altre dispositiu els aplica el formulari mateix (només
+        // als camps que no s'estan escrivint)
         key={`${id}|${recuperacions}`}
         valorsInicials={dadesDePacient(pacient)}
         esborrany={{
           clau: `pacient:${id}:dades`,
           descripcio: formatar(t.esborranys.dadesDe, { nom: nomComplet(pacient) }),
         }}
-        onDesar={async (noves) => actualitzarPacient(await magatzem.actualitzarPacient(id, noves))}
+        onDesar={async (noves) => actualitzarPacient(await magatzem.actualitzarPacient(id, noves, dadesDePacient(pacient)))}
       />
       <div className="zona-arxiu">
         <Boto variant="discret" onClick={canviarArxiu} disabled={arxivant}>

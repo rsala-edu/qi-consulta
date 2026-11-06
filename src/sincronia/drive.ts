@@ -39,11 +39,21 @@ const API = 'https://www.googleapis.com/drive/v3/files'
 const PUJADA = 'https://www.googleapis.com/upload/drive/v3/files'
 const CAMPS = 'id,name,modifiedTime,version'
 
-export function driveGoogle(token: () => string | null, fetchFn: typeof fetch = (...a) => fetch(...a)): Drive {
+/**
+ * `alHora`: l'hora de Google (capçalera Date de la resposta, si el navegador
+ * la deixa llegir), per saber si el rellotge d'aquest dispositiu va desfasat.
+ */
+export function driveGoogle(
+  token: () => string | null,
+  fetchFn: typeof fetch = (...a) => fetch(...a),
+  alHora?: (msGoogle: number, msAqui: number) => void,
+): Drive {
   async function demanar(url: string, init: RequestInit = {}): Promise<Response> {
     const t = token()
     if (!t) throw new ErrorAutoritzacio()
     const r = await fetchFn(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${t}` } })
+    const data = Date.parse(r.headers?.get?.('date') ?? '')
+    if (alHora && Number.isFinite(data)) alHora(data, Date.now())
     if (r.status === 401 || r.status === 403) throw new ErrorAutoritzacio()
     if (!r.ok) throw new ErrorDrive(r.status)
     return r

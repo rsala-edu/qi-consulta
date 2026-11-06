@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useFormulariBrut } from '../../sincronia/revisio'
 import { useForm, type Path } from 'react-hook-form'
 import { AvisDesat } from '../../components/AvisDesat'
 import { Boto } from '../../components/Boto'
@@ -37,6 +38,17 @@ export function FormulariFitxaClinica({ valorsInicials, onDesar, esborrany, conf
     formState: { errors, isSubmitting },
   } = form
   const control = useEsborrany(form, esborrany)
+  // Amb canvis sense desar, les pantalles no es refresquen soles (revisio.tsx)
+  useFormulariBrut(form.formState.isDirty)
+  // Si les dades canvien des de fora (un altre dispositiu), s'actualitzen els
+  // camps que no s'han tocat i es conserven els que s'estan escrivint
+  const textInicials = JSON.stringify(valorsInicials)
+  const primeresInicials = useRef(textInicials)
+  useEffect(() => {
+    if (textInicials === primeresInicials.current) return
+    primeresInicials.current = textInicials
+    form.reset(JSON.parse(textInicials) as typeof valorsInicials, { keepDirtyValues: true })
+  }, [textInicials, form])
   const c = t.camps.fitxaClinica
 
   /** L'altra versió de cada camp en conflicte, al costat del camp */

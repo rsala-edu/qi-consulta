@@ -175,6 +175,35 @@ describe('dos dispositius', () => {
     }
   })
 
+  it('un camp que arriba d\'un altre dispositiu mentre el formulari és obert no es trepitja en desar', async () => {
+    const drive = driveEnMemoria()
+    const a = await primer()
+    const p = await a.m.crearPacient(pacientInventat())
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    const b = await nou(drive)
+    // B obre el formulari…
+    const inicial = pacientInventat()
+    // …mentrestant A canvia la professió i B la rep
+    await a.m.actualitzarPacient(p.id, pacientInventat({ professio: 'Mestra' }))
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    await sincronitzar(b.db, b.clau, drive, DIA)
+    // B desa el formulari amb el telèfon nou i la professió tal com era en obrir-lo
+    const desat = await b.m.actualitzarPacient(p.id, { ...inicial, telefon: '611 111 111' }, inicial)
+    expect(desat).toMatchObject({ telefon: '611 111 111', professio: 'Mestra' })
+    await sincronitzar(b.db, b.clau, drive, DIA)
+    await sincronitzar(a.db, a.clau, drive, DIA)
+    expect(await a.m.obtenirPacient(p.id)).toMatchObject({ telefon: '611 111 111', professio: 'Mestra' })
+  })
+
+  it('una fitxa nova desada des del formulari guarda tots els camps, també els que no s\'han tocat', async () => {
+    const a = await primer()
+    const p = await a.m.crearPacient(pacientInventat())
+    const { id: _i, pacientId: _p, creatAt: _c, modificatAt: _m, ...inicial } = await a.m.obtenirFitxaClinica(p.id)
+    const f = await a.m.desarFitxaClinica(p.id, { ...inicial, alergies: 'Iode' }, inicial)
+    expect(f.alergies).toBe('Iode')
+    expect(f.habits).toEqual(inicial.habits)
+  })
+
   it('n) el que es desa mentre la sincronia aplica canvis de Drive no es perd i es puja', async () => {
     const drive = driveEnMemoria()
     const a = await primer()

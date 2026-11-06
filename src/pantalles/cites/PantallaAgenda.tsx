@@ -304,7 +304,7 @@ export function PantallaAgenda() {
                   const desada =
                     obert.tipus === 'nova'
                       ? await magatzem.crearCita(dades)
-                      : await magatzem.actualitzarCita(obert.cita.id, dades)
+                      : await magatzem.actualitzarCita(obert.cita.id, dades, obert.cita)
                   // El tipus de visita de les altres cites del pacient es recalcula sol
                   const afectats = new Set([dades.pacientId, ...(obert.tipus === 'editar' ? [obert.cita.pacientId] : [])])
                   mostrarAvisTipus((await recalcularTipusVisita(magatzem, afectats)).filter((c) => c.id !== desada.id))

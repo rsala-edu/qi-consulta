@@ -13,15 +13,30 @@ function versioApp(): string {
   }
 }
 process.env.VITE_VERSIO_APP ??= versioApp()
+process.env.VITE_DATA_APP ??= new Date().toISOString()
 
 // Publicació a GitHub Pages: https://<usuari>.github.io/qi-consulta/
 export default defineConfig({
   base: '/qi-consulta/',
   plugins: [
     react(),
+    // version.json: quina versió hi ha publicada (l'app la mira sense memòria cau)
+    {
+      name: 'qi-versio',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'version.json',
+          source: JSON.stringify({ versio: process.env.VITE_VERSIO_APP, data: process.env.VITE_DATA_APP }),
+        })
+      },
+    },
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // La versió nova s'instal·la i espera: l'app la fa servir quan la doctora
+      // toca «Actualitzar» (o sola, si està bloquejada). El registre el fa
+      // src/actualitzacio (amb updateViaCache: 'none' i comprovacions periòdiques)
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['logo/qi-icona.svg', 'logo/qi-icona-180.png', 'logo/qi-simbol.svg', 'logo/qi-simbol-clar.svg'],
       manifest: {
         name: 'Qi — consulta d\'acupuntura',

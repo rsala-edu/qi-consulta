@@ -72,6 +72,13 @@ export async function desarPerCamp(
   base: Registre & { id: string },
   dades: Record<string, unknown>,
   conegudes?: readonly string[],
+  /**
+   * Les dades tal com eren quan es va obrir el formulari (amb els camps en
+   * clar). Si es dona, només compten com a canvis els camps que s'han
+   * modificat respecte d'aquí: un camp que ha arribat canviat d'un altre
+   * dispositiu mentre el formulari era obert no es trepitja.
+   */
+  inicial?: Record<string, unknown>,
 ): Promise<Registre> {
   const { rellotge } = await rellotgeDe(db)
   const t = db.table(taula)
@@ -86,6 +93,16 @@ export async function desarPerCamp(
       completes = { ...desconeguts, ...dades }
     }
     const camps = aplanar({ ...completes, ...clars })
+    // (un registre nou no té cap valor actual per conservar)
+    if (inicial && abans) {
+      const ini = aplanar(inicial)
+      for (const c of new Set([...Object.keys(camps), ...Object.keys(ini), ...Object.keys(obert.camps)])) {
+        if (!igual(ini[c], camps[c])) continue
+        // La doctora no l'ha tocat: es queda el valor actual (potser d'un altre dispositiu)
+        if (obert.camps[c] === undefined) delete camps[c]
+        else camps[c] = obert.camps[c]
+      }
+    }
     const canviats = [...new Set([...Object.keys(obert.camps), ...Object.keys(camps)])].filter((c) => !igual(obert.camps[c], camps[c]))
     if (abans && canviats.length === 0) return abans
     const h = rellotge.nou()

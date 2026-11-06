@@ -2,6 +2,13 @@
 export const ca = {
   app: {
     nom: 'Qi',
+    rellotgeEndarrerit:
+      'El rellotge d\'aquest dispositiu va {n} minuts endarrerit. Les dades no es perden, però convé posar-lo en hora.',
+    rellotgeAvancat: 'El rellotge d\'aquest dispositiu va {n} minuts avançat. Les dades no es perden, però convé posar-lo en hora.',
+    canvisAltreDispositiu: 'Hi ha canvis d\'un altre dispositiu',
+    veureCanvis: 'Veure\'ls',
+    versioNova: 'Hi ha una versió nova',
+    actualitzar: 'Actualitzar',
     finestraPrivada: 'Finestra privada: espera que la píndola digui «al dia» abans de tancar.',
     bloquejar: 'Bloquejar',
     carregant: 'Carregant…',
@@ -351,7 +358,7 @@ export const ca = {
     dies: 'fa {n} dies',
   },
   sincronia: {
-    ultimaCopia: 'Última còpia a Google Drive: {quan}',
+    ultimaCopia: 'Última sincronia d\'aquest dispositiu: {quan}',
     capCopia: 'Aquest dispositiu encara no ha fet cap còpia correcta a Google Drive.',
     sincronitzant: 'Desant a Google Drive…',
     calConnectar: 'Cal connectar amb Google per desar la còpia a Drive.',
@@ -390,7 +397,9 @@ export const ca = {
       local: 'Els canvis que arriben de Drive no s\'han pogut desar en aquest dispositiu.',
       desconegut: 'Hi ha hagut un error inesperat en desar la còpia.',
     },
-    ultimaCorrecta: 'Última còpia correcta: {quan}',
+    ultimaSincronia: 'Última sincronia d\'aquest dispositiu: {quan}',
+    ultimCanviDrive: 'Últim canvi a Drive (qualsevol dispositiu): {quan}',
+    capCanviDrive: 'A Drive encara no hi ha cap canvi.',
     codi: 'Codi: {codi}',
     tornarHoAProvar: 'Tornar-ho a provar',
     nomesLectura:
@@ -466,6 +475,17 @@ export const ca = {
     etiqueta: 'Tema: {tema}',
     noms: { sistema: 'com el sistema', clar: 'clar', fosc: 'fosc' },
     opcions: { sistema: 'Com el sistema', clar: 'Clar', fosc: 'Fosc' },
+  },
+  quantA: {
+    titol: 'Quant a',
+    desc: 'Versió de l\'app i actualitzacions.',
+    versio: 'Versió',
+    versioApp: 'Qi {versio}',
+    compilada: 'Publicada el {data}',
+    format: 'Format de les dades a Drive: {format} (nivell {nivell}) · base de dades v{base}',
+    novaAmb: 'Hi ha una versió nova: {versio}',
+    buscar: 'Buscar actualitzacions',
+    buscant: 'Buscant…',
   },
   aparenca: {
     titol: 'Aparença',
