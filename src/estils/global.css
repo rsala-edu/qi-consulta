@@ -2854,3 +2854,15 @@ fieldset {
 .opcio-clau[aria-current='true'] {
   border-color: var(--jade, var(--avis));
 }
+
+/* Franja fixa sota la barra (finestra privada, versió nova, canvis d'un altre dispositiu) */
+.franja-avis {
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--avis-suau);
+  border-bottom: 1px solid var(--avis);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}

@@ -12,6 +12,7 @@ import { actualitzarApp } from '../sincronia/actualitzarApp'
 import { diesSenseCopia, textSenseCopia } from '../sincronia/senseCopia'
 import { Boto } from './Boto'
 import { DetallsTecnics } from './DetallsTecnics'
+import { useSessio } from '../sessio/ContextSessio'
 
 function quan(iso: string): string {
   const d = new Date(iso)
@@ -19,8 +20,20 @@ function quan(iso: string): string {
 }
 
 export function IndicadorCopia() {
-  const { estat, pendent, error, ultimaCopia, connectar, sincronitzarAra, provarCopiesAnteriors, senseCopiaDesDe } =
-    useSincronia()
+  const {
+    estat,
+    pendent,
+    pendents,
+    nomesLectura,
+    error,
+    ultimaCopia,
+    connectar,
+    sincronitzarAra,
+    provarCopiesAnteriors,
+    senseCopiaDesDe,
+    altreCompte,
+  } = useSincronia()
+  const { canviarAlCompte } = useSessio()
   const [obert, setObert] = useState(false)
   const [provant, setProvant] = useState<'provant' | 'fet' | 'cap' | null>(null)
   const navigate = useNavigate()
@@ -51,13 +64,17 @@ export function IndicadorCopia() {
   const s = t.sincronia
   const senseConnexio = estat === 'error' && error?.motiu === 'xarxa'
   const dies = diesSenseCopia(senseCopiaDesDe, ara)
+  const textPendents =
+    pendents === 1 ? s.curt.unPendent : pendents > 1 ? formatar(s.curt.pendents, { n: String(pendents) }) : s.curt.pendent
   const text = dies
     ? textSenseCopia(dies)
-    : senseConnexio
-    ? s.curt.senseConnexio
-    : estat === 'al-dia' && pendent
-      ? s.curt.pendent
-      : s.curt[estat]
+    : nomesLectura
+      ? s.curt.nomesLectura
+      : senseConnexio
+        ? s.curt.senseConnexio
+        : estat === 'al-dia' && (pendent || pendents > 0)
+          ? textPendents
+          : s.curt[estat]
   const calGoogle = estat === 'cal-connectar' || error?.motiu === 'permis'
   const missatge =
     estat === 'error' && error
@@ -83,6 +100,15 @@ export function IndicadorCopia() {
           <h2>{s.panell}</h2>
           {dies && <p className="avis-fort">{textSenseCopia(dies)}</p>}
           <p role="status">{missatge}</p>
+          {nomesLectura && <p className="avis-fort">{s.nomesLectura}</p>}
+          {altreCompte && (
+            <div className="avis-fort" role="alert">
+              <p>{s.altreCompte}</p>
+              <Boto variant="discret" onClick={() => void canviarAlCompte(altreCompte)}>
+                {s.canviarAlCompte}
+              </Boto>
+            </div>
+          )}
           {provant === 'fet' && <p role="status">{s.copiaAnteriorFeta}</p>}
           {provant === 'cap' && <p role="alert">{s.capCopiaAnterior}</p>}
           <p className="detall">
@@ -93,7 +119,7 @@ export function IndicadorCopia() {
           )}
           <DetallsTecnics />
           <div className="accions accions-esquerra">
-            {estat === 'error' && error?.motiu === 'versio' ? (
+            {nomesLectura || (estat === 'error' && error?.motiu === 'versio') ? (
               <Boto onClick={() => void actualitzarApp()}>{s.actualitzarApp}</Boto>
             ) : estat === 'error' && error?.motiu === 'duplicades' ? (
               <Boto

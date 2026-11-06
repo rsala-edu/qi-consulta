@@ -24,6 +24,7 @@ import { diaLlarg, formatar, t } from '../../i18n/t'
 import { activarEmpremta, desactivarEmpremta, novaClauRecuperacio, teClauRecuperacio, teEmpremta } from '../../sessio/claus'
 import { useClauMestra, useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
+import { demanarPersistencia, estatPersistencia } from '../../sessio/persistencia'
 import { useSincronia } from '../../sincronia/ContextSincronia'
 import { diaDe } from '../../domini/cita'
 import { OPCIONS_MINUTS_BLOQUEIG } from '../../db/magatzem'
@@ -35,8 +36,13 @@ export function PantallaSeguretat() {
   const { estat: estatCopia, error: errorCopia, sincronitzarAra } = useSincronia()
   const [versio, setVersio] = useState(0)
   const [carrega] = useCarrega(async () => {
-    const [empremta, clau, disponible] = await Promise.all([teEmpremta(db), teClauRecuperacio(db), passkeyDisponible()])
-    return { empremta, clau, disponible }
+    const [empremta, clau, disponible, persistencia] = await Promise.all([
+      teEmpremta(db),
+      teClauRecuperacio(db),
+      passkeyDisponible(),
+      estatPersistencia(),
+    ])
+    return { empremta, clau, disponible, persistencia }
   }, [db, versio])
   const [accio, setAccio] = useState<Accio>(null)
   const [clauImpresa, setClauImpresa] = useState<string | null>(null)
@@ -65,6 +71,23 @@ export function PantallaSeguretat() {
         {s.proteccioText.map((p) => (
           <p key={p}>{p}</p>
         ))}
+      </section>
+
+      <section className="panell" aria-label={s.persistencia}>
+        <h2>{s.persistencia}</h2>
+        {carrega.estat === 'llest' && (
+          <>
+            <p role="status">{s.estatsPersistencia[carrega.dades.persistencia]}</p>
+            {carrega.dades.persistencia === 'no-concedida' && (
+              <Boto
+                variant="discret"
+                onClick={() => void demanarPersistencia(db).then(() => setVersio((n) => n + 1))}
+              >
+                {s.demanarPersistencia}
+              </Boto>
+            )}
+          </>
+        )}
       </section>
 
       <section className="panell" aria-label={s.bloqueig}>

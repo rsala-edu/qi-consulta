@@ -2,6 +2,7 @@
 export const ca = {
   app: {
     nom: 'Qi',
+    finestraPrivada: 'Finestra privada: espera que la píndola digui «al dia» abans de tancar.',
     bloquejar: 'Bloquejar',
     carregant: 'Carregant…',
     tornar: 'Tornar',
@@ -46,7 +47,9 @@ export const ca = {
       bloquejat: 'El navegador no ha deixat obrir la finestra de Google. Permet les finestres emergents per a Qi i torna-ho a provar.',
       cancellat: 'No s\'ha completat l\'entrada amb Google. Torna-ho a provar.',
       xarxa: 'No s\'ha pogut connectar amb Google. Comprova la connexió a internet.',
+      altreCompte: 'Aquest compte de Google no és el d\'aquest espai. No s\'ha tocat res.',
     },
+    altreCompte: 'Entrar amb un altre compte de Google',
     errorsRecuperacio: {
       drive: 'No s\'ha pogut connectar amb Google Drive. Potser la sessió ha caducat.',
       versio:
@@ -362,6 +365,9 @@ export const ca = {
       sincronitzant: 'Drive: desant…',
       'al-dia': 'Drive: al dia',
       pendent: 'Drive: canvis pendents',
+      unPendent: 'Drive: 1 canvi pendent de pujar',
+      pendents: 'Drive: {n} canvis pendents de pujar',
+      nomesLectura: 'Actualitza l\'app per desar canvis',
       error: 'Drive: error',
       senseConnexio: 'Drive: sense connexió',
     },
@@ -387,7 +393,12 @@ export const ca = {
     ultimaCorrecta: 'Última còpia correcta: {quan}',
     codi: 'Codi: {codi}',
     tornarHoAProvar: 'Tornar-ho a provar',
+    nomesLectura:
+      'Una versió més nova de Qi ha escrit a Google Drive. Aquesta app encara les pot llegir, però no hi pot desar canvis: el que desis queda en aquest dispositiu fins que actualitzis l\'app.',
     tornarGoogle: 'Tornar a entrar amb Google',
+    altreCompte:
+      'Has entrat amb un altre compte de Google, que no és el d\'aquest espai. No s\'ha fet servir per a res: les dades d\'aquest compte no s\'han tocat.',
+    canviarAlCompte: 'Canviar a aquell compte',
     desarAra: 'Desar ara a Drive',
     tancar: 'Tancar',
     actualitzarApp: 'Actualitzar l\'app',
@@ -471,6 +482,14 @@ export const ca = {
       'La còpia de Google Drive va tancada amb la mateixa clau. Si perds la tauleta, les dades no es perden: entres amb la contrasenya en un altre dispositiu i les recuperes.',
       'Per això és important no oblidar la contrasenya i guardar la clau de recuperació impresa.',
     ],
+    persistencia: 'Emmagatzematge del navegador',
+    estatsPersistencia: {
+      concedida: 'Persistent: el navegador no esborrarà les dades d\'aquest dispositiu encara que li falti espai.',
+      'no-concedida':
+        'No és persistent: si al navegador li falta espai, podria esborrar les dades d\'aquest dispositiu. El que ja és a Google Drive no es perdria.',
+      'no-disponible': 'Aquest navegador no diu si les dades són persistents.',
+    },
+    demanarPersistencia: 'Demanar-ho al navegador',
     bloqueig: 'Bloqueig automàtic',
     bloqueigDesc:
       'Si no fas servir l\'app durant aquest temps, es tanca i cal tornar a entrar amb l\'empremta o la contrasenya. També es tanca si tornes d\'una altra app i ja ha passat aquest temps.',

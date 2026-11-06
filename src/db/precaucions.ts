@@ -4,7 +4,7 @@
 import type { RevisioPrecaucions } from '../punts/cataleg'
 import { ordenarCategories } from '../punts/cataleg'
 import type { CategoriaPrecaucio } from '../punts/esquema'
-import { registrarEsborrats } from './esborrats'
+import { desarSencer, esborrarRegistres } from '../sincronia/escriptura'
 import type { QiDB, RegistreCategoriaPrecaucio, RegistrePrecaucio } from './esquema'
 
 export interface RevisioDesada extends RevisioPrecaucions {
@@ -20,13 +20,12 @@ export async function llegirRevisioPrecaucions(db: QiDB): Promise<RevisioDesada>
 
 /** La doctora confirma una categoria sencera. */
 export async function confirmarCategoria(db: QiDB, categoria: CategoriaPrecaucio): Promise<void> {
-  await db.categoriesPrecaucio.put({ categoria, confirmadaAt: new Date().toISOString() })
+  await desarSencer(db, 'categoriesPrecaucio', { categoria, confirmadaAt: new Date().toISOString() }, categoria)
 }
 
 /** La categoria torna a quedar pendent. */
 export async function desconfirmarCategoria(db: QiDB, categoria: CategoriaPrecaucio): Promise<void> {
-  await db.categoriesPrecaucio.delete(categoria)
-  await registrarEsborrats(db, 'categoriesPrecaucio', [categoria])
+  await esborrarRegistres(db, 'categoriesPrecaucio', [categoria])
 }
 
 /** Excepció per a un punt: categories i text propis (queda confirmat). */
@@ -41,11 +40,10 @@ export async function desarExcepcio(
     nota: precaucio.nota.trim(),
     confirmadaAt: new Date().toISOString(),
   }
-  await db.precaucions.put(registre)
+  await desarSencer(db, 'precaucions', { ...registre }, codi)
   return registre
 }
 
 export async function treureExcepcio(db: QiDB, codi: string): Promise<void> {
-  await db.precaucions.delete(codi)
-  await registrarEsborrats(db, 'precaucions', [codi])
+  await esborrarRegistres(db, 'precaucions', [codi])
 }

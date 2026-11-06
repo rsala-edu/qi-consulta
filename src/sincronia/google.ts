@@ -29,11 +29,18 @@ export function googleConfigurat(): boolean {
 }
 
 export class ErrorGoogle extends Error {
-  motiu: 'cancellat' | 'bloquejat' | 'compte' | 'xarxa'
-  constructor(motiu: ErrorGoogle['motiu']) {
+  /**
+   * `compte`: un compte que no és a la llista permesa.
+   * `altreCompte`: un compte permès, però no el de l'espai obert (no s'ha fet servir per a res).
+   */
+  motiu: 'cancellat' | 'bloquejat' | 'compte' | 'altreCompte' | 'xarxa'
+  /** altreCompte: l'identificador del compte amb què s'ha entrat */
+  sub?: string
+  constructor(motiu: ErrorGoogle['motiu'], sub?: string) {
     super(`Google: ${motiu}`)
     this.name = 'ErrorGoogle'
     this.motiu = motiu
+    if (sub) this.sub = sub
   }
 }
 
@@ -135,12 +142,33 @@ export function iniciarSessioGoogle({
   })
 }
 
+// Permís d'un compte permès que no era el de l'espai obert: no es fa servir,
+// però es guarda en memòria per si la doctora tria canviar a aquell compte
+let rebutjat: { permis: PermisGoogle; sub: string } | null = null
+
+/** Fa servir el permís que s'havia rebutjat per ser d'un altre compte (en canviar a aquell compte) */
+export function adoptarPermisRebutjat(sub: string): boolean {
+  if (!rebutjat || rebutjat.sub !== sub) return false
+  permis = rebutjat.permis
+  rebutjat = null
+  subscriptors.forEach((f) => f())
+  return true
+}
+
 /**
  * Comprova que el compte és un dels permesos (pel hash del correu) i guarda
  * el permís. Torna l'identificador intern del compte (`sub`), que serveix de
  * pista per a les renovacions; el correu no es guarda.
+ *
+ * `subEsperat`: el compte de l'espai obert. Si el permís és d'un altre compte,
+ * no es guarda (el permís que hi havia es manté) i es llança
+ * ErrorGoogle('altreCompte'): les dades d'un compte no van mai al Drive d'un altre.
  */
-export async function acceptarPermis(nou: PermisGoogle, fetchFn: typeof fetch = (...a) => fetch(...a)): Promise<{ sub: string }> {
+export async function acceptarPermis(
+  nou: PermisGoogle,
+  fetchFn: typeof fetch = (...a) => fetch(...a),
+  subEsperat?: string | null,
+): Promise<{ sub: string }> {
   let usuari: { email?: string; sub?: string }
   try {
     const r = await fetchFn(USUARI, { headers: { Authorization: `Bearer ${nou.token}` } })
@@ -153,9 +181,14 @@ export async function acceptarPermis(nou: PermisGoogle, fetchFn: typeof fetch = 
     // El permís d'un altre compte no es fa servir per a res
     throw new ErrorGoogle('compte')
   }
+  const sub = usuari.sub ?? ''
+  if (subEsperat && sub !== subEsperat) {
+    rebutjat = { permis: nou, sub }
+    throw new ErrorGoogle('altreCompte', sub)
+  }
   permis = nou
   subscriptors.forEach((f) => f())
-  return { sub: usuari.sub ?? '' }
+  return { sub }
 }
 
 export async function esCorreuPermes(correu: string, hashos: readonly string[] = HASHOS_PERMESOS): Promise<boolean> {

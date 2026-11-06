@@ -2,7 +2,7 @@
 // fins que s'exporta el JSON i es copia a src/punts/cataleg.json.
 
 import type { Posicio3D, CostatPosicio } from '../punts/esquema'
-import { registrarEsborrats } from './esborrats'
+import { desarSencer, esborrarRegistres } from '../sincronia/escriptura'
 import type { QiDB, RegistreCalibratge } from './esquema'
 
 export type Calibracio = Pick<RegistreCalibratge, 'codi' | 'topologia' | 'costat' | 'index' | 'posicio'>
@@ -31,15 +31,16 @@ export async function desarCalibracio(
   posicio: Posicio3D | null,
   index = 0,
 ): Promise<void> {
-  await db.calibratge.put({
-    id: id(topologia, codi, costat, index),
+  const clau = id(topologia, codi, costat, index)
+  await desarSencer(db, 'calibratge', {
+    id: clau,
     topologia,
     codi,
     costat,
     ...(index > 0 ? { index } : {}),
     posicio,
     modificatAt: new Date().toISOString(),
-  })
+  }, clau)
 }
 
 /** Oblida el canvi local d'un punt i costat: torna a valer la posició del catàleg. */
@@ -50,13 +51,11 @@ export async function esborrarCalibracio(
   costat: CostatPosicio,
   index = 0,
 ): Promise<void> {
-  await db.calibratge.delete(id(topologia, codi, costat, index))
-  await registrarEsborrats(db, 'calibratge', [id(topologia, codi, costat, index)])
+  await esborrarRegistres(db, 'calibratge', [id(topologia, codi, costat, index)])
 }
 
 /** Oblida tots els canvis locals d'una topologia (torna al catàleg del projecte). */
 export async function descartarCalibratge(db: QiDB, topologia: string): Promise<void> {
   const claus = (await db.calibratge.where('topologia').equals(topologia).primaryKeys()) as string[]
-  await db.calibratge.bulkDelete(claus)
-  await registrarEsborrats(db, 'calibratge', claus)
+  await esborrarRegistres(db, 'calibratge', claus)
 }

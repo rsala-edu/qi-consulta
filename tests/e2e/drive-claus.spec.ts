@@ -158,8 +158,8 @@ test('clau diferent (DRV-K): fusionar les dades del Chrome amb les de Drive; els
   await expect(panell).toContainText('Codi: DRV-K')
   // Detalls tècnics: versions i empremtes curtes de les claus (diferents), sense cap dada
   const detalls = await panell.getByTestId('detalls-tecnics').textContent()
-  expect(detalls).toMatch(/^Qi \S+ · format 1 \(base de dades v\d+\) · Drive: format 1, clau [0-9A-F]{4} · dispositiu: clau [0-9A-F]{4} · última còpia correcta: \S+$/)
-  const [, clauDrive, clauDispositiu] = /Drive: format 1, clau (\w{4}) · dispositiu: clau (\w{4})/.exec(detalls!)!
+  expect(detalls).toMatch(/^Qi \S+ · format 2 \(base de dades v\d+\) · Drive: format 2, clau [0-9A-F]{4} · dispositiu: clau [0-9A-F]{4} · última còpia correcta: \S+$/)
+  const [, clauDrive, clauDispositiu] = /Drive: format 2, clau (\w{4}) · dispositiu: clau (\w{4})/.exec(detalls!)!
   expect(clauDrive).not.toBe(clauDispositiu)
   expect(detalls).not.toMatch(/Aina|Bernat/)
   // No s'ha escrit res a Drive
@@ -262,15 +262,17 @@ test('format més nou a Drive (DRV-V): «Actualitzar l\'app»; no s\'hi escriu r
   await nouPacient(page, 'Aina', 'Provencal Inventada', '1980-05-17')
   await desarAra(page)
   await alDia(page)
-  const principal = [...google.fitxers.values()].find((f) => f.name === 'qi-dades.json')!
-  principal.contingut = JSON.stringify({ ...JSON.parse(principal.contingut), versio: 2 })
-  const abans = principal.contingut
+  // La foto la torna a escriure una versió de l'app amb un format més nou
+  const principal = [...google.fitxers.values()].find((f) => f.name.startsWith('qi-foto-'))!
+  principal.contingut = JSON.stringify({ ...JSON.parse(principal.contingut), versio: 3 })
+  principal.modifiedTime = new Date(Date.parse(principal.modifiedTime) + 60_000).toISOString()
+  const abans = JSON.stringify([...google.fitxers.values()])
   const panell = await desarAra(page)
   await expect(panell).toContainText('Codi: DRV-V')
   await expect(panell.getByRole('status').first()).toContainText('l\'ha feta una versió més nova de Qi')
   await expect(panell.getByRole('button', { name: 'Actualitzar l\'app' })).toBeVisible()
-  await expect(panell.getByTestId('detalls-tecnics')).toContainText('Drive: format 2')
-  expect(principal.contingut).toBe(abans)
+  await expect(panell.getByTestId('detalls-tecnics')).toContainText('Drive: format 3')
+  expect(JSON.stringify([...google.fitxers.values()])).toBe(abans)
 })
 
 test('fitxer de Drive danyat (DRV-C): «Provar les còpies diària i mensual»; la danyada es guarda a part', async ({ page, google }) => {
@@ -278,9 +280,10 @@ test('fitxer de Drive danyat (DRV-C): «Provar les còpies diària i mensual»; 
   await nouPacient(page, 'Aina', 'Provencal Inventada', '1980-05-17')
   await desarAra(page)
   await alDia(page)
-  const principal = [...google.fitxers.values()].find((f) => f.name === 'qi-dades.json')!
+  const principal = [...google.fitxers.values()].find((f) => f.name.startsWith('qi-foto-'))!
   // A mig escriure
   principal.contingut = principal.contingut.slice(0, 300)
+  principal.modifiedTime = new Date(Date.parse(principal.modifiedTime) + 60_000).toISOString()
   const panell = await desarAra(page)
   await expect(panell).toContainText('Codi: DRV-C')
   await expect(panell.getByRole('status').first()).toContainText('a mig escriure o danyada')
@@ -288,7 +291,10 @@ test('fitxer de Drive danyat (DRV-C): «Provar les còpies diària i mensual»; 
   await expect(panell.getByText(/Fet: s'ha fet servir l'última còpia/)).toBeVisible()
   await alDia(page)
   expect([...google.fitxers.values()].some((f) => f.name.startsWith('qi-danyada-') && f.contingut.length === 300)).toBe(true)
-  expect(JSON.parse(principal.contingut)).toMatchObject({ format: 'qi-copia' })
+  // La danyada ja no hi és, i a la sincronia següent hi ha una foto nova
+  await desarAra(page)
+  await alDia(page)
+  expect([...google.fitxers.values()].filter((f) => f.name.startsWith('qi-foto-')).every((f) => JSON.parse(f.contingut).format === 'qi-sinc')).toBe(true)
 })
 
 test('fitxer .qi: es descarrega xifrat i s\'importa en un altre dispositiu amb la seva contrasenya', async ({

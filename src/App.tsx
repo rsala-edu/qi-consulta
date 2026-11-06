@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { Fragment, lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { HashRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router'
 import { LimitError } from './components/LimitError'
 import { Boto } from './components/Boto'
@@ -19,8 +19,10 @@ import { PantallaPrecaucions } from './pantalles/ajustos/PantallaPrecaucions'
 import { PantallaSeguretat } from './pantalles/ajustos/PantallaSeguretat'
 import { PantallaAvui } from './pantalles/avui/PantallaAvui'
 import { ProveidorSincronia } from './sincronia/ContextSincronia'
+import { googleConfigurat } from './sincronia/google'
 import { migrarTipusVisita } from './db/tipusVisita'
 import { IndicadorCopia } from './components/IndicadorCopia'
+import { AvisFinestraPrivada } from './components/AvisFinestraPrivada'
 import { BotoTema } from './components/BotoTema'
 import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
 import { PantallaAjustAgenda } from './pantalles/ajustos/PantallaAjustAgenda'
@@ -65,6 +67,7 @@ function Marc() {
             {t.app.bloquejar}
           </Boto>
         </header>
+        <AvisFinestraPrivada />
         <Suspense fallback={<Indicador text={t.app.carregant} />}>
           <Outlet />
         </Suspense>
@@ -85,6 +88,18 @@ function P({ codi, children }: { codi: string; children: ReactNode }) {
       {children}
     </LimitError>
   )
+}
+
+/**
+ * En canviar d'un compte a un altre, tot es torna a muntar de zero: res d'un
+ * espai no passa a l'altre. (Obrir el primer espai, quan no n'hi havia cap, no
+ * cal: no hi ha res de l'anterior, i així es veu si hi ha hagut cap error.)
+ */
+function EspaiObert({ children }: { children: ReactNode }) {
+  const { espai } = useSessio()
+  const [clau, setClau] = useState({ espai, generacio: 0 })
+  if (espai !== clau.espai) setClau({ espai, generacio: clau.espai === null ? clau.generacio : clau.generacio + 1 })
+  return <Fragment key={clau.generacio}>{children}</Fragment>
 }
 
 /** Mentre l'app és bloquejada no es munta cap pantalla amb dades. */
@@ -111,7 +126,7 @@ function PortaOberta() {
         </main>
       )
     case 'sense-google':
-      return <PantallaGoogle onConnectar={connectarGoogle} />
+      return <PantallaGoogle onConnectar={() => connectarGoogle()} />
     case 'sense-configurar':
     case 'bloquejat':
     case 'restaurar':
@@ -126,6 +141,7 @@ function PortaOberta() {
           empremta={estat.tipus === 'bloquejat' && estat.empremta}
           onEmpremta={desbloquejarAmbEmpremta}
           onTornarGoogle={estat.tipus === 'restaurar' ? () => void connectarGoogle() : undefined}
+          onAltreCompte={googleConfigurat() ? () => connectarGoogle({ altreCompte: true }) : undefined}
           onRecuperar={
             (estat.tipus === 'restaurar' && estat.fitxer.embolcalls.secrets.some((x) => x.tipus === 'recuperacio')) ||
             (estat.tipus === 'bloquejat' && estat.recuperacio)
@@ -164,11 +180,13 @@ function PortaOberta() {
   }
 }
 
-export function App({ db }: { db: QiDB }) {
+export function App({ db }: { db: QiDB | null }) {
   return (
     <HashRouter>
       <ProveidorSessio db={db}>
-        <Porta />
+        <EspaiObert>
+          <Porta />
+        </EspaiObert>
       </ProveidorSessio>
     </HashRouter>
   )

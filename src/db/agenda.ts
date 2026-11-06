@@ -2,7 +2,7 @@
 // xifrar, com el calibratge, i se sincronitzen amb els altres dispositius.
 
 import { esquemaHorari, HORARI_PER_DEFECTE, type Horari } from '../domini/agenda'
-import { registrarEsborrats } from './esborrats'
+import { desarSencer, esborrarRegistres } from '../sincronia/escriptura'
 import type { QiDB } from './esquema'
 
 export async function llegirHorari(db: QiDB): Promise<Horari> {
@@ -13,7 +13,7 @@ export async function llegirHorari(db: QiDB): Promise<Horari> {
 
 export async function desarHorari(db: QiDB, horari: Horari): Promise<void> {
   const valor = esquemaHorari.parse({ ...horari, dies: [...new Set(horari.dies)].sort() })
-  await db.configuracio.put({ clau: 'horari', valor, modificatAt: new Date().toISOString() })
+  await desarSencer(db, 'configuracio', { clau: 'horari', valor, modificatAt: new Date().toISOString() }, 'horari')
 }
 
 export async function llegirDiesTancats(db: QiDB): Promise<Set<string>> {
@@ -21,9 +21,6 @@ export async function llegirDiesTancats(db: QiDB): Promise<Set<string>> {
 }
 
 export async function canviarDiaTancat(db: QiDB, dia: string, tancat: boolean): Promise<void> {
-  if (tancat) await db.diesTancats.put({ dia, modificatAt: new Date().toISOString() })
-  else {
-    await db.diesTancats.delete(dia)
-    await registrarEsborrats(db, 'diesTancats', [dia])
-  }
+  if (tancat) await desarSencer(db, 'diesTancats', { dia, modificatAt: new Date().toISOString() }, dia)
+  else await esborrarRegistres(db, 'diesTancats', [dia])
 }

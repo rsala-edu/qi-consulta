@@ -74,18 +74,19 @@ const CLAU_VISTA = 'qi.vistaAgenda'
 /** Distància mínima (px) per comptar un lliscament del dit */
 const LLISCAMENT = 70
 
-function vistaDesada(): VistaAgenda | null {
+/** La vista es recorda per compte (cada espai la seva) */
+function vistaDesada(espai: string | null): VistaAgenda | null {
   try {
-    const v = window.localStorage.getItem(CLAU_VISTA)
+    const v = window.localStorage.getItem(`${CLAU_VISTA}:${espai ?? ''}`)
     return v === 'dia' || v === 'setmana' ? v : null
   } catch {
     return null
   }
 }
 
-function desarVista(v: VistaAgenda) {
+function desarVista(espai: string | null, v: VistaAgenda) {
   try {
-    window.localStorage.setItem(CLAU_VISTA, v)
+    window.localStorage.setItem(`${CLAU_VISTA}:${espai ?? ''}`, v)
   } catch {
     // Sense emmagatzematge: no es recorda, i prou
   }
@@ -125,7 +126,7 @@ function useConsulta(consulta: string): boolean {
 
 export function PantallaAgenda() {
   const magatzem = useMagatzem()
-  const { db } = useSessio()
+  const { db, espai } = useSessio()
   const navegar = useNavigate()
   const [params, setParams] = useSearchParams()
   const ara = useAra()
@@ -135,7 +136,7 @@ export function PantallaAgenda() {
   const vista: VistaAgenda =
     parametreVista === 'dia' || parametreVista === 'setmana'
       ? parametreVista
-      : (vistaDesada() ?? vistaPerDefecte(window.innerWidth, window.innerHeight))
+      : (vistaDesada(espai) ?? vistaPerDefecte(window.innerWidth, window.innerHeight))
   // Columna lateral a l'ordinador (ratolí i pantalla ampla); a la tauleta, desplegable
   const ambLateral = useConsulta('(min-width: 1100px) and (pointer: fine)')
   const [calendariObert, setCalendariObert] = useState(false)
@@ -167,7 +168,7 @@ export function PantallaAgenda() {
     setParams({ dia: nouDia, vista: novaVista }, { replace: true })
   }
   const canviarVista = (v: VistaAgenda) => {
-    desarVista(v)
+    desarVista(espai, v)
     anar(dia, v)
   }
   const pas = vista === 'dia' ? 1 : 7

@@ -81,8 +81,7 @@ test('el permís de Google caducat es renova sol amb el pròxim toc, sense «Dri
     { prompt: 'select_account', pista: null },
     { prompt: 'none', pista: 'sub-doctora' },
   ])
-  const principal = [...google.fitxers.values()].find((f) => f.name === 'qi-dades.json')!
-  expect(principal.contingut).not.toContain('Aina')
+  for (const f of google.fitxers.values()) expect(f.contingut).not.toContain('Aina')
   // Amb el permís nou (una hora), els tocs següents ja no obren res
   await menu(page, 'Avui').click()
   await menu(page, 'Agenda').click()
@@ -122,9 +121,14 @@ test('còpia xifrada a Drive, restauració en un altre dispositiu i canvis entre
   await nouPacient(page, 'Aina', 'Provencal Inventada', '600 111 222')
   await esperarCopia(page)
 
-  // A Drive hi ha la còpia actual, la diària i la mensual, i cap dada en clar
+  // A Drive hi ha el diari del dispositiu, la foto, la diària i la mensual, i cap dada en clar
   const noms = [...google.fitxers.values()].map((f) => f.name).sort()
-  expect(noms).toEqual([expect.stringMatching(/^qi-copia-\d{4}-\d{2}-\d{2}\.json$/), 'qi-dades.json', expect.stringMatching(/^qi-mensual-\d{4}-\d{2}\.json$/)])
+  expect(noms).toEqual([
+    expect.stringMatching(/^qi-copia-\d{4}-\d{2}-\d{2}\.json$/),
+    expect.stringMatching(/^qi-dispositiu-[0-9a-z]{12}\.json$/),
+    expect.stringMatching(/^qi-foto-000001-[0-9a-z]{12}\.json$/),
+    expect.stringMatching(/^qi-mensual-\d{4}-\d{2}\.json$/),
+  ])
   for (const f of google.fitxers.values())
     for (const clar of ['Aina', 'Provencal', '600 111 222']) expect(f.contingut).not.toContain(clar)
   expect(google.peticions.every((p) => p.includes('/files'))).toBe(true)
@@ -236,7 +240,11 @@ test('empremta (passkey amb PRF): activar-la i desbloquejar sense contrasenya', 
   // Un dispositiu configurat: només el botó de l'empremta i l'enllaç de la contrasenya
   await page.getByRole('button', { name: 'Bloquejar' }).click()
   const targeta = page.locator('.targeta-desbloqueig')
-  await expect(targeta.getByRole('button')).toHaveText(['Entrar amb l\'empremta', 'Entrar amb la contrasenya'])
+  await expect(targeta.getByRole('button')).toHaveText([
+    'Entrar amb l\'empremta',
+    'Entrar amb la contrasenya',
+    'Entrar amb un altre compte de Google',
+  ])
   await expect(page.getByLabel('Contrasenya', { exact: true })).toHaveCount(0)
   await expect(page.getByText('Recuperar les dades')).toHaveCount(0)
   await page.getByRole('button', { name: 'Entrar amb l\'empremta' }).click()

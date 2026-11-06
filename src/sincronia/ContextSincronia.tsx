@@ -11,11 +11,12 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { guardarEstatGoogle, llegirEstatGoogle, type EstatGoogle } from '../db/magatzem'
 import { useClauMestra, useSessio } from '../sessio/ContextSessio'
-import { TAULES } from './copia'
+import { pendentsDePujar } from './escriptura'
 import { driveGoogle, ErrorAutoritzacio } from './drive'
 import {
   acceptarPermis,
   calRenovarPermis,
+  ErrorGoogle,
   googleConfigurat,
   iniciarSessioGoogle,
   oblidarPermis,
@@ -56,11 +57,17 @@ interface ValorSincronia {
    * si mai n'hi ha hagut cap, el primer error). null si tot va bé.
    */
   senseCopiaDesDe: string | null
+  /** S'ha entrat amb un altre compte de Google (no s'ha fet servir): el seu identificador */
+  altreCompte: string | null
+  /** Registres desats que encara no són a Drive */
+  pendents: number
+  /** Drive demana una versió més nova de l'app per escriure: no es puja res */
+  nomesLectura: boolean
 }
 
 const Context = createContext<ValorSincronia | null>(null)
 
-export const ESPERA_DESPRES_DE_DESAR = 5_000
+export const ESPERA_DESPRES_DE_DESAR = 3_000
 const CADA = 5 * 60_000
 /** Després d'una renovació silenciosa fallida, no es torna a provar fins al cap de deu minuts */
 const ESPERA_DESPRES_DE_FALLAR = 10 * 60_000
@@ -78,7 +85,18 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   const [infoDrive, setInfoDrive] = useState<InfoDrive | null>(null)
   const [darreraCorrecta, setDarreraCorrecta] = useState<string | null>(null)
   const [errorDesDe, setErrorDesDe] = useState<string | null>(null)
+  /** S'ha entrat amb un compte de Google que no és el d'aquest espai (el seu identificador) */
+  const [altreCompte, setAltreCompte] = useState<string | null>(null)
   const enCurs = useRef(false)
+  /** Registres de la cua que encara no són a Drive */
+  const [pendents, setPendents] = useState(0)
+  /** Drive demana una versió més nova de l'app per escriure */
+  const [nomesLectura, setNomesLectura] = useState(false)
+  const comptarPendents = useCallback(async () => {
+    const n = await pendentsDePujar(db)
+    setPendents(n)
+    return n
+  }, [db])
   // La clau pot canviar (fusió amb Drive) mentre una sincronia és en marxa
   const clauRef = useRef(clau)
   useLayoutEffect(() => {
@@ -144,10 +162,12 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         await guardarEstatGoogle(db, nou)
         google.current = nou
         setUltimaCopia(r.copiaAt)
+        setNomesLectura(r.nomesLectura)
         setError(null)
         setEstat('al-dia')
+        await comptarPendents()
       } while (pendentRef.current && tokenGoogle())
-      setPendent(false)
+      setPendent((await comptarPendents()) > 0 && nomesLecturaRef.current)
       return true
     } catch (e) {
       if (usada !== clauRef.current) {
@@ -166,11 +186,18 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         setEstat('error')
       }
       await anotarError()
+      // S'ha demanat una altra sincronia mentre aquesta fallava (per exemple, amb
+      // la clau nova després de fusionar): es torna a provar
+      if (pendentRef.current) window.setTimeout(() => void sincronitzarAmbRef.current(false), 1_000)
       return false
     } finally {
       enCurs.current = false
     }
-  }, [db, sensePermis, anotarError])
+  }, [db, sensePermis, anotarError, comptarPendents])
+  const nomesLecturaRef = useRef(false)
+  useLayoutEffect(() => {
+    nomesLecturaRef.current = nomesLectura
+  }, [nomesLectura])
   const sincronitzarAmbRef = useRef(sincronitzarAmb)
   useLayoutEffect(() => {
     sincronitzarAmbRef.current = sincronitzarAmb
@@ -186,6 +213,12 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
   // En obrir: l'última còpia coneguda i, si ja hi ha permís, sincronitzar
   useEffect(() => {
     let actiu = true
+    void comptarPendents().then((n) => {
+      if (actiu && n > 0) {
+        pendentRef.current = true
+        setPendent(true)
+      }
+    })
     void Promise.all([llegirDarreraSincronia(db), db.meta.get('errorSincroniaDesDe')]).then(([d, e]) => {
       if (!actiu) return
       setDarreraCorrecta(d)
@@ -205,7 +238,7 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       actiu = false
       desfer()
     }
-  }, [db, sincronitzarAra])
+  }, [db, sincronitzarAra, comptarPendents])
 
   // Renovació silenciosa amb el pròxim toc. S'escolta en fase de captura i no
   // atura el toc: el botó que s'ha tocat fa la seva feina igualment.
@@ -217,15 +250,17 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       renovant.current = true
       // window.open s'ha de fer ara mateix, dins el toc
       iniciarSessioGoogle({ mode: 'silenciosa', pista: google.current?.sub || undefined })
-        .then(acceptarPermis)
+        // Un permís d'un altre compte no es fa servir mai en aquest espai
+        .then((p) => acceptarPermis(p, undefined, google.current?.sub || null))
         .then(async ({ sub }) => {
-          if (sub && google.current && google.current.sub !== sub) {
+          if (sub && google.current && !google.current.sub) {
             google.current = { ...google.current, sub }
             await guardarEstatGoogle(db, google.current)
           }
         })
-        .catch(() => {
+        .catch((e: unknown) => {
           fallitAt.current = Date.now()
+          if (e instanceof ErrorGoogle && e.motiu === 'altreCompte' && e.sub) setAltreCompte(e.sub)
           if (!tokenGoogle()) setEstat('cal-connectar')
         })
         .finally(() => {
@@ -236,34 +271,57 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('click', alTocar, true)
   }, [db, esperaRenovacio])
 
-  // Cada canvi a les taules que se sincronitzen es puja uns segons després
+  // Cada canvi entra a la cua (escriptura.ts) i es puja uns segons després.
+  // També si arriba mentre una sincronia és en marxa: la sincronia torna a
+  // començar quan acaba (el canvi té un número de seqüència més alt)
   useEffect(() => {
     const canvi = () => {
-      if (enCurs.current) return
       pendentRef.current = true
-      window.setTimeout(() => setPendent(true))
+      window.setTimeout(() => {
+        setPendent(true)
+        void comptarPendents()
+      })
       window.clearTimeout(temporitzador.current)
       temporitzador.current = window.setTimeout(() => void sincronitzarAra(), ESPERA_DESPRES_DE_DESAR)
     }
-    const taules = [...TAULES.map((t) => db.table(t.nom)), db.esborrats]
-    for (const t of taules) {
-      t.hook('creating', canvi)
-      t.hook('updating', canvi)
-      t.hook('deleting', canvi)
-    }
+    const cua = db.canvisPropis
+    cua.hook('creating', canvi)
+    cua.hook('updating', canvi)
     const interval = window.setInterval(() => void sincronitzarAra(), CADA)
     return () => {
-      for (const t of taules) {
-        t.hook('creating').unsubscribe(canvi)
-        t.hook('updating').unsubscribe(canvi)
-        t.hook('deleting').unsubscribe(canvi)
-      }
+      cua.hook('creating').unsubscribe(canvi)
+      cua.hook('updating').unsubscribe(canvi)
       window.clearInterval(interval)
       // En bloquejar amb canvis pendents, es pugen ara
       if (temporitzador.current !== undefined && pendentRef.current) void sincronitzarAra()
       window.clearTimeout(temporitzador.current)
     }
-  }, [db, sincronitzarAra])
+  }, [db, sincronitzarAra, comptarPendents])
+
+  // En amagar la pestanya (canviar d'app, tancar-la, bloquejar la pantalla) es
+  // puja de seguida el que hi hagi pendent. I si es tanca amb canvis pendents,
+  // el navegador ho avisa (amb el seu propi text)
+  useEffect(() => {
+    const amagada = () => {
+      if (document.visibilityState === 'hidden' && pendentRef.current) void sincronitzarAra()
+    }
+    const sortint = () => {
+      if (pendentRef.current) void sincronitzarAra()
+    }
+    const tancant = (e: BeforeUnloadEvent) => {
+      if (!pendentRef.current && !enCurs.current) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    document.addEventListener('visibilitychange', amagada)
+    window.addEventListener('pagehide', sortint)
+    window.addEventListener('beforeunload', tancant)
+    return () => {
+      document.removeEventListener('visibilitychange', amagada)
+      window.removeEventListener('pagehide', sortint)
+      window.removeEventListener('beforeunload', tancant)
+    }
+  }, [sincronitzarAra])
 
   // Sense connexió: es torna a provar sol quan torna la connexió
   useEffect(() => {
@@ -274,7 +332,14 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
 
   // Reserva manual. En arribar el permís, la subscripció de dalt ja sincronitza
   const connectar = useCallback(async () => {
-    await connectarGoogle()
+    setAltreCompte(null)
+    try {
+      await connectarGoogle()
+    } catch (e) {
+      // Un altre compte: no s'ha fet servir per a res; la doctora tria què fer
+      if (e instanceof ErrorGoogle && e.motiu === 'altreCompte' && e.sub) setAltreCompte(e.sub)
+      throw e
+    }
     fallitAt.current = 0
     google.current = await llegirEstatGoogle(db)
   }, [connectarGoogle, db])
@@ -297,8 +362,25 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       infoDrive,
       darreraCorrecta,
       senseCopiaDesDe,
+      altreCompte,
+      pendents,
+      nomesLectura,
     }),
-    [estat, ultimaCopia, pendent, error, connectar, sincronitzarAra, provarCopiesAnteriors, infoDrive, darreraCorrecta, senseCopiaDesDe],
+    [
+      estat,
+      ultimaCopia,
+      pendent,
+      error,
+      connectar,
+      sincronitzarAra,
+      provarCopiesAnteriors,
+      infoDrive,
+      darreraCorrecta,
+      senseCopiaDesDe,
+      altreCompte,
+      pendents,
+      nomesLectura,
+    ],
   )
   return <Context.Provider value={valor}>{children}</Context.Provider>
 }

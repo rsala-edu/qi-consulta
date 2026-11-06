@@ -17,14 +17,14 @@ export function driveEnMemoria(): Drive & { fitxers: Map<string, FitxerDrive & {
       return f.contingut
     },
     async crear(nom, contingut) {
-      const f = { id: crypto.randomUUID(), name: nom, modifiedTime: ara(), contingut }
+      const f = { id: crypto.randomUUID(), name: nom, modifiedTime: ara(), version: '1', contingut }
       fitxers.set(f.id, f)
       return sense(f)
     },
     async actualitzar(id, contingut) {
       const f = fitxers.get(id)
       if (!f) throw new ErrorDrive(404)
-      Object.assign(f, { contingut, modifiedTime: ara() })
+      Object.assign(f, { contingut, modifiedTime: ara(), version: String(Number(f.version ?? '0') + 1) })
       return sense(f)
     },
     async esborrar(id) {

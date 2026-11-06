@@ -8,7 +8,11 @@ import { driveEnMemoria } from '../test/driveEnMemoria'
 import { ErrorCopiaDanyada, ErrorCopiaVersio, llegirFitxer, migrarContingut, xifrarCopia } from './copia'
 import { ErrorAutoritzacio } from './drive'
 import { classificar, copiaPerRecuperar, ErrorRecuperacio, obrirClauMestra, restaurarCopia } from './recuperacio'
-import { FITXER_PRINCIPAL } from './sincronitzar'
+import { FITXER_PRINCIPAL, sincronitzar, type CopiaDrive } from './sincronitzar'
+import type { FitxerCopia } from './copia'
+
+/** Una còpia de Drive del format 1 (qi-dades.json) */
+const comV1 = (v1: FitxerCopia): CopiaDrive => ({ format: 1, embolcalls: v1.embolcalls, clauId: v1.clauId ?? null, v1 })
 
 /** Còpia feta amb el codi de la versió 13709c4 (abans de l'orella i de l'agenda nova), amb dades inventades */
 const COPIA_ANTIGA = readFileSync('tests/e2e/dades/copia-versio-13709c4.json', 'utf8')
@@ -41,7 +45,9 @@ describe('còpia d\'una versió anterior', () => {
     // La còpia antiga no té les taules de l'orella, l'horari ni els dies tancats
     const db = novaDb()
     const clau = await obrirClauMestra(fitxer, CONTRASENYA)
-    await restaurarCopia(db, clau, fitxer)
+    const drive = driveEnMemoria()
+    await drive.crear(FITXER_PRINCIPAL, COPIA_ANTIGA)
+    await restaurarCopia(db, clau, comV1(fitxer), drive)
     const m = crearMagatzem(db, clau)
     const pacients = await m.llistarPacients()
     expect(pacients.map((p) => p.nom)).toEqual(['Aina'])
@@ -49,7 +55,15 @@ describe('còpia d\'una versió anterior', () => {
     expect(await db.calibratgeOrella.count()).toBe(0)
     expect(await db.diesTancats.count()).toBe(0)
     expect(await llegirClauEmbolcallada(db)).toEqual(fitxer.embolcalls.contrasenya)
-  }, 20_000)
+    // La primera sincronia la migra al format 2, sense perdre res
+    await sincronitzar(db, clau, drive, new Date('2026-11-06T10:00:00Z'))
+    expect([...drive.fitxers.values()].some((f) => f.name.startsWith('qi-foto-000001-'))).toBe(true)
+    const nova = novaDb()
+    const copia = (await copiaPerRecuperar(drive))!
+    expect(copia.format).toBe(2)
+    await restaurarCopia(nova, await obrirClauMestra(copia, CONTRASENYA), copia, drive)
+    expect((await crearMagatzem(nova, clau).llistarPacients()).map((p) => p.nom)).toEqual(['Aina'])
+  }, 30_000)
 
   it('migrar omple les taules que falten i manté les que hi són', () => {
     const c = migrarContingut({ versio: 1, taules: { pacients: [{ id: 'a' }] } })
@@ -84,7 +98,7 @@ describe('cada error amb el seu tipus i el seu pas', () => {
       secrets: [],
     })
     const malmes = { ...fitxer, xifrat: { ...fitxer.xifrat, dades: fitxer.xifrat.dades.slice(0, -8) + 'AAAAAAAA' } }
-    const e = await errorDe(restaurarCopia(novaDb(), clau, malmes))
+    const e = await errorDe(restaurarCopia(novaDb(), clau, comV1(malmes), driveEnMemoria()))
     expect([e.tipus, e.pas, e.codi]).toEqual(['danyada', 'D1', 'REC-D1'])
   })
 

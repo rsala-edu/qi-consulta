@@ -4,7 +4,7 @@
 import 'fake-indexeddb/auto'
 import { afterEach, describe, expect, it } from 'vitest'
 import { crearClauMestra, desbloquejarClauMestra, ErrorContrasenya, generarSecretRecuperacio, textClauRecuperacio } from '../crypto'
-import { afegirEmbolcallSecret } from '../crypto'
+import { afegirEmbolcallSecret, idClau } from '../crypto'
 import { QiDB } from '../db/esquema'
 import { crearMagatzem, guardarClauEmbolcallada, guardarSecrets, llegirClauEmbolcallada } from '../db/magatzem'
 import { novaCita } from '../domini/cita'
@@ -21,11 +21,12 @@ import {
   obrirClauCopia,
   recuperarDeDrive,
 } from './canviClau'
-import { desxifrarCopia, ErrorClauDiferent, ErrorCopiaDanyada, llegirFitxer, type FitxerCopia } from './copia'
+import { desxifrarCopia, ErrorClauDiferent, ErrorCopiaDanyada, llegirContingut, llegirFitxer, xifrarCopia, type FitxerCopia } from './copia'
+import { llegirFitxer2, obrirFoto } from './format2'
 import { clauPersona } from './fusioClaus'
 import { classificarErrorSincronia } from './motiuSincronia'
 import { diesSenseCopia, textSenseCopia } from './senseCopia'
-import { copiaDeDrive, FITXER_PRINCIPAL, sincronitzar, type InfoDrive } from './sincronitzar'
+import { copiaDeDrive, sincronitzar, type InfoDrive } from './sincronitzar'
 import type { Drive } from './drive'
 
 const IT = 1_000
@@ -65,15 +66,24 @@ async function escenari() {
   return { drive, a, b, aina, bernat, aina2 }
 }
 
-const fitxerDe = (drive: ReturnType<typeof driveEnMemoria>) =>
-  llegirFitxer([...drive.fitxers.values()].find((f) => f.name === FITXER_PRINCIPAL)!.contingut)
+/** La foto més nova de Drive (format 2) */
+const fotoDe = (drive: ReturnType<typeof driveEnMemoria>) =>
+  llegirFitxer2(
+    [...drive.fitxers.values()].filter((f) => f.name.startsWith('qi-foto-')).sort((x, y) => y.name.localeCompare(x.name))[0]!.contingut,
+  )
+
+/** Una còpia del format 1 (com un .qi) amb les dades del Firefox */
+async function fitxerV1(a: { db: QiDB; clau: CryptoKey }): Promise<FitxerCopia> {
+  const embolcalls = { contrasenya: (await llegirClauEmbolcallada(a.db))!, contrasenyaAt: '2026-11-01T00:00:00.000Z', secrets: [] }
+  return xifrarCopia(a.clau, await llegirContingut(a.db), embolcalls)
+}
 
 const totesLesCites = (m: ReturnType<typeof crearMagatzem>) => m.llistarCites('2026-01-01', '2027-01-01')
 
 describe('DRV-C era la clau diferent: ara es diu DRV-K i no s\'escriu res', () => {
   it('la còpia de Drive d\'una altra clau dona ErrorClauDiferent, amb clauId i sense (versions anteriors)', async () => {
-    const { drive, b } = await escenari()
-    const fitxer = fitxerDe(drive)
+    const { a, b } = await escenari()
+    const fitxer = await fitxerV1(a)
     await expect(desxifrarCopia(b.clau, fitxer)).rejects.toBeInstanceOf(ErrorClauDiferent)
     const { clauId: _, ...antic } = fitxer
     await expect(desxifrarCopia(b.clau, antic as FitxerCopia)).rejects.toBeInstanceOf(ErrorClauDiferent)
@@ -81,11 +91,13 @@ describe('DRV-C era la clau diferent: ara es diu DRV-K i no s\'escriu res', () =
 
   it('la mateixa clau amb el contingut malmès, o un fitxer a mig escriure, és ErrorCopiaDanyada', async () => {
     const { drive, a } = await escenari()
-    const fitxer = fitxerDe(drive)
+    const fitxer = await fitxerV1(a)
     const malmes = { ...fitxer, xifrat: { ...fitxer.xifrat, dades: fitxer.xifrat.dades.slice(0, -8) + 'AAAAAAAA' } }
     await expect(desxifrarCopia(a.clau, malmes)).rejects.toBeInstanceOf(ErrorCopiaDanyada)
-    const text = [...drive.fitxers.values()].find((f) => f.name === FITXER_PRINCIPAL)!.contingut
+    const text = JSON.stringify(fitxer)
     expect(() => llegirFitxer(text.slice(0, text.length / 2))).toThrow(ErrorCopiaDanyada)
+    const foto = [...drive.fitxers.values()].find((f) => f.name.startsWith('qi-foto-'))!.contingut
+    expect(() => llegirFitxer2(foto.slice(0, foto.length / 2))).toThrow(ErrorCopiaDanyada)
   })
 
   it('el Chrome sincronitza: DRV-K, Drive queda intacte i se sap la clau de cada banda', async () => {
@@ -96,7 +108,7 @@ describe('DRV-C era la clau diferent: ara es diu DRV-K i no s\'escriu res', () =
     expect(e).toBeInstanceOf(ErrorClauDiferent)
     expect(classificarErrorSincronia(e, true)).toEqual({ motiu: 'clau', codi: 'DRV-K' })
     expect(JSON.stringify([...drive.fitxers.values()])).toBe(abans)
-    expect(info).toEqual({ versio: 1, clauId: fitxerDe(drive).clauId })
+    expect(info).toEqual({ versio: 2, clauId: fotoDe(drive).clauId })
   })
 
   it('abans d\'escriure per primer cop es torna a mirar Drive: si un altre dispositiu hi ha posat dades, no s\'hi escriu', async () => {
@@ -118,7 +130,7 @@ describe('fusionar les dades del dispositiu amb les de Drive (claus diferents)',
     const { drive, a, b, aina, aina2, bernat } = await escenari()
     const fitxer = (await copiaDeDrive(drive))!
     const clauDrive = await obrirClauCopia(fitxer, { tipus: 'contrasenya', valor: CONTRASENYA_A })
-    const r = await fusionarAmbDrive(b.db, b.clau, fitxer, clauDrive)
+    const r = await fusionarAmbDrive(b.db, b.clau, fitxer, clauDrive, drive)
     expect(r.possiblesDuplicats).toBe(1)
 
     // El Chrome adopta la clau de Drive: s'obre amb la contrasenya del Firefox
@@ -147,14 +159,14 @@ describe('fusionar les dades del dispositiu amb les de Drive (claus diferents)',
     // L'esborrany del Chrome es conserva, tornat a xifrar
     expect((await mb.llistarEsborranys()).map((e) => e.valors)).toEqual([{ nom: 'Carme' }])
     // Drive ja és d'una sola clau
-    expect(fitxerDe(drive).clauId).toBe(fitxer.clauId)
+    for (const f of drive.fitxers.values()) if (/^qi-(foto|dispositiu)-/.test(f.name)) expect(llegirFitxer2(f.contingut).clauId).toBe(fitxer.clauId)
   })
 
   it('«No és la mateixa persona» treu l\'avís de totes dues fitxes', async () => {
     const { drive, b, aina, aina2 } = await escenari()
     const fitxer = (await copiaDeDrive(drive))!
     const clauDrive = await obrirClauCopia(fitxer, { tipus: 'contrasenya', valor: CONTRASENYA_A })
-    await fusionarAmbDrive(b.db, b.clau, fitxer, clauDrive)
+    await fusionarAmbDrive(b.db, b.clau, fitxer, clauDrive, drive)
     const m = crearMagatzem(b.db, clauDrive)
     await m.descartarDuplicat(aina.id, aina2.id)
     expect((await m.obtenirPacient(aina.id))!.revisarDuplicat).toBeUndefined()
@@ -165,7 +177,7 @@ describe('fusionar les dades del dispositiu amb les de Drive (claus diferents)',
     const { drive, b, aina2 } = await escenari()
     const fitxer = (await copiaDeDrive(drive))!
     const clauDrive = await obrirClauCopia(fitxer, { tipus: 'contrasenya', valor: CONTRASENYA_A })
-    await fusionarAmbDrive(b.db, b.clau, fitxer, clauDrive)
+    await fusionarAmbDrive(b.db, b.clau, fitxer, clauDrive, drive)
     const m = crearMagatzem(b.db, clauDrive)
     const { revisarDuplicat: _r, arxivat: _a, id: _i, creatAt: _c, modificatAt: _m, ...dades } = (await m.obtenirPacient(aina2.id))!
     expect((await m.actualitzarPacient(aina2.id, { ...dades, professio: 'Mestra' })).revisarDuplicat).toHaveLength(1)
@@ -179,7 +191,7 @@ describe('fusionar les dades del dispositiu amb les de Drive (claus diferents)',
     await sincronitzar(a.db, a.clau, drive, DIA)
     const fitxer = (await copiaDeDrive(drive))!
     const clau = await obrirClauCopia(fitxer, { tipus: 'recuperacio', valor: textClauRecuperacio(secret) })
-    await desxifrarCopia(clau, fitxer)
+    expect(await idClau(clau)).toBe(fitxer.clauId)
     await expect(
       obrirClauCopia(fitxer, { tipus: 'recuperacio', valor: textClauRecuperacio(generarSecretRecuperacio()) }),
     ).rejects.toBeInstanceOf(ErrorClauRecuperacio)
@@ -201,7 +213,7 @@ describe('recuperar les dades de Drive en aquest dispositiu', () => {
     const fitxer = (await copiaDeDrive(drive))!
     const clauDrive = await obrirClauCopia(fitxer, { tipus: 'contrasenya', valor: CONTRASENYA_A })
     await desarCopiaAbansCanviClau(b.db, b.clau)
-    await recuperarDeDrive(b.db, b.clau, fitxer, clauDrive)
+    await recuperarDeDrive(b.db, b.clau, fitxer, clauDrive, drive)
 
     const mb = crearMagatzem(b.db, clauDrive)
     expect((await mb.llistarPacients()).map((p) => p.id)).toEqual([aina.id])
@@ -230,7 +242,7 @@ describe('fitxer .qi', () => {
     expect(await totesLesCites(a.magatzem)).toHaveLength(5)
   })
 
-  it('del mateix dispositiu: el que s\'ha canviat després es fusiona camp a camp i la versió del fitxer queda per revisar', async () => {
+  it('del mateix dispositiu: el que s\'ha canviat després guanya (s\'ha fet sobre el fitxer) i no és cap conflicte', async () => {
     const { a, aina } = await escenari()
     const qi = llegirQi(await exportarQi(a.db, a.clau))
     const { revisarDuplicat: _r, arxivat: _a, id: _i, creatAt: _c, modificatAt: _m, ...dades } = aina
@@ -238,10 +250,9 @@ describe('fitxer .qi', () => {
     await a.magatzem.actualitzarPacient(aina.id, { ...dades, telefon: '600 333 444' })
     const clauQi = await obrirClauCopia(qi, { tipus: 'contrasenya', valor: CONTRASENYA_A })
     const r = await importarQi(a.db, a.clau, qi, clauQi)
-    expect(r.conflictes).toBe(1)
+    expect(r.conflictes).toBe(0)
     expect((await a.magatzem.obtenirPacient(aina.id))!.telefon).toBe('600 333 444')
-    const conflictes = await a.magatzem.conflictesDe(aina.id)
-    expect(conflictes.map((c) => [c.camp, c.valor])).toEqual([['telefon', '600 111 222']])
+    expect(await a.magatzem.conflictesDe(aina.id)).toEqual([])
   })
 
   it('amb la contrasenya equivocada no s\'importa res', async () => {
@@ -254,17 +265,22 @@ describe('fitxer .qi', () => {
 describe('d) fitxer de Drive danyat: les còpies diària i mensual', () => {
   it('es fa servir l\'última còpia que es pot obrir i la danyada es guarda a part', async () => {
     const { drive, a } = await escenari()
-    const principal = [...drive.fitxers.values()].find((f) => f.name === FITXER_PRINCIPAL)!
-    const danyat = principal.contingut.slice(0, 200)
-    principal.contingut = danyat
-    await expect(sincronitzar(a.db, a.clau, drive, DIA)).rejects.toBeInstanceOf(ErrorCopiaDanyada)
+    // Un dispositiu que encara no ha llegit la foto
+    const c = await dispositiu(CONTRASENYA_A)
+    await guardarClauEmbolcallada(c.db, (await llegirClauEmbolcallada(a.db))!)
+    const foto = [...drive.fitxers.values()].find((f) => f.name.startsWith('qi-foto-'))!
+    const danyat = foto.contingut.slice(0, 200)
+    foto.contingut = danyat
+    foto.version = '99'
+    await expect(sincronitzar(c.db, a.clau, drive, DIA)).rejects.toBeInstanceOf(ErrorCopiaDanyada)
 
-    await sincronitzar(a.db, a.clau, drive, { ara: DIA, copiaAnterior: true })
-    await desxifrarCopia(a.clau, fitxerDe(drive))
+    await sincronitzar(c.db, a.clau, drive, { ara: DIA, copiaAnterior: true })
+    expect((await crearMagatzem(c.db, a.clau).llistarPacients()).map((p) => p.nom)).toEqual(['Aina'])
     const guardada = [...drive.fitxers.values()].find((f) => f.name.startsWith('qi-danyada-'))
     expect(guardada?.contingut).toBe(danyat)
-    // I a partir d'ara, normal
+    // I a partir d'ara, normal (amb una foto nova)
     await sincronitzar(a.db, a.clau, drive, DIA)
+    await obrirFoto(a.clau, fotoDe(drive) as never)
   })
 })
 

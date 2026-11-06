@@ -9,11 +9,12 @@
 import { desbloquejarClauMestra, ErrorContrasenya } from '../crypto'
 import type { QiDB } from '../db/esquema'
 import { guardarClauEmbolcallada, guardarSecrets } from '../db/magatzem'
-import { aplicarContingut, desxifrarCopia, ErrorClauDiferent, ErrorCopiaDanyada, ErrorCopiaVersio, llegirFitxer, type FitxerCopia } from './copia'
+import { aplicarContingut, desxifrarCopia, ErrorClauDiferent, ErrorCopiaDanyada, ErrorCopiaVersio } from './copia'
+import { RE_DIARI, RE_FOTO } from './format2'
 import { ErrorAutoritzacio, ErrorDrive, type Drive } from './drive'
 import { baseDe } from './fusioClinica'
 import { ErrorGoogle } from './google'
-import { FITXER_PRINCIPAL } from './sincronitzar'
+import { copiaDeDrive, FITXER_PRINCIPAL, sincronitzar, type CopiaDrive } from './sincronitzar'
 
 export const PASSOS = {
   A: 'llegir la còpia de Google Drive',
@@ -77,30 +78,59 @@ async function pas<T>(p: PasRecuperacio, f: () => Promise<T> | T): Promise<T> {
   }
 }
 
-/** Passos A i B: la còpia principal de Drive, si n'hi ha (només es llegeix) */
-export async function copiaPerRecuperar(drive: Drive): Promise<FitxerCopia | null> {
-  const principal = await pas('A', async () => (await drive.llistar()).find((f) => f.name === FITXER_PRINCIPAL))
-  if (!principal) return null
-  const text = await pas('A', () => drive.baixar(principal.id))
-  return pas('B', () => llegirFitxer(text))
+/** Passos A i B: la còpia de Drive, si n'hi ha (només es llegeix) */
+export async function copiaPerRecuperar(drive: Drive): Promise<CopiaDrive | null> {
+  const fitxers = await pas('A', () => drive.llistar())
+  if (!fitxers.some((f) => f.name === FITXER_PRINCIPAL || RE_FOTO.test(f.name) || RE_DIARI.test(f.name))) return null
+  return pas('B', async () => {
+    try {
+      return await copiaDeDrive(drive)
+    } catch (e) {
+      // No s'ha pogut baixar (xarxa, permís): és del pas A
+      if (e instanceof ErrorAutoritzacio || e instanceof ErrorDrive || e instanceof TypeError) throw classificar('A', e)
+      throw e
+    }
+  })
 }
 
 /** Pas C: la clau mestra, amb la contrasenya */
-export function obrirClauMestra(fitxer: FitxerCopia, contrasenya: string): Promise<CryptoKey> {
+export function obrirClauMestra(fitxer: Pick<CopiaDrive, 'embolcalls'>, contrasenya: string): Promise<CryptoKey> {
   return pas('C', () => desbloquejarClauMestra(fitxer.embolcalls.contrasenya, contrasenya))
 }
 
-/** Passos D i E: escriure la còpia (ja oberta amb la clau mestra) en aquest dispositiu */
-export async function restaurarCopia(db: QiDB, clau: CryptoKey, fitxer: FitxerCopia): Promise<void> {
-  const contingut = await pas('D1', () => desxifrarCopia(clau, fitxer))
-  await pas('D2', () => aplicarContingut(db, contingut))
+/**
+ * Passos D i E: escriure la còpia (ja oberta amb la clau mestra) en aquest
+ * dispositiu. Format 2: es llegeix tot de Drive (sense escriure-hi res).
+ * Format 1: s'importa qi-dades.json (la primera sincronia el migrarà).
+ */
+export async function restaurarCopia(db: QiDB, clau: CryptoKey, copia: CopiaDrive, drive: Drive): Promise<void> {
   await pas('E', async () => {
-    await guardarClauEmbolcallada(db, fitxer.embolcalls.contrasenya, fitxer.embolcalls.contrasenyaAt)
-    await guardarSecrets(db, fitxer.embolcalls.secrets)
-    // El que hi ha ara és el de Drive: el punt de partida per a la pròxima sincronia
-    await db.meta.bulkPut([
-      { clau: 'darreraSincronia', valor: new Date().toISOString() },
-      { clau: 'baseSincronia', valor: baseDe(contingut) },
-    ])
+    await guardarClauEmbolcallada(db, copia.embolcalls.contrasenya, copia.embolcalls.contrasenyaAt)
+    await guardarSecrets(db, copia.embolcalls.secrets)
+    // Res d'aquest dispositiu nou s'ha de pujar: tot ve de Drive
+    await db.meta.put({ clau: 'versionsLocals', valor: new Date().toISOString() })
   })
+  if (copia.format === 1) {
+    const contingut = await pas('D1', () => desxifrarCopia(clau, copia.v1!))
+    await pas('D2', () => aplicarContingut(db, contingut))
+    await pas('E', () =>
+      db.meta.bulkPut([
+        { clau: 'darreraSincronia', valor: new Date().toISOString() },
+        { clau: 'baseSincronia', valor: baseDe(contingut) },
+      ]),
+    )
+    await db.meta.delete('versionsLocals')
+    return
+  }
+  try {
+    await sincronitzar(db, clau, drive, { nomesLlegir: true })
+  } catch (e) {
+    const p: PasRecuperacio =
+      e instanceof ErrorCopiaDanyada || e instanceof ErrorClauDiferent || e instanceof ErrorCopiaVersio
+        ? 'D1'
+        : e instanceof ErrorAutoritzacio || e instanceof ErrorDrive || e instanceof TypeError
+          ? 'A'
+          : 'D2'
+    throw classificar(p, e)
+  }
 }

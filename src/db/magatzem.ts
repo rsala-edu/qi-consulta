@@ -19,7 +19,7 @@ import {
 import { esquemaCitaGuardada, esquemaDadesCita, type Cita, type DadesCita } from '../domini/cita'
 import { esquemaEsborranyGuardat, type Esborrany, type EsborranyGuardat } from '../domini/esborrany'
 import { araIso, nouId } from '../domini/registre'
-import { registrarEsborrats } from './esborrats'
+import { desarPerCamp, desarSencer, esborrarRegistres } from '../sincronia/escriptura'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
 
 /** Les dades associades lliguen cada text xifrat a la seva taula i al seu id. */
@@ -84,12 +84,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
   ): Promise<Pacient> {
     const valid = esquemaPacientGuardat.parse(dades)
     const modificatAt = araIso()
-    await db.pacients.put({
-      id,
-      creatAt,
-      modificatAt,
-      xifrat: await xifrarJson(clau, valid, context('pacients', id)),
-    })
+    await desarPerCamp(db, clau, 'pacients', { id, creatAt, modificatAt }, valid, Object.keys(esquemaPacientGuardat.shape))
     return { id, creatAt, modificatAt, ...valid }
   }
 
@@ -109,14 +104,14 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     await pacientExistent(valid.pacientId)
     const { pacientId, inici, ...resta } = valid
     const modificatAt = araIso()
-    await db.cites.put({
-      id,
-      creatAt,
-      modificatAt,
-      pacientId,
-      inici,
-      xifrat: await xifrarJson(clau, esquemaCitaGuardada.parse(resta), context('cites', id)),
-    })
+    await desarPerCamp(
+      db,
+      clau,
+      'cites',
+      { id, creatAt, modificatAt, pacientId, inici },
+      esquemaCitaGuardada.parse(resta),
+      Object.keys(esquemaCitaGuardada.shape),
+    )
     return { id, creatAt, modificatAt, ...valid }
   }
 
@@ -183,13 +178,14 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       const id = existent?.id ?? `fitxa-${pacientId}`
       const creatAt = existent?.creatAt ?? araIso()
       const modificatAt = araIso()
-      await db.fitxesCliniques.put({
-        id,
-        pacientId,
-        creatAt,
-        modificatAt,
-        xifrat: await xifrarJson(clau, valid, context('fitxesCliniques', id)),
-      })
+      await desarPerCamp(
+        db,
+        clau,
+        'fitxesCliniques',
+        { id, pacientId, creatAt, modificatAt },
+        valid,
+        Object.keys(esquemaDadesFitxaClinica.shape),
+      )
       return { id, pacientId, creatAt, modificatAt, ...valid }
     },
 
@@ -245,8 +241,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     },
 
     async esborrarCita(id) {
-      await db.cites.delete(id)
-      await registrarEsborrats(db, 'cites', [id])
+      await esborrarRegistres(db, 'cites', [id])
     },
 
     async conflictesDe(registreId) {
@@ -265,15 +260,15 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       const d = (await desxifrarJson(clau, r.xifrat, context('conflictes', r.id))) as DadesConflicte
       const resta = d.camps.filter((c) => c.camp !== camp)
       if (resta.length === 0) {
-        await db.conflictes.delete(conflicteId)
-        await registrarEsborrats(db, 'conflictes', [conflicteId])
+        await esborrarRegistres(db, 'conflictes', [conflicteId])
         return
       }
-      await db.conflictes.put({
-        ...r,
-        modificatAt: araIso(),
-        xifrat: await xifrarJson(clau, { ...d, camps: resta }, context('conflictes', r.id)),
-      })
+      await desarSencer(
+        db,
+        'conflictes',
+        { ...r, modificatAt: araIso(), xifrat: await xifrarJson(clau, { ...d, camps: resta }, context('conflictes', r.id)) },
+        r.id,
+      )
     },
   }
   return magatzem

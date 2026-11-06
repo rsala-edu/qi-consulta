@@ -98,35 +98,6 @@ export async function llegirContingut(db: QiDB): Promise<Contingut> {
   return { versio: 1, taules, esborrats }
 }
 
-/** Fusiona dues còpies: per a cada registre guanya el canvi més nou. És simètrica. */
-export function fusionar(a: Contingut, b: Contingut): Contingut {
-  const esborrats = new Map<string, RegistreEsborrat>()
-  for (const e of [...a.esborrats, ...b.esborrats]) {
-    const ja = esborrats.get(e.id)
-    if (!ja || e.esborratAt > ja.esborratAt) esborrats.set(e.id, e)
-  }
-  const taules = {} as Contingut['taules']
-  for (const t of TAULES) {
-    const perClau = new Map<string, Registre>()
-    for (const r of [...(a.taules[t.nom] ?? []), ...(b.taules[t.nom] ?? [])]) {
-      const clau = valor(r, t.clau)
-      const ja = perClau.get(clau)
-      if (!ja || valor(r, t.data) > valor(ja, t.data)) perClau.set(clau, r)
-    }
-    const vius = [...perClau.entries()].filter(([clau, r]) => {
-      const e = esborrats.get(`${t.nom}:${clau}`)
-      return !e || e.esborratAt < valor(r, t.data)
-    })
-    taules[t.nom] = vius.sort(([x], [y]) => x.localeCompare(y)).map(([, r]) => r)
-  }
-  // Un esborrat ja no cal si el registre s'ha tornat a crear després
-  return { versio: 1, taules, esborrats: [...esborrats.values()].sort((x, y) => x.id.localeCompare(y.id)) }
-}
-
-export function iguals(a: Contingut, b: Contingut): boolean {
-  return JSON.stringify(a) === JSON.stringify(b)
-}
-
 /** Escriu el contingut fusionat a la base de dades local (substitueix les taules sincronitzades). */
 export async function aplicarContingut(db: QiDB, c: Contingut): Promise<void> {
   await db.transaction('rw', [...TAULES.map((t) => t.nom), 'esborrats'], async () => {

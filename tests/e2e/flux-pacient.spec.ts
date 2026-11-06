@@ -12,24 +12,25 @@ function menu(page: Page, nom: string) {
 
 /** Llegeix IndexedDB directament, tal com ho veuria algú amb accés al disc. */
 async function contingutBrutIndexedDB(page: Page): Promise<string> {
-  return page.evaluate(
-    () =>
-      new Promise<string>((resoldre, rebutjar) => {
-        const peticio = indexedDB.open('qi')
-        peticio.onerror = () => rebutjar(peticio.error)
-        peticio.onsuccess = () => {
-          const db = peticio.result
-          const taules = Array.from(db.objectStoreNames)
-          const tx = db.transaction(taules, 'readonly')
-          const resultat: Record<string, unknown> = {}
-          for (const taula of taules) {
-            const r = tx.objectStore(taula).getAll()
-            r.onsuccess = () => (resultat[taula] = r.result)
-          }
-          tx.oncomplete = () => resoldre(JSON.stringify(resultat))
+  return page.evaluate(async () => {
+    // L'espai del compte: «qi-» i 16 caràcters
+    const nom = (await indexedDB.databases()).find((d) => /^qi-[0-9a-f]{16}$/.test(d.name ?? ''))!.name!
+    return new Promise<string>((resoldre, rebutjar) => {
+      const peticio = indexedDB.open(nom)
+      peticio.onerror = () => rebutjar(peticio.error)
+      peticio.onsuccess = () => {
+        const db = peticio.result
+        const taules = Array.from(db.objectStoreNames)
+        const tx = db.transaction(taules, 'readonly')
+        const resultat: Record<string, unknown> = {}
+        for (const taula of taules) {
+          const r = tx.objectStore(taula).getAll()
+          r.onsuccess = () => (resultat[taula] = r.result)
         }
-      }),
-  )
+        tx.oncomplete = () => resoldre(JSON.stringify(resultat))
+      }
+    })
+  })
 }
 
 test('desbloquejar → crear pacient → editar la fitxa clínica', async ({ page }) => {

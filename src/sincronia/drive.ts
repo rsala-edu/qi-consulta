@@ -6,6 +6,8 @@ export interface FitxerDrive {
   id: string
   name: string
   modifiedTime: string
+  /** Número de versió que Drive puja a cada canvi del fitxer (no sempre hi és) */
+  version?: string
 }
 
 export interface Drive {
@@ -35,7 +37,7 @@ export class ErrorDrive extends Error {
 
 const API = 'https://www.googleapis.com/drive/v3/files'
 const PUJADA = 'https://www.googleapis.com/upload/drive/v3/files'
-const CAMPS = 'id,name,modifiedTime'
+const CAMPS = 'id,name,modifiedTime,version'
 
 export function driveGoogle(token: () => string | null, fetchFn: typeof fetch = (...a) => fetch(...a)): Drive {
   async function demanar(url: string, init: RequestInit = {}): Promise<Response> {

@@ -20,26 +20,24 @@ import {
   type EmbolcallSecret,
 } from '../crypto'
 import type { QiDB, RegistreXifrat } from '../db/esquema'
+import { esquemaPacientGuardat, type PacientGuardat } from '../domini/pacient'
+import { desxifrarJson } from '../crypto'
+import { context } from '../db/magatzem'
+import { aplicarRemots, clauDe, type EntradaRemota } from './aplicar'
+import type { Drive } from './drive'
+import { desarPerCamp } from './escriptura'
+import { hlcDeData } from './hlc'
+import { esPerCamp, obrirRegistre, tancarRegistre, type Registre, type Versions } from './registres'
+import { sincronitzar, type CopiaDrive } from './sincronitzar'
 import { guardarClauEmbolcallada, guardarSecrets, llegirClauEmbolcallada, llegirClauMestraAt, llegirSecrets } from '../db/magatzem'
 import { ErrorClauRecuperacio } from '../sessio/claus'
-import {
-  aplicarContingut,
-  desxifrarCopia,
-  fusionar,
-  llegirContingut,
-  llegirFitxer,
-  xifrarCopia,
-  type Contingut,
-  type Embolcalls,
-  type FitxerCopia,
-} from './copia'
-import { fusionarClausDiferents, reXifrarRegistres } from './fusioClaus'
-import { baseDe, fusionarClinics } from './fusioClinica'
+import { desxifrarCopia, llegirContingut, llegirFitxer, TAULES, xifrarCopia, type Embolcalls, type FitxerCopia } from './copia'
+import { clauPersona, reXifrarRegistres } from './fusioClaus'
 
 export type Credencial = { tipus: 'contrasenya'; valor: string } | { tipus: 'recuperacio'; valor: string }
 
 /** La clau mestra d'una còpia (de Drive o .qi), amb la seva contrasenya o la seva clau de recuperació */
-export async function obrirClauCopia(fitxer: FitxerCopia, credencial: Credencial): Promise<CryptoKey> {
+export async function obrirClauCopia(fitxer: Pick<FitxerCopia, 'embolcalls'>, credencial: Credencial): Promise<CryptoKey> {
   if (credencial.tipus === 'contrasenya') return desbloquejarClauMestra(fitxer.embolcalls.contrasenya, credencial.valor)
   const secret = llegirClauRecuperacio(credencial.valor)
   const e = fitxer.embolcalls.secrets.find((s) => s.tipus === 'recuperacio')
@@ -84,40 +82,21 @@ export async function llegirCopiaAbansCanviClau(db: QiDB): Promise<{ at: string;
   return r?.clau === 'copiaAbansCanviClau' ? r.valor : null
 }
 
-/**
- * Escriu de cop el contingut i, si cal, les claus de Drive i els esborranys
- * tornats a xifrar: o es fa tot o no es fa res.
- */
-async function escriure(
-  db: QiDB,
-  contingut: Contingut,
-  opcions: { embolcalls?: Embolcalls; esborranys?: RegistreXifrat[]; base?: Contingut; ara: string },
-): Promise<void> {
-  await db.transaction('rw', [db.meta, db.esborranys, db.esborrats, ...TAULES_DB(db)], async () => {
-    await aplicarContingut(db, contingut)
-    if (opcions.esborranys) {
-      await db.esborranys.clear()
-      await db.esborranys.bulkPut(opcions.esborranys)
-    }
-    if (opcions.embolcalls) {
-      await guardarClauEmbolcallada(db, opcions.embolcalls.contrasenya, opcions.embolcalls.contrasenyaAt)
-      await guardarSecrets(db, opcions.embolcalls.secrets as EmbolcallSecret[])
-    }
-    if (opcions.base) {
-      // La còpia de Drive és el punt de partida de la pròxima sincronia
-      await db.meta.bulkPut([
-        { clau: 'darreraSincronia', valor: opcions.ara },
-        { clau: 'baseSincronia', valor: baseDe(opcions.base) },
-      ])
-    }
-  })
+/** Taules sincronitzades amb registres xifrats amb la clau mestra */
+const TAULES_XIFRADES = ['pacients', 'fitxesCliniques', 'cites', 'conflictes'] as const
+
+const SINCRONITZADES = (db: QiDB) => TAULES.map((t) => db.table(t.nom))
+
+/** Torna a xifrar totes les dades del dispositiu (i els esborranys) amb una altra clau */
+async function reXifrarDispositiu(db: QiDB, de: CryptoKey, a: CryptoKey) {
+  const taules = new Map<string, RegistreXifrat[]>()
+  for (const nom of TAULES_XIFRADES) taules.set(nom, await reXifrarRegistres(await db.table(nom).toArray(), nom, de, a))
+  return { taules, esborranys: await reXifrarRegistres(await db.esborranys.toArray(), 'esborranys', de, a) }
 }
 
-const TAULES_DB = (db: QiDB) =>
-  [db.pacients, db.fitxesCliniques, db.cites, db.calibratge, db.calibratgeOrella, db.precaucions, db.categoriesPrecaucio, db.configuracio, db.diesTancats, db.conflictes]
-
-async function esborranysAmb(db: QiDB, de: CryptoKey, a: CryptoKey): Promise<RegistreXifrat[]> {
-  return reXifrarRegistres(await db.esborranys.toArray(), 'esborranys', de, a)
+async function adoptarClausDeDrive(db: QiDB, embolcalls: Embolcalls) {
+  await guardarClauEmbolcallada(db, embolcalls.contrasenya, embolcalls.contrasenyaAt)
+  await guardarSecrets(db, embolcalls.secrets as EmbolcallSecret[])
 }
 
 /**
@@ -125,45 +104,73 @@ async function esborranysAmb(db: QiDB, de: CryptoKey, a: CryptoKey): Promise<Reg
  * substitueix les dades del dispositiu, que abans s'han desat en un .qi.
  * Els formularis a mig fer es conserven (tornats a xifrar).
  */
-export async function recuperarDeDrive(db: QiDB, clauLocal: CryptoKey, fitxer: FitxerCopia, clauDrive: CryptoKey): Promise<void> {
-  const remot = await desxifrarCopia(clauDrive, fitxer)
-  const ara = new Date().toISOString()
-  await escriure(db, remot, {
-    embolcalls: fitxer.embolcalls,
-    esborranys: await esborranysAmb(db, clauLocal, clauDrive),
-    base: remot,
-    ara,
+export async function recuperarDeDrive(db: QiDB, clauLocal: CryptoKey, copia: CopiaDrive, clauDrive: CryptoKey, drive: Drive): Promise<void> {
+  const esborranys = await reXifrarRegistres(await db.esborranys.toArray(), 'esborranys', clauLocal, clauDrive)
+  await db.transaction('rw', [db.meta, db.esborranys, db.esborrats, db.canvisPropis, db.desconegudes, ...SINCRONITZADES(db)], async () => {
+    for (const t of SINCRONITZADES(db)) await t.clear()
+    await db.esborrats.clear()
+    await db.desconegudes.clear()
+    await db.canvisPropis.clear()
+    await db.esborranys.clear()
+    await db.esborranys.bulkPut(esborranys)
+    await adoptarClausDeDrive(db, copia.embolcalls)
+    // Res d'aquest dispositiu queda per pujar: tot vindrà de Drive
+    await db.meta.bulkPut([
+      { clau: 'estatDrive', valor: { aplicats: {}, vistos: {} } },
+      { clau: 'versionsLocals', valor: new Date().toISOString() },
+      { clau: 'darreraSincronia', valor: new Date().toISOString() },
+    ])
+    await db.meta.delete('baseSincronia')
   })
+  await sincronitzar(db, clauDrive, drive, { nomesLlegir: true })
 }
 
 /**
- * «Fusionar les dades d'aquest dispositiu amb les de Drive»: el resultat va
- * xifrat amb la clau de Drive, que el dispositiu adopta (amb la contrasenya,
- * l'empremta i la clau de recuperació de Drive).
+ * «Fusionar les dades d'aquest dispositiu amb les de Drive»: les dades del
+ * dispositiu es tornen a xifrar amb la clau de Drive (que el dispositiu
+ * adopta, amb la contrasenya, l'empremta i la clau de recuperació de Drive),
+ * s'apunten totes a la cua i es fusionen amb les de Drive camp a camp. Els
+ * pacients amb el mateix nom i data a totes dues bandes queden per revisar.
  */
 export async function fusionarAmbDrive(
   db: QiDB,
   clauLocal: CryptoKey,
-  fitxer: FitxerCopia,
+  copia: CopiaDrive,
   clauDrive: CryptoKey,
+  drive: Drive,
 ): Promise<{ possiblesDuplicats: number; conflictes: number }> {
-  const remot = await desxifrarCopia(clauDrive, fitxer)
-  const local = await llegirContingut(db)
-  const ara = new Date().toISOString()
-  const r = await fusionarClausDiferents({ clau: clauDrive, contingut: remot }, { clau: clauLocal, contingut: local }, ara)
-  await escriure(db, r.contingut, {
-    embolcalls: fitxer.embolcalls,
-    esborranys: await esborranysAmb(db, clauLocal, clauDrive),
-    base: remot,
-    ara,
+  const propis = new Set((await db.pacients.toArray()).map((p) => p.id))
+  const { taules, esborranys } = await reXifrarDispositiu(db, clauLocal, clauDrive)
+  await db.transaction('rw', [db.meta, db.esborranys, ...SINCRONITZADES(db)], async () => {
+    for (const [nom, registres] of taules) await db.table(nom).bulkPut(registres)
+    await db.esborranys.clear()
+    await db.esborranys.bulkPut(esborranys)
+    await adoptarClausDeDrive(db, copia.embolcalls)
+    // Tot el que té el dispositiu es tornarà a apuntar a la cua i es pujarà
+    await db.meta.bulkPut([{ clau: 'estatDrive', valor: { aplicats: {}, vistos: {} } }])
+    await db.meta.delete('versionsLocals')
+    await db.meta.delete('darreraSincronia')
+    await db.meta.delete('baseSincronia')
   })
-  return { possiblesDuplicats: r.possiblesDuplicats, conflictes: r.conflictes }
+  const conflictesAbans = await db.conflictes.count()
+  await sincronitzar(db, clauDrive, drive)
+  const possiblesDuplicats = await marcarDuplicats(db, clauDrive, propis)
+  return { possiblesDuplicats, conflictes: (await db.conflictes.count()) - conflictesAbans }
+}
+
+/** Registres del format 1 sense versions: tots els camps amb la versió de l'últim canvi */
+async function ambVersions(clau: CryptoKey, taula: string, r: Registre): Promise<Registre> {
+  if (!esPerCamp(taula) || r.versions) return r
+  const obert = await obrirRegistre(clau, taula, r)
+  const h = hlcDeData(r.modificatAt as string)
+  const versions: Versions = Object.fromEntries(Object.keys(obert.camps).map((c) => [c, [h, null]]))
+  return tancarRegistre(clau, taula, r, { camps: obert.camps, versions })
 }
 
 /**
  * «Importar una còpia»: les dades del .qi s'afegeixen a les del dispositiu,
- * que conserva la seva clau. Si el .qi és de la mateixa clau, és una fusió
- * normal; si no, es tornen a xifrar.
+ * que conserva la seva clau (si el .qi és d'una altra, es tornen a xifrar).
+ * Es fusionen camp a camp i s'apunten a la cua per pujar-les.
  */
 export async function importarQi(
   db: QiDB,
@@ -171,15 +178,59 @@ export async function importarQi(
   fitxer: FitxerCopia,
   clauQi: CryptoKey,
 ): Promise<{ possiblesDuplicats: number; conflictes: number }> {
-  const copia = await desxifrarCopia(clauQi, fitxer)
-  const local = await llegirContingut(db)
-  const ara = new Date().toISOString()
-  if ((await idClau(clauQi)) === (await idClau(clauLocal))) {
-    const c = await fusionarClinics(clauLocal, local, copia, '0000', ara)
-    await escriure(db, fusionar(c.local, c.remot), { ara })
-    return { possiblesDuplicats: 0, conflictes: c.conflictes }
+  let copia = await desxifrarCopia(clauQi, fitxer)
+  const mateixaClau = (await idClau(clauQi)) === (await idClau(clauLocal))
+  if (!mateixaClau) {
+    const taules = { ...copia.taules }
+    for (const nom of TAULES_XIFRADES)
+      taules[nom] = (await reXifrarRegistres(copia.taules[nom] as unknown as RegistreXifrat[], nom, clauQi, clauLocal)) as never
+    copia = { ...copia, taules }
   }
-  const r = await fusionarClausDiferents({ clau: clauLocal, contingut: local }, { clau: clauQi, contingut: copia }, ara)
-  await escriure(db, r.contingut, { ara })
-  return { possiblesDuplicats: r.possiblesDuplicats, conflictes: r.conflictes }
+  const propis = new Set((await db.pacients.toArray()).map((p) => p.id))
+  const entrades: EntradaRemota[] = []
+  for (const [taula, registres] of Object.entries(copia.taules)) {
+    for (const r of registres as Registre[]) entrades.push({ taula, clau: clauDe(taula, r), registre: await ambVersions(clauLocal, taula, r) })
+  }
+  for (const e of copia.esborrats) entrades.push({ taula: e.taula, clau: e.clau, esborrat: e })
+  const r = await aplicarRemots(db, clauLocal, entrades, { encuar: true })
+  const possiblesDuplicats = mateixaClau ? 0 : await marcarDuplicats(db, clauLocal, propis)
+  return { possiblesDuplicats, conflictes: r.conflictes }
+}
+
+async function llegirPacient(clau: CryptoKey, r: RegistreXifrat): Promise<PacientGuardat> {
+  return esquemaPacientGuardat.parse(await desxifrarJson(clau, r.xifrat, context('pacients', r.id)))
+}
+
+/**
+ * Els pacients que eren al dispositiu (`propis`) i que coincideixen (mateix
+ * nom i data de naixement) amb un altre que no ho era queden marcats per
+ * revisar, tots dos: no s'ajunten sols. Torna quantes parelles hi ha.
+ */
+async function marcarDuplicats(db: QiDB, clau: CryptoKey, propis: ReadonlySet<string>): Promise<number> {
+  const perPersona = new Map<string, { r: RegistreXifrat; p: PacientGuardat }[]>()
+  for (const r of await db.pacients.toArray()) {
+    const p = await llegirPacient(clau, r)
+    const k = clauPersona(p)
+    perPersona.set(k, [...(perPersona.get(k) ?? []), { r, p }])
+  }
+  let parelles = 0
+  for (const grup of perPersona.values()) {
+    const meus = grup.filter((x) => propis.has(x.r.id))
+    const altres = grup.filter((x) => !propis.has(x.r.id))
+    if (meus.length === 0 || altres.length === 0) continue
+    parelles += meus.length * altres.length
+    for (const x of grup) {
+      const contraris = (propis.has(x.r.id) ? altres : meus).map((y) => y.r.id)
+      const revisarDuplicat = [...new Set([...(x.p.revisarDuplicat ?? []), ...contraris])].sort()
+      await desarPerCamp(
+        db,
+        clau,
+        'pacients',
+        { id: x.r.id, creatAt: x.r.creatAt, modificatAt: new Date().toISOString() },
+        { ...x.p, revisarDuplicat },
+        Object.keys(esquemaPacientGuardat.shape),
+      )
+    }
+  }
+  return parelles
 }

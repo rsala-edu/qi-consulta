@@ -51,7 +51,8 @@ export function PantallaDrive() {
   const d = t.drive
 
   async function fer(o: Opcio, credencial: Credencial) {
-    const fitxer = await copiaDeDrive(driveGoogle(tokenGoogle))
+    const drive = driveGoogle(tokenGoogle)
+    const fitxer = await copiaDeDrive(drive)
     if (!fitxer) throw new ErrorSenseCopia()
     // Primer la contrasenya: si és incorrecta, no s'ha tocat res
     const clauDrive = await obrirClauCopia(fitxer, credencial)
@@ -59,8 +60,8 @@ export function PantallaDrive() {
     const nom = nomFitxerQi()
     descarregarText(await desarCopiaAbansCanviClau(db, clau), nom)
     let r = { possiblesDuplicats: 0, conflictes: 0 }
-    if (o === 'fusionar') r = await fusionarAmbDrive(db, clau, fitxer, clauDrive)
-    else await recuperarDeDrive(db, clau, fitxer, clauDrive)
+    if (o === 'fusionar') r = await fusionarAmbDrive(db, clau, fitxer, clauDrive, drive)
+    else await recuperarDeDrive(db, clau, fitxer, clauDrive, drive)
     setResultat({ opcio: o, nom, ...r })
     // A partir d'ara, la clau de Drive: la sincronia puja les dades fusionades
     adoptarClau(clauDrive)

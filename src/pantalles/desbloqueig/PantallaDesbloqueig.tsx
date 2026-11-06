@@ -43,6 +43,8 @@ interface Props {
   onRecuperar?(clau: string, contrasenyaNova: string): Promise<void>
   /** Recuperació: tornar a entrar amb Google si la sessió de Drive ha caducat */
   onTornarGoogle?(): void
+  /** Obrir l'espai d'un altre compte de Google (amb la seva contrasenya) */
+  onAltreCompte?(): Promise<void>
 }
 
 export function PantallaDesbloqueig(props: Props) {
@@ -66,7 +68,9 @@ function FormulariContrasenya({
   onEmpremta,
   onOblidada,
   onTornarGoogle,
+  onAltreCompte,
 }: Props & { onOblidada?: () => void }) {
+  const [errorCompte, setErrorCompte] = useState<string | null>(null)
   const crear = mode === 'crear'
   const restaurar = mode === 'restaurar'
   const [errorEmpremta, setErrorEmpremta] = useState(false)
@@ -204,6 +208,26 @@ function FormulariContrasenya({
                 {t.desbloqueig.tornarEmpremta}
               </button>
             )}
+          </>
+        )}
+        {onAltreCompte && (
+          <>
+            {errorCompte && <p role="alert">{errorCompte}</p>}
+            <button
+              type="button"
+              className="enllac-secundari"
+              disabled={ocupat}
+              onClick={() => {
+                setErrorCompte(null)
+                // La finestra de Google s'obre dins el mateix toc
+                onAltreCompte().catch((e: unknown) => {
+                  const motiu = (e as { motiu?: keyof typeof t.desbloqueig.errorsGoogle }).motiu
+                  setErrorCompte(motiu ? t.desbloqueig.errorsGoogle[motiu] : t.app.errorInesperat)
+                })
+              }}
+            >
+              {t.desbloqueig.altreCompte}
+            </button>
           </>
         )}
       </form>

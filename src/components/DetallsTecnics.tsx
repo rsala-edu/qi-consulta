@@ -8,9 +8,10 @@ import { t } from '../i18n/t'
 import { useClauMestra, useSessio } from '../sessio/ContextSessio'
 import { useSincronia } from '../sincronia/ContextSincronia'
 import type { InfoDrive } from '../sincronia/sincronitzar'
+import { VERSIO_FORMAT } from '../sincronia/format2'
 
-/** Versió del format de la còpia que fa aquesta app (copia.ts) */
-const FORMAT_COPIA = 1
+/** Versió del format de la còpia que fa aquesta app (format2.ts) */
+const FORMAT_COPIA = VERSIO_FORMAT
 
 export function textDetalls(d: {
   versioApp: string
