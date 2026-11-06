@@ -19,7 +19,8 @@ concurrency:
 jobs:
   proves:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Les E2E fan uns 13 minuts i la preparació del runner, de 7 a 10: 20 minuts no hi cabien (e139138)
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
