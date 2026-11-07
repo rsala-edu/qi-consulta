@@ -35,6 +35,7 @@ import { PantallaDrive } from './pantalles/ajustos/PantallaDrive'
 import { PantallaQuantA } from './pantalles/ajustos/PantallaQuantA'
 import { PantallaAjustVisita } from './pantalles/ajustos/PantallaAjustVisita'
 import { PantallaVisita } from './pantalles/visita/PantallaVisita'
+import { PantallaAjustCatalegs } from './pantalles/ajustos/PantallaAjustCatalegs'
 import { ProveidorActualitzacio, useActualitzacio } from './actualitzacio/actualitzacio'
 import { AvisVersioNova } from './components/AvisVersioNova'
 import { AvisVersioAntiga } from './components/AvisVersioAntiga'
@@ -226,6 +227,7 @@ function PortaOberta() {
             <Route path="ajustos/agenda" element={<P codi="UI-AJUST-AGENDA"><PantallaAjustAgenda /></P>} />
             <Route path="ajustos/quant-a" element={<P codi="UI-QUANT-A"><PantallaQuantA /></P>} />
             <Route path="ajustos/visita" element={<P codi="UI-AJUST-VISITA"><PantallaAjustVisita /></P>} />
+            <Route path="ajustos/catalegs" element={<P codi="UI-AJUST-CATALEGS"><PantallaAjustCatalegs /></P>} />
             <Route path="visita/:id" element={<P codi="UI-VISITA"><PantallaVisita /></P>} />
             <Route path="*" element={<Navigate to="/avui" replace />} />
           </Route>

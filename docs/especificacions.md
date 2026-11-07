@@ -376,3 +376,28 @@ Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplic
 - **Mapa 2D (SVG):** quatre vistes (davant, darrere, esquerra, dreta), projectades del mateix model 3D, amb els mateixos punts, colors, cerca, filtre de meridià i fitxa. «Anar a un punt» tria la vista des d'on es veu millor i hi amplia; les etiquetes es col·loquen sense trepitjar-se, com al 3D. La correcció de posicions només es fa en 3D.
 - **Interruptor «3D / 2D»** sota el dibuix. La tria es recorda en aquest dispositiu. Si el navegador no té WebGL, el mapa s'obre en 2D.
 - **«Cos 3D no disponible»:** l'avís explica com activar l'acceleració per maquinari a Chrome i Firefox i ofereix «Fer servir el mapa 2D».
+
+## Etapa 3B: primera visita i catàlegs clínics
+
+### Principis
+- Tot el que es pot, amb xips per tocar (selecció simple o múltiple). Cada secció té «Normal / sense alteracions» (d'un toc) i «Altres / observacions».
+- Seccions plegables. Plegades, mostren un resum del que s'hi ha marcat. Les que no s'han tocat no es desen.
+- **Ajustos > Catàlegs:** amagar seccions, camps i opcions, i canviar-ne l'ordre. No s'esborra res: el que ja està desat en una visita es continua veient encara que s'amagui. Els ajustos són comuns a tots els dispositius.
+- Els catàlegs són a `src/cataleg/`, en català, amb el pinyin i els caràcters (simplificats) quan hi ha terme xinès, i la font de cada secció (`fonts.ts`, que també surt a Ajustos > Catàlegs).
+- **Dades:** totes clíniques, xifrades, sincronitzades i amb fusió camp a camp. Cada secció és un camp: dos dispositius que omplen seccions diferents no entren en conflicte. Els ids de secció fan servir «:» i no punts («anamnesi:son»), perquè la fusió camp a camp separa els camins per punts.
+
+### Valoració inicial (taula `valoracions`)
+- Una per episodi, amb id `valoracio-<episodi>-v<n>`. Es fa a la primera visita de l'episodi, que s'obre a la pestanya **Valoració**.
+- A les visites de seguiment, la valoració es veu però no es pot editar. «Revisar la valoració» en fa una versió nova a partir de l'última. Les versions anteriors es conserven tal com eren i es poden consultar.
+- **Contingut:**
+  - **Malaltia actual:** inici, evolució, tendència, factors que milloren i que empitjoren, tractaments previs.
+  - **Diagnòstic occidental:** text, codi CIM-11 amb cercador (la llista oficial de 17.000 codis es carrega a part i funciona sense connexió) i codi CIM-10 escrit a mà.
+  - **Anamnesi:** les deu preguntes ampliades. La ginecologia només surt si la pacient és dona (o si no consta el sexe).
+  - **Constitució:** els nou tipus de la ZYYXH/T157-2009, un de principal i un de secundari.
+- **Embaràs:** si la valoració o la fitxa clínica marquen embaràs (o embaràs possible), la capçalera de tota la visita mostra «Embaràs».
+- En ajuntar dues fitxes, les valoracions segueixen el seu episodi.
+
+### Llicències
+- **Terminologia de l'OMS (2022):** CC BY-NC-SA 3.0 IGO. La traducció catalana es comparteix amb la mateixa llicència. L'ús ha de ser no comercial: cal valorar-ho si la consulta és privada.
+- **CIM-11:** CC BY-ND 3.0 IGO. No es pot traduir sense permís de l'OMS, així que els títols es mostren en anglès, sense modificar.
+- **Escales:** THI i DHI tenen copyright dels autors i de l'AMA, sense cap llicència clínica publicada. El SNOT-22 necessita una llicència de la Washington University (la clínica és de pagament). El MYMOP necessita una llicència de Meaningful Measures Ltd. Per això l'app no inclou el text dels ítems: només es desen les puntuacions i el grau de gravetat.

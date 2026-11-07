@@ -83,7 +83,7 @@ export async function llegirCopiaAbansCanviClau(db: QiDB): Promise<{ at: string;
 }
 
 /** Taules sincronitzades amb registres xifrats amb la clau mestra */
-const TAULES_XIFRADES = ['pacients', 'fitxesCliniques', 'cites', 'conflictes', 'episodis', 'sessions', 'addendes'] as const
+const TAULES_XIFRADES = ['pacients', 'fitxesCliniques', 'cites', 'conflictes', 'episodis', 'sessions', 'addendes', 'valoracions'] as const
 
 const SINCRONITZADES = (db: QiDB) => TAULES.map((t) => db.table(t.nom))
 

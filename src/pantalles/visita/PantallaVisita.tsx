@@ -38,10 +38,16 @@ import { ambValor } from '../../sincronia/fusioCamps'
 import { useFormulariBrut } from '../../sincronia/revisio'
 import { MapaTractament } from '../mapa/PantallaProvaMapa'
 import { Temporitzador } from './Temporitzador'
+import { PestanyaValoracio } from './PestanyaValoracio'
+import { ESPECIALS } from '../../cataleg/components/especials'
+import { GRUPS_VALORACIO } from '../../cataleg/index'
+import type { AjustosCatalegs } from '../../cataleg/motor'
+import { llegirAjustosCatalegs } from '../../db/ajustosCatalegs'
+import { hiHaEmbaras, type DadesValoracio, type Valoracio } from '../../domini/valoracio'
 import { useRetencio } from '../../visita/retencio'
 
-type Pestanya = 'comEsta' | 'exploracio' | 'tractament' | 'tancar'
-const PESTANYES: readonly Pestanya[] = ['comEsta', 'exploracio', 'tractament', 'tancar']
+type Pestanya = 'valoracio' | 'comEsta' | 'exploracio' | 'tractament' | 'tancar'
+const PESTANYES: readonly Pestanya[] = ['valoracio', 'comEsta', 'exploracio', 'tractament', 'tancar']
 /** Temps entre l'últim canvi i el desat */
 const ESPERA_DESAR = 600
 
@@ -65,23 +71,45 @@ export function PantallaVisita() {
   const [carrega] = useCarrega(async () => {
     const sessio = await magatzem.obtenirSessio(id)
     if (!sessio) return null
-    const [pacient, episodi, sessions, ajustos, addendes, conflictes] = await Promise.all([
+    const [pacient, episodi, sessions, ajustos, addendes, conflictes, valoracions, catalegs, fitxa] = await Promise.all([
       magatzem.obtenirPacient(sessio.pacientId),
       magatzem.obtenirEpisodi(sessio.episodiId),
       magatzem.sessionsDelPacient(sessio.pacientId),
       llegirAjustosVisita(db),
       magatzem.addendesDe(id),
       magatzem.conflictesDe(id),
+      magatzem.valoracionsDe(sessio.episodiId),
+      llegirAjustosCatalegs(db),
+      magatzem.obtenirFitxaClinica(sessio.pacientId),
     ])
+    const darreraValoracio = valoracions.at(-1)
+    const conflictesValoracio = darreraValoracio ? await magatzem.conflictesDe(darreraValoracio.id) : []
     // L'última sessió d'abans del mateix episodi (per a l'escala i «Repetir el tractament»)
     const anterior =
       sessions.filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.iniciAt < sessio.iniciAt).at(-1) ?? null
-    return { sessio, pacient, episodi, anterior, ajustos, addendes, conflictes }
+    return {
+      sessio,
+      pacient,
+      episodi,
+      anterior,
+      ajustos,
+      addendes,
+      conflictes,
+      valoracions,
+      conflictesValoracio,
+      catalegs,
+      embarasFitxa: fitxa.contraindicacions.embaras,
+    }
   }, [magatzem, db, id, versio])
 
-  if (carrega.estat === 'carregant') return <Indicador text={t.app.carregant} />
-  if (carrega.estat === 'error' || !carrega.dades) return <p role="alert">{t.visita.noTrobada}</p>
-  return <Visita key={id} {...carrega.dades} onRecarregar={() => setVersio((n) => n + 1)} />
+  // En tornar a carregar (conflictes, revisar la valoració…) es continua veient la visita: no es perd la pestanya
+  type Dades = NonNullable<Extract<typeof carrega, { estat: 'llest' }>['dades']>
+  const [ultimes, setUltimes] = useState<{ id: string; dades: Dades } | null>(null)
+  if (carrega.estat === 'llest' && carrega.dades && ultimes?.dades !== carrega.dades) setUltimes({ id, dades: carrega.dades })
+  const mostrades = carrega.estat === 'llest' ? carrega.dades : ultimes?.id === id ? ultimes.dades : null
+  if (carrega.estat === 'carregant' && !mostrades) return <Indicador text={t.app.carregant} />
+  if (!mostrades) return <p role="alert">{t.visita.noTrobada}</p>
+  return <Visita key={id} {...mostrades} onRecarregar={() => setVersio((n) => n + 1)} />
 }
 
 function Visita({
@@ -92,6 +120,10 @@ function Visita({
   ajustos,
   addendes,
   conflictes,
+  valoracions,
+  conflictesValoracio,
+  catalegs,
+  embarasFitxa,
   onRecarregar,
 }: {
   sessio: Sessio
@@ -101,6 +133,10 @@ function Visita({
   ajustos: Awaited<ReturnType<typeof llegirAjustosVisita>>
   addendes: Awaited<ReturnType<ReturnType<typeof useMagatzem>['addendesDe']>>
   conflictes: CampEnConflicte[]
+  valoracions: Valoracio[]
+  conflictesValoracio: CampEnConflicte[]
+  catalegs: AjustosCatalegs
+  embarasFitxa: boolean
   onRecarregar(): void
 }) {
   const magatzem = useMagatzem()
@@ -113,7 +149,11 @@ function Visita({
   const [pendent, setPendent] = useState(false)
   const [desant, setDesant] = useState(false)
   const [bloquejada, setBloquejada] = useState(() => !esEditable(sessio, Date.now()))
-  const [pestanya, setPestanya] = useState<Pestanya>('comEsta')
+  // A la primera visita de l'episodi es comença per la valoració
+  const [pestanya, setPestanya] = useState<Pestanya>(sessio.numero === 1 ? 'valoracio' : 'comEsta')
+  const [embarasValoracio, setEmbarasValoracio] = useState(() => hiHaEmbaras(valoracions.at(-1)))
+  const canviValoracio = useCallback((d: DadesValoracio) => setEmbarasValoracio(hiHaEmbaras(d)), [])
+  const embaras = embarasFitxa || embarasValoracio
   const [acabada, setAcabada] = useState(false)
   const [finalitzant, setFinalitzant] = useState(false)
   // Mentre hi ha canvis per desar, els d'un altre dispositiu no es posen a sobre
@@ -193,7 +233,14 @@ function Visita({
     <main className="pantalla pantalla-visita">
       <header className={`capcalera-visita${acabada ? ' retencio-acabada' : ''}`}>
         <div className="qui-visita">
-          <h1>{pacient ? nomComplet(pacient) : '—'}</h1>
+          <h1>
+            {pacient ? nomComplet(pacient) : '—'}
+            {embaras && (
+              <span className="etiqueta etiqueta-embaras" role="note" title={v.embarasDetall}>
+                {v.embaras}
+              </span>
+            )}
+          </h1>
           <p className="detall">
             {episodi?.motiu ?? ''} · {formatar(v.sessio, { n: String(dades.numero) })} ·{' '}
             {formatar(v.inici, { hora: new Date(dades.iniciAt).toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' }) })}
@@ -276,6 +323,23 @@ function Visita({
           </button>
         ))}
       </div>
+
+      {pestanya === 'valoracio' && (
+        <section id="visita-valoracio" role="tabpanel" aria-labelledby="pestanya-valoracio" className="panell">
+          <PestanyaValoracio
+            sessio={sessio}
+            valoracions={valoracions}
+            conflictes={conflictesValoracio}
+            grups={GRUPS_VALORACIO}
+            ajustos={catalegs}
+            sexe={pacient?.sexe}
+            editableSessio={editable}
+            onRecarregar={onRecarregar}
+            onDades={canviValoracio}
+            especials={ESPECIALS}
+          />
+        </section>
+      )}
 
       <fieldset className="contingut-visita" disabled={!editable}>
         {pestanya === 'comEsta' && (

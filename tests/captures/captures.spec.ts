@@ -48,7 +48,10 @@ async function pacient(page: Page, nom: string, llinatges: string, altres: Recor
   await page.getByRole('link', { name: 'Nou pacient' }).click()
   await page.getByLabel('Nom', { exact: true }).fill(nom)
   await page.getByLabel('Llinatges').fill(llinatges)
-  for (const [camp, valor] of Object.entries(altres)) await page.getByLabel(camp).fill(valor)
+  for (const [camp, valor] of Object.entries(altres)) {
+    if (camp === 'Sexe') await page.getByLabel(camp).selectOption({ label: valor })
+    else await page.getByLabel(camp).fill(valor)
+  }
   await page.getByRole('button', { name: 'Desar' }).first().click()
   await expect(page.getByRole('heading', { name: `${nom} ${llinatges}` })).toBeVisible()
 }
@@ -97,6 +100,7 @@ test('Visita', async ({ page }) => {
   await expect(capcalera).toBeVisible()
   const pestanya = (nom: string) => page.getByRole('tablist', { name: 'Visita' }).getByRole('tab', { name: nom })
 
+  await pestanya('Com està').click()
   await page.getByLabel('Canvis des de l\'última sessió').fill('Dorm millor, però el dolor lumbar continua al matí (inventat).')
   await page.getByRole('radiogroup', { name: 'Símptoma principal (0–10)' }).getByRole('radio', { name: '6' }).click()
   await page.getByLabel('Símptoma secundari 1 · Quin').fill('Insomni')
@@ -216,4 +220,104 @@ test('Mapa 2D', async ({ page }) => {
   await page.getByLabel('Meridià').selectOption('ST')
   await page.getByRole('button', { name: 'Tot el cos' }).click()
   await capturar(page, 'mapa-2d-meridia', false)
+})
+
+// --- Etapa 3B -------------------------------------------------------------
+
+async function obrir(page: Page, nom: string | RegExp) {
+  const boto = page.locator('.capcalera-seccio button').filter({ hasText: nom }).first()
+  if ((await boto.getAttribute('aria-expanded')) !== 'true') await boto.click()
+  return page.getByRole('region', { name: nom, exact: typeof nom === 'string' })
+}
+async function tocar(regio: ReturnType<Page['getByRole']>, camp: string, opcio: string | RegExp) {
+  await regio.getByRole('group', { name: camp, exact: true }).getByRole('button', { name: opcio }).click()
+}
+/** Captura la secció (amb la capçalera fixa de la visita a dalt) */
+async function capturarSeccio(page: Page, regio: ReturnType<Page['getByRole']>, nom: string) {
+  await regio.evaluate((e) => e.parentElement?.scrollIntoView({ block: 'start' }))
+  await page.evaluate(() => window.scrollBy(0, -170))
+  mkdirSync(CARPETA, { recursive: true })
+  for (const esquema of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme: esquema })
+    await page.waitForTimeout(300)
+    await page.screenshot({ path: `${CARPETA}/${nom}${SUFIX}-${esquema === 'light' ? 'clar' : 'fosc'}.png` })
+  }
+  await page.emulateMedia({ colorScheme: 'light' })
+}
+
+test('3B Valoració', async ({ page }) => {
+  test.setTimeout(240_000)
+  await entrar(page)
+  await pacient(page, 'Mia', 'Exemple Inventada', { Sexe: 'Dona' })
+  const ara = new Date()
+  const hora = `${String(ara.getHours()).padStart(2, '0')}:${String(Math.floor(ara.getMinutes() / 5) * 5).padStart(2, '0')}`
+  await cita(page, 'Mia', dia(0), hora, 'Acúfens')
+  await menu(page, 'Avui').click()
+  await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).click()
+  await expect(page.locator('.capcalera-visita')).toBeVisible()
+
+  const motiu = await obrir(page, 'Motiu de consulta i malaltia actual')
+  await motiu.getByLabel('Motiu de consulta', { exact: true }).fill('Acúfens a l\'orella esquerra des de fa tres mesos, pitjor amb l\'estrès (inventat)')
+  await tocar(motiu, 'Inici', 'Progressiu')
+  await tocar(motiu, 'Evolució', 'Subagut')
+  await tocar(motiu, 'Tendència', 'Fluctuant')
+  await tocar(motiu, 'Factors que milloren', 'Relaxació')
+  await tocar(motiu, 'Factors que empitjoren', 'Estrès')
+  await tocar(motiu, 'Factors que empitjoren', 'Soroll')
+  await capturarSeccio(page, motiu, 'valoracio-motiu')
+  const diag = await obrir(page, 'Diagnòstic occidental')
+  await diag.getByLabel('Diagnòstic', { exact: true }).fill('Acúfens subjectius (inventat)')
+  await diag.getByRole('searchbox', { name: 'Codi CIM-11 (opcional)' }).fill('tinnitus')
+  await capturarSeccio(page, diag, 'valoracio-cim11-cerca')
+  await diag.getByRole('button', { name: /MC41 Tinnitus/ }).click()
+
+  const fred = await obrir(page, 'Fred i calor')
+  await tocar(fred, 'Signes', /Calor als cinc cors/)
+  await tocar(fred, 'Signes', /Febre de tarda/)
+  const suor = await obrir(page, 'Sudoració')
+  await tocar(suor, 'Sudoració', /Nocturna/)
+  const son = await obrir(page, 'Son')
+  await tocar(son, 'Alteracions', /^Despertars/)
+  await tocar(son, 'Alteracions', /Somnis abundants/)
+  await tocar(son, 'Hora dels despertars', '1–3 h (fetge)')
+  await capturarSeccio(page, fred, 'valoracio-anamnesi')
+  const orelles = await obrir(page, 'Orelles i ulls')
+  await tocar(orelles, 'Acúfens', 'Agut i fort (com un xiulet)')
+  await tocar(orelles, 'Acúfens', 'Continu')
+  await tocar(orelles, 'Acúfens: costat', 'Esquerra')
+  await tocar(orelles, 'Ulls', /Sequedat ocular/)
+  await capturarSeccio(page, orelles, 'valoracio-orelles')
+  const dolor = await obrir(page, 'Dolor')
+  await dolor.getByRole('button', { name: 'Normal / sense alteracions' }).click()
+  const gine = await obrir(page, 'Ginecologia')
+  await tocar(gine, 'Embaràs', 'No')
+  await tocar(gine, 'Cicle', /Regular/)
+  await tocar(gine, 'Altres', /Síndrome premenstrual/)
+  await capturarSeccio(page, gine, 'valoracio-ginecologia')
+  const emo = await obrir(page, 'Emocions i estrès')
+  await tocar(emo, 'Les set emocions', /Preocupació/)
+  await tocar(emo, 'Estrès', 'Alt')
+  await capturarSeccio(page, emo, 'valoracio-emocions')
+  const cons = await obrir(page, 'Tipus de constitució')
+  await tocar(cons, 'Principal', /Deficiència de yin/)
+  await tocar(cons, 'Secundària', /Estancament de qi/)
+  await capturarSeccio(page, cons, 'valoracio-constitucio')
+  // Totes plegades: el resum de cada secció
+  const obertes = page.locator('.capcalera-seccio button[aria-expanded="true"]')
+  while ((await obertes.count()) > 0) await obertes.first().click()
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await capturar(page, 'valoracio-resum', false)
+  // Embaràs: avís a la capçalera
+  const gine2 = await obrir(page, 'Ginecologia')
+  await tocar(gine2, 'Embaràs', 'Sí')
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await capturar(page, 'valoracio-embaras', false)
+
+  await menu(page, 'Ajustos').click()
+  await page.getByRole('link', { name: /^Catàlegs/ }).click()
+  await page.getByRole('checkbox', { name: 'Mostrar Dolor' }).uncheck()
+  await page.getByRole('listitem').filter({ hasText: /^Son/ }).getByRole('button', { name: 'Camps i opcions' }).click()
+  await capturar(page, 'ajustos-catalegs', false)
+  await page.getByRole('region', { name: 'Fonts i llicències' }).scrollIntoViewIfNeeded()
+  await capturar(page, 'ajustos-catalegs-fonts', false)
 })

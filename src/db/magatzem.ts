@@ -39,6 +39,7 @@ import {
 } from '../domini/ajuntar'
 import { dadesDePacient } from '../domini/pacient'
 import { recalcularTipusVisita } from './tipusVisita'
+import { esquemaDadesValoracio, idValoracio, novaValoracio, type DadesValoracio, type Valoracio } from '../domini/valoracio'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
 
 /** Les dades associades lliguen cada text xifrat a la seva taula i al seu id. */
@@ -99,6 +100,14 @@ export interface Magatzem {
   finalitzarSessio(id: string, agulles: { retirades: number | null; motiu: string }): Promise<Sessio>
   addendesDe(sessioId: string): Promise<Addenda[]>
   afegirAddenda(sessioId: string, text: string): Promise<Addenda>
+
+  // --- Etapa 3B: valoració inicial (una per episodi, amb versions) ---
+  /** Totes les versions, de la primera a la darrera */
+  valoracionsDe(episodiId: string): Promise<Valoracio[]>
+  /** Desa una versió (només els camps canviats respecte d'`inicial`); si encara no existeix, la crea */
+  desarValoracio(dades: DadesValoracio, inicial?: DadesValoracio): Promise<Valoracio>
+  /** «Revisar la valoració»: una versió nova a partir de l'última (l'anterior es conserva) */
+  revisarValoracio(episodiId: string, sessioId: string | null): Promise<Valoracio>
 
   // --- Part 2: ajuntar fitxes de la mateixa persona ---
   /** Les dades del pacient i la fitxa clínica per comparar-les */
@@ -514,7 +523,51 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
   })
 
 
+  // --- Valoracions ---
+
+  async function llegirValoracio(r: RegistreXifrat): Promise<Valoracio> {
+    const xifrades = await desxifrarJson(clau, r.xifrat, context('valoracions', r.id))
+    const dades = esquemaDadesValoracio.parse({ ...(xifrades as object), episodiId: r.episodiId })
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, ...dades }
+  }
+
+  async function guardarValoracio(pacientId: string, dades: DadesValoracio, inicial?: DadesValoracio): Promise<Valoracio> {
+    const { episodiId, ...resta } = esquemaDadesValoracio.parse(dades)
+    const id = idValoracio(episodiId, dades.versio)
+    const existent = await db.valoracions.get(id)
+    const conegudes = Object.keys(esquemaDadesValoracio.shape).filter((k) => k !== 'episodiId')
+    await desarPerCamp(
+      db,
+      clau,
+      'valoracions',
+      { id, creatAt: existent?.creatAt ?? araIso(), modificatAt: araIso(), pacientId, episodiId },
+      resta,
+      conegudes,
+      inicial ? { ...inicial } : undefined,
+    )
+    return llegirValoracio((await db.valoracions.get(id))!)
+  }
+
+  Object.assign(magatzem, {
+    async valoracionsDe(episodiId: string) {
+      const registres = await db.valoracions.where('episodiId').equals(episodiId).toArray()
+      return (await Promise.all(registres.map(llegirValoracio))).sort((a, b) => a.versio - b.versio)
+    },
+    async desarValoracio(dades: DadesValoracio, inicial?: DadesValoracio) {
+      const e = await db.episodis.get(dades.episodiId)
+      if (!e) throw new Error(`No existeix l'episodi ${dades.episodiId}`)
+      return guardarValoracio(e.pacientId!, dades, inicial)
+    },
+    async revisarValoracio(episodiId: string, sessioId: string | null) {
+      const totes = await magatzem.valoracionsDe(episodiId)
+      const darrera = totes.at(-1)
+      return magatzem.desarValoracio(novaValoracio(episodiId, (darrera?.versio ?? 0) + 1, sessioId, darrera))
+    },
+  })
+
   // --- Ajuntar fitxes ---
+
+  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes', 'valoracions'] as const
 
   const senseMeta = <T extends { id: string; creatAt: string; modificatAt: string }>(x: T) => {
     const { id: _i, creatAt: _c, modificatAt: _m, ...resta } = x
@@ -522,7 +575,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
   }
 
   /** Passa un registre d'un pacient a un altre (només canvia el pacient: la resta es manté) */
-  async function moure(taula: 'cites' | 'episodis' | 'sessions' | 'addendes', id: string, a: string): Promise<boolean> {
+  async function moure(taula: (typeof TAULES_MOGUDES)[number], id: string, a: string): Promise<boolean> {
     if (taula === 'cites') {
       const c = await magatzem.obtenirCita(id)
       if (!c || c.pacientId === a) return false
@@ -547,6 +600,12 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       if (!s || s.pacientId === a) return false
       const { pacientId: _p, ...dades } = senseMeta(s)
       await guardarSessio(id, a, dades, dades)
+    } else if (taula === 'valoracions') {
+      const v = await db.valoracions.get(id)
+      if (!v || v.pacientId === a) return false
+      const actual = await llegirValoracio(v)
+      const { pacientId: _p, ...dades } = senseMeta(actual)
+      await guardarValoracio(a, dades, dades)
     } else {
       const r = await db.addendes.get(id)
       if (!r || r.pacientId === a) return false
@@ -555,7 +614,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     return true
   }
 
-  async function idsDe(taula: 'cites' | 'episodis' | 'sessions' | 'addendes', pacientId: string): Promise<string[]> {
+  async function idsDe(taula: (typeof TAULES_MOGUDES)[number], pacientId: string): Promise<string[]> {
     return (await db.table(taula).where('pacientId').equals(pacientId).primaryKeys()) as string[]
   }
 
@@ -570,7 +629,6 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     return actual.id === p.id ? null : actual.id
   }
 
-  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes'] as const
 
   Object.assign(magatzem, {
     async dadesPerAjuntar(pacientId: string): Promise<FitxaPerAjuntar> {
@@ -599,7 +657,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       await esborrarRegistres(db, 'cites', citesTretes.map((c) => c.id))
 
       // Primer els episodis (les cites i les sessions hi apunten), després la resta
-      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [] }
+      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [], valoracions: [] }
       for (const taula of TAULES_MOGUDES) {
         for (const id of await idsDe(taula, treuId)) if (await moure(taula, id, quedaId)) moguts[taula].push(id)
       }

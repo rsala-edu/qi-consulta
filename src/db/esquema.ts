@@ -128,6 +128,7 @@ export type TaulaSincronitzada =
   | 'episodis'
   | 'sessions'
   | 'addendes'
+  | 'valoracions'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -199,7 +200,7 @@ export interface RegistreCategoriaPrecaucio {
  * l'agenda). No és dada de pacient.
  */
 export interface RegistreConfiguracio {
-  clau: 'horari' | 'visita'
+  clau: 'horari' | 'visita' | 'catalegs'
   valor: unknown
   modificatAt: string
   /** Sincronia: versió (HLC) del registre */
@@ -221,7 +222,7 @@ export interface RegistreDiaTancat {
   hlc?: string
 }
 
-export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites' | 'conflictes' | 'episodis' | 'sessions' | 'addendes'
+export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites' | 'conflictes' | 'episodis' | 'sessions' | 'addendes' | 'valoracions'
 
 export class QiDB extends Dexie {
   meta!: Table<RegistreMeta, RegistreMeta['clau']>
@@ -247,6 +248,8 @@ export class QiDB extends Dexie {
   episodis!: Table<RegistreXifrat, string>
   /** Sessions (visites): una per cita feta */
   sessions!: Table<RegistreXifrat, string>
+  /** Valoració inicial de cada episodi, amb una versió per revisió (etapa 3B) */
+  valoracions!: Table<RegistreXifrat, string>
   /** Addendes de les sessions tancades: només s'afegeixen */
   addendes!: Table<RegistreXifrat, string>
   /** Cua de canvis pendents de pujar a Drive (i diari propi fins que una foto el cobreix) */
@@ -314,6 +317,9 @@ export class QiDB extends Dexie {
       episodis: 'id, pacientId',
       sessions: 'id, pacientId, citaId, episodiId',
       addendes: 'id, sessioId, pacientId',
+    })
+    this.version(13).stores({
+      valoracions: 'id, pacientId, episodiId',
     })
   }
 }

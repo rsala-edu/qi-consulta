@@ -25,7 +25,7 @@ export type Camps = Record<string, unknown>
 export type Registre = Record<string, unknown> & { hlc?: Hlc }
 
 /** Taules amb dades clíniques, fusionades camp a camp */
-export const TAULES_PER_CAMP = ['pacients', 'fitxesCliniques', 'cites', 'episodis', 'sessions'] as const
+export const TAULES_PER_CAMP = ['pacients', 'fitxesCliniques', 'cites', 'episodis', 'sessions', 'valoracions'] as const
 export type TaulaPerCamp = (typeof TAULES_PER_CAMP)[number]
 export const esPerCamp = (t: string): t is TaulaPerCamp => (TAULES_PER_CAMP as readonly string[]).includes(t)
 
@@ -36,6 +36,7 @@ export const CAMPS_CLARS: Record<TaulaPerCamp, readonly string[]> = {
   cites: ['pacientId', 'inici'],
   episodis: ['pacientId'],
   sessions: ['pacientId', 'citaId', 'episodiId'],
+  valoracions: ['pacientId', 'episodiId'],
 }
 
 const contextVersions = (taula: string, id: string) => `qi:versions:${taula}:${id}`

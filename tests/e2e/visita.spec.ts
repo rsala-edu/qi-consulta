@@ -89,7 +89,10 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   await comencarVisita(page)
   await expect(capcalera(page)).toContainText('Aina Provencal Inventada')
   await expect(capcalera(page)).toContainText('Lumbàlgia · Sessió 1')
+  // La primera visita de l'episodi comença per la valoració
+  await expect(pestanya(page, 'Valoració')).toHaveAttribute('aria-selected', 'true')
   // Com està
+  await pestanya(page, 'Com està').click()
   await page.getByLabel('Canvis des de l\'última sessió').fill('Primera visita (inventat)')
   await page.getByRole('radiogroup', { name: 'Símptoma principal (0–10)' }).getByRole('radio', { name: '7' }).click()
   // Exploració

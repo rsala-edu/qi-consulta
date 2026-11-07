@@ -3299,3 +3299,284 @@ fieldset {
   align-content: safe center;
   place-items: start center;
 }
+
+/* --- Catàlegs clínics (etapa 3B) --- */
+.grup-cataleg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.grup-cataleg > h2 {
+  font-size: 1.15rem;
+  margin: 8px 0 4px;
+}
+.seccio-cataleg {
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  background: var(--clar);
+}
+.seccio-cataleg.oberta {
+  border-color: var(--accent);
+}
+.capcalera-seccio {
+  margin: 0;
+  font: inherit;
+}
+.capcalera-seccio button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-height: var(--toc);
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--tinta);
+  text-align: left;
+  cursor: pointer;
+}
+.nom-seccio {
+  font-weight: 600;
+}
+.xines {
+  font-weight: 400;
+  color: var(--tinta-suau);
+  font-size: 0.85em;
+}
+.resum-seccio {
+  color: var(--accent-fosc);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+.seccio-cataleg.normal .resum-seccio {
+  color: var(--accent);
+}
+.resum-seccio.anterior,
+.cos-seccio .anterior {
+  color: var(--tinta-suau);
+  font-style: italic;
+}
+.cos-seccio {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 16px 16px;
+}
+.cos-seccio .anterior {
+  margin: 0;
+}
+.accions-seccio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.camp-xips,
+.camp-graella,
+.camp-especial {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.nom-camp {
+  font-size: 0.95rem;
+  color: var(--tinta-suau);
+}
+.xips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.xip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 1px solid var(--linia);
+  border-radius: 999px;
+  background: var(--fons);
+  color: var(--tinta);
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.xip .xines {
+  font-size: 0.78rem;
+}
+.xip[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--clar);
+}
+.xip[aria-pressed='true'] .xines {
+  color: inherit;
+  opacity: 0.85;
+}
+.xip:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+.xip-normal {
+  border-style: dashed;
+}
+.nombre-unitat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nombre-unitat input {
+  max-width: 8rem;
+}
+.graella {
+  border-collapse: separate;
+  border-spacing: 6px;
+  width: 100%;
+  table-layout: fixed;
+}
+.graella th {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--tinta-suau);
+}
+.graella th[scope='row'] {
+  text-align: left;
+  width: 6rem;
+}
+.casella-graella {
+  width: 100%;
+  min-height: 56px;
+  padding: 6px;
+  border: 1px solid var(--linia);
+  border-radius: 10px;
+  background: var(--fons);
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--tinta);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.casella-graella[aria-pressed='true'] {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+}
+.etiqueta-embaras {
+  margin-left: 12px;
+  vertical-align: middle;
+  background: var(--cinabri);
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: var(--lletra);
+}
+.pestanya-valoracio {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.barra-valoracio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.barra-valoracio p {
+  margin: 0;
+}
+.camp-en-linia {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.llista-ajust {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.llista-ajust.interna {
+  padding-left: 28px;
+  margin: 4px 0 8px;
+}
+.ajust-seccio {
+  border-bottom: 1px solid var(--linia);
+  padding: 6px 0;
+}
+.fila-ajust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.fila-ajust .casella {
+  flex: 1 1 14rem;
+}
+.fletxes {
+  display: inline-flex;
+  gap: 2px;
+}
+.fletxes .boto {
+  min-width: 44px;
+  padding: 0;
+}
+.fonts-catalegs ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fonts-catalegs li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cercador-codi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.llista-codis {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  max-height: 18rem;
+  overflow: auto;
+}
+.llista-codis button {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid var(--linia);
+  background: var(--clar);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.llista-codis li.detall {
+  padding: 8px 12px;
+}
+.codi-triat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.codi-triat .xip {
+  flex-direction: row;
+  gap: 6px;
+  cursor: default;
+}
