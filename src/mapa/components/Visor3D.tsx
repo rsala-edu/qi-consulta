@@ -92,9 +92,21 @@ const escalaMarcadors = (distancia: number) => Math.min(1.6, Math.max(0.45, dist
 
 type ProjeccioMarcador = ProjeccioPantalla<string>
 
-export function Visor3D({ ref, ...props }: Props) {
+/** Si el context no torna en aquest temps, es crea un visor nou (amb un context nou) */
+const ESPERA_RECUPERAR_MS = 8000
+
+export function Visor3D({ ref, onUsar2D, ...props }: Props & { onUsar2D?(): void }) {
   const control = useRef<ControlVisor | null>(null)
   const [etiquetes, setEtiquetes] = useState<Etiqueta[]>([])
+  // El navegador pot treure el context WebGL (massa contextos, la GPU es
+  // reinicia, la tauleta en segon pla): l'avís «Recuperant…» és un component
+  // a part (el Canvas no s'ha de tornar a pintar amb el context perdut) i,
+  // si el context no torna sol, es crea un visor nou.
+  const [generacio, setGeneracio] = useState(0)
+  const visorEl = useRef<HTMLDivElement>(null)
+  const netejar = useRef<() => void>(() => {})
+  useEffect(() => () => netejar.current(), [])
+  const recrear = useCallback(() => setGeneracio((g) => g + 1), [])
 
   useImperativeHandle(ref, () => ({
     anarA: (p, n) => control.current?.anarA(p, n),
@@ -103,10 +115,33 @@ export function Visor3D({ ref, ...props }: Props) {
   }))
 
   return (
-    <div className="visor3d" data-testid="visor3d" data-marcadors={props.marcadors.length} data-moviment="no">
+    <div ref={visorEl} className="visor3d" data-testid="visor3d" data-marcadors={props.marcadors.length} data-moviment="no">
       {/* Sense WebGL (o si l'escena peta) només cau el cos: la resta del mapa continua */}
-      <LimitError codi="UI-COS3D" alternativa={<ErrorCos3D />}>
+      <LimitError codi="UI-COS3D" alternativa={<ErrorCos3D onUsar2D={onUsar2D} />}>
       <Canvas
+        key={generacio}
+        onCreated={({ gl, invalidate }) => {
+          const canvas = gl.domElement
+          // El renderer ja té el seu context (ho fan servir les proves)
+          if (visorEl.current) visorEl.current.dataset.llest = 'si'
+          const avisar = (perdut: boolean) => visorEl.current?.dispatchEvent(new CustomEvent('qi-context', { detail: perdut }))
+          const perdre = (e: Event) => {
+            // Sense preventDefault, el navegador no el torna mai
+            e.preventDefault()
+            avisar(true)
+          }
+          const tornar = () => {
+            avisar(false)
+            invalidate()
+          }
+          canvas.addEventListener('webglcontextlost', perdre)
+          canvas.addEventListener('webglcontextrestored', tornar)
+          netejar.current()
+          netejar.current = () => {
+            canvas.removeEventListener('webglcontextlost', perdre)
+            canvas.removeEventListener('webglcontextrestored', tornar)
+          }
+        }}
         frameloop="demand"
         dpr={[1, 2]}
         camera={{ fov: CAMERA.fov, near: 0.02, far: 50, position: [0, CAMERA.alcadaInicial, CAMERA.distanciaInicial] }}
@@ -116,6 +151,7 @@ export function Visor3D({ ref, ...props }: Props) {
         <Escena {...props} control={control} onEtiquetes={setEtiquetes} />
       </Canvas>
       </LimitError>
+      <AvisRecuperant visor={visorEl} onRecrear={recrear} />
       <div className="visor3d-etiquetes" aria-hidden="true">
         {etiquetes.map((e) => (
           <span key={e.id} className="etiqueta-punt" style={{ transform: `translate(${e.esquerra}px, ${e.dalt}px)` }}>
@@ -127,11 +163,60 @@ export function Visor3D({ ref, ...props }: Props) {
   )
 }
 
+/** «Recuperant el cos 3D…» mentre el context WebGL és perdut; si no torna, es recrea el visor */
+function AvisRecuperant({ visor, onRecrear }: { visor: RefObject<HTMLDivElement | null>; onRecrear(): void }) {
+  const [perdut, setPerdut] = useState(false)
+  useEffect(() => {
+    const el = visor.current
+    if (!el) return
+    const escoltar = (e: Event) => setPerdut((e as CustomEvent<boolean>).detail)
+    el.addEventListener('qi-context', escoltar)
+    return () => el.removeEventListener('qi-context', escoltar)
+  }, [visor])
+  useEffect(() => {
+    if (!perdut) return
+    const temps = window.setTimeout(() => {
+      setPerdut(false)
+      onRecrear()
+    }, ESPERA_RECUPERAR_MS)
+    return () => window.clearTimeout(temps)
+  }, [perdut, onRecrear])
+  if (!perdut) return null
+  return (
+    <p className="visor3d-recuperant" role="status">
+      {t.mapa.recuperant}
+    </p>
+  )
+}
+
 /** Al lloc del cos, quan no es pot dibuixar (sense WebGL o el model no carrega) */
-export function ErrorCos3D() {
+export function ErrorCos3D({ onUsar2D }: { onUsar2D?(): void } = {}) {
+  const a = t.mapa.ajudaAcceleracio
   return (
     <div className="visor3d-error" role="alert">
       <p>{t.errorPantalla.cos3D}</p>
+      {onUsar2D && (
+        <button type="button" className="boto boto-principal" onClick={onUsar2D}>
+          {t.mapa.usar2d}
+        </button>
+      )}
+      <details className="ajuda-acceleracio">
+        <summary>{a.titol}</summary>
+        <p>{a.intro}</p>
+        <h3>Chrome</h3>
+        <ol>
+          {a.chrome.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ol>
+        <h3>Firefox</h3>
+        <ol>
+          {a.firefox.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ol>
+        <p className="detall">{a.final}</p>
+      </details>
     </div>
   )
 }

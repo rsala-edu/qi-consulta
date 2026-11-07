@@ -179,3 +179,41 @@ test('Ajuntar fitxes', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^Desfer/ })).toBeVisible()
   await capturar(page, 'ajuntada-desfer', false)
 })
+
+test('Mapa 2D', async ({ page }) => {
+  await entrar(page)
+  await menu(page, 'Mapa').click()
+  await expect(page.getByTestId('visor3d')).toHaveAttribute('data-llest', 'si')
+  // El cos 3D recuperant-se després de perdre el context WebGL
+  await page.evaluate(() => {
+    const c = document.querySelector<HTMLCanvasElement>('.visor3d canvas')!
+    const gl = (c.getContext('webgl2') ?? c.getContext('webgl'))!
+    const ext = gl.getExtension('WEBGL_lose_context')!
+    ;(window as unknown as { ext: WEBGL_lose_context }).ext = ext
+    ext.loseContext()
+  })
+  await expect(page.getByText('Recuperant el cos 3D…')).toBeVisible()
+  await capturar(page, 'recuperant-3d', false)
+  await page.evaluate(() => (window as unknown as { ext: WEBGL_lose_context }).ext.restoreContext())
+
+  await page.getByRole('radiogroup', { name: 'Tipus de mapa' }).getByRole('radio', { name: '2D' }).click()
+  await expect(page.getByTestId('visor2d')).toBeVisible()
+  await capturar(page, 'mapa-2d-davant', false)
+  await page.getByRole('button', { name: 'Esquerra' }).click()
+  await capturar(page, 'mapa-2d-esquerra', false)
+  await page.getByRole('button', { name: 'Darrere' }).click()
+  await capturar(page, 'mapa-2d-darrere', false)
+  for (const [consulta, codi] of [['LI4', 'LI4'], ['zusanli', 'ST36']] as const) {
+    await page.getByRole('searchbox', { name: /Cerca un punt/ }).fill(consulta)
+    await page.getByRole('searchbox', { name: /Cerca un punt/ }).press('Enter')
+    const fitxa = page.getByRole('region', { name: codi })
+    await fitxa.getByRole('radio', { name: 'Bilateral' }).click()
+    await fitxa.getByRole('button', { name: 'Marcar' }).click()
+  }
+  await page.getByRole('searchbox', { name: /Cerca un punt/ }).fill('zusanli')
+  await page.getByRole('searchbox', { name: /Cerca un punt/ }).press('Enter')
+  await capturar(page, 'mapa-2d-ampliat', false)
+  await page.getByLabel('Meridià').selectOption('ST')
+  await page.getByRole('button', { name: 'Tot el cos' }).click()
+  await capturar(page, 'mapa-2d-meridia', false)
+})

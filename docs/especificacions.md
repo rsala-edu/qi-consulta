@@ -368,3 +368,11 @@ Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplic
 - **Desfer** torna cada cosa a la seva fitxa, torna a posar les cites repetides que es van treure i retorna les dades d'abans a la fitxa que es quedava (excepte els camps que s'han tornat a editar després).
 - Es recalcula quina cita és la primera visita i quines són seguiment.
 - **Amb diversos dispositius:** tot el que calgui per desfer-ho va xifrat dins la fitxa arxivada i se sincronitza. Si un altre dispositiu, abans de saber-ho, crea una cita (o una sessió) per a la fitxa vella, en rebre l'ajuntament passa sola a la fitxa que es queda.
+
+## Mapa sense 3D
+
+- **Un sol context WebGL:** només hi ha un cos 3D muntat alhora (canviar Cos–Orella no en crea cap més) i, en sortir del mapa, el context s'allibera. Una prova obre i tanca el mapa i canvia Cos–Orella 30 vegades i comprova que el cos continua viu.
+- **Context perdut:** si el navegador treu el context WebGL (massa contextos, la GPU es reinicia, la tauleta en segon pla), surt «Recuperant el cos 3D…» i, quan torna, el cos continua on era. Si no torna en 8 segons, es crea un visor nou.
+- **Mapa 2D (SVG):** quatre vistes (davant, darrere, esquerra, dreta), projectades del mateix model 3D, amb els mateixos punts, colors, cerca, filtre de meridià i fitxa. «Anar a un punt» tria la vista des d'on es veu millor i hi amplia; les etiquetes es col·loquen sense trepitjar-se, com al 3D. La correcció de posicions només es fa en 3D.
+- **Interruptor «3D / 2D»** sota el dibuix. La tria es recorda en aquest dispositiu. Si el navegador no té WebGL, el mapa s'obre en 2D.
+- **«Cos 3D no disponible»:** l'avís explica com activar l'acceleració per maquinari a Chrome i Firefox i ofereix «Fer servir el mapa 2D».

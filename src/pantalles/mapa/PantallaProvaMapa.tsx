@@ -20,6 +20,8 @@ import {
 } from '../../domini/puntMarcat'
 import { formatar, t } from '../../i18n/t'
 import { BarraVistes } from '../../mapa/components/BarraVistes'
+import { Visor2D } from '../../mapa/components/Visor2D'
+import { desarMode, modeInicial, type ModeMapa } from '../../mapa/modeMapa'
 import { ErrorCos3D, Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
 import { posicio3D, posicioDesDePunt } from '../../mapa/geometria/baricentriques'
 import { etiquetesDelPunt } from '../../mapa/etiquetaPunt'
@@ -156,6 +158,13 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure }: P
   const [meridia, setMeridia] = useState('')
   const [consulta, setConsulta] = useState('')
   const [fitxa, setFitxa] = useState<FitxaOberta | null>(null)
+  const [mode, setModeEstat] = useState<ModeMapa>(modeInicial)
+  const setMode = (m: ModeMapa) => {
+    setModeEstat(m)
+    desarMode(m)
+    // La correcció de posicions només es fa en 3D
+    if (m === '2d') setCorreccio(null)
+  }
 
   const tots = useMemo(() => (model ? puntsSobreModel(efectiu, model) : []), [efectiu, model])
   const visibles = useMemo(() => (meridia ? tots.filter((p) => p.punt.meridia === meridia) : tots), [tots, meridia])
@@ -245,8 +254,21 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure }: P
           {model && !model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
           {model && tots.length === 0 && <p className="avis avis-flotant avis-segon">{t.mapa.sensePosicions}</p>}
           {!model && (carregant ? <Indicador text={t.mapa.carregantModel} /> : <ErrorCos3D />)}
-          {model && <Visor3D
+          {model && mode === '2d' && (
+            <Visor2D
+              ref={visor}
+              geometria={model.geometria}
+              marcadors={marcadors}
+              etiquetesSempre={meridia !== ''}
+              onTocarMarcador={(id) => {
+                const { codi, costat, index } = llegirIdMarcador(id)
+                obrirFitxa(codi, costat, index)
+              }}
+            />
+          )}
+          {model && mode === '3d' && <Visor3D
             ref={visor}
+            onUsar2D={() => setMode('2d')}
             geometria={model.geometria}
             marcadors={marcadors}
             recorreguts={recorreguts}
@@ -263,6 +285,13 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure }: P
         </div>
         {/* Fora del dibuix, perquè no tapin el cos */}
         <div className="barra-visor">
+          <div className="segmentat mode-mapa" role="radiogroup" aria-label={t.mapa.modeMapa}>
+            {(['3d', '2d'] as const).map((m) => (
+              <button key={m} type="button" role="radio" aria-checked={mode === m} onClick={() => setMode(m)}>
+                {m === '3d' ? t.mapa.mode3d : t.mapa.mode2d}
+              </button>
+            ))}
+          </div>
           <BarraVistes visor={visor} />
           <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
             {TECNIQUES.map((tec) => (
@@ -471,7 +500,8 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure }: P
                 {t.mapa.tancar}
               </Boto>
             </div>
-            {model && (
+            {model && mode === '2d' && <p className="detall">{t.mapa.correccioNomes3d}</p>}
+            {model && mode === '3d' && (
             <div className="accions accions-esquerra">
               <Boto
                 variant="discret"
