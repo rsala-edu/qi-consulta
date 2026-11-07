@@ -40,7 +40,8 @@ import { MapaTractament } from '../mapa/PantallaProvaMapa'
 import { Temporitzador } from './Temporitzador'
 import { PestanyaValoracio } from './PestanyaValoracio'
 import { ESPECIALS } from '../../cataleg/components/especials'
-import { GRUPS_VALORACIO } from '../../cataleg/index'
+import { EXPLORACIO, etiquetaCami, GRUPS_VALORACIO } from '../../cataleg/index'
+import { GrupCataleg } from '../../cataleg/components/Cataleg'
 import type { AjustosCatalegs } from '../../cataleg/motor'
 import { llegirAjustosCatalegs } from '../../db/ajustosCatalegs'
 import { hiHaEmbaras, type DadesValoracio, type Valoracio } from '../../domini/valoracio'
@@ -223,8 +224,6 @@ function Visita({
   const etiquetes: Record<string, string> = {
     'comEsta.canvis': v.canvis,
     'comEsta.escala': v.escala,
-    'exploracio.llengua': v.llengua,
-    'exploracio.pols': v.pols,
     'tancar.recomanacions': v.recomanacions,
     'tancar.incidencies': v.incidencies,
   }
@@ -296,7 +295,7 @@ function Visita({
 
       <RevisioConflictes
         conflictes={conflictes}
-        etiquetes={etiquetes}
+        etiquetes={{ ...Object.fromEntries(conflictes.map((c) => [c.camp, etiquetaCami(c.camp) ?? c.camp])), ...etiquetes }}
         onQuedar={async (c) => {
           await magatzem.resoldreConflicte(c.conflicteId, c.camp)
           onRecarregar()
@@ -378,21 +377,25 @@ function Visita({
 
         {pestanya === 'exploracio' && (
           <section id="visita-exploracio" role="tabpanel" aria-labelledby="pestanya-exploracio" className="panell">
-            <p className="detall">{v.exploracioNota}</p>
-            <Camp etiqueta={v.llengua}>
-              <textarea
-                rows={3}
-                value={dades.exploracio.llengua}
-                onChange={(e) => setDades((d) => ({ ...d, exploracio: { ...d.exploracio, llengua: e.target.value } }))}
-              />
-            </Camp>
-            <Camp etiqueta={v.pols}>
-              <textarea
-                rows={3}
-                value={dades.exploracio.pols}
-                onChange={(e) => setDades((d) => ({ ...d, exploracio: { ...d.exploracio, pols: e.target.value } }))}
-              />
-            </Camp>
+            {anterior && Object.keys(anterior.exploracio.seccions).length > 0 && (
+              <p className="accions accions-esquerra">
+                <Boto
+                  variant="secundari"
+                  onClick={() => setDades((d) => ({ ...d, exploracio: { seccions: structuredClone(anterior.exploracio.seccions) } }))}
+                >
+                  {t.cataleg.totIgualQueUltima}
+                </Boto>
+              </p>
+            )}
+            <GrupCataleg
+              grup={EXPLORACIO}
+              seccions={dades.exploracio.seccions}
+              anteriors={anterior?.exploracio.seccions}
+              onCanviar={(seccions) => setDades((d) => ({ ...d, exploracio: { seccions } }))}
+              ajustos={catalegs}
+              editable={editable}
+              especials={ESPECIALS}
+            />
           </section>
         )}
 

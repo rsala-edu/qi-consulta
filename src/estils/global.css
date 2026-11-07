@@ -3580,3 +3580,82 @@ fieldset {
   gap: 6px;
   cursor: default;
 }
+.zones-llengua {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+.dibuix-llengua {
+  width: 160px;
+  flex: none;
+}
+.zona-llengua {
+  fill: #e8a3a0;
+  stroke: #fcfbf7;
+  stroke-width: 2;
+  cursor: pointer;
+}
+.zona-llengua.triada {
+  fill: var(--cinabri);
+}
+.contorn-llengua {
+  fill: none;
+  stroke: #9c4a46;
+  stroke-width: 2;
+}
+.text-llengua {
+  font: 12px var(--lletra);
+  fill: #4a2523;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.zones-llengua .xips {
+  flex: 1 1 16rem;
+}
+.punts-palpacio {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+.llista-palpacio {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.xip-palpacio {
+  flex-direction: row;
+  gap: 6px;
+  cursor: default;
+}
+.xip-palpacio .boto {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 0;
+}
+.mapa-palpacio {
+  align-self: stretch;
+}
+/* La graella és una taula de debò (sense els estils generals de taules) */
+.graella {
+  display: table;
+}
+.graella thead {
+  display: table-header-group;
+}
+.graella tbody {
+  display: table-row-group;
+}
+.graella tr {
+  display: table-row;
+}
+.graella th,
+.graella td {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 0;
+}
+.graella thead th:first-child {
+  width: 7rem;
+}

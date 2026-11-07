@@ -97,7 +97,8 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   await page.getByRole('radiogroup', { name: 'Símptoma principal (0–10)' }).getByRole('radio', { name: '7' }).click()
   // Exploració
   await pestanya(page, 'Exploració').click()
-  await page.getByLabel('Llengua').fill('Pàl·lida (inventat)')
+  await page.locator('.capcalera-seccio button').filter({ hasText: /^Llengua/ }).click()
+  await page.getByRole('region', { name: 'Llengua', exact: true }).getByRole('group', { name: 'Cos: color', exact: true }).getByRole('button', { name: /^Pàl·lid/ }).click()
   // Tractament: dos punts amb agulla (un de bilateral): 3 agulles
   await pestanya(page, 'Tractament').click()
   await marcar(page, 'LI4', 'LI4', 'Bilateral')

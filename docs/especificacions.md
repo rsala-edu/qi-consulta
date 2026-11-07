@@ -401,3 +401,17 @@ Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplic
 - **Terminologia de l'OMS (2022):** CC BY-NC-SA 3.0 IGO. La traducció catalana es comparteix amb la mateixa llicència. L'ús ha de ser no comercial: cal valorar-ho si la consulta és privada.
 - **CIM-11:** CC BY-ND 3.0 IGO. No es pot traduir sense permís de l'OMS, així que els títols es mostren en anglès, sense modificar.
 - **Escales:** THI i DHI tenen copyright dels autors i de l'AMA, sense cap llicència clínica publicada. El SNOT-22 necessita una llicència de la Washington University (la clínica és de pagament). El MYMOP necessita una llicència de Meaningful Measures Ltd. Per això l'app no inclou el text dels ítems: només es desen les puntuacions i el grau de gravetat.
+
+### Exploració (a cada sessió)
+- **Inspecció:** vitalitat (shen), color de la tez, constitució física, veu i respiració.
+- **Llengua** (terminologia de l'OMS):
+  - cos: color, forma i moviment;
+  - saburra: color, gruix, naturalesa i humitat;
+  - venes sublinguals;
+  - zones (punta, laterals, centre i arrel), que es marquen sobre un dibuix SVG o amb els xips de sota.
+- **Pols:** profunditat, polsacions per minut, força i ritme; les 28 qualitats clàssiques; i una graella de 6 caselles (cun, guan i chi, a l'esquerra i a la dreta), cadascuna amb les seves qualitats.
+- **Palpació:**
+  - **punts dolorosos:** es marquen sobre el mapa del cos amb un color propi («Dolor a la palpació»). No compten com a agulles del tractament;
+  - abdomen, temperatura i pell.
+- **Seguiment:** cada secció mostra en gris el que hi havia a l'última sessió. Hi ha «Igual que l'última» a cada secció i «Tota l'exploració igual que l'última» a dalt.
+- **Sessions d'abans de la 3B:** el text lliure de la llengua i del pols passa a «Altres / observacions» de la secció corresponent. No es perd res.

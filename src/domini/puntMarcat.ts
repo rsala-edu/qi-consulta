@@ -8,7 +8,8 @@ import { z } from 'zod'
 export const MAPES = ['cos', 'orella'] as const
 export type Mapa = (typeof MAPES)[number]
 
-export const TECNIQUES = ['agulla', 'moxa', 'ventosa', 'llavor', 'electro', 'xinxeta'] as const
+/** «palpacio»: punt dolorós a la palpació (exploració, etapa 3B), amb el seu color; no és un tractament */
+export const TECNIQUES = ['agulla', 'moxa', 'ventosa', 'llavor', 'electro', 'xinxeta', 'palpacio'] as const
 export type Tecnica = (typeof TECNIQUES)[number]
 
 /** Tècniques que es poden triar a cada mapa */
@@ -25,6 +26,7 @@ export const COLOR_TECNICA: Record<Tecnica, string> = {
   llavor: '#a8840f',
   electro: '#1f63b5',
   xinxeta: '#a3366f',
+  palpacio: '#d23c3c',
 }
 
 export const COSTATS_MARCAT = ['E', 'D', 'bilateral'] as const
@@ -44,7 +46,7 @@ export const esquemaPuntMarcat = z
     temps: z.string().trim(),
     notes: z.string().trim(),
   })
-  .refine((p) => TECNIQUES_DEL_MAPA[p.mapa].includes(p.tecnica), {
+  .refine((p) => TECNIQUES_DEL_MAPA[p.mapa].includes(p.tecnica) || (p.tecnica === 'palpacio' && p.mapa === 'cos'), {
     message: 'Aquesta tècnica no es fa servir en aquest mapa',
     path: ['tecnica'],
   })

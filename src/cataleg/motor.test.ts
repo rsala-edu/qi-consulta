@@ -36,7 +36,7 @@ describe('càrrega dels catàlegs', () => {
           expect(camps.has(c.id), `${s.id}/${c.id}`).toBe(false)
           camps.add(c.id)
           expect(c.id).not.toMatch(/[./]/)
-          if ('opcions' in c) {
+          if ('opcions' in c && c.opcions) {
             const ops = new Set<string>()
             for (const op of c.opcions) {
               expect(ops.has(op.id), `${s.id}/${c.id}/${op.id}`).toBe(false)

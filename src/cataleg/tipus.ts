@@ -61,6 +61,8 @@ export interface CampEspecial extends CampBase {
   component: 'zonesLlengua' | 'audiograma' | 'escala' | 'codiCim' | 'sindromes' | 'mymop' | 'puntsPalpacio'
   /** Configuració del component (p. ex. quina escala) */
   config?: string
+  /** Noms dels valors possibles (per al resum de la secció; p. ex. les zones de la llengua) */
+  opcions?: readonly Opcio[]
 }
 
 export type Camp = CampOpcions | CampText | CampNombre | CampGraella | CampEspecial

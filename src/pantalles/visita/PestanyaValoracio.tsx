@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Boto } from '../../components/Boto'
 import { RevisioConflictes } from '../../components/RevisioConflictes'
 import { GrupCataleg, type Especials } from '../../cataleg/components/Cataleg'
-import { seccio as seccioDe } from '../../cataleg/index'
+import { etiquetaCami } from '../../cataleg/index'
 import type { AjustosCatalegs } from '../../cataleg/motor'
 import type { Grup } from '../../cataleg/tipus'
 import type { CampEnConflicte } from '../../db/magatzem'
@@ -22,15 +22,6 @@ const v = t.valoracio
 const dadesDe = (x: Valoracio): DadesValoracio => {
   const { id: _i, creatAt: _c, modificatAt: _m, pacientId: _p, ...d } = x
   return d
-}
-
-/** «seccions.anamnesi:son.valors.alteracions» → «Son · Alteracions» */
-export function etiquetaCampValoracio(cami: string): string {
-  const [, sid, , campId] = cami.split('.')
-  const s = sid ? seccioDe(sid) : undefined
-  if (!s) return cami
-  const camp = s.camps.find((c) => c.id === campId)
-  return [s.ca, camp?.ca ?? (campId ? '' : undefined)].filter(Boolean).join(' · ') || s.ca
 }
 
 export function PestanyaValoracio({
@@ -136,7 +127,7 @@ export function PestanyaValoracio({
       {mostrada && (
         <RevisioConflictes
           conflictes={conflictes}
-          etiquetes={Object.fromEntries(conflictes.map((c) => [c.camp, etiquetaCampValoracio(c.camp)]))}
+          etiquetes={Object.fromEntries(conflictes.map((c) => [c.camp, etiquetaCami(c.camp) ?? c.camp]))}
           onQuedar={async (c) => {
             await magatzem.resoldreConflicte(c.conflicteId, c.camp)
             onRecarregar()

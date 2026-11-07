@@ -5,6 +5,7 @@
 
 import { z } from 'zod'
 import { esquemaPuntMarcat, type PuntMarcat } from './puntMarcat'
+import { esquemaDadesSeccions } from '../cataleg/motor'
 import type { Registre } from './registre'
 
 export const ESTATS_SESSIO = ['enCurs', 'tancada'] as const
@@ -14,6 +15,23 @@ export type EstatSessio = (typeof ESTATS_SESSIO)[number]
 export const HORES_EDITABLE = 24
 /** Minuts de retenció de les agulles per defecte */
 export const MINUTS_RETENCIO = 28
+
+/**
+ * L'exploració d'abans de la 3B (llengua i pols en text lliure) passa a les
+ * observacions de les seccions de la llengua i del pols: no es perd res.
+ */
+export function migrarExploracio(v: unknown): unknown {
+  if (!v || typeof v !== 'object') return { seccions: {} }
+  const { llengua, pols, seccions } = v as { llengua?: unknown; pols?: unknown; seccions?: Record<string, unknown> }
+  const r: Record<string, unknown> = { ...(seccions ?? {}) }
+  const posar = (id: string, text: unknown) => {
+    if (typeof text !== 'string' || text.trim() === '' || r[id]) return
+    r[id] = { altres: text }
+  }
+  posar('exploracio:llengua', llengua)
+  posar('exploracio:pols', pols)
+  return { seccions: r }
+}
 
 const escala = z.number().int().min(0).max(10).nullable()
 const simptoma = z.object({ nom: z.string().trim(), escala })
@@ -37,7 +55,8 @@ export const esquemaDadesSessio = z.object({
     secundari1: simptoma,
     secundari2: simptoma,
   }),
-  exploracio: z.object({ llengua: z.string(), pols: z.string() }),
+  /** Seccions del catàleg d'exploració (etapa 3B). Abans eren dos textos: van a «Altres / observacions» */
+  exploracio: z.preprocess(migrarExploracio, z.object({ seccions: esquemaDadesSeccions })),
   /** «mapa:codi» → punt */
   punts: z.record(z.string(), esquemaPuntMarcat),
   agulles: z.object({
@@ -63,7 +82,7 @@ export function novaSessio(d: { citaId: string; episodiId: string; numero: numbe
     estat: 'enCurs',
     retencio: { iniciAt: null, minuts: d.minuts ?? MINUTS_RETENCIO },
     comEsta: { canvis: '', escala: null, secundari1: buit, secundari2: { ...buit } },
-    exploracio: { llengua: '', pols: '' },
+    exploracio: { seccions: {} },
     punts: {},
     agulles: { posades: null, retirades: null, motiu: '' },
     tancar: { recomanacions: '', incidencies: '', capIncidencia: false },

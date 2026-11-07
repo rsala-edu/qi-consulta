@@ -38,7 +38,6 @@ import { PanellLateral, type PestanyaPanell } from './PanellLateral'
 import { nomAmple } from './tecniques'
 import { MarcatgeOrella } from './MarcatgeOrella'
 
-const TECNIQUES = TECNIQUES_DEL_MAPA.cos
 
 /** Punt que una pestanya ha de mostrar (des de la llista de marcats); `n` fa que es repeteixi */
 type Peticio = { codi: string; n: number } | null
@@ -68,11 +67,17 @@ export function MapaTractament({
   avis,
   marcats,
   setMarcats,
+  tecniques = TECNIQUES_DEL_MAPA.cos,
+  nomesCos = false,
 }: {
   titol?: ReactNode
   avis?: ReactNode
   marcats: PuntMarcat[]
   setMarcats: Dispatch<SetStateAction<PuntMarcat[]>>
+  /** Tècniques que es poden triar al cos (a la palpació, només «Dolor a la palpació») */
+  tecniques?: readonly Tecnica[]
+  /** Sense la pestanya de l'orella (palpació) */
+  nomesCos?: boolean
 }) {
   const carrega = useModelCos()
   const [pestanya, setPestanya] = useState<Mapa>('cos')
@@ -86,7 +91,7 @@ export function MapaTractament({
     <>
       <div className="capcalera-mapa">
         {titol}
-        <div className="segmentat pestanyes-mapa" role="tablist" aria-label={t.mapa.quinMapa}>
+        {!nomesCos && <div className="segmentat pestanyes-mapa" role="tablist" aria-label={t.mapa.quinMapa}>
           {(['cos', 'orella'] as const).map((m) => (
             <button
               key={m}
@@ -100,7 +105,7 @@ export function MapaTractament({
               {m === 'cos' ? t.mapa.pestanyaCos : t.orella.titol}
             </button>
           ))}
-        </div>
+        </div>}
         {avis}
       </div>
       {/* El cos es queda muntat (i carregat) quan es mira l'orella */}
@@ -113,6 +118,7 @@ export function MapaTractament({
           setMarcats={setMarcats}
           peticio={peticions.cos}
           onVeure={veure}
+          tecniques={tecniques}
         />
       </div>
       {pestanya === 'orella' && (
@@ -147,9 +153,10 @@ interface PropsMarcatge {
   setMarcats: Dispatch<SetStateAction<PuntMarcat[]>>
   peticio: Peticio
   onVeure(m: PuntMarcat): void
+  tecniques: readonly Tecnica[]
 }
 
-function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure }: PropsMarcatge) {
+function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tecniques: TECNIQUES }: PropsMarcatge) {
   const visor = useRef<ControlVisor>(null)
   const { efectiu: calibrat, desar, restablir } = useCalibracions(model?.topologia ?? '')
   const { revisio } = usePrecaucions()
@@ -194,7 +201,7 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure }: P
     const existent = puntMarcat(marcats, codi)
     const costat: CostatMarcat =
       existent?.costat ?? (costatTocat === 'E' || costatTocat === 'D' ? costatTocat : 'bilateral')
-    setFitxa({ codi, costat, tecnica: existent?.tecnica ?? 'agulla', tocat: { costat: costatTocat, index } })
+    setFitxa({ codi, costat, tecnica: existent?.tecnica ?? TECNIQUES[0] ?? 'agulla', tocat: { costat: costatTocat, index } })
     // La fitxa és a la pestanya «Punt»
     setPestanyaPanell('punt')
   }

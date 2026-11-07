@@ -136,8 +136,31 @@ export function ambSeccio(seccions: DadesSeccions, id: string, d: DadesSeccio | 
 // --- Resum (capçalera plegada, valors de l'última sessió) -----------------------
 
 export function nomOpcio(camp: Camp, id: string): string {
-  if (camp.tipus === 'simple' || camp.tipus === 'multiple' || camp.tipus === 'graella') return camp.opcions.find((x) => x.id === id)?.ca ?? id
+  if ('opcions' in camp && camp.opcions) return camp.opcions.find((x) => x.id === id)?.ca ?? id
   return id
+}
+
+/** Text curt d'un valor que no és un xip (graella, zones, punts, codis…) */
+function resumValor(camp: Camp, v: ValorCamp): string {
+  if (Array.isArray(v)) return (v as string[]).map((id) => nomOpcio(camp, id)).join(', ')
+  if (v && typeof v === 'object') {
+    const o = v as Record<string, unknown>
+    if (typeof o.codi === 'string') return `${o.codi} ${typeof o.titol === 'string' ? o.titol : ''}`.trim()
+    if (camp.tipus === 'graella') {
+      return Object.entries(o)
+        .map(([casella, ops]) => {
+          const [f, col] = casella.split('_')
+          const nom = [camp.files.find((x) => x.id === f)?.ca, camp.columnes.find((x) => x.id === col)?.ca].filter(Boolean).join(' ')
+          return `${nom}: ${(ops as string[]).map((id) => nomOpcio(camp, id)).join(', ')}`
+        })
+        .join('; ')
+    }
+    // Punts (codi → costat)
+    return Object.entries(o)
+      .map(([k, x]) => (x && typeof x === 'object' && 'costat' in x ? `${k} ${String((x as { costat: string }).costat)}` : k))
+      .join(', ')
+  }
+  return String(v)
 }
 
 /** Text curt del que hi ha a una secció: «Normal», els xips triats i les observacions */
@@ -151,7 +174,7 @@ export function resumSeccio(seccio: Seccio, d: DadesSeccio | undefined, textNorm
     if (c.tipus === 'simple' || c.tipus === 'multiple') parts.push(valorsTriats(v).map((id) => nomOpcio(c, id)).join(', '))
     else if (c.tipus === 'nombre') parts.push(`${c.ca}: ${String(v)}${c.unitat ? ` ${c.unitat}` : ''}`)
     else if (typeof v === 'string') parts.push(v)
-    else if (v && typeof v === 'object' && 'codi' in v) parts.push(`${String(v.codi)} ${String((v as { titol?: string }).titol ?? '')}`.trim())
+    else parts.push(resumValor(c, v as ValorCamp))
   }
   if (d.altres?.trim()) parts.push(d.altres.trim())
   return parts.join(' · ')
