@@ -3,6 +3,7 @@
 ## Context
 App per a una metgessa (ORL i medicina xinesa) per gestionar pacients,
 valoracions, sessions i punts d'acupuntura. Especificacions: docs/especificacions.md
+Estat actual, decisions pendents i el que queda: docs/estat.md (llegir-lo en començar)
 
 ## Tecnologia
 - TypeScript estricte, React, Vite, Dexie (IndexedDB), vite-plugin-pwa
