@@ -3,6 +3,8 @@
 
 import { z } from 'zod'
 import type { Camp, DadesSeccio, DadesSeccions, Grup, Opcio, Seccio, ValorCamp } from './tipus'
+import { pta } from '../domini/audiometria'
+import { ESCALES, grauEscala, type IdEscala } from '../domini/escales'
 
 // --- Ajustos > Catàlegs -------------------------------------------------------
 
@@ -145,6 +147,16 @@ function resumValor(camp: Camp, v: ValorCamp): string {
   if (Array.isArray(v)) return (v as string[]).map((id) => nomOpcio(camp, id)).join(', ')
   if (v && typeof v === 'object') {
     const o = v as Record<string, unknown>
+    if (camp.tipus === 'especial' && camp.component === 'escala') {
+      const total = typeof o.total === 'number' ? o.total : null
+      const grau = camp.config && camp.config in ESCALES ? grauEscala(ESCALES[camp.config as IdEscala], total) : null
+      return total === null ? '' : `${camp.ca}: ${total}${grau ? ` (${grau})` : ''}`
+    }
+    if (camp.tipus === 'especial' && camp.component === 'audiograma') {
+      const l = o as Record<string, number>
+      const [d, e] = [pta(l, 'D_aeria'), pta(l, 'E_aeria')]
+      return `PTA: dreta ${d === null ? "—" : `${d.toLocaleString("ca")} dB`}, esquerra ${e === null ? "—" : `${e.toLocaleString("ca")} dB`}`
+    }
     if (typeof o.codi === 'string') return `${o.codi} ${typeof o.titol === 'string' ? o.titol : ''}`.trim()
     if (camp.tipus === 'graella') {
       return Object.entries(o)
@@ -179,7 +191,7 @@ export function resumSeccio(seccio: Seccio, d: DadesSeccio | undefined, textNorm
     else parts.push(resumValor(c, v as ValorCamp))
   }
   if (d.altres?.trim()) parts.push(d.altres.trim())
-  return parts.join(' · ')
+  return parts.filter(Boolean).join(' · ')
 }
 
 // --- Validació del que es desa ------------------------------------------------

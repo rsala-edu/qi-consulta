@@ -429,3 +429,20 @@ Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplic
 ### MYMOP (a la sessió, pestanya «Com està»)
 - Dos símptomes i una activitat, amb les paraules de la persona, i el benestar, tot de 0 a 6. El perfil és la mitjana de les puntuacions que hi ha, i es mostra al costat del de l'última vegada.
 - Es demana a la primera sessió de l'episodi i cada 4 sessions (1, 5, 9…), amb un avís discret. Les altres sessions, si es vol.
+
+### Mòdul ORL (pestanya «ORL», dins la valoració de l'episodi)
+- **Quan surt:** s'activa sol quan el motiu de l'episodi, el motiu de consulta o el diagnòstic occidental són ORL (acúfens, vertigen, hipoacúsia, otitis, sinusitis, rinitis, disfonia…), o quan el codi CIM-11 és de l'orella (AB) o de les vies respiratòries altes (CA0). També es pot activar o treure a mà.
+- **Exploracions:**
+  - otoscòpia per orella (conducte auditiu extern i membrana timpànica);
+  - rinoscòpia anterior (septe, cornets, mucosa i pòlips);
+  - orofaringe (amígdales segons Brodsky i Mallampati);
+  - laringe (indirecta, fibroscòpia o estroboscòpia);
+  - acumetria (Rinne i Weber).
+- **Audiometria tonal:** graella de llindars de 250 a 8.000 Hz, per via aèria i òssia i per orella, amb l'audiograma estàndard: dB HL cap avall; O vermella i X blava per a la via aèria; < i > per a l'òssia. Calcula el PTA (500, 1.000, 2.000 i 4.000 Hz).
+- **Timpanometria i exploració vestibular:**
+  - timpanometria: tipus A, As, Ad, B o C (Jerger) i reflexos estapedials;
+  - exploració vestibular: nistagme, Romberg, Unterberger, Dix-Hallpike i head impulse test.
+- **Escales:** THI, DHI i SNOT-22, sense el text dels ítems (vegeu «Llicències»). Es pot escriure el total o apuntar les respostes ítem per ítem, només amb els números. Es desen el total i el grau:
+  - THI: graus de McCombe (2001);
+  - DHI: Jacobson i Calder (1998);
+  - SNOT-22: Toma i Hopkins (2016).

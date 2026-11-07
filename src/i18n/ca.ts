@@ -105,6 +105,25 @@ export const ca = {
     ajuntarAmbAquesta: 'És la mateixa persona: ajuntar les fitxes',
     ajuntada: 'Ajuntada',
   },
+  audiograma: {
+    grafic: 'Audiograma',
+    hz: 'Hz',
+    vies: { D_aeria: 'Dreta · aèria', D_ossia: 'Dreta · òssia', E_aeria: 'Esquerra · aèria', E_ossia: 'Esquerra · òssia' },
+    llindar: '{via} · {f} Hz (dB HL)',
+    pta: 'PTA (500–4.000 Hz, via aèria): dreta {d} · esquerra {e}',
+  },
+  escales: {
+    total: 'Puntuació total (0–{max})',
+    perItem: 'Apuntar les respostes ítem per ítem',
+    instruccions: 'Respostes possibles: {valors}. Fes servir el qüestionari amb llicència: aquí només hi ha els números.',
+    item: 'Ítem {n}',
+    falten: 'Falten {n} respostes.',
+  },
+  orl: {
+    activar: 'Activar el mòdul ORL',
+    desactivar: 'Treure el mòdul ORL',
+    automatic: 'Mòdul ORL actiu (segons el motiu)',
+  },
   mymop: {
     titol: 'MYMOP',
     afegir: 'Afegir el MYMOP en aquesta sessió',
@@ -618,6 +637,7 @@ export const ca = {
       comEsta: 'Com està',
       exploracio: 'Exploració',
       diagnostic: 'Diagnòstic',
+      orl: 'ORL',
       tractament: 'Tractament',
       tancar: 'Tancar',
     },

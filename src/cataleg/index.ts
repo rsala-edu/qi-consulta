@@ -5,6 +5,7 @@ import type { Grup, Seccio } from './tipus'
 import { ANAMNESI, CONSTITUCIO, MOTIU } from './valoracio'
 import { EXPLORACIO } from './exploracio'
 import { DIAGNOSTIC } from './diagnostic'
+import { ORL } from './orl'
 
 /** Els grups de la valoració inicial (una per episodi), en l'ordre de la pestanya */
 export const GRUPS_VALORACIO: readonly Grup[] = [MOTIU, ANAMNESI, CONSTITUCIO]
@@ -15,7 +16,10 @@ export { EXPLORACIO }
 /** El diagnòstic de MTC: forma part de la valoració de l'episodi (pestanya «Diagnòstic») */
 export { DIAGNOSTIC }
 
-export const GRUPS: readonly Grup[] = [...GRUPS_VALORACIO, DIAGNOSTIC, EXPLORACIO]
+/** L'exploració ORL: forma part de la valoració (pestanya «ORL», quan el motiu és ORL o s'activa a mà) */
+export { ORL }
+
+export const GRUPS: readonly Grup[] = [...GRUPS_VALORACIO, DIAGNOSTIC, ORL, EXPLORACIO]
 
 export function grup(id: string): Grup | undefined {
   return GRUPS.find((g) => g.id === id)

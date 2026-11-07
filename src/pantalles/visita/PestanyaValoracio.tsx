@@ -35,6 +35,7 @@ export function PestanyaValoracio({
   especials,
   onRecarregar,
   onDades,
+  orlActiu,
 }: {
   sessio: Sessio
   valoracions: readonly Valoracio[]
@@ -47,6 +48,8 @@ export function PestanyaValoracio({
   onRecarregar(): void
   /** El que hi ha ara a la valoració (per a l'avís d'embaràs de la capçalera) */
   onDades?(d: DadesValoracio): void
+  /** El mòdul ORL és actiu (sol o triat): el botó l'activa o el treu */
+  orlActiu?: boolean
 }) {
   const magatzem = useMagatzem()
   const darrera = valoracions.at(-1)
@@ -103,6 +106,11 @@ export function PestanyaValoracio({
               ))}
             </select>
           </label>
+        )}
+        {editable && orlActiu !== undefined && (
+          <Boto variant="discret" onClick={() => setDades((d) => ({ ...d, orl: !orlActiu }))}>
+            {orlActiu ? t.orl.desactivar : t.orl.activar}
+          </Boto>
         )}
         {editableSessio && esDarrera && !propia && (
           <Boto

@@ -457,3 +457,66 @@ test('3B Diagnòstic, pla i MYMOP', async ({ page }) => {
   await page.evaluate(() => window.scrollTo(0, 0))
   await capturar(page, 'diagnostic-resum', false)
 })
+
+test('3B ORL', async ({ page }) => {
+  test.setTimeout(240_000)
+  await entrar(page)
+  await pacient(page, 'Rosa', 'Exemple Inventada', { Sexe: 'Dona' })
+  const ara = new Date()
+  const d = new Date(Math.ceil((ara.getTime() + 4 * 60_000) / 300_000) * 300_000)
+  await cita(page, 'Rosa', dia(0), `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`, 'Acúfens')
+  await menu(page, 'Avui').click()
+  await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).first().click()
+  await page.getByRole('tablist', { name: 'Visita' }).getByRole('tab', { name: 'ORL' }).click()
+  const oto = await obrir(page, 'Otoscòpia')
+  await tocar(oto, 'Orella dreta: conducte auditiu extern', 'Normal')
+  await tocar(oto, 'Orella dreta: membrana timpànica', 'Normal')
+  await tocar(oto, 'Orella esquerra: conducte auditiu extern', 'Tap de cerumen')
+  await tocar(oto, 'Orella esquerra: membrana timpànica', 'Retracció')
+  await capturarSeccio(page, oto, 'orl-otoscopia')
+  const acu = await obrir(page, 'Acumetria')
+  await tocar(acu, 'Diapasó', '512 Hz')
+  await tocar(acu, 'Rinne: orella dreta', 'Positiu')
+  await tocar(acu, 'Rinne: orella esquerra', 'Positiu')
+  await tocar(acu, 'Weber', 'Lateralitzat a la dreta')
+  const audio = await obrir(page, 'Audiometria tonal')
+  const llindars: Record<string, number[]> = {
+    'Dreta · aèria': [10, 10, 15, 20, 25, 30, 35, 40],
+    'Dreta · òssia': [5, 10, 10, 15, 20, 25, 0, 0],
+    'Esquerra · aèria': [15, 15, 20, 35, 45, 50, 60, 65],
+    'Esquerra · òssia': [10, 15, 15, 30, 40, 45, 0, 0],
+  }
+  const fs = [250, 500, 1000, 2000, 3000, 4000, 6000, 8000]
+  for (const [via, valors] of Object.entries(llindars)) {
+    for (let i = 0; i < fs.length; i++) {
+      if (via.includes('òssia') && i >= 6) continue
+      await audio.getByLabel(`${via} · ${fs[i]} Hz (dB HL)`).fill(String(valors[i]))
+    }
+  }
+  await tocar(audio, 'Tipus d\'hipoacúsia', 'Neurosensorial esquerra')
+  await capturarSeccio(page, audio, 'orl-audiometria')
+  await capturarSeccio(page, audio.locator('.grafic-audiograma'), 'orl-audiograma', true)
+  const timp = await obrir(page, 'Timpanometria')
+  await tocar(timp, 'Orella dreta (Jerger)', /^A$/)
+  await tocar(timp, 'Orella esquerra (Jerger)', /^C$/)
+  await tocar(timp, 'Reflexos estapedials: dreta', 'Presents')
+  await tocar(timp, 'Reflexos estapedials: esquerra', 'Presents')
+  await capturarSeccio(page, timp, 'orl-timpanometria')
+  const vest = await obrir(page, 'Exploració vestibular')
+  await tocar(vest, 'Nistagme', 'Sense nistagme')
+  await tocar(vest, 'Romberg', 'Negatiu')
+  await tocar(vest, 'Dix-Hallpike: dreta', 'Negatiu')
+  await tocar(vest, 'Dix-Hallpike: esquerra', 'Negatiu')
+  await tocar(vest, 'Head impulse test', 'Normal')
+  await capturarSeccio(page, vest, 'orl-vestibular')
+  const esc = await obrir(page, 'Escales')
+  const thi = esc.locator('.camp-especial').filter({ hasText: 'THI (acúfens)' })
+  await thi.getByLabel('Apuntar les respostes ítem per ítem').check()
+  for (let i = 1; i <= 25; i++) await thi.getByRole('radiogroup', { name: `Ítem ${i}`, exact: true }).getByRole('radio', { name: i <= 8 ? '4' : i <= 16 ? '2' : '0' }).click()
+  await esc.locator('.camp-especial').filter({ hasText: 'DHI' }).getByLabel('Puntuació total (0–100)').fill('24')
+  await capturarSeccio(page, esc, 'orl-escales')
+  const obertes = page.locator('.capcalera-seccio button[aria-expanded="true"]')
+  while ((await obertes.count()) > 0) await obertes.first().click()
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await capturar(page, 'orl-resum', false)
+})

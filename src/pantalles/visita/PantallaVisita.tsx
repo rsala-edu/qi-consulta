@@ -40,7 +40,8 @@ import { MapaTractament } from '../mapa/PantallaProvaMapa'
 import { Temporitzador } from './Temporitzador'
 import { PestanyaValoracio } from './PestanyaValoracio'
 import { ESPECIALS } from '../../cataleg/components/especials'
-import { DIAGNOSTIC, EXPLORACIO, etiquetaCami, GRUPS_VALORACIO } from '../../cataleg/index'
+import { DIAGNOSTIC, EXPLORACIO, etiquetaCami, GRUPS_VALORACIO, ORL } from '../../cataleg/index'
+import { orlActiu } from '../../cataleg/orl'
 import { PlaTractament } from './PlaTractament'
 import { BlocMymop } from './BlocMymop'
 import type { Mymop } from '../../domini/escales'
@@ -50,8 +51,10 @@ import { llegirAjustosCatalegs } from '../../db/ajustosCatalegs'
 import { hiHaEmbaras, type DadesValoracio, type Valoracio } from '../../domini/valoracio'
 import { useRetencio } from '../../visita/retencio'
 
-type Pestanya = 'valoracio' | 'comEsta' | 'exploracio' | 'diagnostic' | 'tractament' | 'tancar'
-const PESTANYES: readonly Pestanya[] = ['valoracio', 'comEsta', 'exploracio', 'diagnostic', 'tractament', 'tancar']
+type Pestanya = 'valoracio' | 'comEsta' | 'exploracio' | 'diagnostic' | 'orl' | 'tractament' | 'tancar'
+const PESTANYES: readonly Pestanya[] = ['valoracio', 'comEsta', 'exploracio', 'diagnostic', 'orl', 'tractament', 'tancar']
+/** Pestanyes que mostren la valoració de l'episodi (un sol component) */
+const DE_VALORACIO: readonly Pestanya[] = ['valoracio', 'diagnostic', 'orl']
 /** Temps entre l'últim canvi i el desat */
 const ESPERA_DESAR = 600
 
@@ -161,9 +164,21 @@ function Visita({
   const [bloquejada, setBloquejada] = useState(() => !esEditable(sessio, Date.now()))
   // A la primera visita de l'episodi es comença per la valoració
   const [pestanya, setPestanya] = useState<Pestanya>(sessio.numero === 1 ? 'valoracio' : 'comEsta')
-  const [embarasValoracio, setEmbarasValoracio] = useState(() => hiHaEmbaras(valoracions.at(-1)))
-  const canviValoracio = useCallback((d: DadesValoracio) => setEmbarasValoracio(hiHaEmbaras(d)), [])
-  const embaras = embarasFitxa || embarasValoracio
+  // El que hi ha ara a la valoració (avís d'embaràs, mòdul ORL)
+  const [valoracio, setValoracio] = useState<DadesValoracio | null>(() => valoracions.at(-1) ?? null)
+  const canviValoracio = useCallback((d: DadesValoracio) => setValoracio(d), [])
+  const embaras = embarasFitxa || hiHaEmbaras(valoracio)
+  const motiuV = valoracio?.seccions['motiu:actual']?.valors?.motiu
+  const diagV = valoracio?.seccions['motiu:diagnosticOccidental']?.valors
+  const codiCim = (diagV?.cim11 as { codi?: string } | undefined)?.codi ?? null
+  const ambOrl = orlActiu(
+    valoracio?.orl ?? null,
+    [episodi?.motiu ?? '', typeof motiuV === 'string' ? motiuV : '', typeof diagV?.text === 'string' ? diagV.text : ''],
+    codiCim,
+  )
+  const pestanyes = PESTANYES.filter((p) => p !== 'orl' || ambOrl)
+  // Si es treu el mòdul ORL amb la pestanya oberta, es torna a la valoració
+  if (pestanya === 'orl' && !ambOrl) setPestanya('valoracio')
   // El pla de tractament de l'episodi (es pot canviar a la pestanya Diagnòstic)
   const [pla, setPla] = useState(() => episodi?.pla ?? null)
   const [acabada, setAcabada] = useState(false)
@@ -321,7 +336,7 @@ function Visita({
       />
 
       <div className="segmentat pestanyes-visita" role="tablist" aria-label={v.titol}>
-        {PESTANYES.map((p) => (
+        {pestanyes.map((p) => (
           <button
             key={p}
             type="button"
@@ -339,17 +354,18 @@ function Visita({
       {/* La valoració i el diagnòstic són el mateix registre: un sol component, sempre muntat (si es
           desmuntés en canviar de pestanya, en tornar mostraria la versió carregada en obrir la visita) */}
       <section
-        id={`visita-${pestanya === 'diagnostic' ? 'diagnostic' : 'valoracio'}`}
+        id={`visita-${DE_VALORACIO.includes(pestanya) ? pestanya : 'valoracio'}`}
         role="tabpanel"
-        aria-labelledby={`pestanya-${pestanya === 'diagnostic' ? 'diagnostic' : 'valoracio'}`}
+        aria-labelledby={`pestanya-${DE_VALORACIO.includes(pestanya) ? pestanya : 'valoracio'}`}
         className="panell"
-        hidden={pestanya !== 'valoracio' && pestanya !== 'diagnostic'}
+        hidden={!DE_VALORACIO.includes(pestanya)}
       >
           <PestanyaValoracio
             sessio={sessio}
             valoracions={valoracions}
             conflictes={conflictesValoracio}
-            grups={pestanya === 'diagnostic' ? [DIAGNOSTIC] : GRUPS_VALORACIO}
+            grups={pestanya === 'diagnostic' ? [DIAGNOSTIC] : pestanya === 'orl' ? [ORL] : GRUPS_VALORACIO}
+            orlActiu={ambOrl}
             ajustos={catalegs}
             sexe={pacient?.sexe}
             editableSessio={editable}
