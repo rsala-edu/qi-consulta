@@ -210,7 +210,7 @@ async function canviarDeCompte(x: Disp) {
   await x.page.keyboard.press('Escape')
   // El toc següent prova la renovació silenciosa, que falla
   await menu(x.page, 'Avui').click()
-  await expect(pindola(x.page)).toHaveText('Drive: connectar')
+  await expect(pindola(x.page)).toHaveText('Cal tornar a connectar amb Google')
   await pindola(x.page).click()
   await x.page.getByRole('button', { name: 'Tornar a entrar amb Google' }).click()
 }
@@ -640,7 +640,7 @@ test('l) el permís d\'un altre compte de Google no es fa servir: res no va al s
   const panell = pc1.page.getByRole('dialog', { name: 'Còpia a Google Drive' })
   if (!(await panell.isVisible())) await pindola(pc1.page).click()
   await expect(panell.getByRole('alert')).toContainText('Has entrat amb un altre compte de Google')
-  await expect(pindola(pc1.page)).toHaveText('Drive: connectar')
+  await expect(pindola(pc1.page)).toHaveText('Cal tornar a connectar amb Google')
   // Res no ha arribat al Drive del compte de proves, i el compte desat continua sent el de la doctora
   expect(driveDe(mon, CORREU_PROVES).size).toBe(0)
   expect(peticionsDe(mon, 'pc1').filter((p) => p.correu === CORREU_PROVES)).toEqual([])

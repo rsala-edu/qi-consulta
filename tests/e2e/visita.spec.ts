@@ -114,8 +114,12 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   // Es veu encara que es canviï de pestanya
   await pestanya(page, 'Com està').click()
   await expect(capcalera(page).getByRole('timer')).toBeVisible()
-  // S'acaba: capçalera en cinabri, sense cap finestra
+  // S'acaba (mentrestant, l'app s'ha bloquejat sola: la pantalla de bloqueig ho
+  // mostra); en desbloquejar, la capçalera en cinabri, sense cap finestra
   await page.clock.fastForward('28:30')
+  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció acabada')
+  await page.getByLabel('Contrasenya', { exact: true }).fill(P)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
   await expect(capcalera(page).getByRole('timer')).toContainText('Retenció acabada')
   await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
 
@@ -160,6 +164,103 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   const episodi = page.getByRole('article', { name: 'Lumbàlgia' })
   await expect(episodi.getByRole('listitem')).toHaveCount(2)
   await expect(episodi.getByRole('listitem').first()).toContainText('escala 7 · 2 punts')
+})
+
+/** Compta els sons que fa l'app (Web Audio) */
+async function comptarSons(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __sons: number; AudioContext: unknown }
+    w.__sons = 0
+    w.AudioContext = class {
+      currentTime = 0
+      destination = {}
+      createOscillator() {
+        return { type: '', frequency: { value: 0 }, connect: (x: unknown) => x, start: () => (w.__sons += 1), stop() {}, onended: null }
+      }
+      createGain() {
+        return { gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect: (x: unknown) => x }
+      }
+      close() {
+        return Promise.resolve()
+      }
+    }
+  })
+}
+const sons = (page: Page) => page.evaluate(() => (window as unknown as { __sons: number }).__sons)
+
+test('retenció amb l\'app bloquejada: el temporitzador es veu sense cap dada, en acabar sona i s\'avisa, i en desbloquejar es veu que ha acabat', async ({
+  page,
+}) => {
+  await comptarSons(page)
+  await entrar(page)
+  await nouPacient(page, 'Aina', 'Provencal Inventada')
+  await novaCita(page, 'Aina', '2026-11-04', '10:00', 'Lumbàlgia')
+  await comencarVisita(page)
+  await capcalera(page).getByRole('button', { name: 'Agulles posades: començar' }).click()
+  await page.getByRole('button', { name: 'Bloquejar' }).click()
+
+  // Pantalla de bloqueig: només el temps
+  const temps = page.locator('.retencio-bloqueig')
+  await expect(temps).toHaveText(/^Retenció · 2[78]:\d\d$/)
+  await expect(page.getByText(/Aina|Provencal|Lumbàlgia/)).toHaveCount(0)
+  await page.clock.fastForward('10:00')
+  await expect(temps).toHaveText(/^Retenció · 1[78]:\d\d$/)
+  // S'acaba amb l'app bloquejada: avís visual i un sol so
+  await page.clock.fastForward('18:30')
+  await expect(temps).toHaveText('Retenció acabada')
+  await expect(temps).toHaveClass(/acabada/)
+  await expect.poll(() => sons(page)).toBe(1)
+  await page.clock.fastForward('02:00')
+  expect(await sons(page)).toBe(1)
+
+  // En desbloquejar es veu clarament que ha acabat, i porta a la visita
+  await page.getByLabel('Contrasenya', { exact: true }).fill(P)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
+  await expect(temps).toHaveCount(0)
+  // Si s'era a una altra pantalla, la franja ho diu i hi porta
+  await page.getByRole('button', { name: 'Bloquejar' }).click()
+  await page.getByLabel('Contrasenya', { exact: true }).fill(P)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  await menu(page, 'Pacients').click()
+  expect(await sons(page)).toBe(1)
+})
+
+test('retenció acabada amb l\'app oberta: la capçalera passa a cinabri, sona un cop i no surt cap franja', async ({ page }) => {
+  await comptarSons(page)
+  await entrar(page)
+  // Bloqueig als 30 minuts: la retenció (28) s'acaba amb l'app oberta
+  await menu(page, 'Ajustos').click()
+  await page.getByRole('link', { name: /Seguretat i còpia/ }).click()
+  await page.getByLabel('Bloquejar després de').selectOption('30')
+  await nouPacient(page, 'Bernat', 'Prova Inventat')
+  await novaCita(page, 'Bernat', '2026-11-04', '10:00', 'Acúfens')
+  await comencarVisita(page)
+  await capcalera(page).getByRole('button', { name: 'Agulles posades: començar' }).click()
+  await page.clock.fastForward('28:30')
+  await expect(capcalera(page).getByRole('timer')).toContainText('Retenció acabada')
+  await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
+  await expect.poll(() => sons(page)).toBe(1)
+  await expect(page.locator('.franja-retencio')).toHaveCount(0)
+})
+
+test('si s\'acaba amb l\'app bloquejada i es desbloqueja en una altra pantalla, la franja ho diu i porta a la visita', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Carla', 'Exemple Inventada')
+  await novaCita(page, 'Carla', '2026-11-04', '10:00', 'Insomni')
+  await comencarVisita(page)
+  await capcalera(page).getByRole('button', { name: 'Agulles posades: començar' }).click()
+  // Se'n va a una altra pantalla i l'app es bloqueja
+  await menu(page, 'Agenda').click()
+  await page.clock.fastForward('29:00')
+  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció acabada')
+  await page.getByLabel('Contrasenya', { exact: true }).fill(P)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  const franja = page.locator('.franja-retencio')
+  await expect(franja).toContainText('La retenció de les agulles ha acabat a les')
+  await franja.getByRole('button', { name: 'Tornar a la visita' }).click()
+  await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
+  await expect(franja).toHaveCount(0)
 })
 
 test('24 hores després de finalitzar, la sessió és de només lectura i s\'hi poden afegir addendes', async ({ page }) => {

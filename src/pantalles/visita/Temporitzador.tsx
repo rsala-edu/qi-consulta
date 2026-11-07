@@ -1,4 +1,5 @@
-// Temporitzador de retenció de les agulles, a la capçalera de la visita.
+// Temporitzador de retenció de les agulles, a la capçalera de la visita (el so,
+// la pantalla de bloqueig i que la pantalla no s'apagui són a visita/retencio.tsx).
 //
 // - Abans de començar: els minuts (per defecte, 28, destacat en jade), amb + i −
 //   de minut en minut, i el botó gran «Agulles posades: començar».
@@ -8,11 +9,11 @@
 // - En acabar: la capçalera passa a cinabri, un avís suau i un so curt (si està
 //   activat). Res de finestres que bloquegin la pantalla.
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Boto } from '../../components/Boto'
 import { formatTemps, tempsRestant, type DadesSessio } from '../../domini/sessio'
 import { formatar, t } from '../../i18n/t'
-import { useSessio } from '../../sessio/ContextSessio'
+import { useRetencio } from '../../visita/retencio'
 
 /** Un so curt i suau (sense cap fitxer: es genera amb Web Audio) */
 export function soCurt(): void {
@@ -34,19 +35,17 @@ export function soCurt(): void {
   }
 }
 
-type WakeLock = { release(): Promise<void> }
-
 export function Temporitzador({
+  sessioId,
   retencio,
   minutsPerDefecte,
-  ambSo,
   editable,
   onCanviar,
   onAcabada,
 }: {
+  sessioId: string
   retencio: DadesSessio['retencio']
   minutsPerDefecte: number
-  ambSo: boolean
   editable: boolean
   onCanviar(r: DadesSessio['retencio']): void
   /** S'ha acabat (o ja ho estava en obrir): la capçalera canvia de color */
@@ -56,7 +55,6 @@ export function Temporitzador({
   const restant = tempsRestant(retencio, ara)
   const enMarxa = restant !== null && restant > 0
   const acabada = restant !== null && restant <= 0
-  const avisat = useRef<string | null>(null)
 
   // Només per dibuixar: el temps sempre surt de l'hora d'inici
   useEffect(() => {
@@ -72,36 +70,18 @@ export function Temporitzador({
     return () => document.removeEventListener('visibilitychange', tornar)
   }, [])
 
-  // Mentre dura la retenció, l'app no es bloqueja per inactivitat
-  const { suspendreBloqueig } = useSessio()
-  const fi = retencio.iniciAt ? Date.parse(retencio.iniciAt) + retencio.minuts * 60_000 : null
+  // La retenció en marxa es registra per a tota l'app (visita/retencio.tsx):
+  // la pantalla de bloqueig la mostra i el so sona sigui on sigui l'app
+  const { registrar, marcarVista } = useRetencio()
   useEffect(() => {
-    suspendreBloqueig(enMarxa ? fi : null)
-    return () => suspendreBloqueig(null)
-  }, [enMarxa, fi, suspendreBloqueig])
-
-  // La pantalla no s'apaga mentre dura la retenció (si el navegador ho permet)
-  useEffect(() => {
-    if (!enMarxa) return
-    let bloqueig: WakeLock | null = null
-    const nav = navigator as Navigator & { wakeLock?: { request(t: 'screen'): Promise<WakeLock> } }
-    void nav.wakeLock?.request('screen').then(
-      (b) => (bloqueig = b),
-      () => {},
-    )
-    return () => void bloqueig?.release().catch(() => {})
-  }, [enMarxa])
+    if (retencio.iniciAt) registrar({ iniciAt: retencio.iniciAt, minuts: retencio.minuts, sessioId })
+  }, [registrar, retencio.iniciAt, retencio.minuts, sessioId])
 
   useEffect(() => {
     onAcabada(acabada)
-    // Un sol so per retenció, i només si s'ha acabat amb la visita oberta
-    if (acabada && retencio.iniciAt && avisat.current !== retencio.iniciAt) {
-      const ara2 = Date.now()
-      const fa = ara2 - (Date.parse(retencio.iniciAt) + retencio.minuts * 60_000)
-      if (ambSo && fa < 60_000) soCurt()
-      avisat.current = retencio.iniciAt
-    }
-  }, [acabada, ambSo, onAcabada, retencio.iniciAt, retencio.minuts])
+    // Es veu a la visita: ja no cal la franja de «ha acabat»
+    if (acabada) marcarVista()
+  }, [acabada, onAcabada, marcarVista])
 
   const v = t.visita
   if (restant === null) {

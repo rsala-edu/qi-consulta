@@ -161,6 +161,16 @@ export function PantallaAgenda() {
     }
     return { tipus: 'nova', inici: `${dia}T10:00`, plantilla }
   })
+  // Els paràmetres que obren el formulari es fan servir un sol cop: si no, en
+  // tornar a muntar l'agenda (desbloquejar l'app, tornar-hi) es tornaria a obrir
+  useEffect(() => {
+    if (!params.get('nova')) return
+    const nous = new URLSearchParams(params)
+    for (const k of ['nova', 'pacient', 'episodi', 'tipus', 'durada']) nous.delete(k)
+    setParams(nous, { replace: true })
+    // Només en obrir l'agenda
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [versio, setVersio] = useState(0)
   const [avisTipus, mostrarAvisTipus] = useAvisTipus()
 

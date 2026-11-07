@@ -1,5 +1,6 @@
 import { Fragment, lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
-import { HashRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router'
+import { HashRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router'
+import { AvisRetencioAcabada, ProveidorRetencio, RetencioBloqueig } from './visita/retencio'
 import { LimitError } from './components/LimitError'
 import { Boto } from './components/Boto'
 import { Simbol } from './components/Simbol'
@@ -50,6 +51,7 @@ import { ProveidorSessio, useMagatzem, useSessio } from './sessio/ContextSessio'
 
 function Marc() {
   const { bloquejar, db } = useSessio()
+  const navegar = useNavigate()
   const magatzem = useMagatzem()
   // Una sola vegada per dispositiu: el tipus de visita automàtic a les cites que ja hi havia
   useEffect(() => {
@@ -81,6 +83,7 @@ function Marc() {
           </Boto>
         </header>
         <AvisVersioNova />
+        <AvisRetencioAcabada onAnar={(id) => void navegar(`/visita/${id}`)} />
         <AvisVersioAntiga />
         <AvisFinestraPrivada />
         <AvisCanvis />
@@ -118,6 +121,12 @@ function EspaiObert({ children }: { children: ReactNode }) {
   return <Fragment key={clau.generacio}>{children}</Fragment>
 }
 
+/** La retenció en marxa de l'espai obert (cap, si encara no n'hi ha cap) */
+function RetencioDeLEspai({ children }: { children: ReactNode }) {
+  const sessio = useSessio()
+  return <ProveidorRetencio db={sessio.espai ? sessio.db : null}>{children}</ProveidorRetencio>
+}
+
 /** Mentre l'app és bloquejada no es munta cap pantalla amb dades. */
 function Porta() {
   const { estat } = useSessio()
@@ -133,6 +142,8 @@ function Porta() {
       <div className="tema-entrada">
         <BotoTema petit />
       </div>
+      {/* La retenció de les agulles es veu (i sona) també amb l'app bloquejada, sense cap dada */}
+      <RetencioBloqueig />
       <PortaOberta />
     </>
   )
@@ -212,7 +223,9 @@ export function App({ db }: { db: QiDB | null }) {
       <ProveidorActualitzacio>
         <ProveidorSessio db={db}>
           <EspaiObert>
-            <Porta />
+            <RetencioDeLEspai>
+              <Porta />
+            </RetencioDeLEspai>
           </EspaiObert>
         </ProveidorSessio>
       </ProveidorActualitzacio>

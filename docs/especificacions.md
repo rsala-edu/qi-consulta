@@ -164,7 +164,13 @@ un camp s'edita alhora en dos dispositius, el valor que perd queda per revisar.
 - **Número de sessió:** l'ordre de la sessió dins l'episodi (per data d'inici).
 - **Temporitzador de retenció:** es desa l'hora d'inici i els minuts. El temps
   que queda sempre es calcula a partir de l'hora, mai amb un comptador: si la
-  pantalla s'apaga, en tornar continua bé.
+  pantalla s'apaga, en tornar continua bé. L'app es **bloqueja igualment** per
+  inactivitat. La pantalla de bloqueig mostra el temporitzador sense cap dada
+  del pacient («Retenció · 12:34»), i l'avís de final (visual i so) hi surt
+  igual. Si s'acaba amb l'app bloquejada, en desbloquejar es veu que ha acabat:
+  la capçalera de la visita en cinabri o, des d'una altra pantalla, la franja
+  «La retenció de les agulles ha acabat a les 10:28 · Tornar a la visita». El
+  so sona una sola vegada.
 - **Finalitzar:** posa l'hora de final, tanca la sessió i passa la cita a
   «feta». Durant 24 hores es pot editar («Editable fins demà a les 17:20»).
   Després és de només lectura i només s'hi poden afegir addendes. Una sessió

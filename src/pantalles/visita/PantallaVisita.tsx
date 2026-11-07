@@ -38,6 +38,7 @@ import { ambValor } from '../../sincronia/fusioCamps'
 import { useFormulariBrut } from '../../sincronia/revisio'
 import { MapaTractament } from '../mapa/PantallaProvaMapa'
 import { Temporitzador } from './Temporitzador'
+import { useRetencio } from '../../visita/retencio'
 
 type Pestanya = 'comEsta' | 'exploracio' | 'tractament' | 'tancar'
 const PESTANYES: readonly Pestanya[] = ['comEsta', 'exploracio', 'tractament', 'tancar']
@@ -104,6 +105,7 @@ function Visita({
 }) {
   const magatzem = useMagatzem()
   const navegar = useNavigate()
+  const retencioGlobal = useRetencio()
   const v = t.visita
   const [dades, setDadesEstat] = useState<DadesSessio>(() => dadesDe(sessio))
   // L'última versió desada: només es desa el que ha canviat respecte d'aquí
@@ -156,6 +158,20 @@ function Visita({
     return () => window.clearTimeout(tmp)
   }, [dades, pendent, bloquejada, magatzem, sessio.id])
 
+  // En sortir de la visita (canviar de pantalla, bloquejar l'app) amb canvis
+  // encara per desar, es desen de seguida: no es pot perdre res
+  const perDesar = useRef<{ dades: DadesSessio; pendent: boolean; bloquejada: boolean }>({ dades, pendent, bloquejada })
+  useEffect(() => {
+    perDesar.current = { dades, pendent, bloquejada }
+  }, [dades, pendent, bloquejada])
+  useEffect(
+    () => () => {
+      const p = perDesar.current
+      if (p.pendent && !p.bloquejada) void magatzem.actualitzarSessio(sessio.id, p.dades, desada.current).catch(() => {})
+    },
+    [magatzem, sessio.id],
+  )
+
   const editable = !bloquejada
   const enCurs = dades.estat === 'enCurs'
   const fins = editableFins(dades)
@@ -185,9 +201,9 @@ function Visita({
         </div>
         {enCurs && (
           <Temporitzador
+            sessioId={sessio.id}
             retencio={dades.retencio}
             minutsPerDefecte={ajustos.minutsRetencio}
-            ambSo={ajustos.so}
             editable={editable}
             onCanviar={(retencio) => setDades((d) => ({ ...d, retencio }))}
             onAcabada={setAcabada}
@@ -214,6 +230,8 @@ function Visita({
             const s = await magatzem.actualitzarSessio(sessio.id, dades, desada.current)
             desada.current = dadesDe(s)
             const tancada = await magatzem.finalitzarSessio(sessio.id, agulles)
+            // La visita s'ha acabat: ja no hi ha cap retenció en marxa
+            if (retencioGlobal.retencio?.sessioId === sessio.id) retencioGlobal.registrar(null)
             desada.current = dadesDe(tancada)
             setDadesEstat(dadesDe(tancada))
             setPendent(false)

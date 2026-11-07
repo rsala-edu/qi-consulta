@@ -370,7 +370,7 @@ export const ca = {
     senseGoogle: 'Aquesta versió no té Google Drive configurat: les dades només són en aquest dispositiu.',
     pendent: 'Hi ha canvis pendents de desar a Drive.',
     curt: {
-      'cal-connectar': 'Drive: connectar',
+      'cal-connectar': 'Cal tornar a connectar amb Google',
       sincronitzant: 'Drive: desant…',
       'al-dia': 'Drive: al dia',
       pendent: 'Drive: canvis pendents',
@@ -527,6 +527,9 @@ export const ca = {
     comencarRetencio: 'Agulles posades: començar',
     queda: 'Queden {temps}',
     acabada: 'Retenció acabada',
+    retencioBloqueig: 'Retenció · {temps}',
+    retencioAcabadaA: 'La retenció de les agulles ha acabat a les {hora}.',
+    tornarVisita: 'Tornar a la visita',
     confirmarAgulles: 'Agulles retirades',
     deN: 'de {n}',
     motiuAgulles: 'Motiu (p. ex. «agulla semipermanent»)',
@@ -573,7 +576,6 @@ export const ca = {
     novaAmb: 'Hi ha una versió nova: {versio}',
     buscar: 'Buscar actualitzacions',
     buscant: 'Buscant…',
-    provaActualitzacio: 'Prova d\'actualització 1',
   },
   aparenca: {
     titol: 'Aparença',

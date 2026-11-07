@@ -22,12 +22,14 @@ test.describe.configure({ timeout: 180_000 })
 
 const menu = (page: Page, nom: string) => page.getByRole('navigation', { name: 'Navegació principal' }).getByRole('link', { name: nom })
 
-async function capturar(page: Page, nom: string) {
+/** `sencera`: tota la pàgina; si no, la pantalla tal com es veu, des de dalt (amb la capçalera fixa) */
+async function capturar(page: Page, nom: string, sencera = true) {
   mkdirSync(CARPETA, { recursive: true })
+  if (!sencera) await page.evaluate(() => window.scrollTo(0, 0))
   for (const esquema of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme: esquema })
     await page.waitForTimeout(300)
-    await page.screenshot({ path: `${CARPETA}/${nom}${SUFIX}-${esquema === 'light' ? 'clar' : 'fosc'}.png`, fullPage: true })
+    await page.screenshot({ path: `${CARPETA}/${nom}${SUFIX}-${esquema === 'light' ? 'clar' : 'fosc'}.png`, fullPage: sencera })
   }
   await page.emulateMedia({ colorScheme: 'light' })
 }
@@ -77,4 +79,77 @@ test('Avui', async ({ page }) => {
   await menu(page, 'Avui').click()
   await expect(page.getByRole('heading', { name: 'Cites d\'avui' })).toBeVisible()
   await capturar(page, 'avui')
+})
+
+test('Visita', async ({ page }) => {
+  test.setTimeout(240_000)
+  // Rellotge controlat (comença a l'hora real: el Google simulat també la fa servir)
+  await page.clock.install({ time: new Date() })
+  await entrar(page)
+  await pacient(page, 'Aina', 'Provencal Inventada')
+  const ara = new Date()
+  const hora = `${String(ara.getHours()).padStart(2, '0')}:${String(Math.floor(ara.getMinutes() / 5) * 5).padStart(2, '0')}`
+  await cita(page, 'Aina', dia(0), hora, 'Lumbàlgia')
+  await menu(page, 'Avui').click()
+  await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).click()
+  const capcalera = page.locator('.capcalera-visita')
+  await expect(capcalera).toBeVisible()
+  const pestanya = (nom: string) => page.getByRole('tablist', { name: 'Visita' }).getByRole('tab', { name: nom })
+
+  await page.getByLabel('Canvis des de l\'última sessió').fill('Dorm millor, però el dolor lumbar continua al matí (inventat).')
+  await page.getByRole('radiogroup', { name: 'Símptoma principal (0–10)' }).getByRole('radio', { name: '6' }).click()
+  await page.getByLabel('Símptoma secundari 1 · Quin').fill('Insomni')
+  await page.getByRole('radiogroup', { name: 'Símptoma secundari 1 · Escala (0–10)' }).getByRole('radio', { name: '4' }).click()
+  await capturar(page, 'visita-com-esta', false)
+  await pestanya('Exploració').click()
+  await page.getByLabel('Llengua').fill('Pàl·lida, saburra blanca fina (inventat)')
+  await page.getByLabel('Pols').fill('Profund i feble (inventat)')
+  await capturar(page, 'visita-exploracio', false)
+  await pestanya('Tractament').click()
+  for (const [q, codi, costat] of [['LI4', 'LI4', 'Bilateral'], ['zusanli', 'ST36', 'Bilateral'], ['sanyinjiao', 'SP6', 'Esquerre']] as const) {
+    await page.getByRole('searchbox', { name: /Cerca un punt/ }).fill(q)
+    await page.getByRole('searchbox', { name: /Cerca un punt/ }).press('Enter')
+    const fitxa = page.getByRole('region', { name: codi })
+    await fitxa.getByRole('radio', { name: costat }).click()
+    await fitxa.getByRole('radio', { name: 'Agulla' }).click()
+    await fitxa.getByRole('button', { name: 'Marcar' }).click()
+  }
+  await page.waitForTimeout(1_500)
+  await capturar(page, 'visita-tractament', false)
+  await pestanya('Tancar').click()
+  await page.getByLabel('Recomanacions').fill('Caminar 20 minuts cada dia i evitar estar molta estona assegut (inventat).')
+  await page.getByLabel('Cap incidència').check()
+  await capturar(page, 'visita-tancar', false)
+
+  // Temporitzador en marxa (a la capçalera) i a la pantalla de bloqueig
+  await capcalera.getByRole('button', { name: 'Agulles posades: començar' }).click()
+  await page.clock.fastForward('03:20')
+  await capturar(page, 'temporitzador-en-marxa', false)
+  await page.getByRole('button', { name: 'Bloquejar' }).click()
+  await expect(page.locator('.retencio-bloqueig')).toBeVisible()
+  await capturar(page, 'bloqueig-retencio')
+  await page.clock.fastForward('25:00')
+  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció acabada')
+  await capturar(page, 'bloqueig-retencio-acabada')
+  await page.getByLabel('Contrasenya', { exact: true }).fill(P)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  await expect(capcalera).toHaveClass(/retencio-acabada/)
+  await capturar(page, 'temporitzador-acabat', false)
+
+  // Control d'agulles: no quadra, cal el motiu
+  await capcalera.getByRole('button', { name: 'Finalitzar visita' }).click()
+  const panell = page.getByRole('region', { name: 'Finalitzar visita' })
+  await panell.getByLabel('Agulles retirades').fill('9')
+  await expect(panell.getByRole('alert')).toBeVisible()
+  await capturar(page, 'control-agulles', false)
+  await panell.getByLabel(/Motiu/).fill('Agulla semipermanent a l\'orella (inventat)')
+  await panell.getByRole('button', { name: 'Confirmar i finalitzar' }).click()
+  await expect(page.getByText(/Visita finalitzada/)).toBeVisible()
+
+  // Tractaments a la fitxa
+  await menu(page, 'Pacients').click()
+  await page.getByRole('link', { name: /Aina Provencal Inventada/ }).click()
+  await page.getByRole('link', { name: 'Tractaments' }).click()
+  await expect(page.getByRole('article', { name: 'Lumbàlgia' })).toBeVisible()
+  await capturar(page, 'tractaments')
 })

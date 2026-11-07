@@ -106,6 +106,11 @@ export type RegistreMeta =
   | { clau: 'versioAntigaAt'; valor: string }
   /** S'han creat els episodis de les cites d'abans de l'etapa 3A (data) */
   | { clau: 'episodisMigrats'; valor: string }
+  /**
+   * Retenció de les agulles en marxa (sense cap dada del pacient: només l'hora,
+   * els minuts i l'id de la sessió), perquè es vegi i soni també amb l'app bloquejada
+   */
+  | { clau: 'retencio'; valor: { iniciAt: string; minuts: number; sessioId: string; avisat: boolean; vista: boolean } }
   | { clau: 'persistencia'; valor: { estat: 'concedida' | 'no-concedida' | 'no-disponible'; at: string } }
 
 /** Taules que se sincronitzen amb Google Drive */
