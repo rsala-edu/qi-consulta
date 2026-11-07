@@ -11,7 +11,9 @@
 // - A la tauleta, lliscar el dit canvia de dia o de setmana.
 // Arrossegar cites per canviar-les d'hora arriba a l'etapa 3.
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type TouchEvent } from 'react'
+import { llegirAjustosVisita } from '../../db/ajustosVisita'
+import { episodisActius } from '../../domini/episodi'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type TouchEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
@@ -56,7 +58,7 @@ import { useAvisTipus } from './AvisTipus'
 import { recalcularTipusVisita } from '../../db/tipusVisita'
 
 type Obert =
-  | { tipus: 'nova'; inici: string }
+  | { tipus: 'nova'; inici: string; plantilla?: Partial<DadesCita> }
   | { tipus: 'fitxa'; cita: Cita }
   | { tipus: 'editar'; cita: Cita }
   | null
@@ -127,6 +129,10 @@ function useConsulta(consulta: string): boolean {
 export function PantallaAgenda() {
   const magatzem = useMagatzem()
   const { db, espai } = useSessio()
+  const carregarEpisodis = useCallback(
+    async (pacientId: string) => episodisActius(await magatzem.llistarEpisodis(pacientId)),
+    [magatzem],
+  )
   const navegar = useNavigate()
   const [params, setParams] = useSearchParams()
   const ara = useAra()
@@ -142,7 +148,19 @@ export function PantallaAgenda() {
   const [calendariObert, setCalendariObert] = useState(false)
 
   // Des de l'accés ràpid «Nova cita» (Avui) s'obre directament el formulari
-  const [obert, setObert] = useState<Obert>(() => (params.get('nova') ? { tipus: 'nova', inici: `${dia}T10:00` } : null))
+  const [obert, setObert] = useState<Obert>(() => {
+    if (!params.get('nova')) return null
+    // «Proposar la propera cita» (des de la visita): el pacient, l'episodi, el tipus i la durada ja posats
+    const tipus = params.get('tipus') === 'primera' ? 'primera' : params.get('tipus') === 'seguiment' ? 'seguiment' : undefined
+    const durada = Number(params.get('durada'))
+    const plantilla: Partial<DadesCita> = {
+      ...(params.get('pacient') ? { pacientId: params.get('pacient')! } : {}),
+      ...(params.get('episodi') ? { episodiId: params.get('episodi')! } : {}),
+      ...(tipus ? { tipus } : {}),
+      ...(Number.isInteger(durada) && durada > 0 ? { durada } : {}),
+    }
+    return { tipus: 'nova', inici: `${dia}T10:00`, plantilla }
+  })
   const [versio, setVersio] = useState(0)
   const [avisTipus, mostrarAvisTipus] = useAvisTipus()
 
@@ -282,7 +300,11 @@ export function PantallaAgenda() {
               <FitxaCita
                 cita={obert.cita}
                 esAvui={obert.cita.inici.slice(0, 10) === avui}
-                onComencar={() => navegar(`/pacients/${obert.cita.pacientId}/cites`)}
+                onComencar={() =>
+                  void llegirAjustosVisita(db)
+                    .then((aj) => magatzem.comencarVisita(obert.cita.id, aj.minutsRetencio))
+                    .then((s) => navegar(`/visita/${s.id}`))
+                }
                 onEditar={() => setObert({ tipus: 'editar', cita: obert.cita })}
                 onTancar={() => setObert(null)}
                 onCanviada={() => {
@@ -294,8 +316,9 @@ export function PantallaAgenda() {
               <FormulariCita
                 key={obert.tipus === 'nova' ? obert.inici : obert.cita.id}
                 id={obert.tipus === 'editar' ? obert.cita.id : undefined}
-                inicial={obert.tipus === 'nova' ? novaCita('', obert.inici) : obert.cita}
+                inicial={obert.tipus === 'nova' ? { ...novaCita('', obert.inici), ...obert.plantilla } : obert.cita}
                 pacients={carrega.dades.pacients}
+                carregarEpisodis={carregarEpisodis}
                 altres={carrega.dades.cites}
                 horari={carrega.dades.horari}
                 diesTancats={carrega.dades.diesTancats}

@@ -8,6 +8,7 @@ import type { QiDB } from './db/esquema'
 import { t } from './i18n/t'
 import { PestanyaDades } from './pantalles/fitxa-pacient/PestanyaDades'
 import { PestanyaCites } from './pantalles/fitxa-pacient/PestanyaCites'
+import { PestanyaTractaments } from './pantalles/fitxa-pacient/PestanyaTractaments'
 import { PantallaAgenda } from './pantalles/cites/PantallaAgenda'
 import { PestanyaFitxaClinica } from './pantalles/fitxa-pacient/PestanyaFitxaClinica'
 import { PantallaFitxaPacient } from './pantalles/fitxa-pacient/PantallaFitxaPacient'
@@ -21,6 +22,7 @@ import { PantallaAvui } from './pantalles/avui/PantallaAvui'
 import { ProveidorSincronia } from './sincronia/ContextSincronia'
 import { googleConfigurat } from './sincronia/google'
 import { migrarTipusVisita } from './db/tipusVisita'
+import { migrarEpisodis } from './db/episodis'
 import { IndicadorCopia } from './components/IndicadorCopia'
 import { AvisFinestraPrivada } from './components/AvisFinestraPrivada'
 import { AvisCanvis } from './components/AvisCanvis'
@@ -29,6 +31,8 @@ import { PantallaAparenca } from './pantalles/ajustos/PantallaAparenca'
 import { PantallaAjustAgenda } from './pantalles/ajustos/PantallaAjustAgenda'
 import { PantallaDrive } from './pantalles/ajustos/PantallaDrive'
 import { PantallaQuantA } from './pantalles/ajustos/PantallaQuantA'
+import { PantallaAjustVisita } from './pantalles/ajustos/PantallaAjustVisita'
+import { PantallaVisita } from './pantalles/visita/PantallaVisita'
 import { ProveidorActualitzacio, useActualitzacio } from './actualitzacio/actualitzacio'
 import { AvisVersioNova } from './components/AvisVersioNova'
 import { AvisVersioAntiga } from './components/AvisVersioAntiga'
@@ -49,7 +53,11 @@ function Marc() {
   const magatzem = useMagatzem()
   // Una sola vegada per dispositiu: el tipus de visita automàtic a les cites que ja hi havia
   useEffect(() => {
-    void migrarTipusVisita(db, magatzem).catch(() => {})
+    // I després, els episodis de les cites d'abans de l'etapa 3A
+    void migrarTipusVisita(db, magatzem)
+      .catch(() => {})
+      .then(() => migrarEpisodis(db, magatzem))
+      .catch(() => {})
   }, [db, magatzem])
   return (
     <ProveidorSincronia>
@@ -178,6 +186,7 @@ function PortaOberta() {
               <Route path="dades" element={<P codi="UI-FITXA-DADES"><PestanyaDades /></P>} />
               <Route path="fitxa-clinica" element={<P codi="UI-FITXA-CLINICA"><PestanyaFitxaClinica /></P>} />
               <Route path="cites" element={<P codi="UI-FITXA-CITES"><PestanyaCites /></P>} />
+              <Route path="tractaments" element={<P codi="UI-FITXA-TRACTAMENTS"><PestanyaTractaments /></P>} />
             </Route>
             <Route path="mapa" element={<P codi="UI-MAPA"><PantallaProvaMapa /></P>} />
             <Route path="ajustos" element={<P codi="UI-AJUSTOS"><PantallaAjustos /></P>} />
@@ -188,6 +197,8 @@ function PortaOberta() {
             <Route path="ajustos/aparenca" element={<P codi="UI-APARENCA"><PantallaAparenca /></P>} />
             <Route path="ajustos/agenda" element={<P codi="UI-AJUST-AGENDA"><PantallaAjustAgenda /></P>} />
             <Route path="ajustos/quant-a" element={<P codi="UI-QUANT-A"><PantallaQuantA /></P>} />
+            <Route path="ajustos/visita" element={<P codi="UI-AJUST-VISITA"><PantallaAjustVisita /></P>} />
+            <Route path="visita/:id" element={<P codi="UI-VISITA"><PantallaVisita /></P>} />
             <Route path="*" element={<Navigate to="/avui" replace />} />
           </Route>
         </Routes>

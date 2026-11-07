@@ -7,6 +7,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import type { Episodi } from '../../domini/episodi'
 import { useFormulariBrut } from '../../sincronia/revisio'
 import { z } from 'zod'
 import { Boto } from '../../components/Boto'
@@ -33,6 +34,7 @@ const esquemaFormulari = esquemaDadesCita.omit({ inici: true, sessioId: true }).
   dia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t.errors.dataInvalida),
   hora: z.string().regex(/^\d{2}:\d{2}$/, t.errors.horaInvalida),
   nouEpisodi: z.boolean(),
+  episodiId: z.string().nullable(),
 })
 
 type ValorsFormulari = z.infer<typeof esquemaFormulari>
@@ -55,6 +57,8 @@ interface Props {
   diesTancats?: ReadonlySet<string>
   /** L'hora actual (per a les proves) */
   ara?: Date
+  /** Els episodis actius d'un pacient: si n'hi ha més d'un, la cita deixa triar a quin va */
+  carregarEpisodis?(pacientId: string): Promise<readonly Pick<Episodi, 'id' | 'motiu'>[]>
 }
 
 export function FormulariCita({
@@ -70,6 +74,7 @@ export function FormulariCita({
   horari,
   diesTancats = new Set<string>(),
   ara: araProp,
+  carregarEpisodis,
 }: Props) {
   // L'hora d'obrir el formulari
   const [araObrir] = useState(() => new Date())
@@ -82,6 +87,7 @@ export function FormulariCita({
     register,
     handleSubmit,
     setValue,
+    getValues,
     control,
     formState: { errors, isSubmitting, dirtyFields, isDirty },
   } = useForm<ValorsFormulari>({
@@ -96,14 +102,30 @@ export function FormulariCita({
       motiu: inicial.motiu,
       notes: inicial.notes,
       nouEpisodi: inicial.nouEpisodi ?? false,
+      episodiId: inicial.episodiId ?? null,
     },
   })
   // Amb canvis sense desar, les pantalles no es refresquen soles (revisio.tsx)
   useFormulariBrut(isDirty)
+  // Els episodis actius del pacient triat (si n'hi ha més d'un, es pot triar)
+  const [episodis, setEpisodis] = useState<readonly Pick<Episodi, 'id' | 'motiu'>[]>([])
   const [pacientId, dia, hora, durada, estat, nouEpisodi] = useWatch({
     control,
     name: ['pacientId', 'dia', 'hora', 'durada', 'estat', 'nouEpisodi'],
   })
+  useEffect(() => {
+    let actiu = true
+    if (!pacientId || !carregarEpisodis) return setEpisodis([])
+    void carregarEpisodis(pacientId).then((l) => {
+      if (!actiu) return
+      setEpisodis(l)
+      // Per defecte, el que ja tenia la cita o el més recent
+      if (l.length > 0 && !l.some((e) => e.id === getValues('episodiId'))) setValue('episodiId', l[0]!.id)
+    })
+    return () => {
+      actiu = false
+    }
+  }, [pacientId, carregarEpisodis, getValues, setValue])
 
   const pacient = tots.find((p) => p.id === pacientId)
   const inici = `${dia}T${hora}`
@@ -222,6 +244,17 @@ export function FormulariCita({
             <input type="checkbox" {...register('nouEpisodi')} />
             {c.nouEpisodi}
           </label>
+        )}
+        {!nouEpisodi && episodis.length > 1 && (
+          <Camp etiqueta={c.episodi} ample>
+            <select {...register('episodiId', { setValueAs: (v: string) => v || null })}>
+              {episodis.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.motiu}
+                </option>
+              ))}
+            </select>
+          </Camp>
         )}
       </div>
 

@@ -1,7 +1,8 @@
 // Pestanya Cites de la fitxa del pacient: la pròxima cita, el recompte de
 // visites i l'historial (data, tipus, estat i sessió).
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { episodisActius } from '../../domini/episodi'
 import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
@@ -43,6 +44,10 @@ export function PestanyaCites() {
     return { cites, pacients }
   }, [magatzem, pacient.id, versio])
   const [avisTipus, mostrarAvisTipus] = useAvisTipus()
+  const carregarEpisodis = useCallback(
+    async (pacientId: string) => episodisActius(await magatzem.llistarEpisodis(pacientId)),
+    [magatzem],
+  )
 
   if (carrega.estat === 'carregant') return <Indicador text={t.app.carregant} />
   if (carrega.estat === 'error') return <p role="alert">{t.app.errorInesperat}</p>
@@ -92,6 +97,7 @@ export function PestanyaCites() {
             id={obert.tipus === 'editar' ? obert.cita.id : undefined}
             inicial={obert.tipus === 'nova' ? novaCita(pacient.id, iniciNova) : obert.cita}
             pacients={pacients}
+            carregarEpisodis={carregarEpisodis}
             pacientFix
             altres={totes}
             onCancellar={() => setObert(null)}

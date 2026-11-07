@@ -12,7 +12,7 @@ import type { Cita, EstatCita, TipusCita } from './cita'
 export type CitaPerTipus = Pick<Cita, 'id' | 'pacientId' | 'inici' | 'tipus' | 'estat' | 'nouEpisodi'>
 
 /** Les cites anul·lades o no presentades no compten per saber quina és la primera */
-const compta = (estat: EstatCita) => estat === 'programada' || estat === 'feta'
+const compta = (estat: EstatCita) => estat === 'programada' || estat === 'enCurs' || estat === 'feta'
 
 /** El tipus que li toca a cada cita que compta (les fetes, el que ja tenen) */
 export function tipusCalculats(cites: readonly CitaPerTipus[]): Map<string, TipusCita> {

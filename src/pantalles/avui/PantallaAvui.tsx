@@ -8,7 +8,8 @@ import { EstatCopia } from '../../components/EstatCopia'
 import { Indicador } from '../../components/Indicador'
 import { diaDe, diaHoraDe, fiDe, sumarDies } from '../../domini/cita'
 import { nomComplet } from '../../domini/pacient'
-import { diaLlarg, hora, t } from '../../i18n/t'
+import { diaLlarg, formatar, hora, t } from '../../i18n/t'
+import { llegirAjustosVisita } from '../../db/ajustosVisita'
 import { teClauRecuperacio, teEmpremta } from '../../sessio/claus'
 import { useMagatzem, useSessio } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
@@ -22,14 +23,29 @@ export function PantallaAvui() {
   const [ara] = useState(() => new Date())
   const avui = diaDe(ara)
   const [carrega] = useCarrega(async () => {
-    const [cites, pacients, empremta, clau] = await Promise.all([
+    const [cites, pacients, empremta, clau, ajustos] = await Promise.all([
       magatzem.llistarCites(avui, sumarDies(avui, 1)),
       magatzem.llistarPacients(),
       teEmpremta(db),
       teClauRecuperacio(db),
+      llegirAjustosVisita(db),
     ])
-    return { cites, pacients, empremta, clau }
+    // Les sessions dels pacients d'avui: per saber el número de sessió de cada seguiment
+    const sessions = (await Promise.all([...new Set(cites.map((c) => c.pacientId))].map((p) => magatzem.sessionsDelPacient(p)))).flat()
+    return { cites, pacients, empremta, clau, ajustos, sessions }
   }, [magatzem, db, avui])
+  const [comencant, setComencant] = useState<string | null>(null)
+
+  /** «Començar visita»: crea la sessió (o obre la que ja hi ha) i obre la pantalla de visita */
+  async function comencar(citaId: string, minuts: number) {
+    setComencant(citaId)
+    try {
+      const s = await magatzem.comencarVisita(citaId, minuts)
+      void navegar(`/visita/${s.id}`)
+    } finally {
+      setComencant(null)
+    }
+  }
 
   const a = t.avui
   return (
@@ -71,27 +87,34 @@ export function PantallaAvui() {
                   return carrega.dades.cites.map((c) => {
                     const p = carrega.dades.pacients.find((x) => x.id === c.pacientId)
                     const esSeguent = c.id === seguent?.id
+                    const sessio = carrega.dades.sessions.find((s) => s.id === c.sessioId)
+                    const numero = sessio?.numero ?? carrega.dades.sessions.filter((s) => s.episodiId === c.episodiId).length + 1
                     return (
                       <li key={c.id} className={`estat-${c.estat}${esSeguent ? ' seguent' : ''}`}>
-                        <span className="hora">
-                          {hora(c.inici)}–{hora(fiDe(c))}
-                        </span>
-                        <span className="qui">
-                          <Link to={`/pacients/${c.pacientId}/cites`}>{p ? nomComplet(p) : '—'}</Link>
-                          <span className="detall">
-                            {t.cites.tipusNoms[c.tipus]}
-                            {c.motiu && ` · ${c.motiu}`}
-                          </span>
-                        </span>
-                        <span className={`etiqueta etiqueta-${c.estat}`}>{t.cites.estats[c.estat]}</span>
-                        {esSeguent && (
+                        <div className="cos-cita">
+                          <p className="linia-cita">
+                            <span className="hora">{hora(c.inici)}</span>
+                            <Link className="nom" to={`/pacients/${c.pacientId}/cites`}>
+                              {p ? nomComplet(p) : '—'}
+                            </Link>
+                          </p>
+                          {c.motiu && <p className="motiu-cita">{c.motiu}</p>}
+                          <p className="etiquetes-cita">
+                            <span className={`etiqueta-tipus tipus-${c.tipus}`}>
+                              {c.tipus === 'primera' ? t.cites.tipusNoms.primera : formatar(a.seguimentSessio, { n: String(numero) })}
+                            </span>
+                            <span className="durada">{formatar(a.minuts, { n: String(c.durada) })}</span>
+                            {c.estat !== 'programada' && <span className={`etiqueta etiqueta-${c.estat}`}>{t.cites.estats[c.estat]}</span>}
+                          </p>
+                        </div>
+                        {(esSeguent || c.estat === 'enCurs') && (
                           <button
                             type="button"
                             className="boto boto-principal"
-                            // Les sessions arriben a l'etapa 3: de moment obre la fitxa del pacient
-                            onClick={() => navegar(`/pacients/${c.pacientId}/cites`)}
+                            disabled={comencant === c.id}
+                            onClick={() => void comencar(c.id, carrega.dades.ajustos.minutsRetencio)}
                           >
-                            {a.comencarVisita}
+                            {c.estat === 'enCurs' ? a.continuarVisita : a.comencarVisita}
                           </button>
                         )}
                       </li>

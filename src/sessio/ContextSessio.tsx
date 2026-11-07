@@ -74,6 +74,12 @@ interface ValorSessio {
    * després de recuperar-ne les dades o de fusionar-s'hi)
    */
   adoptarClau(clau: CryptoKey): void
+  /**
+   * Retenció de les agulles en marxa fins a aquesta hora (ms): mentrestant no
+   * es bloqueja per inactivitat (la doctora és a la sala, sense tocar la
+   * tauleta). Després, torna a comptar el temps de sempre. null: cap.
+   */
+  suspendreBloqueig(fins: number | null): void
   /** Minuts sense activitat abans de bloquejar (Ajustos > Seguretat) */
   minutsBloqueig: number
   canviarMinutsBloqueig(minuts: number): Promise<void>
@@ -282,7 +288,16 @@ export function ProveidorSessio({
     void estatBloquejat(db).then((nou) => setEstat((e) => (e.tipus === 'carregant' ? nou : e)))
   }, [db])
 
-  useAutoBloqueig(estat.tipus === 'desbloquejat', bloquejar, msInactivitat ?? minutsBloqueig * 60_000)
+  const [suspesFins, suspendreBloqueig] = useState<number | null>(null)
+  const [suspes, setSuspes] = useState(false)
+  useEffect(() => {
+    const queda = suspesFins === null ? 0 : suspesFins - Date.now()
+    setSuspes(queda > 0)
+    if (queda <= 0) return
+    const tmp = window.setTimeout(() => setSuspes(false), queda)
+    return () => window.clearTimeout(tmp)
+  }, [suspesFins])
+  useAutoBloqueig(estat.tipus === 'desbloquejat' && !suspes, bloquejar, msInactivitat ?? minutsBloqueig * 60_000)
 
   const valor = useMemo<ValorSessio>(
     () => ({
@@ -300,6 +315,7 @@ export function ProveidorSessio({
       recuperar,
       bloquejar,
       adoptarClau: obrir,
+      suspendreBloqueig,
       minutsBloqueig,
       canviarMinutsBloqueig,
     }),

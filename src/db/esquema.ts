@@ -15,6 +15,11 @@ export interface RegistreXifrat {
   pacientId?: string
   /** Cites: hora d'inici local («2026-11-02T10:15»), per cercar per dies */
   inici?: string
+  /** Sessions: la cita i l'episodi (ids, en clar per trobar-les) */
+  citaId?: string
+  episodiId?: string
+  /** Addendes: la sessió */
+  sessioId?: string
   xifrat: DadesXifrades
   /** Sincronia: la versió (HLC) més alta del registre (sincronia/hlc.ts) */
   hlc?: string
@@ -99,6 +104,8 @@ export type RegistreMeta =
   | { clau: 'versionsLocals'; valor: string }
   /** Quan s'ha vist que un dispositiu amb una versió antiga escrivia a qi-dades.json (fins que la doctora ho tanca) */
   | { clau: 'versioAntigaAt'; valor: string }
+  /** S'han creat els episodis de les cites d'abans de l'etapa 3A (data) */
+  | { clau: 'episodisMigrats'; valor: string }
   | { clau: 'persistencia'; valor: { estat: 'concedida' | 'no-concedida' | 'no-disponible'; at: string } }
 
 /** Taules que se sincronitzen amb Google Drive */
@@ -113,6 +120,9 @@ export type TaulaSincronitzada =
   | 'configuracio'
   | 'diesTancats'
   | 'conflictes'
+  | 'episodis'
+  | 'sessions'
+  | 'addendes'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -184,7 +194,7 @@ export interface RegistreCategoriaPrecaucio {
  * l'agenda). No és dada de pacient.
  */
 export interface RegistreConfiguracio {
-  clau: 'horari'
+  clau: 'horari' | 'visita'
   valor: unknown
   modificatAt: string
   /** Sincronia: versió (HLC) del registre */
@@ -206,7 +216,7 @@ export interface RegistreDiaTancat {
   hlc?: string
 }
 
-export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites' | 'conflictes'
+export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites' | 'conflictes' | 'episodis' | 'sessions' | 'addendes'
 
 export class QiDB extends Dexie {
   meta!: Table<RegistreMeta, RegistreMeta['clau']>
@@ -228,6 +238,12 @@ export class QiDB extends Dexie {
    * alhora (xifrades): la doctora les revisa. `pacientId` en clar per trobar-les.
    */
   conflictes!: Table<RegistreConflicte, string>
+  /** Episodis (problemes de salut) de cada pacient (etapa 3A) */
+  episodis!: Table<RegistreXifrat, string>
+  /** Sessions (visites): una per cita feta */
+  sessions!: Table<RegistreXifrat, string>
+  /** Addendes de les sessions tancades: només s'afegeixen */
+  addendes!: Table<RegistreXifrat, string>
   /** Cua de canvis pendents de pujar a Drive (i diari propi fins que una foto el cobreix) */
   canvisPropis!: Table<CanviPropi, string>
   /** Registres de taules que aquesta versió no coneix (d'una versió més nova) */
@@ -288,6 +304,11 @@ export class QiDB extends Dexie {
     this.version(11).stores({
       canvisPropis: 'id, seq',
       desconegudes: 'id',
+    })
+    this.version(12).stores({
+      episodis: 'id, pacientId',
+      sessions: 'id, pacientId, citaId, episodiId',
+      addendes: 'id, sessioId, pacientId',
     })
   }
 }

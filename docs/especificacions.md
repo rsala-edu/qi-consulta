@@ -126,6 +126,52 @@ Set entitats: el pacient és el centre, cada sessió penja d'un pacient i cada p
 
 La llengua i el pols es guarden com a camps estructurats (llistes tancades: color, saburra, forma; pols superficial, profund, ràpid, lent, etc.) més un camp de text lliure. Això permet fer cerques i gràfiques més endavant.
 
+## Etapa 3A: la base de la visita (model de dades)
+
+Totes les taules noves són **clíniques**: van xifrades com la resta (en clar
+només l'id, l'id del pacient i les dates), se sincronitzen amb el format 2
+(docs/sincronia.md, 8) i es fusionen **camp a camp** amb el rellotge lògic. Si
+un camp s'edita alhora en dos dispositius, el valor que perd queda per revisar.
+
+| Entitat (taula) | Camps | Relació i regles |
+| --- | --- | --- |
+| **Episodi** (`episodis`) | pacient (en clar), motiu («Lumbàlgia»), data d'inici, estat (actiu, alta, millora parcial, abandonament), data i nota finals | N per pacient. La casella «Nou episodi» de la cita n'obre un de nou |
+| **Cita** (`cites`, ja existeix) | + **episodi** | Una cita de seguiment s'enganxa a l'episodi actiu del pacient. Si n'hi ha més d'un, el formulari deixa triar |
+| **Sessió** (`sessions`) | pacient (en clar), cita, episodi, número dins l'episodi, hora d'inici i de final, estat (en curs, tancada), retenció (hora d'inici i minuts), «Com està», «Exploració», punts, control d'agulles i «Tancar» | 1 per cita feta. «Tancada amb addendes» és una sessió tancada que en té |
+| **Punts de la sessió** (dins la sessió) | per a cada punt: mapa (cos, orella), codi, costat, tècnica, mètode, profunditat, temps i notes | Es desen com un mapa `mapa:codi → punt`, de manera que dos dispositius que hi afegeixen punts diferents no entren en conflicte |
+| **Addenda** (`addendes`) | sessió, pacient (en clar), text, data i hora | Només s'afegeixen; no es modifiquen ni s'esborren |
+
+**Seccions de la sessió**
+
+- **Com està:** «Canvis des de l'última sessió» (text), escala 0–10 del
+  símptoma principal (amb la de l'última sessió al costat) i fins a dos
+  símptomes secundaris, cadascun amb nom i escala.
+- **Exploració:** llengua i pols en text lliure (a la 3B, catàlegs).
+- **Tractament:** els punts (cos i orella). «Repetir el tractament de l'última
+  sessió» copia tots els punts de l'última sessió tancada de l'episodi.
+- **Control d'agulles:** agulles posades (automàtic: els punts amb tècnica
+  «agulla», bilateral = 2; es pot corregir a mà), agulles retirades i, si no
+  quadra, el motiu.
+- **Tancar:** recomanacions, reaccions o incidències, i «Cap incidència».
+
+**Regles**
+
+- **Migració:** per a cada pacient amb cites, es crea un episodi amb el motiu de
+  la seva primera visita (o «Primera visita», si no en té) i s'hi enganxen les
+  cites. Si una cita antiga té «Nou episodi», a partir d'ella s'obre un altre
+  episodi. Els identificadors depenen del pacient i de la primera cita de
+  l'episodi: si dos dispositius migren alhora, creen el mateix episodi, no dos.
+- **Número de sessió:** l'ordre de la sessió dins l'episodi (per data d'inici).
+- **Temporitzador de retenció:** es desa l'hora d'inici i els minuts. El temps
+  que queda sempre es calcula a partir de l'hora, mai amb un comptador: si la
+  pantalla s'apaga, en tornar continua bé.
+- **Finalitzar:** posa l'hora de final, tanca la sessió i passa la cita a
+  «feta». Durant 24 hores es pot editar («Editable fins demà a les 17:20»).
+  Després és de només lectura i només s'hi poden afegir addendes. Una sessió
+  tancada no es pot esborrar.
+- **Ajustos > Visita** (comuns a tots els dispositius, com l'horari): minuts
+  de retenció per defecte (28), so en acabar (sí) i control d'agulles (sí).
+
 ## Pantalles i flux d'ús
 
 Sis pantalles cobreixen l'MVP. L'estil segueix la línia que volíeu per a la web: zen, clar, amb molt d'espai i botons grans per a la tauleta.

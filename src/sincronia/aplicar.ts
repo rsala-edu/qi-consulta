@@ -127,17 +127,29 @@ async function aplicarUn(
   throw new Error(`No s'ha pogut aplicar ${e.taula}`)
 }
 
-/** Desa els conflictes que encara no hi són (ni s'han resolt ja). Dins una transacció. */
+/**
+ * Desa els conflictes que encara no hi són (ni s'han resolt ja). Dins una
+ * transacció amb conflictes, esborrats, canvisPropis i meta. S'apunten a la
+ * cua: el valor que ha perdut només és aquí (el diari d'aquest dispositiu ja
+ * porta el guanyador), i l'altre dispositiu també l'ha de poder revisar.
+ */
 async function desarConflictes(db: QiDB, conflictes: readonly (RegistreConflicte & { hlc: string })[]): Promise<number> {
-  let n = 0
+  const nous: string[] = []
   for (const c of conflictes) {
     if (await db.conflictes.get(c.id)) continue
     const resolt = await db.esborrats.get(`conflictes:${c.id}`)
     if (resolt && hlcEsborrat(resolt) >= c.hlc) continue
     await db.conflictes.put(c)
-    n++
+    nous.push(c.id)
   }
-  return n
+  if (nous.length > 0) {
+    await encuar(
+      db,
+      nous.map((clau) => ({ taula: 'conflictes', clau })),
+      (await rellotgeDe(db)).rellotge.actual,
+    )
+  }
+  return nous.length
 }
 
 /**

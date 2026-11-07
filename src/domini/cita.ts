@@ -11,8 +11,8 @@ import type { Registre } from './registre'
 export const TIPUS_CITA = ['primera', 'seguiment'] as const
 export type TipusCita = (typeof TIPUS_CITA)[number]
 
-/** Programada → Feta (crea la sessió), Anul·lada o No presentat. */
-export const ESTATS_CITA = ['programada', 'feta', 'anullada', 'noPresentat'] as const
+/** Programada → En curs (s'ha començat la visita) → Feta (sessió tancada); o Anul·lada, o No presentat. */
+export const ESTATS_CITA = ['programada', 'enCurs', 'feta', 'anullada', 'noPresentat'] as const
 export type EstatCita = (typeof ESTATS_CITA)[number]
 
 /** 60 minuts la primera visita i 40 el seguiment */
@@ -36,6 +36,8 @@ export const esquemaDadesCita = z.object({
   sessioId: z.string().nullable(),
   /** Primera visita per un problema nou, encara que n'hi hagi d'anteriors (les cites antigues no el tenen) */
   nouEpisodi: z.boolean().default(false),
+  /** L'episodi (problema de salut) al qual pertany (les cites d'abans de l'etapa 3A no el tenen fins que es migren) */
+  episodiId: z.string().nullable().default(null),
 })
 export type DadesCita = z.infer<typeof esquemaDadesCita>
 
@@ -56,6 +58,7 @@ export function novaCita(pacientId: string, inici: string, tipus: TipusCita = 's
     notes: '',
     sessioId: null,
     nouEpisodi: false,
+    episodiId: null,
   }
 }
 
@@ -128,7 +131,7 @@ export function horaPassada(inici: string, ara: Date): boolean {
 
 /** Les cites anul·lades o no presentades ja no ocupen l'hora. */
 export function ocupaHora(c: Pick<DadesCita, 'estat'>): boolean {
-  return c.estat === 'programada' || c.estat === 'feta'
+  return c.estat === 'programada' || c.estat === 'enCurs' || c.estat === 'feta'
 }
 
 type Interval = Pick<DadesCita, 'inici' | 'durada' | 'estat'> & { id?: string }
