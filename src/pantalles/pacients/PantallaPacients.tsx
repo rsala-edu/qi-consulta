@@ -56,7 +56,11 @@ export function PantallaPacients() {
                 <Link to={`/pacients/${p.id}`}>
                   <span className="nom">{nomComplet(p)}</span>
                   <span className="detall">{p.telefon}</span>
-                  {p.arxivat && <span className="etiqueta">{t.pacients.arxivat}</span>}
+                  {p.arxivat && (
+                    <span className="etiqueta">
+                      {p.ajuntadaAmb && p.ajuntadaAmb.desfetAt === null ? t.pacients.ajuntada : t.pacients.arxivat}
+                    </span>
+                  )}
                   {p.revisarDuplicat && p.revisarDuplicat.length > 0 && (
                     <span className="etiqueta etiqueta-precaucio">{t.pacients.possibleDuplicat}</span>
                   )}

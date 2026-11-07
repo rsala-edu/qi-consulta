@@ -9,6 +9,8 @@
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 
 interface ValorRevisio {
+  /** Quantes vegades la sincronia ha portat canvis d'un altre dispositiu (sense esperar els formularis) */
+  revisio: number
   /** Número de la versió de les dades que mostren les pantalles */
   vista: number
   /** Han arribat canvis que no es mostren perquè hi ha un formulari a mig fer */
@@ -40,7 +42,7 @@ export function ProveidorRevisio({ revisio, children }: { revisio: number; child
   }, [])
 
   const valor = useMemo(
-    () => ({ vista, canvisPerVeure: revisio !== vista, veure, marcarBrut }),
+    () => ({ revisio, vista, canvisPerVeure: revisio !== vista, veure, marcarBrut }),
     [vista, revisio, veure, marcarBrut],
   )
   return <Context.Provider value={valor}>{children}</Context.Provider>
@@ -49,6 +51,11 @@ export function ProveidorRevisio({ revisio, children }: { revisio: number; child
 /** La versió de les dades que mostren les pantalles (0 fora del proveïdor: proves) */
 export function useVistaDades(): number {
   return useContext(Context)?.vista ?? 0
+}
+
+/** Puja cada cop que arriben canvis d'un altre dispositiu (encara que no es mostrin) */
+export function useRevisioSincronia(): number {
+  return useContext(Context)?.revisio ?? 0
 }
 
 export function useCanvisPerVeure(): { canvisPerVeure: boolean; veure(): void } {

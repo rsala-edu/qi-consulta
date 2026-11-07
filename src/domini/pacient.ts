@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { t } from '../i18n/t'
 import type { Registre } from './registre'
+import { esquemaAjuntament } from './ajuntar'
 
 const text = z.string().trim()
 
@@ -33,6 +34,8 @@ export const esquemaPacientGuardat = esquemaDadesPacient.extend({
    * fusionen soles: la doctora les revisa.
    */
   revisarDuplicat: z.array(z.string()).optional(),
+  /** Aquesta fitxa s'ha ajuntat amb una altra (la que es queda): el que cal per desfer-ho */
+  ajuntadaAmb: esquemaAjuntament.optional(),
 })
 export type PacientGuardat = z.infer<typeof esquemaPacientGuardat>
 

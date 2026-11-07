@@ -43,11 +43,12 @@ async function entrar(page: Page) {
   await expect(page.getByRole('heading', { name: 'Avui', exact: true })).toBeVisible()
 }
 
-async function pacient(page: Page, nom: string, llinatges: string) {
+async function pacient(page: Page, nom: string, llinatges: string, altres: Record<string, string> = {}) {
   await menu(page, 'Pacients').click()
   await page.getByRole('link', { name: 'Nou pacient' }).click()
   await page.getByLabel('Nom', { exact: true }).fill(nom)
   await page.getByLabel('Llinatges').fill(llinatges)
+  for (const [camp, valor] of Object.entries(altres)) await page.getByLabel(camp).fill(valor)
   await page.getByRole('button', { name: 'Desar' }).first().click()
   await expect(page.getByRole('heading', { name: `${nom} ${llinatges}` })).toBeVisible()
 }
@@ -152,4 +153,29 @@ test('Visita', async ({ page }) => {
   await page.getByRole('link', { name: 'Tractaments' }).click()
   await expect(page.getByRole('article', { name: 'Lumbàlgia' })).toBeVisible()
   await capturar(page, 'tractaments')
+})
+
+test('Ajuntar fitxes', async ({ page }) => {
+  await entrar(page)
+  await pacient(page, 'Carla', 'Exemple Inventada', { Telèfon: '600 111 222' })
+  await pacient(page, 'Karla', 'Exemple Inventada', { Telèfon: '600 999 888', Professió: 'Mestra' })
+  await cita(page, 'Carla Exemple', dia(1), '10:00', 'Lumbàlgia')
+  await cita(page, 'Karla Exemple', dia(1), '10:00', 'Lumbàlgia')
+  await cita(page, 'Karla Exemple', dia(8), '10:00', 'Lumbàlgia')
+  await menu(page, 'Pacients').click()
+  await page.getByRole('list', { name: 'Pacients' }).getByRole('link', { name: /Carla/ }).click()
+  await page.getByRole('link', { name: 'Ajuntar amb una altra fitxa…' }).click()
+  await capturar(page, 'ajuntar-triar')
+  await page.getByRole('list', { name: 'Ajuntar fitxes' }).getByRole('link', { name: /Karla/ }).click()
+  await expect(page.getByRole('button', { name: 'Confirmar: ajuntar les fitxes' })).toBeVisible()
+  await capturar(page, 'ajuntar-comparacio')
+  await page.getByRole('group', { name: 'Nom' }).getByRole('radio', { name: /Carla/ }).check()
+  await page.getByRole('button', { name: 'Confirmar: ajuntar les fitxes' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Fitxes ajuntades' })).toBeVisible()
+  await capturar(page, 'ajuntar-fet', false)
+  await menu(page, 'Pacients').click()
+  await page.getByLabel('Mostrar arxivats').check()
+  await page.getByRole('list', { name: 'Pacients' }).getByRole('link', { name: /Karla/ }).click()
+  await expect(page.getByRole('button', { name: /^Desfer/ })).toBeVisible()
+  await capturar(page, 'ajuntada-desfer', false)
 })

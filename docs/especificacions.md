@@ -357,3 +357,14 @@ Funcionalitats que es poden afegir més endavant si la doctora les necessita.
 - [ ] Orella: cara posterior (P1–P5 i PS) i arrel de l'orella (R1–R3) de l'estàndard GB/T 13734-2008, amb un segon dibuix de la cara posterior (9 punts)
 - [ ] Cara posterior de l'orella: segon dibuix pla segons GB/T 13734-2008 i botó «Girar l'orella» amb animació de gir.
 - [ ] Revisar l'empremta amb la doctora a la tauleta.
+
+## Ajuntar fitxes duplicades
+
+Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplicat» o qualsevol fitxa, amb «Ajuntar amb una altra fitxa…»):
+
+- **Comparació a dues columnes** (dades del pacient i fitxa clínica): els camps iguals surten una vegada; els que només són en una fitxa es queden; on són diferents, la doctora tria, i per defecte surt marcat el de la fitxa modificada més recentment. Les contraindicacions marcades en una fitxa es queden marcades. Per defecte es queda la fitxa des d'on s'ha vingut; «Que es quedi l'altra» ho intercanvia.
+- **En confirmar:** les cites, els episodis, les sessions i les addendes passen a la fitxa que es queda. Si una cita és a totes dues fitxes (mateix dia, hora i durada), se'n treu una: es queda la que té la visita feta (si totes dues en tenen, no se'n treu cap). Ho diu en acabar.
+- **La fitxa que es treu** no s'esborra: s'arxiva, amb l'avís «Aquesta fitxa es va ajuntar amb … el …» i el botó «Desfer» durant 30 dies. Les seves dades no es toquen: res no es perd.
+- **Desfer** torna cada cosa a la seva fitxa, torna a posar les cites repetides que es van treure i retorna les dades d'abans a la fitxa que es quedava (excepte els camps que s'han tornat a editar després).
+- Es recalcula quina cita és la primera visita i quines són seguiment.
+- **Amb diversos dispositius:** tot el que calgui per desfer-ho va xifrat dins la fitxa arxivada i se sincronitza. Si un altre dispositiu, abans de saber-ho, crea una cita (o una sessió) per a la fitxa vella, en rebre l'ajuntament passa sola a la fitxa que es queda.

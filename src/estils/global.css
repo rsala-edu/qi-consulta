@@ -3132,3 +3132,108 @@ fieldset {
   background: var(--avis-suau);
   border-bottom-color: var(--avis);
 }
+
+/* --- Ajuntar fitxes (part 2) --- */
+.pantalla-ajuntar section {
+  margin-top: 1.5rem;
+}
+.pantalla-ajuntar h2 {
+  font-size: 1.1rem;
+}
+.dues-columnes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.columna-ajuntar {
+  background: var(--clar);
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  padding: 12px 16px;
+}
+.columna-ajuntar h2 {
+  margin: 0.3rem 0;
+}
+.columna-ajuntar .detall {
+  margin: 0.2rem 0;
+}
+.camp-ajuntar {
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  padding: 8px 12px 12px;
+  margin: 0 0 10px;
+}
+.camp-ajuntar legend {
+  font-weight: 600;
+  padding: 0 4px;
+}
+.opcio-ajuntar {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  min-height: var(--toc);
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--clar);
+  overflow-wrap: anywhere;
+}
+.opcio-ajuntar:has(input:checked) {
+  background: var(--accent-suau);
+  outline: 2px solid var(--accent);
+}
+.camps-ajuntar {
+  margin: 0;
+}
+.camps-ajuntar > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--linia);
+}
+.camps-ajuntar dt {
+  color: var(--tinta-suau);
+}
+.camps-ajuntar dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.resum-ajuntar {
+  margin-top: 1.5rem;
+  padding: 12px 16px;
+  border-radius: var(--radi);
+  background: var(--accent-suau);
+}
+.resum-ajuntar p {
+  margin: 0.3rem 0;
+}
+.avis-ajuntades {
+  color: var(--tinta);
+  background: var(--accent-suau);
+  border-radius: var(--radi);
+  padding: 8px 16px;
+}
+.avis-ajuntada {
+  color: var(--tinta);
+  background: var(--avis-suau);
+  border-radius: var(--radi);
+  padding: 8px 16px;
+}
+@media (max-width: 560px) {
+  .dues-columnes,
+  .camps-ajuntar > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.opcio-ajuntar input[type='radio'] {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+.opcio-ajuntar > span:first-of-type {
+  flex: 1;
+}

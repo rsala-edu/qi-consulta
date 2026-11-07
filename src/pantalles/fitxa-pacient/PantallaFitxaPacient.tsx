@@ -1,7 +1,9 @@
-import { Link, NavLink, Outlet, useOutletContext, useParams } from 'react-router'
+import { useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useOutletContext, useParams } from 'react-router'
+import { AvisAjuntada, type EstatAjuntades } from '../pacients/PantallaAjuntar'
 import { Indicador } from '../../components/Indicador'
 import { nomComplet, type Pacient } from '../../domini/pacient'
-import { t } from '../../i18n/t'
+import { formatar, t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
 
@@ -26,7 +28,11 @@ const PESTANYES_FUTURES = [p.valoracions, p.evolucio]
 export function PantallaFitxaPacient() {
   const { id = '' } = useParams()
   const magatzem = useMagatzem()
-  const [carrega, substituir] = useCarrega(() => magatzem.obtenirPacient(id), [magatzem, id])
+  const [desfet, setDesfet] = useState(0)
+  const [carrega, substituir] = useCarrega(() => magatzem.obtenirPacient(id), [magatzem, id, desfet])
+  // En arribar d'ajuntar dues fitxes: què s'hi ha mogut
+  const ajuntades = (useLocation().state as EstatAjuntades | null)?.ajuntades
+  const [desfetAra, setDesfetAra] = useState(false)
 
   return (
     <main className="pantalla">
@@ -39,7 +45,31 @@ export function PantallaFitxaPacient() {
       {carrega.estat === 'llest' && carrega.dades && (
         <>
           <h1>{nomComplet(carrega.dades)}</h1>
-          {carrega.dades.arxivat && <p className="avis">{t.fitxa.avisArxivat}</p>}
+          {ajuntades && (
+            <div className="avis avis-ajuntades" role="status">
+              <p>
+                {formatar(t.ajuntar.fetes, {
+                  cites: String(ajuntades.cites),
+                  episodis: String(ajuntades.episodis),
+                  sessions: String(ajuntades.sessions),
+                  addendes: String(ajuntades.addendes),
+                })}
+              </p>
+              {ajuntades.citesRepetides > 0 && <p>{formatar(t.ajuntar.repetidesTretes, { n: String(ajuntades.citesRepetides) })}</p>}
+            </div>
+          )}
+          {desfetAra && <p className="avis" role="status">{t.ajuntar.desfet}</p>}
+          {carrega.dades.ajuntadaAmb && carrega.dades.ajuntadaAmb.desfetAt === null ? (
+            <AvisAjuntada
+              pacient={carrega.dades}
+              onDesfet={() => {
+                setDesfetAra(true)
+                setDesfet((n) => n + 1)
+              }}
+            />
+          ) : (
+            carrega.dades.arxivat && <p className="avis">{t.fitxa.avisArxivat}</p>
+          )}
           <nav className="pestanyes" aria-label={nomComplet(carrega.dades)}>
             {PESTANYES_ACTIVES.map(({ ruta, text }) => (
               <NavLink key={ruta} to={ruta} className="pestanya">

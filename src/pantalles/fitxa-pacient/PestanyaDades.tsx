@@ -62,6 +62,11 @@ export function PestanyaDades() {
         onDesar={async (noves) => actualitzarPacient(await magatzem.actualitzarPacient(id, noves, dadesDePacient(pacient)))}
       />
       <div className="zona-arxiu">
+        {!pacient.ajuntadaAmb || pacient.ajuntadaAmb.desfetAt !== null ? (
+          <Link className="boto boto-discret" to={`/pacients/${id}/ajuntar`}>
+            {t.ajuntar.ajuntarAmbAltra}
+          </Link>
+        ) : null}
         <Boto variant="discret" onClick={canviarArxiu} disabled={arxivant}>
           {arxivat ? t.fitxa.desarxivar : t.fitxa.arxivar}
         </Boto>
@@ -89,6 +94,9 @@ function AvisDuplicat() {
         altres.dades.map((a) => (
           <p key={a.id} className="accions accions-esquerra">
             <Link to={`/pacients/${a.id}/dades`}>{formatar(t.pacients.veureAltra, { nom: nomComplet(a) })}</Link>
+            <Link className="boto boto-secundari" to={`/pacients/${pacient.id}/ajuntar/${a.id}`}>
+              {t.pacients.ajuntarAmbAquesta}
+            </Link>
             <Boto
               variant="discret"
               onClick={() => void magatzem.descartarDuplicat(pacient.id, a.id).then(actualitzarPacient)}

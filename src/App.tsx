@@ -16,6 +16,7 @@ import { PantallaFitxaPacient } from './pantalles/fitxa-pacient/PantallaFitxaPac
 import { PantallaDesbloqueig, PantallaGoogle } from './pantalles/desbloqueig/PantallaDesbloqueig'
 import { PantallaNouPacient } from './pantalles/pacients/PantallaNouPacient'
 import { PantallaPacients } from './pantalles/pacients/PantallaPacients'
+import { PantallaAjuntar } from './pantalles/pacients/PantallaAjuntar'
 import { PantallaAjustos } from './pantalles/ajustos/PantallaAjustos'
 import { PantallaPrecaucions } from './pantalles/ajustos/PantallaPrecaucions'
 import { PantallaSeguretat } from './pantalles/ajustos/PantallaSeguretat'
@@ -45,9 +46,23 @@ const PantallaCalibratge = lazy(() =>
 const PantallaProvaMapa = lazy(() =>
   import('./pantalles/mapa/PantallaProvaMapa').then((m) => ({ default: m.PantallaProvaMapa })),
 )
+import { useRevisioSincronia } from './sincronia/revisio'
 import { DialegEsborranys } from './pantalles/desbloqueig/DialegEsborranys'
 import { ProveidorEsborranys } from './sessio/ContextEsborranys'
 import { ProveidorSessio, useMagatzem, useSessio } from './sessio/ContextSessio'
+
+/**
+ * Fitxes ajuntades: el que un altre dispositiu hagi creat per a la fitxa que
+ * es va treure passa a la que es queda (en obrir i cada cop que arriben canvis)
+ */
+function RedireccioAjuntades() {
+  const magatzem = useMagatzem()
+  const revisio = useRevisioSincronia()
+  useEffect(() => {
+    void magatzem.redirigirAjuntades().catch(() => {})
+  }, [magatzem, revisio])
+  return null
+}
 
 function Marc() {
   const { bloquejar, db } = useSessio()
@@ -64,6 +79,7 @@ function Marc() {
   return (
     <ProveidorSincronia>
       <ProveidorEsborranys magatzem={magatzem}>
+        <RedireccioAjuntades />
         <header className="barra-app">
           <span className="logotip">
           <Simbol />
@@ -192,6 +208,7 @@ function PortaOberta() {
             <Route path="agenda" element={<P codi="UI-AGENDA"><PantallaAgenda /></P>} />
             <Route path="pacients" element={<P codi="UI-PACIENTS"><PantallaPacients /></P>} />
             <Route path="pacients/nou" element={<P codi="UI-NOU"><PantallaNouPacient /></P>} />
+            <Route path="pacients/:id/ajuntar/:altreId?" element={<P codi="UI-AJUNTAR"><PantallaAjuntar /></P>} />
             <Route path="pacients/:id" element={<P codi="UI-FITXA"><PantallaFitxaPacient /></P>}>
               <Route index element={<Navigate to="dades" replace />} />
               <Route path="dades" element={<P codi="UI-FITXA-DADES"><PestanyaDades /></P>} />

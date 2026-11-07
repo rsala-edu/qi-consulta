@@ -30,6 +30,15 @@ import {
   type Sessio,
 } from '../domini/sessio'
 import { desarPerCamp, desarSencer, esborrarRegistres } from '../sincronia/escriptura'
+import {
+  citesRepetides,
+  esPotDesfer,
+  valorsDesfets,
+  type Ajuntament,
+  type FitxaPerAjuntar,
+} from '../domini/ajuntar'
+import { dadesDePacient } from '../domini/pacient'
+import { recalcularTipusVisita } from './tipusVisita'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
 
 /** Les dades associades lliguen cada text xifrat a la seva taula i al seu id. */
@@ -90,6 +99,32 @@ export interface Magatzem {
   finalitzarSessio(id: string, agulles: { retirades: number | null; motiu: string }): Promise<Sessio>
   addendesDe(sessioId: string): Promise<Addenda[]>
   afegirAddenda(sessioId: string, text: string): Promise<Addenda>
+
+  // --- Part 2: ajuntar fitxes de la mateixa persona ---
+  /** Les dades del pacient i la fitxa clínica per comparar-les */
+  dadesPerAjuntar(pacientId: string): Promise<FitxaPerAjuntar>
+  /**
+   * Ajunta `treuId` a `quedaId`: les cites, episodis, sessions i addendes
+   * passen a `quedaId`, que es queda amb `dades`; les cites repetides es
+   * treuen, i `treuId` s'arxiva amb tot el que cal per desfer-ho.
+   */
+  ajuntarPacients(quedaId: string, treuId: string, dades: { pacient: DadesPacient; fitxa: DadesFitxaClinica }): Promise<InformeAjuntament>
+  /** Desfà l'ajuntament (dins dels 30 dies): cada cosa torna a la seva fitxa */
+  desferAjuntament(treuId: string): Promise<void>
+  /**
+   * El que un altre dispositiu hagi creat per a una fitxa ja ajuntada (abans
+   * de saber-ho) passa a la fitxa que es queda. Torna quants registres ha mogut.
+   */
+  redirigirAjuntades(): Promise<number>
+}
+
+export interface InformeAjuntament {
+  cites: number
+  episodis: number
+  sessions: number
+  addendes: number
+  /** Cites que eren a totes dues fitxes (mateix dia, hora i durada) i se n'ha tret una */
+  citesRepetides: number
 }
 
 /** La sessió fa més de 24 hores que es va tancar: només s'hi poden afegir addendes */
@@ -179,6 +214,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
         arxivat: actual.arxivat,
         // L'avís de possible duplicat es manté fins que la doctora el revisa
         ...(actual.revisarDuplicat ? { revisarDuplicat: actual.revisarDuplicat } : {}),
+        ...(actual.ajuntadaAmb ? { ajuntadaAmb: actual.ajuntadaAmb } : {}),
       }
       return guardarPacient(id, actual.creatAt, { ...dades, ...extres }, inicial ? { ...inicial, ...extres } : undefined)
     },
@@ -474,6 +510,198 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
         id,
       )
       return { id, creatAt: at, modificatAt: at, pacientId: s.pacientId, ...dades }
+    },
+  })
+
+
+  // --- Ajuntar fitxes ---
+
+  const senseMeta = <T extends { id: string; creatAt: string; modificatAt: string }>(x: T) => {
+    const { id: _i, creatAt: _c, modificatAt: _m, ...resta } = x
+    return resta
+  }
+
+  /** Passa un registre d'un pacient a un altre (només canvia el pacient: la resta es manté) */
+  async function moure(taula: 'cites' | 'episodis' | 'sessions' | 'addendes', id: string, a: string): Promise<boolean> {
+    if (taula === 'cites') {
+      const c = await magatzem.obtenirCita(id)
+      if (!c || c.pacientId === a) return false
+      const d = senseMeta(c)
+      await guardarCita(id, c.creatAt, { ...d, pacientId: a }, d)
+    } else if (taula === 'episodis') {
+      const r = await db.episodis.get(id)
+      if (!r || r.pacientId === a) return false
+      const e = senseMeta(await llegirEpisodi(r))
+      const { pacientId, ...dades } = e
+      await desarPerCamp(
+        db,
+        clau,
+        'episodis',
+        { id, creatAt: r.creatAt, modificatAt: araIso(), pacientId: a },
+        dades,
+        Object.keys(esquemaDadesEpisodi.shape),
+        { ...dades, pacientId },
+      )
+    } else if (taula === 'sessions') {
+      const s = await magatzem.obtenirSessio(id)
+      if (!s || s.pacientId === a) return false
+      const { pacientId: _p, ...dades } = senseMeta(s)
+      await guardarSessio(id, a, dades, dades)
+    } else {
+      const r = await db.addendes.get(id)
+      if (!r || r.pacientId === a) return false
+      await desarSencer(db, 'addendes', { ...r, pacientId: a, modificatAt: araIso() }, id)
+    }
+    return true
+  }
+
+  async function idsDe(taula: 'cites' | 'episodis' | 'sessions' | 'addendes', pacientId: string): Promise<string[]> {
+    return (await db.table(taula).where('pacientId').equals(pacientId).primaryKeys()) as string[]
+  }
+
+  /** La fitxa on ha d'anar a parar tot el d'un pacient ajuntat (si s'ha ajuntat més d'un cop, la del final) */
+  async function desti(p: Pacient): Promise<string | null> {
+    let actual = p
+    for (let i = 0; i < 10 && actual.ajuntadaAmb && actual.ajuntadaAmb.desfetAt === null; i++) {
+      const seguent = await magatzem.obtenirPacient(actual.ajuntadaAmb.pacientId)
+      if (!seguent) break
+      actual = seguent
+    }
+    return actual.id === p.id ? null : actual.id
+  }
+
+  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes'] as const
+
+  Object.assign(magatzem, {
+    async dadesPerAjuntar(pacientId: string): Promise<FitxaPerAjuntar> {
+      const p = await pacientExistent(pacientId)
+      const f = await magatzem.obtenirFitxaClinica(pacientId)
+      const { id: _i, creatAt: _c, modificatAt, pacientId: _p, ...fitxa } = f
+      return {
+        pacient: dadesDePacient(p),
+        fitxa: f.id ? fitxa : null,
+        pacientModificatAt: p.modificatAt,
+        fitxaModificatAt: f.id ? modificatAt : null,
+      }
+    },
+
+    async ajuntarPacients(quedaId: string, treuId: string, dades: { pacient: DadesPacient; fitxa: DadesFitxaClinica }) {
+      if (quedaId === treuId) throw new Error('No es pot ajuntar una fitxa amb ella mateixa')
+      const queda = await pacientExistent(quedaId)
+      const treu = await pacientExistent(treuId)
+      if (treu.ajuntadaAmb && treu.ajuntadaAmb.desfetAt === null) throw new Error('Aquesta fitxa ja està ajuntada')
+      const fitxaAbans = await magatzem.dadesPerAjuntar(quedaId)
+      const at = araIso()
+
+      // Cites repetides (mateix dia, hora i durada): se'n treu una i es guarda per poder-la tornar a posar
+      const repetides = citesRepetides(await magatzem.citesDelPacient(quedaId), await magatzem.citesDelPacient(treuId))
+      const citesTretes = repetides.map(({ treure }) => ({ id: treure.id, pacientId: treure.pacientId, dades: senseMeta(treure) }))
+      await esborrarRegistres(db, 'cites', citesTretes.map((c) => c.id))
+
+      // Primer els episodis (les cites i les sessions hi apunten), després la resta
+      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [] }
+      for (const taula of TAULES_MOGUDES) {
+        for (const id of await idsDe(taula, treuId)) if (await moure(taula, id, quedaId)) moguts[taula].push(id)
+      }
+
+      // La fitxa que es queda, amb les dades triades
+      const duplicatsAbans = { queda: queda.revisarDuplicat ?? [], treu: treu.revisarDuplicat ?? [] }
+      const sense = (l: string[], x: string) => {
+        const r = l.filter((y) => y !== x)
+        return r.length > 0 ? { revisarDuplicat: r } : {}
+      }
+      const { revisarDuplicat: _rq, ...restaQueda } = queda
+      await guardarPacient(quedaId, queda.creatAt, { ...restaQueda, ...dades.pacient, arxivat: false, ...sense(duplicatsAbans.queda, treuId) })
+      const teFitxa = fitxaAbans.fitxa !== null || (await db.fitxesCliniques.where('pacientId').equals(treuId).count()) > 0
+      if (teFitxa) await magatzem.desarFitxaClinica(quedaId, dades.fitxa)
+
+      // La que es treu: arxivada, amb el que cal per desfer-ho
+      const ajuntament: Ajuntament = {
+        pacientId: quedaId,
+        at,
+        desfetAt: null,
+        moguts,
+        citesTretes,
+        abans: { pacient: fitxaAbans.pacient, fitxa: fitxaAbans.fitxa },
+        despres: { pacient: dades.pacient, fitxa: dades.fitxa },
+        duplicatsAbans,
+      }
+      const { revisarDuplicat: _rt, ...restaTreu } = treu
+      await guardarPacient(treuId, treu.creatAt, { ...restaTreu, arxivat: true, ...sense(duplicatsAbans.treu, quedaId), ajuntadaAmb: ajuntament })
+
+      await recalcularTipusVisita(magatzem, [quedaId])
+      return {
+        cites: moguts.cites.length,
+        episodis: moguts.episodis.length,
+        sessions: moguts.sessions.length,
+        addendes: moguts.addendes.length,
+        citesRepetides: citesTretes.length,
+      }
+    },
+
+    async desferAjuntament(treuId: string) {
+      const treu = await pacientExistent(treuId)
+      const a = treu.ajuntadaAmb
+      if (!a || !esPotDesfer(a, Date.now())) throw new Error('Aquest ajuntament ja no es pot desfer')
+      const quedaId = a.pacientId
+      // Primer es marca desfet: així ningú (ni un altre dispositiu) no ho torna a moure
+      const { revisarDuplicat: _rt, ...restaTreu } = treu
+      await guardarPacient(treuId, treu.creatAt, {
+        ...restaTreu,
+        arxivat: false,
+        ...(a.duplicatsAbans.treu.length > 0 ? { revisarDuplicat: a.duplicatsAbans.treu } : {}),
+        ajuntadaAmb: { ...a, desfetAt: araIso() },
+      })
+      // Cada cosa torna a la seva fitxa (si encara és a la que es quedava)
+      for (const taula of TAULES_MOGUDES) {
+        for (const id of a.moguts[taula]) {
+          const r = await db.table(taula).get(id)
+          if (r?.pacientId === quedaId) await moure(taula, id, treuId)
+        }
+      }
+      // Les cites repetides que es van treure (amb un id nou: el vell està esborrat)
+      for (const c of a.citesTretes) {
+        if (!(await db.pacients.get(c.pacientId))) continue
+        await guardarCita(nouId(), araIso(), { ...c.dades, pacientId: c.pacientId })
+      }
+      // Les dades de la que es quedava tornen a ser les d'abans (excepte el que s'hagi editat després)
+      const queda = await magatzem.obtenirPacient(quedaId)
+      if (queda) {
+        const dadesQueda = valorsDesfets(dadesDePacient(queda), a.abans.pacient, a.despres.pacient)
+        const dupl = a.duplicatsAbans.queda
+        const { revisarDuplicat: _rq, ...restaQueda } = queda
+        await guardarPacient(quedaId, queda.creatAt, { ...restaQueda, ...dadesQueda, ...(dupl.length > 0 ? { revisarDuplicat: dupl } : {}) })
+        const f = await magatzem.obtenirFitxaClinica(quedaId)
+        if (f.id) {
+          const { id: _i, creatAt: _c, modificatAt: _m, pacientId: _p, ...actual } = f
+          const abans = a.abans.fitxa ?? fitxaClinicaBuida()
+          await magatzem.desarFitxaClinica(quedaId, valorsDesfets(actual, abans, a.despres.fitxa))
+        }
+      }
+      await recalcularTipusVisita(magatzem, [quedaId, treuId])
+    },
+
+    async redirigirAjuntades() {
+      let total = 0
+      for (const p of await magatzem.llistarPacients()) {
+        if (!p.ajuntadaAmb || p.ajuntadaAmb.desfetAt !== null) continue
+        const a = await desti(p)
+        if (!a) continue
+        const moguts = structuredClone(p.ajuntadaAmb.moguts)
+        let n = 0
+        for (const taula of TAULES_MOGUDES) {
+          for (const id of await idsDe(taula, p.id)) {
+            if (!(await moure(taula, id, a))) continue
+            if (!moguts[taula].includes(id)) moguts[taula].push(id)
+            n++
+          }
+        }
+        if (n === 0) continue
+        await guardarPacient(p.id, p.creatAt, { ...senseMeta(p), ajuntadaAmb: { ...p.ajuntadaAmb, moguts } })
+        await recalcularTipusVisita(magatzem, [a])
+        total += n
+      }
+      return total
     },
   })
 
