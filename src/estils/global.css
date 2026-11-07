@@ -680,7 +680,8 @@ fieldset {
 .navegacio {
   display: flex;
   gap: 4px;
-  flex: 1;
+  /* El menú no s'escurça mai: si falta espai, s'escurça la píndola de Drive */
+  flex: 1 0 auto;
   overflow-x: auto;
 }
 
@@ -2041,6 +2042,9 @@ fieldset {
 .indicador-copia-arrel {
   position: relative;
   margin-left: auto;
+  /* Si no hi cap, s'escurça la píndola (amb «…»), mai el menú */
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 .indicador-copia {
@@ -2054,6 +2058,9 @@ fieldset {
   padding: 0 14px;
   cursor: pointer;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .indicador-copia.estat-cal-connectar,
@@ -2109,16 +2116,18 @@ fieldset {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 }
 
+/* Cada cita: hora i nom; el motiu; una etiqueta suau amb el tipus i la durada.
+   Més aire entre línies, sense fer la targeta gaire més alta. */
 .cites-avui li {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px 18px;
-  padding: 14px 18px;
-  background: var(--superficie);
+  gap: 10px 20px;
+  padding: 16px 22px;
+  background: var(--clar);
   border: 1px solid var(--linia);
   border-left: 4px solid var(--linia);
   border-radius: var(--radi);
@@ -2126,7 +2135,6 @@ fieldset {
 
 .cites-avui li.seguent {
   border-left-color: var(--accent);
-  background: var(--accent-suau);
 }
 
 .cites-avui li.estat-anullada,
@@ -2134,28 +2142,66 @@ fieldset {
   color: var(--tinta-suau);
 }
 
-.cites-avui .hora {
-  font-variant-numeric: tabular-nums;
-  min-width: 11ch;
-  color: var(--accent-fosc);
-}
-
-.cites-avui .qui {
+.cites-avui .cos-cita {
+  flex: 1;
+  min-width: 18ch;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 14ch;
+  gap: 6px;
 }
 
-.cites-avui .qui a {
+.cites-avui .cos-cita p {
+  margin: 0;
+}
+
+.cites-avui .linia-cita {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.cites-avui .hora {
+  font-family: var(--lletra-titol);
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--jade);
+}
+
+.cites-avui .nom {
   color: inherit;
   font-weight: 600;
   text-decoration: none;
 }
 
-.cites-avui .detall {
+.cites-avui .motiu-cita {
+  color: var(--tinta);
+}
+
+.cites-avui .etiquetes-cita {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.etiqueta-tipus {
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--boira);
   color: var(--tinta-suau);
-  font-size: 0.9rem;
+}
+
+.etiqueta-tipus.tipus-primera {
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+}
+
+.cites-avui .durada {
+  font-size: 0.8rem;
+  color: var(--tinta-suau);
 }
 
 .accessos {
@@ -2333,16 +2379,6 @@ fieldset {
   margin: calc(var(--espai) * 1.2) 0 14px;
 }
 
-.cites-avui {
-  gap: 12px;
-}
-
-.cites-avui li {
-  padding: 18px 22px;
-  border-left: none;
-  gap: 10px 22px;
-}
-
 .cites-avui li.seguent {
   background: var(--clar);
   box-shadow: inset 0 0 0 1.5px var(--jade);
@@ -2354,18 +2390,6 @@ fieldset {
   box-shadow: inset 0 0 0 1px var(--linia);
 }
 
-.cites-avui .hora {
-  font-family: var(--lletra-titol);
-  font-weight: 600;
-  font-size: 1.15rem;
-  color: var(--jade);
-  min-width: 10ch;
-}
-
-.cites-avui .qui a {
-  font-weight: 500;
-  font-size: 1.05rem;
-}
 
 .accessos {
   display: grid;
@@ -2865,4 +2889,246 @@ fieldset {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
+}
+
+/* --- Visita (etapa 3A) --- */
+
+.pantalla-visita {
+  padding-top: 0;
+}
+
+/* Capçalera fixa: es veu encara que es canviï de pestanya o es baixi la pàgina */
+.capcalera-visita {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin: 0 calc(var(--espai) * -1) 16px;
+  padding: 14px var(--espai);
+  background: var(--fons);
+  border-bottom: 1px solid var(--linia);
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+.capcalera-visita h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.capcalera-visita .qui-visita {
+  flex: 1;
+  min-width: 18ch;
+}
+
+.capcalera-visita .qui-visita p {
+  margin: 2px 0 0;
+}
+
+/* Retenció acabada: la capçalera passa a cinabri (avís suau, res que bloquegi) */
+.capcalera-visita.retencio-acabada {
+  background: var(--avis-suau);
+  border-bottom-color: var(--avis);
+}
+
+.temporitzador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.temporitzador > span {
+  font-family: var(--lletra-titol);
+  font-size: 1.6rem;
+  color: var(--jade);
+}
+
+.temporitzador.acabada strong {
+  color: var(--avis);
+  font-size: 1.2rem;
+}
+
+.minuts-retencio {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.minuts-retencio output {
+  min-width: 6ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* El valor per defecte, destacat en jade */
+.minuts-retencio output.per-defecte {
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+  font-weight: 600;
+}
+
+.boto-gran {
+  min-height: 56px;
+  padding: 0 26px;
+  font-size: 1.05rem;
+}
+
+.accions-visita {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pestanyes-visita {
+  margin-bottom: 16px;
+}
+
+.contingut-visita {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.escala-visita .escala {
+  flex-wrap: wrap;
+}
+
+.escala-visita .escala button {
+  min-width: 44px;
+}
+
+.simptoma-secundari {
+  display: grid;
+  grid-template-columns: minmax(12ch, 1fr) auto;
+  gap: 0 16px;
+  align-items: end;
+}
+
+.eines-tractament {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-bottom: 12px;
+}
+
+.pregunta-repetir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.pregunta-repetir p {
+  margin: 0;
+  flex-basis: 100%;
+}
+
+.agulles-posades {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.agulles-posades output {
+  min-width: 3ch;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mapa-visita {
+  min-height: 60vh;
+}
+
+.finalitzar-visita .agulles-retirades {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+}
+
+.finalitzar-visita .agulles-retirades input {
+  max-width: 8ch;
+}
+
+.addendes ul {
+  padding-left: 1.2em;
+}
+
+@media (max-width: 760px) {
+  .simptoma-secundari {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Tractaments (fitxa del pacient) --- */
+
+.tractaments {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.capcalera-episodi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+}
+
+.capcalera-episodi h3 {
+  margin: 0;
+}
+
+.sessions-episodi {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sessions-episodi li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  align-items: baseline;
+}
+
+/* Retenció a la pantalla de bloqueig: només el temps, cap dada del pacient */
+.retencio-bloqueig {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  margin: 0;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+  font-family: var(--lletra-titol);
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 1px var(--linia);
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+.retencio-bloqueig.acabada {
+  background: var(--avis-suau);
+  color: var(--avis);
+  box-shadow: 0 0 0 1.5px var(--avis);
+}
+
+.franja-retencio {
+  background: var(--avis-suau);
+  border-bottom-color: var(--avis);
 }

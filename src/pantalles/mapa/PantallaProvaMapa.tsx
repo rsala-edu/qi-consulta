@@ -1,7 +1,7 @@
 // Pantalla de prova del marcatge de punts (etapa 2d). No desa res: quan
 // tinguem les sessions, aquest mateix flux anirà dins la pantalla de sessió.
 
-import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useMemo, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
 import {
@@ -42,10 +42,38 @@ const TECNIQUES = TECNIQUES_DEL_MAPA.cos
 type Peticio = { codi: string; n: number } | null
 
 export function PantallaProvaMapa() {
+  // Els punts del cos i de l'orella van junts, com a la sessió
+  const [marcats, setMarcats] = useState<PuntMarcat[]>([])
+  return (
+    <main className="pantalla-mapa">
+      <MapaTractament
+        titol={<h1>{t.mapa.titolProva}</h1>}
+        avis={<p className="avis">{t.mapa.avisProva}</p>}
+        marcats={marcats}
+        setMarcats={setMarcats}
+      />
+    </main>
+  )
+}
+
+/**
+ * El mapa (cos 3D i orella) amb la llista de punts marcats. El fan servir la
+ * pantalla Mapa (punts en memòria) i la pestanya Tractament de la visita
+ * (punts desats a la sessió).
+ */
+export function MapaTractament({
+  titol,
+  avis,
+  marcats,
+  setMarcats,
+}: {
+  titol?: ReactNode
+  avis?: ReactNode
+  marcats: PuntMarcat[]
+  setMarcats: Dispatch<SetStateAction<PuntMarcat[]>>
+}) {
   const carrega = useModelCos()
   const [pestanya, setPestanya] = useState<Mapa>('cos')
-  // Els punts del cos i de l'orella van junts, com aniran a la sessió
-  const [marcats, setMarcats] = useState<PuntMarcat[]>([])
   const [peticions, setPeticions] = useState<Record<Mapa, Peticio>>({ cos: null, orella: null })
   const veure = (m: PuntMarcat) => {
     setPestanya(m.mapa)
@@ -53,9 +81,9 @@ export function PantallaProvaMapa() {
   }
 
   return (
-    <main className="pantalla-mapa">
+    <>
       <div className="capcalera-mapa">
-        <h1>{t.mapa.titolProva}</h1>
+        {titol}
         <div className="segmentat pestanyes-mapa" role="tablist" aria-label={t.mapa.quinMapa}>
           {(['cos', 'orella'] as const).map((m) => (
             <button
@@ -71,7 +99,7 @@ export function PantallaProvaMapa() {
             </button>
           ))}
         </div>
-        <p className="avis">{t.mapa.avisProva}</p>
+        {avis}
       </div>
       {/* El cos es queda muntat (i carregat) quan es mira l'orella */}
       <div id="mapa-cos" role="tabpanel" aria-labelledby="pestanya-cos" className="panell-pestanya" hidden={pestanya !== 'cos'}>
@@ -90,7 +118,7 @@ export function PantallaProvaMapa() {
           <MarcatgeOrella marcats={marcats} setMarcats={setMarcats} peticio={peticions.orella} onVeure={veure} />
         </div>
       )}
-    </main>
+    </>
   )
 }
 

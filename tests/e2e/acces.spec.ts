@@ -67,7 +67,7 @@ test('el compte de proves (el segon hash de la llista) també pot entrar', async
   await context.close()
 })
 
-test('el permís de Google caducat es renova sol amb el pròxim toc, sense «Drive: connectar»', async ({ page, google }) => {
+test('el permís de Google caducat es renova sol amb el pròxim toc, sense «Cal tornar a connectar amb Google»', async ({ page, google }) => {
   // El primer permís dura 70 s: amb el minut de marge, en 10 s ja no serveix
   google.durada = 70
   await crearContrasenya(page)
@@ -88,7 +88,7 @@ test('el permís de Google caducat es renova sol amb el pròxim toc, sense «Dri
   expect(google.autoritzacions).toHaveLength(2)
 })
 
-test('si la renovació silenciosa falla, queda «Drive: connectar» com a reserva', async ({ page, google }) => {
+test('si la renovació silenciosa falla, queda «Cal tornar a connectar amb Google» com a reserva', async ({ page, google }) => {
   google.durada = 70
   google.silenciosaFalla = true
   await crearContrasenya(page)
@@ -97,7 +97,7 @@ test('si la renovació silenciosa falla, queda «Drive: connectar» com a reserv
 
   await menu(page, 'Pacients').click()
   const indicador = page.locator('.indicador-copia')
-  await expect(indicador).toHaveText('Drive: connectar')
+  await expect(indicador).toHaveText('Cal tornar a connectar amb Google')
   expect(google.autoritzacions.at(-1)).toEqual({ prompt: 'none', pista: 'sub-doctora' })
   // Un altre toc no torna a provar-ho de seguida
   await menu(page, 'Avui').click()
@@ -314,15 +314,19 @@ test('Avui: les cites del dia en ordre i «Començar visita» a la següent', as
   await menu(page, 'Avui').click()
   const cites = page.getByRole('region', { name: 'Cites d\'avui' }).getByRole('listitem')
   await expect(cites).toHaveCount(2)
-  await expect(cites.nth(0)).toContainText('00:05–01:05')
+  // Hora d'inici i nom; després, el tipus i la durada
+  await expect(cites.nth(0)).toContainText('00:05')
   await expect(cites.nth(0)).toContainText('Aina Provencal Inventada')
+  await expect(cites.nth(0)).toContainText('Primera visita60 min')
   await expect(cites.nth(0)).toContainText('Feta')
-  await expect(cites.nth(1)).toContainText('23:10–00:10')
+  await expect(cites.nth(1)).toContainText('23:10')
+  await expect(cites.nth(1)).toContainText('60 min')
   // A les 12:00, la de les 00:05 ja ha passat: la següent és la del Biel
   await expect(page.getByRole('button', { name: 'Començar visita' })).toHaveCount(1)
   await expect(cites.nth(1).getByRole('button', { name: 'Començar visita' })).toBeVisible()
+  // Obre la pantalla de visita del Biel
   await cites.nth(1).getByRole('button', { name: 'Començar visita' }).click()
-  await expect(page.getByRole('heading', { name: 'Biel Prova Inventat' })).toBeVisible()
+  await expect(page.locator('.capcalera-visita').getByRole('heading', { name: 'Biel Prova Inventat' })).toBeVisible()
 })
 
 test('«Drive: error»: la píndola explica el motiu, l\'última còpia correcta i deixa tornar-ho a provar', async ({ page, google }) => {
@@ -409,4 +413,29 @@ test('la mateixa fitxa clínica editada en dos dispositius: no es perd res i la 
   await expect(page.locator('.versio-anterior')).toHaveCount(0)
   await expect(page.getByText('editat en dos dispositius')).toHaveCount(0)
   await pc.context().close()
+})
+
+test('una setmana sense obrir l\'app i Google ja no renova el permís: l\'app funciona amb les dades del dispositiu i la píndola demana tornar a connectar', async ({
+  page,
+  google,
+}) => {
+  await page.clock.install({ time: new Date(2026, 10, 4, 9, 0) })
+  await crearContrasenya(page)
+  await nouPacient(page, 'Aina', 'Provencal Inventada', '600 111 222')
+  await esperarCopia(page)
+  // Passa una setmana; mentrestant, el compte de Google ja no dona el permís sense preguntar
+  google.silenciosaFalla = true
+  await page.clock.fastForward(7 * 24 * 3_600_000)
+  await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+  // Es pot treballar: les dades del dispositiu hi són i es pot donar d'alta un pacient
+  await menu(page, 'Pacients').click()
+  await expect(page.getByRole('link', { name: /Aina Provencal Inventada/ })).toBeVisible()
+  await nouPacient(page, 'Bernat', 'Prova Inventat', '600 222 333')
+  await expect(page.locator('.indicador-copia')).toHaveText('Cal tornar a connectar amb Google')
+  // I en tornar a connectar, es puja
+  google.silenciosaFalla = false
+  await page.locator('.indicador-copia').click()
+  await page.getByRole('button', { name: 'Tornar a entrar amb Google' }).click()
+  await expect(page.locator('.indicador-copia')).toHaveText('Drive: al dia')
 })

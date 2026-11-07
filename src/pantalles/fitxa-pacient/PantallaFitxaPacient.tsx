@@ -19,8 +19,9 @@ const PESTANYES_ACTIVES = [
   { ruta: 'dades', text: p.dades },
   { ruta: 'fitxa-clinica', text: p.fitxaClinica },
   { ruta: 'cites', text: p.cites },
+  { ruta: 'tractaments', text: t.tractaments.titol },
 ] as const
-const PESTANYES_FUTURES = [p.valoracions, p.sessions, p.evolucio]
+const PESTANYES_FUTURES = [p.valoracions, p.evolucio]
 
 export function PantallaFitxaPacient() {
   const { id = '' } = useParams()

@@ -19,6 +19,16 @@ import {
 import { esquemaCitaGuardada, esquemaDadesCita, type Cita, type DadesCita } from '../domini/cita'
 import { esquemaEsborranyGuardat, type Esborrany, type EsborranyGuardat } from '../domini/esborrany'
 import { araIso, nouId } from '../domini/registre'
+import { episodisActius, esquemaDadesEpisodi, idEpisodiDeCita, nouEpisodi, type DadesEpisodi, type Episodi } from '../domini/episodi'
+import {
+  esEditable,
+  esquemaDadesAddenda,
+  esquemaDadesSessio,
+  novaSessio,
+  type Addenda,
+  type DadesSessio,
+  type Sessio,
+} from '../domini/sessio'
 import { desarPerCamp, desarSencer, esborrarRegistres } from '../sincronia/escriptura'
 import type { NomTaula, QiDB, RegistreXifrat } from './esquema'
 
@@ -62,6 +72,32 @@ export interface Magatzem {
   conflictesDe(registreId: string): Promise<CampEnConflicte[]>
   /** La doctora ha revisat el camp (s'hagi quedat la versió actual o hagi recuperat l'altra) */
   resoldreConflicte(conflicteId: string, camp: string): Promise<void>
+
+  // --- Etapa 3A: episodis, sessions i addendes ---
+  llistarEpisodis(pacientId: string): Promise<Episodi[]>
+  obtenirEpisodi(id: string): Promise<Episodi | undefined>
+  /** `id`: per a la migració (ids que depenen de la cita, iguals a tots els dispositius) */
+  crearEpisodi(pacientId: string, dades: DadesEpisodi, id?: string): Promise<Episodi>
+  actualitzarEpisodi(id: string, dades: DadesEpisodi): Promise<Episodi>
+  obtenirSessio(id: string): Promise<Sessio | undefined>
+  sessioDeCita(citaId: string): Promise<Sessio | undefined>
+  sessionsDelPacient(pacientId: string): Promise<Sessio[]>
+  /** «Començar visita»: crea la sessió de la cita (o torna la que ja hi ha) i posa la cita en curs */
+  comencarVisita(citaId: string, minutsRetencio?: number): Promise<Sessio>
+  /** Desa la sessió (només els camps canviats respecte d'`inicial`). Si ja no és editable, ErrorSessioBloquejada */
+  actualitzarSessio(id: string, dades: DadesSessio, inicial?: DadesSessio): Promise<Sessio>
+  /** «Finalitzar visita»: tanca la sessió, hi posa l'hora de final i la cita passa a feta */
+  finalitzarSessio(id: string, agulles: { retirades: number | null; motiu: string }): Promise<Sessio>
+  addendesDe(sessioId: string): Promise<Addenda[]>
+  afegirAddenda(sessioId: string, text: string): Promise<Addenda>
+}
+
+/** La sessió fa més de 24 hores que es va tancar: només s'hi poden afegir addendes */
+export class ErrorSessioBloquejada extends Error {
+  constructor() {
+    super('La sessió ja no es pot editar')
+    this.name = 'ErrorSessioBloquejada'
+  }
 }
 
 /** Un camp amb dues versions: la que hi ha i l'altra, que no va guanyar */
@@ -120,7 +156,8 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     return { id, creatAt, modificatAt, ...valid }
   }
 
-  const magatzem: Magatzem = {
+  // Els mètodes de l'etapa 3A s'hi afegeixen més avall (Object.assign)
+  const magatzem = {
     async llistarPacients() {
       const registres = await db.pacients.toArray()
       return Promise.all(registres.map(llegirPacient))
@@ -237,13 +274,14 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     },
 
     async crearCita(dades) {
-      return guardarCita(nouId(), araIso(), dades)
+      const id = nouId()
+      return guardarCita(id, araIso(), { ...dades, episodiId: await episodiDeCita(id, dades) })
     },
 
     async actualitzarCita(id, dades, inicial) {
       const actual = await db.cites.get(id)
       if (!actual) throw new Error(`No existeix la cita ${id}`)
-      return guardarCita(id, actual.creatAt, dades, inicial)
+      return guardarCita(id, actual.creatAt, { ...dades, episodiId: await episodiDeCita(id, dades) }, inicial)
     },
 
     async esborrarCita(id) {
@@ -276,7 +314,169 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
         r.id,
       )
     },
+  } as Magatzem
+
+  // --- Episodis ---
+
+  async function llegirEpisodi(r: RegistreXifrat): Promise<Episodi> {
+    const dades = await obrir(clau, 'episodis', r, esquemaDadesEpisodi)
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, ...dades }
   }
+
+  async function guardarEpisodi(id: string, pacientId: string, dades: DadesEpisodi): Promise<Episodi> {
+    const valid = esquemaDadesEpisodi.parse(dades)
+    const existent = await db.episodis.get(id)
+    const creatAt = existent?.creatAt ?? araIso()
+    const modificatAt = araIso()
+    await desarPerCamp(db, clau, 'episodis', { id, creatAt, modificatAt, pacientId }, valid, Object.keys(esquemaDadesEpisodi.shape))
+    return { id, creatAt, modificatAt, pacientId, ...valid }
+  }
+
+  /**
+   * L'episodi d'una cita: «Nou episodi» n'obre un (amb un id que depèn de la
+   * cita); si no, el que ja tenia, l'actiu més recent del pacient o, si no en
+   * té cap d'actiu, un de nou.
+   */
+  async function episodiDeCita(citaId: string, dades: DadesCita): Promise<string> {
+    const obrirNou = async () => {
+      const eid = idEpisodiDeCita(citaId)
+      if (!(await db.episodis.get(eid))) await guardarEpisodi(eid, dades.pacientId, nouEpisodi(dades.motiu, dades.inici.slice(0, 10)))
+      return eid
+    }
+    if (dades.nouEpisodi) return obrirNou()
+    const propis = await magatzem.llistarEpisodis(dades.pacientId)
+    if (dades.episodiId && propis.some((e) => e.id === dades.episodiId)) return dades.episodiId
+    return episodisActius(propis)[0]?.id ?? obrirNou()
+  }
+
+  // --- Sessions ---
+
+  async function llegirSessio(r: RegistreXifrat): Promise<Sessio> {
+    const xifrades = await desxifrarJson(clau, r.xifrat, context('sessions', r.id))
+    const dades = esquemaDadesSessio.parse({ ...(xifrades as object), citaId: r.citaId, episodiId: r.episodiId })
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, ...dades }
+  }
+
+  async function guardarSessio(id: string, pacientId: string, dades: DadesSessio, inicial?: DadesSessio): Promise<Sessio> {
+    const { citaId, episodiId, ...resta } = esquemaDadesSessio.parse(dades)
+    const existent = await db.sessions.get(id)
+    const creatAt = existent?.creatAt ?? araIso()
+    const conegudes = Object.keys(esquemaDadesSessio.shape).filter((k) => k !== 'citaId' && k !== 'episodiId')
+    await desarPerCamp(
+      db,
+      clau,
+      'sessions',
+      { id, creatAt, modificatAt: araIso(), pacientId, citaId, episodiId },
+      resta,
+      conegudes,
+      inicial ? { ...inicial } : undefined,
+    )
+    return (await magatzem.obtenirSessio(id))!
+  }
+
+  Object.assign(magatzem, {
+    async llistarEpisodis(pacientId: string) {
+      const registres = await db.episodis.where('pacientId').equals(pacientId).toArray()
+      return (await Promise.all(registres.map(llegirEpisodi))).sort((a, b) => a.dataInici.localeCompare(b.dataInici))
+    },
+    async obtenirEpisodi(id: string) {
+      const r = await db.episodis.get(id)
+      return r && llegirEpisodi(r)
+    },
+    async crearEpisodi(pacientId: string, dades: DadesEpisodi, id?: string) {
+      return guardarEpisodi(id ?? nouId(), pacientId, dades)
+    },
+    async actualitzarEpisodi(id: string, dades: DadesEpisodi) {
+      const e = await db.episodis.get(id)
+      if (!e) throw new Error(`No existeix l'episodi ${id}`)
+      return guardarEpisodi(id, e.pacientId!, dades)
+    },
+    async obtenirSessio(id: string) {
+      const r = await db.sessions.get(id)
+      return r && llegirSessio(r)
+    },
+    async sessioDeCita(citaId: string) {
+      const r = await db.sessions.where('citaId').equals(citaId).first()
+      return r && llegirSessio(r)
+    },
+    async sessionsDelPacient(pacientId: string) {
+      const registres = await db.sessions.where('pacientId').equals(pacientId).toArray()
+      return (await Promise.all(registres.map(llegirSessio))).sort((a, b) => a.iniciAt.localeCompare(b.iniciAt))
+    },
+    async comencarVisita(citaId: string, minutsRetencio?: number) {
+      const ja = await magatzem.sessioDeCita(citaId)
+      const cita = await magatzem.obtenirCita(citaId)
+      if (!cita) throw new Error(`No existeix la cita ${citaId}`)
+      if (ja) return ja
+      const episodiId = cita.episodiId ?? (await episodiDeCita(citaId, cita))
+      const delEpisodi = (await magatzem.sessionsDelPacient(cita.pacientId)).filter((s) => s.episodiId === episodiId)
+      const id = nouId()
+      const sessio = await guardarSessio(
+        id,
+        cita.pacientId,
+        novaSessio({ citaId, episodiId, numero: delEpisodi.length + 1, iniciAt: araIso(), minuts: minutsRetencio }),
+      )
+      const { id: _i, creatAt: _c, modificatAt: _m, ...dadesCita } = cita
+      await magatzem.actualitzarCita(citaId, { ...dadesCita, estat: 'enCurs', sessioId: id, episodiId }, { ...dadesCita })
+      return sessio
+    },
+    async actualitzarSessio(id: string, dades: DadesSessio, inicial?: DadesSessio) {
+      const actual = await magatzem.obtenirSessio(id)
+      if (!actual) throw new Error(`No existeix la sessió ${id}`)
+      if (!esEditable(actual, Date.now())) throw new ErrorSessioBloquejada()
+      return guardarSessio(id, actual.pacientId, dades, inicial)
+    },
+    async finalitzarSessio(id: string, agulles: { retirades: number | null; motiu: string }) {
+      const actual = await magatzem.obtenirSessio(id)
+      if (!actual) throw new Error(`No existeix la sessió ${id}`)
+      const { id: _i, creatAt: _c, modificatAt: _m, pacientId, ...dades } = actual
+      const tancada: DadesSessio = {
+        ...dades,
+        estat: 'tancada',
+        finalAt: dades.finalAt ?? araIso(),
+        agulles: { ...dades.agulles, retirades: agulles.retirades, motiu: agulles.motiu },
+      }
+      const s = await guardarSessio(id, pacientId, tancada, dades)
+      const cita = await magatzem.obtenirCita(dades.citaId)
+      if (cita) {
+        const { id: _ci, creatAt: _cc, modificatAt: _cm, ...dc } = cita
+        await magatzem.actualitzarCita(cita.id, { ...dc, estat: 'feta', sessioId: id }, { ...dc })
+      }
+      return s
+    },
+    async addendesDe(sessioId: string) {
+      const registres = await db.addendes.where('sessioId').equals(sessioId).toArray()
+      const llista = await Promise.all(
+        registres.map(async (r) => {
+          const d = (await desxifrarJson(clau, r.xifrat, context('addendes', r.id))) as { text: string; at: string }
+          return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, sessioId, ...d }
+        }),
+      )
+      return llista.sort((a, b) => a.at.localeCompare(b.at))
+    },
+    async afegirAddenda(sessioId: string, text: string) {
+      const s = await magatzem.obtenirSessio(sessioId)
+      if (!s || s.estat !== 'tancada') throw new Error('Les addendes són per a les sessions tancades')
+      const id = nouId()
+      const at = araIso()
+      const dades = esquemaDadesAddenda.parse({ sessioId, text, at })
+      await desarSencer(
+        db,
+        'addendes',
+        {
+          id,
+          creatAt: at,
+          modificatAt: at,
+          pacientId: s.pacientId,
+          sessioId,
+          xifrat: await xifrarJson(clau, { text: dades.text, at }, context('addendes', id)),
+        },
+        id,
+      )
+      return { id, creatAt: at, modificatAt: at, pacientId: s.pacientId, ...dades }
+    },
+  })
+
   return magatzem
 }
 

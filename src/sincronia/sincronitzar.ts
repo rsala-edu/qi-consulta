@@ -55,7 +55,7 @@ import {
   type FitxerFoto,
 } from './format2'
 import { hlcDeData } from './hlc'
-import { esPerCamp, obrirRegistre, tancarRegistre, type Registre, type VersioCamp, type Versions } from './registres'
+import { esPerCamp, obrirRegistre, tancarRegistre, type Registre, type TaulaPerCamp, type VersioCamp, type Versions } from './registres'
 
 export const FITXER_PRINCIPAL = NOM_V1
 export const DIES_COPIES_DIARIES = 30
@@ -648,7 +648,7 @@ async function aplicarV1(
  * l'última sincronia tenen la versió de la base; els que han canviat, la del
  * registre (feta sobre la de la base).
  */
-async function ambVersionsDerivades(clau: CryptoKey, taula: 'pacients' | 'fitxesCliniques' | 'cites', r: Registre, base?: Registre): Promise<Registre> {
+async function ambVersionsDerivades(clau: CryptoKey, taula: TaulaPerCamp, r: Registre, base?: Registre): Promise<Registre> {
   const obert = await obrirRegistre(clau, taula, r)
   const h = hlcDeData(r.modificatAt as string)
   const versions: Versions = {}

@@ -69,7 +69,11 @@ export function IndicadorCopia() {
   const dies = diesSenseCopia(senseCopiaDesDe, ara)
   const textPendents =
     pendents === 1 ? s.curt.unPendent : pendents > 1 ? formatar(s.curt.pendents, { n: String(pendents) }) : s.curt.pendent
-  const text = dies
+  // Si cal tornar a connectar, és el que la doctora ha de fer: va per davant
+  // dels dies sense còpia (que també surten a la pantalla Avui)
+  const text = estat === 'cal-connectar'
+    ? s.curt['cal-connectar']
+    : dies
     ? textSenseCopia(dies)
     : nomesLectura
       ? s.curt.nomesLectura
@@ -92,7 +96,8 @@ export function IndicadorCopia() {
     <div className="indicador-copia-arrel" ref={arrel}>
       <button
         type="button"
-        className={`indicador-copia estat-${dies ? 'sense-copia' : senseConnexio ? 'sense-connexio' : estat}`}
+        className={`indicador-copia estat-${estat === 'cal-connectar' ? estat : dies ? 'sense-copia' : senseConnexio ? 'sense-connexio' : estat}`}
+        title={text}
         aria-expanded={obert}
         onClick={() => setObert((o) => !o)}
       >

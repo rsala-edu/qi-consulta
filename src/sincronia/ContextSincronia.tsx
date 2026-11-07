@@ -6,7 +6,7 @@
 // deu minuts), el pròxim toc de la doctora a qualsevol lloc de l'app obre la
 // renovació silenciosa: la finestra de Google s'obre i es tanca sola, sense
 // preguntar res. Mentrestant els canvis queden desats al dispositiu i es
-// pugen després. «Drive: connectar» només apareix si la renovació falla.
+// pugen després. «Cal tornar a connectar amb Google» només apareix si la renovació falla.
 
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { guardarEstatGoogle, llegirEstatGoogle, type EstatGoogle } from '../db/magatzem'
