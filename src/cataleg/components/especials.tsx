@@ -4,6 +4,7 @@
 import type { Especials } from './Cataleg'
 import { CodiCim } from './CodiCim'
 import { PuntsPalpacio } from './PuntsPalpacio'
+import { Sindromes } from './Sindromes'
 import { ZonesLlengua } from './ZonesLlengua'
 
 export const ESPECIALS: Especials = {
@@ -12,4 +13,13 @@ export const ESPECIALS: Especials = {
   ),
   zonesLlengua: ({ valor, onCanviar, editable }) => <ZonesLlengua valor={valor} editable={editable} onCanviar={onCanviar} />,
   puntsPalpacio: ({ valor, onCanviar, editable }) => <PuntsPalpacio valor={valor} editable={editable} onCanviar={onCanviar} />,
+  sindromes: ({ camp, valor, onCanviar, editable }) => (
+    <Sindromes
+      mode={camp.config === 'secundaries' ? 'secundaries' : 'principal'}
+      etiqueta={camp.ca}
+      valor={valor}
+      editable={editable}
+      onCanviar={(v) => onCanviar(v ? { ...v } : null)}
+    />
+  ),
 }

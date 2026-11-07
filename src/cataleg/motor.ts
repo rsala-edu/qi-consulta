@@ -157,7 +157,9 @@ function resumValor(camp: Camp, v: ValorCamp): string {
     }
     // Punts (codi → costat)
     return Object.entries(o)
-      .map(([k, x]) => (x && typeof x === 'object' && 'costat' in x ? `${k} ${String((x as { costat: string }).costat)}` : k))
+      .map(([k, x]) =>
+        typeof x === 'string' ? `${k} ${x}` : x && typeof x === 'object' && 'costat' in x ? `${k} ${String((x as { costat: string }).costat)}` : k,
+      )
       .join(', ')
   }
   return String(v)

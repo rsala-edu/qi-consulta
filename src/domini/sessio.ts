@@ -6,6 +6,7 @@
 import { z } from 'zod'
 import { esquemaPuntMarcat, type PuntMarcat } from './puntMarcat'
 import { esquemaDadesSeccions } from '../cataleg/motor'
+import { esquemaMymop } from './escales'
 import type { Registre } from './registre'
 
 export const ESTATS_SESSIO = ['enCurs', 'tancada'] as const
@@ -57,6 +58,8 @@ export const esquemaDadesSessio = z.object({
   }),
   /** Seccions del catàleg d'exploració (etapa 3B). Abans eren dos textos: van a «Altres / observacions» */
   exploracio: z.preprocess(migrarExploracio, z.object({ seccions: esquemaDadesSeccions })),
+  /** MYMOP: a la primera sessió de l'episodi i cada 4 (les d'abans de la 3B no en tenen) */
+  mymop: esquemaMymop.nullable().default(null),
   /** «mapa:codi» → punt */
   punts: z.record(z.string(), esquemaPuntMarcat),
   agulles: z.object({
@@ -83,6 +86,7 @@ export function novaSessio(d: { citaId: string; episodiId: string; numero: numbe
     retencio: { iniciAt: null, minuts: d.minuts ?? MINUTS_RETENCIO },
     comEsta: { canvis: '', escala: null, secundari1: buit, secundari2: { ...buit } },
     exploracio: { seccions: {} },
+    mymop: null,
     punts: {},
     agulles: { posades: null, retirades: null, motiu: '' },
     tancar: { recomanacions: '', incidencies: '', capIncidencia: false },

@@ -40,15 +40,18 @@ import { MapaTractament } from '../mapa/PantallaProvaMapa'
 import { Temporitzador } from './Temporitzador'
 import { PestanyaValoracio } from './PestanyaValoracio'
 import { ESPECIALS } from '../../cataleg/components/especials'
-import { EXPLORACIO, etiquetaCami, GRUPS_VALORACIO } from '../../cataleg/index'
+import { DIAGNOSTIC, EXPLORACIO, etiquetaCami, GRUPS_VALORACIO } from '../../cataleg/index'
+import { PlaTractament } from './PlaTractament'
+import { BlocMymop } from './BlocMymop'
+import type { Mymop } from '../../domini/escales'
 import { GrupCataleg } from '../../cataleg/components/Cataleg'
 import type { AjustosCatalegs } from '../../cataleg/motor'
 import { llegirAjustosCatalegs } from '../../db/ajustosCatalegs'
 import { hiHaEmbaras, type DadesValoracio, type Valoracio } from '../../domini/valoracio'
 import { useRetencio } from '../../visita/retencio'
 
-type Pestanya = 'valoracio' | 'comEsta' | 'exploracio' | 'tractament' | 'tancar'
-const PESTANYES: readonly Pestanya[] = ['valoracio', 'comEsta', 'exploracio', 'tractament', 'tancar']
+type Pestanya = 'valoracio' | 'comEsta' | 'exploracio' | 'diagnostic' | 'tractament' | 'tancar'
+const PESTANYES: readonly Pestanya[] = ['valoracio', 'comEsta', 'exploracio', 'diagnostic', 'tractament', 'tancar']
 /** Temps entre l'últim canvi i el desat */
 const ESPERA_DESAR = 600
 
@@ -83,6 +86,9 @@ export function PantallaVisita() {
       llegirAjustosCatalegs(db),
       magatzem.obtenirFitxaClinica(sessio.pacientId),
     ])
+    // El MYMOP més recent de l'episodi (per comparar i per repetir els símptomes triats)
+    const mymopAnterior =
+      sessions.filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.iniciAt < sessio.iniciAt && s.mymop).at(-1)?.mymop ?? null
     const darreraValoracio = valoracions.at(-1)
     const conflictesValoracio = darreraValoracio ? await magatzem.conflictesDe(darreraValoracio.id) : []
     // L'última sessió d'abans del mateix episodi (per a l'escala i «Repetir el tractament»)
@@ -100,6 +106,7 @@ export function PantallaVisita() {
       conflictesValoracio,
       catalegs,
       embarasFitxa: fitxa.contraindicacions.embaras,
+      mymopAnterior,
     }
   }, [magatzem, db, id, versio])
 
@@ -125,6 +132,7 @@ function Visita({
   conflictesValoracio,
   catalegs,
   embarasFitxa,
+  mymopAnterior,
   onRecarregar,
 }: {
   sessio: Sessio
@@ -138,6 +146,7 @@ function Visita({
   conflictesValoracio: CampEnConflicte[]
   catalegs: AjustosCatalegs
   embarasFitxa: boolean
+  mymopAnterior: Mymop | null
   onRecarregar(): void
 }) {
   const magatzem = useMagatzem()
@@ -155,6 +164,8 @@ function Visita({
   const [embarasValoracio, setEmbarasValoracio] = useState(() => hiHaEmbaras(valoracions.at(-1)))
   const canviValoracio = useCallback((d: DadesValoracio) => setEmbarasValoracio(hiHaEmbaras(d)), [])
   const embaras = embarasFitxa || embarasValoracio
+  // El pla de tractament de l'episodi (es pot canviar a la pestanya Diagnòstic)
+  const [pla, setPla] = useState(() => episodi?.pla ?? null)
   const [acabada, setAcabada] = useState(false)
   const [finalitzant, setFinalitzant] = useState(false)
   // Mentre hi ha canvis per desar, els d'un altre dispositiu no es posen a sobre
@@ -241,7 +252,9 @@ function Visita({
             )}
           </h1>
           <p className="detall">
-            {episodi?.motiu ?? ''} · {formatar(v.sessio, { n: String(dades.numero) })} ·{' '}
+            {episodi?.motiu ?? ''} ·{' '}
+            {pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) })}{' '}
+            ·{' '}
             {formatar(v.inici, { hora: new Date(dades.iniciAt).toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' }) })}
           </p>
         </div>
@@ -323,13 +336,20 @@ function Visita({
         ))}
       </div>
 
-      {pestanya === 'valoracio' && (
-        <section id="visita-valoracio" role="tabpanel" aria-labelledby="pestanya-valoracio" className="panell">
+      {/* La valoració i el diagnòstic són el mateix registre: un sol component, sempre muntat (si es
+          desmuntés en canviar de pestanya, en tornar mostraria la versió carregada en obrir la visita) */}
+      <section
+        id={`visita-${pestanya === 'diagnostic' ? 'diagnostic' : 'valoracio'}`}
+        role="tabpanel"
+        aria-labelledby={`pestanya-${pestanya === 'diagnostic' ? 'diagnostic' : 'valoracio'}`}
+        className="panell"
+        hidden={pestanya !== 'valoracio' && pestanya !== 'diagnostic'}
+      >
           <PestanyaValoracio
             sessio={sessio}
             valoracions={valoracions}
             conflictes={conflictesValoracio}
-            grups={GRUPS_VALORACIO}
+            grups={pestanya === 'diagnostic' ? [DIAGNOSTIC] : GRUPS_VALORACIO}
             ajustos={catalegs}
             sexe={pacient?.sexe}
             editableSessio={editable}
@@ -337,8 +357,12 @@ function Visita({
             onDades={canviValoracio}
             especials={ESPECIALS}
           />
-        </section>
-      )}
+          {episodi && (
+            <div hidden={pestanya !== 'diagnostic'}>
+              <PlaTractament episodi={episodi} editable={editable} onPla={setPla} />
+            </div>
+          )}
+      </section>
 
       <fieldset className="contingut-visita" disabled={!editable}>
         {pestanya === 'comEsta' && (
@@ -355,6 +379,12 @@ function Visita({
               valor={dades.comEsta.escala}
               anterior={anterior?.comEsta.escala ?? null}
               onCanviar={(escala) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, escala } }))}
+            />
+            <BlocMymop
+              numero={dades.numero}
+              mymop={dades.mymop}
+              anterior={mymopAnterior}
+              onCanviar={(mymop) => setDades((d) => ({ ...d, mymop }))}
             />
             {(['secundari1', 'secundari2'] as const).map((k, i) => (
               <div key={k} className="simptoma-secundari">

@@ -88,7 +88,8 @@ export interface Magatzem {
   obtenirEpisodi(id: string): Promise<Episodi | undefined>
   /** `id`: per a la migració (ids que depenen de la cita, iguals a tots els dispositius) */
   crearEpisodi(pacientId: string, dades: DadesEpisodi, id?: string): Promise<Episodi>
-  actualitzarEpisodi(id: string, dades: DadesEpisodi): Promise<Episodi>
+  /** `inicial`: les dades quan es va obrir el formulari (només es desa el que s'ha canviat) */
+  actualitzarEpisodi(id: string, dades: DadesEpisodi, inicial?: DadesEpisodi): Promise<Episodi>
   obtenirSessio(id: string): Promise<Sessio | undefined>
   sessioDeCita(citaId: string): Promise<Sessio | undefined>
   sessionsDelPacient(pacientId: string): Promise<Sessio[]>
@@ -368,12 +369,21 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, ...dades }
   }
 
-  async function guardarEpisodi(id: string, pacientId: string, dades: DadesEpisodi): Promise<Episodi> {
+  async function guardarEpisodi(id: string, pacientId: string, dades: DadesEpisodi, inicial?: DadesEpisodi): Promise<Episodi> {
     const valid = esquemaDadesEpisodi.parse(dades)
     const existent = await db.episodis.get(id)
     const creatAt = existent?.creatAt ?? araIso()
     const modificatAt = araIso()
-    await desarPerCamp(db, clau, 'episodis', { id, creatAt, modificatAt, pacientId }, valid, Object.keys(esquemaDadesEpisodi.shape))
+    await desarPerCamp(
+      db,
+      clau,
+      'episodis',
+      { id, creatAt, modificatAt, pacientId },
+      valid,
+      Object.keys(esquemaDadesEpisodi.shape),
+      inicial ? { ...inicial, pacientId } : undefined,
+    )
+    if (inicial) return (await magatzem.obtenirEpisodi(id))!
     return { id, creatAt, modificatAt, pacientId, ...valid }
   }
 
@@ -431,10 +441,10 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     async crearEpisodi(pacientId: string, dades: DadesEpisodi, id?: string) {
       return guardarEpisodi(id ?? nouId(), pacientId, dades)
     },
-    async actualitzarEpisodi(id: string, dades: DadesEpisodi) {
+    async actualitzarEpisodi(id: string, dades: DadesEpisodi, inicial?: DadesEpisodi) {
       const e = await db.episodis.get(id)
       if (!e) throw new Error(`No existeix l'episodi ${id}`)
-      return guardarEpisodi(id, e.pacientId!, dades)
+      return guardarEpisodi(id, e.pacientId!, dades, inicial)
     },
     async obtenirSessio(id: string) {
       const r = await db.sessions.get(id)

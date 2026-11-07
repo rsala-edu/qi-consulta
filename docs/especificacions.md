@@ -415,3 +415,17 @@ Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplic
   - abdomen, temperatura i pell.
 - **Seguiment:** cada secció mostra en gris el que hi havia a l'última sessió. Hi ha «Igual que l'última» a cada secció i «Tota l'exploració igual que l'última» a dalt.
 - **Sessions d'abans de la 3B:** el text lliure de la llengua i del pols passa a «Altres / observacions» de la secció corresponent. No es perd res.
+
+### Diagnòstic de MTC (pestanya «Diagnòstic», dins la valoració de l'episodi)
+- Els vuit principis, els òrgans zang-fu, les substàncies i els factors patògens.
+- **Síndromes:** cercador sobre els 196 patrons de la CIM-11, capítol 26 (TM1), sense els residuals. Una síndrome principal, diverses de secundàries, i text lliure si cap no encaixa. Els títols són els oficials en anglès (la llicència CC BY-ND no en permet la traducció). Es pot cercar en català perquè les paraules passen per un glossari («ronyó yin» troba «Kidney yin deficiency pattern»).
+- **Principis de tractament:** suggeriments en xips, i text lliure a «Altres / observacions».
+- La valoració i el diagnòstic són el mateix registre. La pestanya queda muntada en canviar de pestanya, perquè no es mostri mai una versió antiga.
+
+### Pla de tractament (a l'episodi)
+- Sessions previstes, freqüència, objectius, tècniques previstes i data de revisió del pla. Es desa a l'episodi, camp a camp.
+- Amb sessions previstes, la capçalera de la visita diu «Sessió 4 de 10».
+
+### MYMOP (a la sessió, pestanya «Com està»)
+- Dos símptomes i una activitat, amb les paraules de la persona, i el benestar, tot de 0 a 6. El perfil és la mitjana de les puntuacions que hi ha, i es mostra al costat del de l'última vegada.
+- Es demana a la primera sessió de l'episodi i cada 4 sessions (1, 5, 9…), amb un avís discret. Les altres sessions, si es vol.

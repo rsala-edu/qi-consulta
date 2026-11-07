@@ -8,6 +8,24 @@ import type { Registre } from './registre'
 export const ESTATS_EPISODI = ['actiu', 'alta', 'milloraParcial', 'abandonament'] as const
 export type EstatEpisodi = (typeof ESTATS_EPISODI)[number]
 
+/** Freqüències del pla de tractament */
+export const FREQUENCIES_PLA = ['dosSetmana', 'setmanal', 'quinzenal', 'mensual'] as const
+/** Tècniques previstes del pla */
+export const TECNIQUES_PLA = ['acupuntura', 'electroacupuntura', 'moxa', 'ventoses', 'auriculoterapia', 'guaSha', 'tuina', 'dietetica'] as const
+
+/** Pla de tractament de l'episodi (etapa 3B) */
+export const esquemaPla = z.object({
+  /** Sessions previstes (a la capçalera de la visita: «Sessió 4 de 10») */
+  sessions: z.number().int().min(1).max(100).nullable(),
+  frequencia: z.enum(FREQUENCIES_PLA).nullable(),
+  objectius: z.string(),
+  tecniques: z.array(z.enum(TECNIQUES_PLA)),
+  /** Dia en què es revisa el pla */
+  revisio: z.string().nullable(),
+})
+export type Pla = z.infer<typeof esquemaPla>
+export const PLA_BUIT: Pla = { sessions: null, frequencia: null, objectius: '', tecniques: [], revisio: null }
+
 export const esquemaDadesEpisodi = z.object({
   motiu: z.string().trim().max(200),
   /** Dia d'inici («2026-11-02») */
@@ -15,6 +33,8 @@ export const esquemaDadesEpisodi = z.object({
   estat: z.enum(ESTATS_EPISODI),
   dataFinal: z.string().nullable(),
   notaFinal: z.string().trim(),
+  /** Els episodis d'abans de la 3B no en tenen */
+  pla: esquemaPla.nullable().default(null),
 })
 export type DadesEpisodi = z.infer<typeof esquemaDadesEpisodi>
 
@@ -24,7 +44,7 @@ export type Episodi = Registre & { pacientId: string } & DadesEpisodi
 export const idEpisodiDeCita = (citaId: string) => `episodi-${citaId}`
 
 export function nouEpisodi(motiu: string, dataInici: string): DadesEpisodi {
-  return { motiu: motiu.trim() || 'Primera visita', dataInici, estat: 'actiu', dataFinal: null, notaFinal: '' }
+  return { motiu: motiu.trim() || 'Primera visita', dataInici, estat: 'actiu', dataFinal: null, notaFinal: '', pla: null }
 }
 
 /** Els episodis actius d'un pacient, del més recent al més antic */
