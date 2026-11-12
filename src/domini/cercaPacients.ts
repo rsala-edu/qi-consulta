@@ -17,11 +17,13 @@ function coincideix(p: Pacient, consulta: string): boolean {
     return nomesDigits(p.telefon).includes(nomesDigits(consulta))
   }
 
-  // Si no, cada paraula ha d'aparèixer al nom o als llinatges
-  const nom = normalitzar(`${p.nom} ${p.llinatges}`)
+  // Si no, cada paraula ha d'aparèixer (en qualsevol posició) al nom, als
+  // llinatges o al telèfon: «sala» troba «Raül Sala Grau»
+  const text = normalitzar(`${p.nom} ${p.llinatges} ${p.telefon}`)
+  const digits = nomesDigits(p.telefon)
   return normalitzar(consulta)
     .split(/\s+/)
-    .every((paraula) => nom.includes(paraula))
+    .every((paraula) => text.includes(paraula) || (/^\d+$/.test(paraula) && digits.includes(paraula)))
 }
 
 export function compararPerNom(a: Pacient, b: Pacient): number {
@@ -41,4 +43,24 @@ export function cercarPacients(
     .filter((p) => incloureArxivats || !p.arxivat)
     .filter((p) => coincideix(p, consulta))
     .sort(compararPerNom)
+}
+
+/**
+ * Els pacients que s'han vist fa menys temps (les cites ja passades o fetes,
+ * de la més recent a la més antiga), sense repetir-ne cap.
+ */
+export function pacientsRecents(
+  cites: readonly { pacientId: string; inici: string; estat: string }[],
+  ara: Date,
+  maxim = 5,
+): string[] {
+  const araLocal = new Date(ara.getTime() - ara.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+  const ids: string[] = []
+  for (const c of [...cites]
+    .filter((c) => c.pacientId && c.estat !== 'anullada' && (c.estat === 'feta' || c.inici <= araLocal))
+    .sort((a, b) => b.inici.localeCompare(a.inici))) {
+    if (!ids.includes(c.pacientId)) ids.push(c.pacientId)
+    if (ids.length >= maxim) break
+  }
+  return ids
 }

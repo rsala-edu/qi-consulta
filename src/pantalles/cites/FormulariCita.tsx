@@ -5,7 +5,7 @@
 // registra com a visita ja feta).
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import type { Episodi } from '../../domini/episodi'
 import { useFormulariBrut } from '../../sincronia/revisio'
@@ -13,7 +13,7 @@ import { z } from 'zod'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { avisHorari, hhmm, type Horari } from '../../domini/agenda'
-import { cercarPacients } from '../../domini/cercaPacients'
+import { cercarPacients, pacientsRecents } from '../../domini/cercaPacients'
 import {
   DURADA_PER_DEFECTE,
   horaPassada,
@@ -195,6 +195,7 @@ export function FormulariCita({
       ) : (
         <TriarPacient
           pacients={tots}
+          recents={[...nous.map((p) => p.id).reverse(), ...pacientsRecents(altres, ara)]}
           error={errors.pacientId?.message}
           onTriar={(p) => setValue('pacientId', p.id, { shouldDirty: true, shouldValidate: true })}
           onCrear={
@@ -304,21 +305,30 @@ export function FormulariCita({
 
 function TriarPacient({
   pacients,
+  recents,
   error,
   onTriar,
   onCrear,
 }: {
   pacients: readonly Pacient[]
+  /** Els ids dels pacients vistos fa menys temps, del més recent al més antic */
+  recents: readonly string[]
   error?: string
   onTriar(p: Pacient): void
   onCrear?: (nom: string, telefon: string) => Promise<void>
 }) {
   const c = t.cites
   const [consulta, setConsulta] = useState('')
+  const [obert, setObert] = useState(false)
+  const [creant, setCreant] = useState(false)
   const [nom, setNom] = useState('')
   const [telefon, setTelefon] = useState('')
   const [errorNou, setErrorNou] = useState<string | null>(null)
-  const resultats = consulta.trim() === '' ? [] : cercarPacients(pacients, consulta, { incloureArxivats: false }).slice(0, 6)
+  const idLlista = useId()
+  // Primer els recents i després tots els altres per ordre alfabètic (sense repetir-ne cap)
+  const trobats = cercarPacients(pacients, consulta, { incloureArxivats: false })
+  const delsRecents = recents.map((id) => trobats.find((p) => p.id === id)).filter((p): p is Pacient => !!p)
+  const resta = trobats.filter((p) => !recents.includes(p.id))
 
   async function crear() {
     const v = esquemaDadesPacient.safeParse({ ...dadesPacientBuides(), nom, telefon })
@@ -330,50 +340,105 @@ function TriarPacient({
     await onCrear!(v.data.nom, v.data.telefon)
   }
 
+  const opcio = (p: Pacient) => (
+    <li key={p.id}>
+      <button
+        type="button"
+        // Abans que el camp perdi el focus i es tanqui la llista
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onTriar(p)}
+      >
+        <span className="nom">{nomComplet(p)}</span>
+        <span className="detall">{p.telefon}</span>
+      </button>
+    </li>
+  )
+
   return (
     <fieldset className="triar-pacient">
       <legend>{c.pacient}</legend>
-      <input
-        type="search"
-        aria-label={c.cercarPacient}
-        placeholder={c.cercarPacient}
-        value={consulta}
-        onChange={(e) => setConsulta(e.target.value)}
-        autoComplete="off"
-      />
+      <div className="desplegable-pacient">
+        <input
+          type="search"
+          aria-label={c.cercarPacient}
+          aria-controls={idLlista}
+          placeholder={c.cercarPacient}
+          value={consulta}
+          onFocus={() => setObert(true)}
+          onClick={() => setObert(true)}
+          onBlur={() => setObert(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape' && obert) {
+              e.preventDefault()
+              e.stopPropagation()
+              setObert(false)
+            }
+          }}
+          onChange={(e) => {
+            setConsulta(e.target.value)
+            setObert(true)
+          }}
+          autoComplete="off"
+        />
+        {obert && (
+          <div className="llista-pacients" id={idLlista}>
+            {trobats.length === 0 && <p className="detall">{c.capPacient}</p>}
+            {delsRecents.length > 0 && (
+              <>
+                <p className="titol-grup">{c.recents}</p>
+                <ul className="resultats-pacient" aria-label={c.recents}>
+                  {delsRecents.map(opcio)}
+                </ul>
+              </>
+            )}
+            {resta.length > 0 && (
+              <>
+                {delsRecents.length > 0 && <p className="titol-grup">{c.totsPacients}</p>}
+                <ul className="resultats-pacient" aria-label={c.totsPacients}>
+                  {resta.map(opcio)}
+                </ul>
+              </>
+            )}
+          </div>
+        )}
+      </div>
       {error && (
         <p className="camp-error" role="alert">
           {error}
         </p>
       )}
-      {consulta.trim() !== '' && resultats.length === 0 && <p className="detall">{c.capPacient}</p>}
-      {resultats.length > 0 && (
-        <ul className="resultats-pacient" aria-label={c.cercarPacient}>
-          {resultats.map((p) => (
-            <li key={p.id}>
-              <button type="button" onClick={() => onTriar(p)}>
-                <span className="nom">{nomComplet(p)}</span>
-                <span className="detall">{p.telefon}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      {onCrear && !creant && (
+        <button
+          type="button"
+          className="enllac enllac-pacient-nou"
+          onClick={() => {
+            setCreant(true)
+            // El que ja s'ha escrit a la cerca és, segurament, el nom
+            if (!/^[\d\s+.-]*$/.test(consulta)) setNom(consulta.trim())
+          }}
+        >
+          {c.pacientNou}
+        </button>
       )}
-      {onCrear && (
-        <details className="pacient-nou">
-          <summary>{c.pacientNou}</summary>
+      {onCrear && creant && (
+        <div className="pacient-nou">
           <div className="graella">
             <Camp etiqueta={c.nomPacientNou} error={errorNou ?? undefined}>
-              <input autoComplete="off" value={nom} onChange={(e) => setNom(e.target.value)} />
+              <input autoComplete="off" value={nom} onChange={(e) => setNom(e.target.value)} autoFocus />
             </Camp>
             <Camp etiqueta={c.telefonPacientNou}>
               <input type="tel" autoComplete="off" value={telefon} onChange={(e) => setTelefon(e.target.value)} />
             </Camp>
           </div>
-          <Boto variant="secundari" onClick={() => void crear()}>
-            {c.crearPacient}
-          </Boto>
-        </details>
+          <div className="accions accions-esquerra">
+            <Boto variant="secundari" onClick={() => void crear()}>
+              {c.crearPacient}
+            </Boto>
+            <Boto variant="discret" onClick={() => setCreant(false)}>
+              {t.app.cancellar}
+            </Boto>
+          </div>
+        </div>
       )}
     </fieldset>
   )

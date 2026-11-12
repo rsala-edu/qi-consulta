@@ -157,3 +157,30 @@ test('agenda: crear cites, avís de solapament, setmana i pestanya Cites del pac
   await anarAAgenda(page)
   await expect(dia.getByRole('button', { name: /10:00–11:00 Aina.*Feta/ })).toBeVisible()
 })
+
+test('nova cita: en tocar el camp surten tots els pacients i la cerca troba qualsevol part del nom', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Raül', 'Sala Grau')
+  await nouPacient(page, 'Aina', 'Provencal Inventada')
+  await anarAAgenda(page)
+  await expect(page.getByRole('heading', { name: 'dilluns, 2 de novembre de 2026' })).toBeVisible()
+  // (el dia buit també té «Nova cita» al mig)
+  await page.getByRole('main').getByRole('button', { name: 'Nova cita', exact: true }).first().click()
+  const dialeg = page.getByRole('dialog', { name: 'Nova cita' })
+  const cerca = dialeg.getByRole('searchbox', { name: 'Cerca el pacient' })
+  // «Pacient nou» és un enllaç a sota, no un bloc al mig del formulari
+  await expect(dialeg.getByRole('button', { name: 'Pacient nou' })).toBeVisible()
+  await expect(dialeg.getByLabel('Nom del pacient nou')).toBeHidden()
+
+  // Només tocar el camp: tots, per ordre alfabètic de llinatges
+  await cerca.click()
+  const llista = dialeg.getByRole('list', { name: 'Tots els pacients' })
+  await expect(llista.getByRole('button')).toHaveText([/Aina Provencal Inventada/, /Raül Sala Grau/])
+
+  // Sense accents ni majúscules, i qualsevol part dels llinatges
+  await cerca.fill('SALA')
+  await expect(llista.getByRole('button')).toHaveText([/Raül Sala Grau/])
+  await cerca.fill('raul gra')
+  await llista.getByRole('button', { name: /Raül Sala Grau/ }).click()
+  await expect(dialeg.getByText('Raül Sala Grau')).toBeVisible()
+})

@@ -836,6 +836,8 @@ export const ca = {
     triar: 'Triar',
     canviarPacient: 'Canviar de pacient',
     pacientNou: 'Pacient nou',
+    recents: 'Recents',
+    totsPacients: 'Tots els pacients',
     nomPacientNou: 'Nom del pacient nou',
     telefonPacientNou: 'Telèfon del pacient nou',
     crearPacient: 'Donar d\'alta i triar',

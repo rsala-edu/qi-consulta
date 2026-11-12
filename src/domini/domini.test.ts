@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pacientInventat } from '../test/dadesInventades'
-import { cercarPacients, normalitzar } from './cercaPacients'
+import { cercarPacients, normalitzar, pacientsRecents } from './cercaPacients'
 import { esquemaDadesPacient, nomComplet, type Pacient } from './pacient'
 
 function pacient(id: string, canvis: Partial<Pacient>): Pacient {
@@ -35,6 +35,27 @@ describe('cerca de pacients', () => {
     expect(ids(cercarPacients(pacients, '600111'))).toEqual(['1'])
     expect(ids(cercarPacients(pacients, '699 000'))).toEqual(['2'])
     expect(ids(cercarPacients(pacients, '34699'))).toEqual(['2'])
+  })
+
+  it('troba qualsevol part del nom, dels llinatges o del telèfon', () => {
+    const raul = [pacient('9', { nom: 'Raül', llinatges: 'Sala Grau', telefon: '611 22 33 44' })]
+    expect(ids(cercarPacients(raul, 'sala'))).toEqual(['9'])
+    expect(ids(cercarPacients(raul, 'SÀLA gra'))).toEqual(['9'])
+    expect(ids(cercarPacients(raul, 'aul'))).toEqual(['9'])
+    expect(ids(cercarPacients(raul, 'raul 2233'))).toEqual(['9'])
+    expect(ids(cercarPacients(raul, 'raul ferrer'))).toEqual([])
+  })
+
+  it('els recents: cites passades o fetes, de la més nova a la més antiga, sense repetir', () => {
+    const ara = new Date(2026, 10, 12, 12, 0)
+    const cites = [
+      { pacientId: 'a', inici: '2026-11-01T10:00', estat: 'feta' },
+      { pacientId: 'b', inici: '2026-11-10T10:00', estat: 'feta' },
+      { pacientId: 'a', inici: '2026-11-11T10:00', estat: 'feta' },
+      { pacientId: 'c', inici: '2026-11-20T10:00', estat: 'programada' },
+      { pacientId: 'd', inici: '2026-11-12T09:00', estat: 'anullada' },
+    ]
+    expect(pacientsRecents(cites, ara)).toEqual(['a', 'b'])
   })
 
   it('els arxivats només surten si es demana', () => {

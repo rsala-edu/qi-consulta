@@ -1,5 +1,5 @@
 // Formulari de cita i agenda amb un magatzem real (IndexedDB simulada).
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Magatzem } from '../../db/magatzem'
@@ -116,13 +116,27 @@ describe('formulari de cita', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
+  it('en tocar el camp surt la llista: primer els recents i després tots per ordre alfabètic', async () => {
+    const usuari = userEvent.setup()
+    // El Biel va venir el 2/11: és recent
+    formulari({ ara: new Date(2026, 10, 3, 8, 0) })
+    await usuari.click(screen.getByRole('searchbox', { name: 'Cerca el pacient' }))
+    const recents = screen.getByRole('list', { name: 'Recents' })
+    expect(within(recents).getByRole('button', { name: /Biel/ })).toBeInTheDocument()
+    const tots = screen.getByRole('list', { name: 'Tots els pacients' })
+    expect(within(tots).queryByRole('button', { name: /Biel/ })).not.toBeInTheDocument()
+    expect(within(tots).getByRole('button', { name: /Aina Provencal Inventada/ })).toBeInTheDocument()
+    await usuari.keyboard('{Escape}')
+    expect(screen.queryByRole('list', { name: 'Recents' })).not.toBeInTheDocument()
+  })
+
   it('dona d\'alta un pacient nou amb nom i telèfon i el tria', async () => {
     const usuari = userEvent.setup()
     const onCrearPacient = vi.fn((nom: string, telefon: string) =>
       magatzem.crearPacient({ ...pacientInventat(), nom, llinatges: '', telefon }),
     )
     const onDesar = formulari({ onCrearPacient })
-    await usuari.click(screen.getByText('Pacient nou'))
+    await usuari.click(screen.getByRole('button', { name: 'Pacient nou' }))
     await usuari.type(screen.getByLabelText('Nom del pacient nou'), 'Carme')
     await usuari.type(screen.getByLabelText('Telèfon del pacient nou'), '600 999 888')
     await usuari.click(screen.getByRole('button', { name: 'Donar d\'alta i triar' }))
