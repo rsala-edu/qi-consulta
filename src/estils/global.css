@@ -1951,7 +1951,8 @@ fieldset {
   width: 100%;
 }
 
-.llista-pacients {
+/* (classe pròpia: «llista-pacients» és la de la llista de la pantalla Pacients) */
+.desplegable-llista {
   position: absolute;
   z-index: 20;
   top: calc(100% + 4px);
@@ -1966,17 +1967,17 @@ fieldset {
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
 }
 
-.llista-pacients .resultats-pacient button {
+.desplegable-llista .resultats-pacient button {
   border-color: transparent;
   background: transparent;
 }
 
-.llista-pacients .resultats-pacient button:hover,
-.llista-pacients .resultats-pacient button:focus-visible {
+.desplegable-llista .resultats-pacient button:hover,
+.desplegable-llista .resultats-pacient button:focus-visible {
   background: var(--accent-suau);
 }
 
-.llista-pacients .titol-grup {
+.desplegable-llista .titol-grup {
   margin: 6px 14px 2px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -1985,7 +1986,15 @@ fieldset {
   color: var(--tinta-suau);
 }
 
-.llista-pacients > .detall {
+.desplegable-llista .nom {
+  flex: 1;
+}
+
+.desplegable-llista .detall {
+  color: var(--tinta-suau);
+}
+
+.desplegable-llista > .detall {
   margin: 8px 14px;
 }
 
