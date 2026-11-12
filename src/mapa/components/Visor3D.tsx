@@ -344,27 +344,29 @@ const Escena = memo(function Escena({
     const nivell = nivellEtiquetes(distancia, etiquetesSempre)
     const pixelsPerMetre = size.height / (2 * Math.tan((CAMERA.fov * Math.PI) / 360))
     const perId = new Map(marcadors.map((m) => [m.id, m]))
+    // Amb el cos sencer, només els punts marcats i el seleccionat porten
+    // etiqueta (com al 2D); la resta, punts petits. En ampliar, tots.
+    const ambEtiqueta = (m: MarcadorVisor) => nivell !== 'cap' || !!m.color || !!m.destacat
+    const nivellText = nivell === 'cap' ? 'codi' : nivell
     // Primer el punt destacat, després els més propers a la càmera
-    const ordenades =
-      nivell === 'cap'
-        ? []
-        : projectar()
-            .sort(
-              (a, b) =>
-                Number(perId.get(b.dada)?.destacat ?? false) - Number(perId.get(a.dada)?.destacat ?? false) ||
-                a.profunditat - b.profunditat,
-            )
-            .slice(0, 80)
-            .map((p) => {
-              const m = perId.get(p.dada)!
-              const text = textEtiqueta(m.etiquetes, nivell)
-              // Mida del marcador a la pantalla, perquè cap etiqueta el tapi
-              const a = aspecteMarcador(m)
-              const radiMon = (a.anell?.[1] ?? a.vora ?? a.radi) * escalaMarcadors(distancia)
-              const radi = (radiMon * pixelsPerMetre) / p.profunditat
-              // Sense text, el punt continua ocupant lloc
-              return { id: p.dada, x: p.x, y: p.y, text: text?.text ?? '', curt: text?.curt, radi }
-            })
+    const ordenades = projectar()
+        .filter((p) => ambEtiqueta(perId.get(p.dada)!))
+        .sort(
+          (a, b) =>
+            Number(perId.get(b.dada)?.destacat ?? false) - Number(perId.get(a.dada)?.destacat ?? false) ||
+            a.profunditat - b.profunditat,
+        )
+        .slice(0, 80)
+        .map((p) => {
+          const m = perId.get(p.dada)!
+          const text = textEtiqueta(m.etiquetes, nivellText)
+          // Mida del marcador a la pantalla, perquè cap etiqueta el tapi
+          const a = aspecteMarcador(m)
+          const radiMon = (a.anell?.[1] ?? a.vora ?? a.radi) * escalaMarcadors(distancia)
+          const radi = (radiMon * pixelsPerMetre) / p.profunditat
+          // Sense text, el punt continua ocupant lloc
+          return { id: p.dada, x: p.x, y: p.y, text: text?.text ?? '', curt: text?.curt, radi }
+        })
     const noves = colocarEtiquetes(ordenades, size.width, size.height)
     const clau = JSON.stringify(noves)
     if (clau === ultimes.current) return

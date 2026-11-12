@@ -862,8 +862,26 @@ fieldset {
     height: auto;
   }
 
+  /* Una columna i la pàgina es desplaça: cada fila pren l'alçada que necessita
+     (si no, la barra de sota el mapa quedava tapada per Punt/Marcats) */
   .disseny-mapa {
     grid-template-columns: 1fr;
+    flex: none;
+    min-height: auto;
+  }
+
+  .columna-visor {
+    min-height: auto;
+  }
+
+  .panell-mapa.amb-pestanyes {
+    overflow: visible;
+  }
+
+  .panell-mapa .panell-lateral,
+  .panell-mapa > .llista-marcats-seccio {
+    flex: none;
+    min-height: auto;
   }
 
   .zona-visor {
@@ -4458,7 +4476,86 @@ fieldset {
     margin-top: 0;
   }
 
+  /* «Agulles posades» a la mateixa fila que «Repetir»: si no hi cap, la
+     diferència de punts s'escurça (sencera en passar-hi per sobre) */
   .pantalla-visita.amb-mapa .barra-tractament {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow: visible;
   }
+
+  .pantalla-visita.amb-mapa .barra-tractament [data-testid='diferencia-punts'] {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+  }
+}
+
+/* «⤢ Ampliar», a la cantonada del mapa (cos i orella) */
+.cantonada-visor {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
+.boto-ampliar {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--linia);
+  border-radius: 999px;
+  background: var(--clar);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+  cursor: pointer;
+}
+
+.boto-ampliar[aria-pressed='true'] {
+  background: var(--accent-suau);
+}
+
+/* Mapa ampliat: sense la barra de l'app, sense la capçalera de la visita ni
+   les pestanyes; només el temporitzador, en petit, en una franja fina */
+#root:has(> .pantalla-visita.ampliat) > .barra-app,
+#root:has(.pantalla-visita.ampliat) .barra-app {
+  display: none;
+}
+
+.pantalla-visita.ampliat .pestanyes-visita {
+  display: none;
+}
+
+.pantalla-visita.ampliat .capcalera-visita {
+  position: static;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  min-height: 0;
+  margin-bottom: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  /* (el fons es manté: en acabar la retenció, la franja també passa a cinabri) */
+  border-bottom: none;
+}
+
+.pantalla-visita.ampliat .capcalera-visita > :not(.temporitzador) {
+  display: none;
+}
+
+.pantalla-visita.ampliat .temporitzador {
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.pantalla-visita.ampliat .temporitzador > span,
+.pantalla-visita.ampliat .temporitzador output {
+  font-size: 1.05rem;
+}
+
+.pantalla-visita.ampliat .temporitzador .boto {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 0.85rem;
 }

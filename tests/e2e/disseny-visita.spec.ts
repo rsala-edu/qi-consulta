@@ -87,3 +87,62 @@ test('visita: capçalera en una fila, escala en barra, secundaris a demanda i Tr
     await expect(llegenda.getByText('Moxa')).toBeVisible()
   }
 })
+
+test('Tractament: cos sencer en entrar, etiquetes només dels marcats, «⤢ Ampliar» i l\'orella sencera', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Aina', 'Provencal Inventada')
+  await novaCita(page, 'Aina', '2026-11-04', '10:00', 'Lumbàlgia')
+  await comencarVisita(page)
+  await pestanya(page, 'Tractament').click()
+  const visor = page.getByTestId('visor3d')
+  await expect(visor).toBeVisible()
+  const etiquetes = visor.locator('.visor3d-etiquetes .etiqueta-punt')
+
+  // En entrar, el cos sencer: cap etiqueta (cap punt marcat)
+  await page.waitForTimeout(800)
+  await expect(etiquetes).toHaveCount(0)
+
+  // Es marca LI4 (la càmera hi va i, ampliat, surten totes les etiquetes)
+  const cerca = page.getByRole('searchbox', { name: /Cerca un punt/ })
+  await cerca.fill('LI4')
+  await cerca.press('Enter')
+  const fitxa = page.getByRole('region', { name: 'LI4' })
+  await fitxa.getByRole('radio', { name: 'Bilateral' }).click()
+  await fitxa.getByRole('button', { name: 'Marcar' }).click()
+  await expect.poll(() => etiquetes.count()).toBeGreaterThan(2)
+
+  // Amb el cos sencer, només les del punt marcat
+  await page.getByRole('button', { name: 'Tot el cos' }).click()
+  await expect(visor).toHaveAttribute('data-moviment', 'no')
+  await expect.poll(() => etiquetes.count()).toBeLessThanOrEqual(2)
+  for (const text of await etiquetes.allTextContents()) expect(text).toBe('LI4')
+  expect(await etiquetes.count()).toBeGreaterThan(0)
+
+  // «⤢ Ampliar»: sense capçalera, pestanyes ni barra de l'app; el temporitzador, sí
+  const ampliar = page.getByRole('button', { name: '⤢ Ampliar' })
+  await ampliar.click()
+  await expect(page.getByRole('tablist', { name: 'Visita' })).toBeHidden()
+  await expect(page.getByRole('navigation', { name: 'Navegació principal' })).toBeHidden()
+  await expect(page.locator('.capcalera-visita').getByRole('button', { name: 'Finalitzar visita' })).toBeHidden()
+  await expect(page.locator('.capcalera-visita .temporitzador')).toBeVisible()
+  const desplacament = await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight)
+  expect(desplacament).toBeLessThanOrEqual(1)
+  // Es torna amb el mateix botó (o amb Esc)
+  await page.getByRole('button', { name: '⤡ Reduir' }).click()
+  await expect(page.getByRole('tablist', { name: 'Visita' })).toBeVisible()
+  await ampliar.click()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('navigation', { name: 'Navegació principal' })).toBeVisible()
+
+  // L'orella s'obre sencera i centrada, també amb el botó «⤢ Ampliar»
+  await page.getByRole('tab', { name: 'Orella' }).click()
+  const orella = page.getByTestId('visor-orella')
+  await expect(orella).toHaveAttribute('data-escala', '1.00')
+  await expect(page.getByRole('button', { name: '⤢ Ampliar' })).toBeVisible()
+  const caixa = (await orella.boundingBox())!
+  const dibuix = (await orella.locator('svg path').first().boundingBox())!
+  expect(dibuix.x).toBeGreaterThanOrEqual(caixa.x)
+  expect(dibuix.y).toBeGreaterThanOrEqual(caixa.y)
+  expect(dibuix.x + dibuix.width).toBeLessThanOrEqual(caixa.x + caixa.width + 1)
+  expect(dibuix.y + dibuix.height).toBeLessThanOrEqual(caixa.y + caixa.height + 1)
+})

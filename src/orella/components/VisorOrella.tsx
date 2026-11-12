@@ -205,11 +205,13 @@ export function VisorOrella({ ref, costat, punts, modeToc, onTocarPunt, onTocarP
   const u = unitatsPerPixel(vista, mida)
   const mirall = costat === 'D' ? 'translate(340,0) scale(-1,1)' : undefined
 
-  // Etiquetes: amb l'orella sencera, els noms de les zones; en ampliar, els codis
+  // Etiquetes: amb l'orella sencera, només les dels punts marcats i del
+  // seleccionat (i els noms de les zones, si es mostren); en ampliar, totes
   const etiquetes: EtiquetaColocada[] = useMemo(() => {
-    if (vista.escala < 1.6) return []
+    const sencera = vista.escala < 1.6
     const llarga = vista.escala >= 3
     const entrades = enPantalla
+      .filter((p) => !sencera || p.color || p.destacat)
       .map((p) => ({ p, s: aPantalla(vista, mida, p.dx, p.dy) }))
       .filter(({ s }) => s.x >= 0 && s.y >= 0 && s.x <= mida.amplada && s.y <= mida.alcada)
       .sort((a, b) => Number(Boolean(b.p.destacat)) - Number(Boolean(a.p.destacat)) || Number(Boolean(b.p.color)) - Number(Boolean(a.p.color)))

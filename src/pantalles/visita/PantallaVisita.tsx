@@ -8,7 +8,7 @@
 // lectura i només s'hi poden afegir addendes.
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { BarraEscala } from '../../components/BarraEscala'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
@@ -166,6 +166,15 @@ function Visita({
   const [bloquejada, setBloquejada] = useState(() => !esEditable(sessio, Date.now()))
   // A la primera visita de l'episodi es comença per la valoració
   const [pestanya, setPestanya] = useState<Pestanya>(sessio.numero === 1 ? 'valoracio' : 'comEsta')
+  // «⤢ Ampliar» (pestanya Tractament): el mapa ocupa tota la pantalla; només queda el temporitzador, en petit
+  const [ampliat, setAmpliat] = useState(false)
+  const mapaAmpliat = ampliat && pestanya === 'tractament'
+  useEffect(() => {
+    if (!mapaAmpliat) return
+    const tecla = (e: KeyboardEvent) => e.key === 'Escape' && setAmpliat(false)
+    document.addEventListener('keydown', tecla)
+    return () => document.removeEventListener('keydown', tecla)
+  }, [mapaAmpliat])
   // El que hi ha ara a la valoració (avís d'embaràs, mòdul ORL)
   const [valoracio, setValoracio] = useState<DadesValoracio | null>(() => valoracions.at(-1) ?? null)
   const canviValoracio = useCallback((d: DadesValoracio) => setValoracio(d), [])
@@ -280,7 +289,7 @@ function Visita({
   }
 
   return (
-    <main className={`pantalla pantalla-visita${pestanya === 'tractament' ? ' amb-mapa' : ''}`}>
+    <main className={`pantalla pantalla-visita${pestanya === 'tractament' ? ' amb-mapa' : ''}${mapaAmpliat ? ' ampliat' : ''}`}>
       <header className={`capcalera-visita${acabada ? ' retencio-acabada' : ''}`}>
         <div className="qui-visita">
           <h1>
@@ -498,6 +507,11 @@ function Visita({
                 marcats={marcats}
                 setMarcats={setMarcats}
                 barra={<Tractament dades={dades} anterior={anterior} setDades={setDades} controlAgulles={ajustos.controlAgulles} editable={editable} />}
+                cantonada={
+                  <button type="button" className="boto-ampliar" aria-pressed={mapaAmpliat} onClick={() => setAmpliat((x) => !x)}>
+                    {mapaAmpliat ? v.reduir : v.ampliar}
+                  </button>
+                }
               />
             </div>
           </section>
@@ -536,9 +550,6 @@ function Visita({
 
       {!enCurs && <Addendes sessioId={sessio.id} addendes={addendes} bloquejada={bloquejada} onAfegida={onRecarregar} />}
 
-      <p className="detall enllac-tractaments">
-        <Link to={`/pacients/${sessio.pacientId}/tractaments`}>{t.tractaments.titol}</Link>
-      </p>
     </main>
   )
 }
@@ -589,7 +600,7 @@ function Tractament({
         </>
       )}
       {dif && teAnterior && (
-        <p className="detall" data-testid="diferencia-punts">
+        <p className="detall" data-testid="diferencia-punts" title={formatar(v.diferencia, { mes: String(dif.mes), menys: String(dif.menys) })}>
           {formatar(v.diferencia, { mes: String(dif.mes), menys: String(dif.menys) })}
         </p>
       )}

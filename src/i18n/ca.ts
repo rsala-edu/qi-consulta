@@ -662,6 +662,8 @@ export const ca = {
     nomSimptoma: 'Quin',
     escalaSimptoma: 'Escala (0–10)',
     afegirSecundari: '+ Afegir símptoma secundari',
+    ampliar: '⤢ Ampliar',
+    reduir: '⤡ Reduir',
     senseValor: '—',
     repetir: 'Repetir el tractament de l\'última sessió',
     repetirPregunta: 'Aquesta sessió ja té punts. Què vols fer amb els de l\'última sessió?',

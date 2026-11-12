@@ -1,7 +1,7 @@
 // Mapa de l'orella (escola xinesa, GB/T 13734-2008): orella esquerra o dreta,
 // zoom, marcatge amb les tècniques de l'orella i correcció de la posició.
 
-import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useMemo, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import { LlegendaColors } from '../../mapa/components/LlegendaColors'
 import { Boto } from '../../components/Boto'
 import {
@@ -41,9 +41,11 @@ interface Props {
   /** Punt que s'ha de mostrar (des de la llista de marcats) */
   peticio: { codi: string; n: number } | null
   onVeure(m: PuntMarcat): void
+  /** A la cantonada del dibuix (a la visita: «⤢ Ampliar») */
+  cantonada?: ReactNode
 }
 
-export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props) {
+export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonada }: Props) {
   const visor = useRef<ControlOrella>(null)
   const { correccions, desar, treure } = useCorreccionsOrella()
   const [costatVist, setCostatVist] = useState<CostatOrella>('E')
@@ -121,6 +123,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
     <div className="disseny-mapa">
       <div className="columna-visor">
         <div className="zona-visor">
+          {cantonada && <div className="cantonada-visor">{cantonada}</div>}
           <VisorOrella
             ref={visor}
             costat={costatVist}
