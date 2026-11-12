@@ -247,12 +247,15 @@ function Visita({
     },
     [magatzem, sessio.id],
   )
-  // En sortir de la pantalla amb la visita encara en curs: avís suau (es pot reprendre des d'Avui)
+  // En sortir de la pantalla amb la visita encara en curs: avís suau (es pot reprendre des d'Avui).
+  // Només si de debò s'ha sortit (l'adreça ja és una altra): la pantalla també es desmunta i es
+  // torna a muntar sense sortir-ne (en recarregar-la, o el mode estricte de React)
   useEffect(
     () => () => {
-      if (perDesar.current.dades.estat === 'enCurs') avisarSortidaVisita()
+      const encaraHiEs = decodeURIComponent(location.hash.split('?')[0] ?? '') === `#/visita/${sessio.id}`
+      if (perDesar.current.dades.estat === 'enCurs' && !encaraHiEs) avisarSortidaVisita()
     },
-    [],
+    [sessio.id],
   )
 
   const editable = !bloquejada

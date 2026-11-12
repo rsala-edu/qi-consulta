@@ -11,6 +11,10 @@ test('una visita en curs es pot reprendre des de l\'Agenda i des d\'Avui, i en s
   await nouPacient(page, 'Aina', 'Provencal Inventada')
   await novaCita(page, 'Aina', '2026-11-04', '10:00', 'Lumbàlgia')
   await comencarVisita(page)
+  // Dins la visita no surt l'avís (la pantalla es pot tornar a muntar sense sortir-ne)
+  await page.waitForTimeout(500)
+  // (sense reintentar: l'avís desapareix sol al cap de 7 s)
+  expect(await page.getByRole('status').filter({ hasText: 'La visita continua en curs' }).count()).toBe(0)
 
   // Sortir sense finalitzar: avís suau
   await menu(page, 'Agenda').click()
