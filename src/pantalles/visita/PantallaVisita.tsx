@@ -8,7 +8,7 @@
 // lectura i només s'hi poden afegir addendes.
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { Indicador } from '../../components/Indicador'
@@ -43,6 +43,7 @@ import { ESPECIALS } from '../../cataleg/components/especials'
 import { DIAGNOSTIC, EXPLORACIO, etiquetaCami, GRUPS_VALORACIO, ORL } from '../../cataleg/index'
 import { orlActiu } from '../../cataleg/orl'
 import { PlaTractament } from './PlaTractament'
+import { ProperaCita } from './ProperaCita'
 import { BlocMymop } from './BlocMymop'
 import type { Mymop } from '../../domini/escales'
 import { GrupCataleg } from '../../cataleg/components/Cataleg'
@@ -153,7 +154,6 @@ function Visita({
   onRecarregar(): void
 }) {
   const magatzem = useMagatzem()
-  const navegar = useNavigate()
   const retencioGlobal = useRetencio()
   const v = t.visita
   const [dades, setDadesEstat] = useState<DadesSessio>(() => dadesDe(sessio))
@@ -491,27 +491,7 @@ function Visita({
         )}
       </fieldset>
 
-      {pestanya === 'tancar' && (
-        <div className="accions accions-esquerra">
-          <Boto
-            variant="secundari"
-            onClick={() => {
-              const q = new URLSearchParams({
-                nova: '1',
-                dia: sumarDies(diaDe(new Date()), 7),
-                vista: 'dia',
-                pacient: sessio.pacientId,
-                episodi: sessio.episodiId,
-                tipus: 'seguiment',
-                durada: '40',
-              })
-              void navegar(`/agenda?${q}`)
-            }}
-          >
-            {v.proposarCita}
-          </Boto>
-        </div>
-      )}
+      {pestanya === 'tancar' && <ProperaCita sessio={sessio} />}
 
       {!enCurs && <Addendes sessioId={sessio.id} addendes={addendes} bloquejada={bloquejada} onAfegida={onRecarregar} />}
 

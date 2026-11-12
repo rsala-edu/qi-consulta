@@ -246,6 +246,12 @@ export function FormulariCita({
             {c.nouEpisodi}
           </label>
         )}
+        {!nouEpisodi && episodis.length === 1 && (
+          <div className="camp camp-ample">
+            <span className="etiqueta-camp">{c.episodi}</span>
+            <output aria-label={c.episodi}>{episodis[0]!.motiu || '—'}</output>
+          </div>
+        )}
         {!nouEpisodi && episodis.length > 1 && (
           <Camp etiqueta={c.episodi} ample>
             <select {...register('episodiId', { setValueAs: (v: string) => v || null })}>

@@ -131,17 +131,27 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   await finalitzar(page, 2, 'Agulla semipermanent (inventat)')
   await expect(page.getByText(/Editable fins demà a les/)).toBeVisible()
 
-  // Proposar la propera cita: el pacient, el tipus i la durada ja hi són
+  // Proposar la propera cita: el pacient, l'episodi de la visita, el tipus i la durada ja hi són
   await pestanya(page, 'Tancar').click()
   await page.getByRole('button', { name: 'Proposar la propera cita' }).click()
-  const dialeg = page.getByRole('dialog', { name: 'Nova cita' })
+  let dialeg = page.getByRole('dialog', { name: 'Proposar la propera cita' })
   await expect(dialeg).toContainText('Aina Provencal Inventada')
-  await expect(dialeg.getByRole('status', { name: 'Tipus' }).or(dialeg.locator('output[aria-label="Tipus"]'))).toHaveText('Seguiment')
+  await expect(dialeg.locator('output[aria-label="Episodi"]')).toHaveText('Lumbàlgia')
+  await expect(dialeg.locator('output[aria-label="Tipus"]')).toHaveText('Seguiment')
   await expect(dialeg.getByLabel('Durada')).toHaveValue('40')
   await expect(dialeg.getByLabel('Data')).toHaveValue('2026-11-11')
-  await dialeg.getByLabel('Hora').fill('10:00')
+  await expect(dialeg.getByLabel('Hora')).toHaveValue('10:00')
   await dialeg.getByRole('button', { name: 'Desar' }).click()
   await expect(dialeg).toBeHidden()
+  // No se surt de la visita: Tancar, amb la confirmació
+  await expect(pestanya(page, 'Tancar')).toHaveAttribute('aria-selected', 'true')
+  await expect(page.locator('.confirmacio-cita')).toHaveText('Propera cita: dc. 11/11 a les 10:00 · Canviar')
+  // «Canviar» l'obre per editar-la
+  await page.getByRole('button', { name: 'Canviar la propera cita' }).click()
+  dialeg = page.getByRole('dialog', { name: 'Canviar la propera cita' })
+  await dialeg.getByLabel('Hora').fill('10:30')
+  await dialeg.getByRole('button', { name: 'Desar' }).click()
+  await expect(page.locator('.confirmacio-cita')).toHaveText('Propera cita: dc. 11/11 a les 10:30 · Canviar')
 
   // Una setmana després, 2a visita: repetir el tractament i canviar-lo
   await page.clock.fastForward(7 * 24 * 3_600_000)

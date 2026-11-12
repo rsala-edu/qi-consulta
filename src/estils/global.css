@@ -3881,3 +3881,28 @@ fieldset {
   min-width: 40px;
   padding: 0 8px;
 }
+
+/* Propera cita, a la pestanya Tancar de la visita */
+.propera-cita {
+  margin-top: 8px;
+}
+
+.confirmacio-cita {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radi);
+  background: var(--accent-suau);
+  color: var(--accent-fosc);
+}
+
+.enllac-en-linia {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  font-weight: 600;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
