@@ -65,6 +65,7 @@ export function PantallaProvaMapa() {
 export function MapaTractament({
   titol,
   avis,
+  barra,
   marcats,
   setMarcats,
   tecniques = TECNIQUES_DEL_MAPA.cos,
@@ -72,6 +73,8 @@ export function MapaTractament({
 }: {
   titol?: ReactNode
   avis?: ReactNode
+  /** Barra fina sobre el mapa, al costat de Cos/Orella (a la visita: repetir, diferència i agulles) */
+  barra?: ReactNode
   marcats: PuntMarcat[]
   setMarcats: Dispatch<SetStateAction<PuntMarcat[]>>
   /** Tècniques que es poden triar al cos (a la palpació, només «Dolor a la palpació») */
@@ -107,6 +110,7 @@ export function MapaTractament({
           ))}
         </div>}
         {avis}
+        {barra}
       </div>
       {/* El cos es queda muntat (i carregat) quan es mira l'orella */}
       <div id="mapa-cos" role="tabpanel" aria-labelledby="pestanya-cos" className="panell-pestanya" hidden={pestanya !== 'cos'}>

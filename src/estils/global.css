@@ -27,6 +27,17 @@
   --avis-suau: #f3e3dd;
   --radi: 14px;
   --toc: 52px;
+  /* Càpsula del menú */
+  --capsula: rgb(47 93 80 / 0.08);
+  --capsula-activa: #ffffff;
+  --capsula-activa-tinta: #234a3f;
+  --capsula-ombra: 0 1px 3px rgb(31 36 33 / 0.12), 0 1px 1px rgb(31 36 33 / 0.06);
+  /* Mapa (cos i orella): fons al voltant i etiquetes */
+  --fons-visor: linear-gradient(#fcfbf7, #e9ede7);
+  --vora-visor: transparent;
+  --xip-etiqueta: rgb(252 251 247 / 0.88);
+  --xip-etiqueta-tinta: #1f2421;
+  --tinta-etiqueta-zona: #59615c;
   --espai: clamp(16px, 3vw, 32px);
   --lletra-titol: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
   --lletra: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -58,6 +69,15 @@
     --accent-fosc: #b4d9cb;
     --accent-suau: #26332d;
     --avis-suau: #3b2722;
+    --capsula: rgb(255 255 255 / 0.05);
+    --capsula-activa: #2f5d50;
+    --capsula-activa-tinta: #eef5f1;
+    --capsula-ombra: 0 1px 3px rgb(0 0 0 / 0.35);
+    --fons-visor: radial-gradient(ellipse at 50% 35%, #3a4448, #283034 75%);
+    --vora-visor: rgb(255 255 255 / 0.08);
+    --xip-etiqueta: rgb(24 30 33 / 0.86);
+    --xip-etiqueta-tinta: #eef0ec;
+    --tinta-etiqueta-zona: #c9d0cb;
   }
 
   :root:not([data-theme='light']) .zona-visor {
@@ -107,6 +127,15 @@
     --accent-fosc: #b4d9cb;
     --accent-suau: #26332d;
     --avis-suau: #3b2722;
+    --capsula: rgb(255 255 255 / 0.05);
+    --capsula-activa: #2f5d50;
+    --capsula-activa-tinta: #eef5f1;
+    --capsula-ombra: 0 1px 3px rgb(0 0 0 / 0.35);
+    --fons-visor: radial-gradient(ellipse at 50% 35%, #3a4448, #283034 75%);
+    --vora-visor: rgb(255 255 255 / 0.08);
+    --xip-etiqueta: rgb(24 30 33 / 0.86);
+    --xip-etiqueta-tinta: #eef0ec;
+    --tinta-etiqueta-zona: #c9d0cb;
 }
 
 :root[data-theme='dark'] .zona-visor {
@@ -208,11 +237,6 @@ a {
 /* --- Barra i pantalles --- */
 
 .barra-app {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px var(--espai);
-  border-bottom: 1px solid var(--linia);
   background: var(--fons);
 }
 
@@ -671,50 +695,82 @@ fieldset {
   gap: 8px;
 }
 
-/* --- Navegació --- */
+/* --- Navegació ---
+   El logo sol a l'esquerra; el menú en una càpsula de fons suau al mig (l'opció
+   activa, en blanc amb una ombra lleugera; en fosc, en jade fosc); Drive, el
+   tema i Bloquejar a la dreta. Sense línia separadora. */
 
 .barra-app {
-  gap: 16px;
+  display: grid;
+  /* La càpsula, centrada a l'espai que deixen el logo i les accions (a la
+     tauleta horitzontal no hi ha amplada per centrar-la a tota la barra) */
+  grid-template-columns: auto minmax(max-content, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: 12px 24px;
+  padding: 10px var(--espai);
+  border-bottom: none;
+}
+
+.barra-app .logotip {
+  justify-self: start;
+  padding: 4px 8px 4px 4px;
 }
 
 .navegacio {
-  display: flex;
-  gap: 4px;
-  /* El menú no s'escurça mai: si falta espai, s'escurça la píndola de Drive */
-  flex: 1 0 auto;
+  justify-self: center;
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--capsula);
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .navegacio a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: var(--radi);
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
   color: var(--tinta-suau);
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.navegacio a:hover {
+  color: var(--tinta);
 }
 
 .navegacio a.active {
-  color: var(--accent);
-  background: var(--accent-suau);
+  color: var(--capsula-activa-tinta);
+  background: var(--capsula-activa);
+  box-shadow: var(--capsula-ombra);
+  font-weight: 500;
 }
 
-/* Pantalla estreta (tauleta vertical): la navegació baixa a una fila pròpia */
-@media (max-width: 760px) {
-  .barra-app {
-    flex-wrap: wrap;
-    row-gap: 4px;
-  }
+.accions-barra {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
 
-  .barra-app .logotip {
-    margin-right: auto;
+/* Tauleta vertical (i pantalles estretes): la càpsula baixa a una segona fila, amb el mateix estil */
+@media (max-width: 900px) {
+  .barra-app {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   .navegacio {
-    order: 5;
-    flex-basis: 100%;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    max-width: 100%;
   }
 }
 
@@ -809,9 +865,9 @@ fieldset {
   min-height: 0;
   border-radius: calc(var(--radi) * 1.5);
   overflow: hidden;
-  /* Paper d'arròs que s'esvaeix cap a la boira */
-  background: linear-gradient(#fcfbf7, #e9ede7);
-  border: none;
+  /* Paper d'arròs que s'esvaeix cap a la boira; en fosc, gris pissarra amb una vora suau */
+  background: var(--fons-visor);
+  box-shadow: inset 0 0 0 1px var(--vora-visor);
 }
 
 .visor3d {
@@ -843,8 +899,8 @@ fieldset {
   line-height: 1.2;
   padding: 1px 6px;
   border-radius: 6px;
-  background: rgb(252 251 247 / 0.88);
-  color: var(--tinta);
+  background: var(--xip-etiqueta);
+  color: var(--xip-etiqueta-tinta);
   white-space: nowrap;
 }
 
@@ -2587,7 +2643,7 @@ fieldset {
   padding: 0 6px;
   font-size: 0.8rem;
   letter-spacing: 0.02em;
-  color: var(--tinta-suau);
+  color: var(--tinta-etiqueta-zona);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -3982,4 +4038,327 @@ fieldset {
   align-items: center;
   justify-content: space-between;
   gap: 8px 16px;
+}
+
+/* --- Escala 0–10 (BarraEscala): 11 caselles en una fila, de jade a cinabri --- */
+.barra-escala {
+  gap: 8px;
+}
+
+.capcalera-escala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.escala-anterior {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caselles-escala {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 3px;
+  max-width: 720px;
+  padding: 3px;
+  border-radius: 16px;
+  /* Degradat suau, només de fons */
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--jade) 18%, var(--clar)),
+    color-mix(in oklab, var(--cinabri) 18%, var(--clar))
+  );
+  /* Es pot lliscar el dit en horitzontal; la pàgina es continua desplaçant en vertical */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.casella-escala {
+  position: relative;
+  min-height: 48px;
+  padding: 0;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.casella-escala:hover {
+  background: rgb(255 255 255 / 0.35);
+}
+
+.casella-escala.triada {
+  color: #fff;
+  font-weight: 600;
+  background: color-mix(in oklab, var(--cinabri) var(--p), var(--jade));
+  box-shadow:
+    0 0 0 2px var(--clar),
+    0 2px 8px rgb(0 0 0 / 0.18);
+  transform: scale(1.08);
+  z-index: 1;
+}
+
+:root[data-theme='dark'] .casella-escala.triada {
+  color: #151917;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .casella-escala.triada {
+    color: #151917;
+  }
+}
+
+.caselles-escala:disabled,
+.casella-escala:disabled {
+  cursor: default;
+}
+
+.punt-anterior {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tinta-suau);
+}
+
+.casella-escala .punt-anterior {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  translate: -50% 0;
+}
+
+.casella-escala.triada .punt-anterior {
+  background: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .casella-escala {
+    transition: none;
+  }
+}
+
+/* --- Visita a pantalla completa ---
+   Capçalera en una sola fila (nom, episodi i sessió, temporitzador, agulles,
+   Desat i Finalitzar), pestanyes a sota i el contingut a tota l'amplada. */
+.pantalla.pantalla-visita {
+  max-width: none;
+}
+
+@media (min-width: 901px) {
+  .capcalera-visita {
+    flex-wrap: nowrap;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .capcalera-visita .qui-visita {
+    display: flex;
+    align-items: baseline;
+    gap: 6px 16px;
+    min-width: 0;
+  }
+
+  .capcalera-visita h1,
+  .capcalera-visita .qui-visita p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .capcalera-visita h1 {
+    flex: 0 1 auto;
+  }
+
+  .capcalera-visita .qui-visita p {
+    flex: 0 1 auto;
+    margin: 0;
+  }
+
+  .capcalera-visita .temporitzador,
+  .capcalera-visita .accions-visita {
+    flex: none;
+  }
+
+  .capcalera-visita .boto-gran {
+    min-height: 48px;
+    padding: 0 20px;
+    font-size: 1rem;
+  }
+}
+
+.pestanyes-visita {
+  margin-bottom: 12px;
+}
+
+/* Pestanya Tractament, com la pantalla Mapa: el mapa ocupa tota l'alçada sota
+   la capçalera i les pestanyes; la columna dreta es desplaça per dins i la
+   pàgina no es desplaça mai */
+@media (min-width: 901px) {
+  #root:has(> .pantalla-visita.amb-mapa) {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pantalla-visita.amb-mapa {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .capcalera-visita {
+    position: static;
+    margin-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .pestanyes-visita {
+    margin-bottom: 0;
+  }
+
+  .pantalla-visita.amb-mapa > .contingut-visita,
+  .pantalla-visita.amb-mapa .tractament-visita {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pantalla-visita.amb-mapa .tractament-visita {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .pantalla-visita.amb-mapa .mapa-visita {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .pantalla-visita.amb-mapa > .enllac-tractaments,
+  .pantalla-visita.amb-mapa > .addendes {
+    display: none;
+  }
+}
+
+/* La barra fina sobre el mapa: repetir l'última sessió, la diferència i el comptador d'agulles */
+.barra-tractament {
+  flex: 1;
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 8px 14px;
+  margin: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.barra-tractament > * {
+  flex: none;
+}
+
+.barra-tractament .boto {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.95rem;
+}
+
+.barra-tractament .detall {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.barra-tractament .pregunta-repetir {
+  width: auto;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.barra-tractament .pregunta-repetir p {
+  flex-basis: auto;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.barra-tractament .agulles-posades {
+  margin-left: auto;
+}
+
+@media (max-width: 900px) {
+  .barra-tractament {
+    flex-wrap: wrap;
+    flex-basis: 100%;
+  }
+}
+
+/* Tauleta horitzontal i ordinadors petits: la capçalera de la visita, més
+   compacta perquè hi càpiga en una fila; el nom té prioritat sobre el motiu */
+@media (min-width: 901px) and (max-width: 1279px) {
+  .capcalera-visita {
+    gap: 8px 14px;
+  }
+
+  .capcalera-visita h1 {
+    font-size: 1.35rem;
+    flex-shrink: 0.3;
+  }
+
+  .capcalera-visita .qui-visita p {
+    font-size: 0.85rem;
+    flex-shrink: 3;
+  }
+
+  .capcalera-visita .temporitzador {
+    gap: 4px;
+  }
+
+  .capcalera-visita .temporitzador > span {
+    font-size: 1.3rem;
+  }
+
+  .capcalera-visita .boto-gran {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Pestanya Tractament: sota el mapa, el 3D/2D i les vistes en una sola fila
+   (el mapa guanya alçada); en pantalles baixes, sense la llegenda de colors
+   (els colors ja surten en triar la tècnica i a la llista de marcats) */
+@media (min-width: 901px) {
+  .pantalla-visita.amb-mapa .barra-visor {
+    gap: 6px 12px;
+    justify-content: flex-start;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .visor3d-vistes {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 800px) {
+  .pantalla-visita.amb-mapa .barra-visor .llegenda {
+    display: none;
+  }
 }

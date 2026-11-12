@@ -76,8 +76,8 @@ interface PropsSeccio {
 
 export function SeccioCataleg({ seccio, dades, anterior, ajustos, editable, especials, onCanviar }: PropsSeccio) {
   const [oberta, setOberta] = useState(false)
-  const resum = resumSeccio(seccio, dades, c.normal)
-  const resumAnterior = anterior ? resumSeccio(seccio, anterior, c.normal) : ''
+  const resum = resumSeccio(seccio, dades, c.normalCurt)
+  const resumAnterior = anterior ? resumSeccio(seccio, anterior, c.normalCurt) : ''
   const id = `seccio-${seccio.id.replace(/\W/g, '-')}`
   return (
     <div className={`seccio-cataleg${oberta ? ' oberta' : ''}${dades?.normal ? ' normal' : ''}`}>
@@ -104,7 +104,12 @@ export function SeccioCataleg({ seccio, dades, anterior, ajustos, editable, espe
                   className="xip xip-normal"
                   aria-pressed={!!dades?.normal}
                   disabled={!editable}
-                  onClick={() => onCanviar(canviarNormal(dades))}
+                  onClick={() => {
+                    const nou = canviarNormal(dades)
+                    onCanviar(nou)
+                    // Marcada com a normal, la secció es plega i només diu «✓ Normal» (en tocar-la, es torna a obrir)
+                    if (nou?.normal) setOberta(false)
+                  }}
                 >
                   {c.normal}
                 </button>

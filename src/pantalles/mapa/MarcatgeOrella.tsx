@@ -47,6 +47,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
   const { correccions, desar, treure } = useCorreccionsOrella()
   const [costatVist, setCostatVist] = useState<CostatOrella>('E')
   const [zona, setZona] = useState<ZonaOrella | ''>('')
+  const [zones, setZones] = useState(false)
   const [consulta, setConsulta] = useState('')
   const [fitxa, setFitxa] = useState<FitxaOberta | null>(null)
   const [corregint, setCorregint] = useState<string | null>(null)
@@ -128,6 +129,8 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
             onTocarPosicio={(p) => corregint && desar(corregint, p.x, p.y)}
             arrossegable={corregint}
             onArrossegar={(p) => corregint && desar(corregint, p.x, p.y, false)}
+            // En corregir la posició d'un punt, les zones sempre es veuen
+            zones={zones || !!corregint}
           />
         </div>
         <div className="barra-visor">
@@ -147,6 +150,9 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
             </button>
             <button type="button" className="boto boto-secundari" onClick={() => visor.current?.restablir()}>
               {t.orella.sencera}
+            </button>
+            <button type="button" className="boto boto-secundari" aria-pressed={zones} onClick={() => setZones((z) => !z)}>
+              {zones ? t.orella.amagarZones : t.orella.mostrarZones}
             </button>
           </div>
           <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>

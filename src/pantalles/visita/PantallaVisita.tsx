@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { Link, useParams } from 'react-router'
+import { BarraEscala } from '../../components/BarraEscala'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { Indicador } from '../../components/Indicador'
@@ -247,15 +248,23 @@ function Visita({
     },
     [magatzem, sessio.id],
   )
-  // En sortir de la pantalla amb la visita encara en curs: avís suau (es pot reprendre des d'Avui)
+  // En sortir de la pantalla amb la visita encara en curs: avís suau (es pot reprendre des d'Avui).
+  // Només si de debò s'ha sortit (l'adreça ja és una altra): la pantalla també es desmunta i es
+  // torna a muntar sense sortir-ne (en recarregar-la, o el mode estricte de React)
   useEffect(
     () => () => {
-      if (perDesar.current.dades.estat === 'enCurs') avisarSortidaVisita()
+      const encaraHiEs = decodeURIComponent(location.hash.split('?')[0] ?? '') === `#/visita/${sessio.id}`
+      if (perDesar.current.dades.estat === 'enCurs' && !encaraHiEs) avisarSortidaVisita()
     },
-    [],
+    [sessio.id],
   )
 
   const editable = !bloquejada
+  // Símptomes secundaris a la vista: els que ja tenen alguna cosa, o els que s'han afegit
+  const ambSecundari = (k: 'secundari1' | 'secundari2') => dades.comEsta[k].nom.trim() !== '' || dades.comEsta[k].escala !== null
+  const [secundarisAfegits, setSecundaris] = useState(0)
+  const [afegit, setAfegit] = useState(false)
+  const secundaris = Math.max(secundarisAfegits, ambSecundari('secundari2') ? 2 : ambSecundari('secundari1') ? 1 : 0)
   const enCurs = dades.estat === 'enCurs'
   const fins = editableFins(dades)
   const marcats = llistaPunts(dades.punts)
@@ -271,7 +280,7 @@ function Visita({
   }
 
   return (
-    <main className="pantalla pantalla-visita">
+    <main className={`pantalla pantalla-visita${pestanya === 'tractament' ? ' amb-mapa' : ''}`}>
       <header className={`capcalera-visita${acabada ? ' retencio-acabada' : ''}`}>
         <div className="qui-visita">
           <h1>
@@ -282,11 +291,10 @@ function Visita({
               </span>
             )}
           </h1>
-          <p className="detall">
+          {/* L'hora d'inici, en passar-hi per sobre: la capçalera cap en una sola fila */}
+          <p className="detall" title={formatar(v.inici, { hora: new Date(dades.iniciAt).toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' }) })}>
             {episodi?.motiu ?? ''} ·{' '}
-            {pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) })}{' '}
-            ·{' '}
-            {formatar(v.inici, { hora: new Date(dades.iniciAt).toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' }) })}
+            {pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) })}
           </p>
         </div>
         {enCurs && (
@@ -360,7 +368,12 @@ function Visita({
             id={`pestanya-${p}`}
             aria-controls={`visita-${p}`}
             aria-selected={pestanya === p}
-            onClick={() => setPestanya(p)}
+            onClick={() => {
+              setPestanya(p)
+              // En tornar a «Com està», només es veuen els secundaris que tenen alguna cosa
+              setSecundaris(0)
+              setAfegit(false)
+            }}
           >
             {v.pestanyes[p]}
           </button>
@@ -406,10 +419,11 @@ function Visita({
                 onChange={(e) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, canvis: e.target.value } }))}
               />
             </Camp>
-            <Escala
+            <BarraEscala
               etiqueta={v.escala}
               valor={dades.comEsta.escala}
               anterior={anterior?.comEsta.escala ?? null}
+              disabled={!editable}
               onCanviar={(escala) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, escala } }))}
             />
             <BlocMymop
@@ -418,22 +432,38 @@ function Visita({
               anterior={mymopAnterior}
               onCanviar={(mymop) => setDades((d) => ({ ...d, mymop }))}
             />
-            {(['secundari1', 'secundari2'] as const).map((k, i) => (
+            {/* Símptomes secundaris: amagats fins que se n'afegeix un (fins a 2) */}
+            {(['secundari1', 'secundari2'] as const).slice(0, secundaris).map((k, i) => (
               <div key={k} className="simptoma-secundari">
                 <Camp etiqueta={`${formatar(v.secundari, { n: String(i + 1) })} · ${v.nomSimptoma}`}>
                   <input
                     value={dades.comEsta[k].nom}
+                    autoFocus={i + 1 === secundaris && afegit}
                     onChange={(e) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, [k]: { ...d.comEsta[k], nom: e.target.value } } }))}
                   />
                 </Camp>
-                <Escala
+                <BarraEscala
                   etiqueta={`${formatar(v.secundari, { n: String(i + 1) })} · ${v.escalaSimptoma}`}
                   valor={dades.comEsta[k].escala}
                   anterior={anterior?.comEsta[k].escala ?? null}
+                  disabled={!editable}
                   onCanviar={(escala) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, [k]: { ...d.comEsta[k], escala } } }))}
                 />
               </div>
             ))}
+            {editable && secundaris < 2 && (
+              <p className="accions accions-esquerra">
+                <Boto
+                  variant="discret"
+                  onClick={() => {
+                    setAfegit(true)
+                    setSecundaris((n) => n + 1)
+                  }}
+                >
+                  {v.afegirSecundari}
+                </Boto>
+              </p>
+            )}
           </section>
         )}
 
@@ -463,9 +493,12 @@ function Visita({
 
         {pestanya === 'tractament' && (
           <section id="visita-tractament" role="tabpanel" aria-labelledby="pestanya-tractament" className="panell tractament-visita">
-            <Tractament dades={dades} anterior={anterior} setDades={setDades} controlAgulles={ajustos.controlAgulles} editable={editable} />
             <div className="pantalla-mapa mapa-visita">
-              <MapaTractament marcats={marcats} setMarcats={setMarcats} />
+              <MapaTractament
+                marcats={marcats}
+                setMarcats={setMarcats}
+                barra={<Tractament dades={dades} anterior={anterior} setDades={setDades} controlAgulles={ajustos.controlAgulles} editable={editable} />}
+              />
             </div>
           </section>
         )}
@@ -503,37 +536,10 @@ function Visita({
 
       {!enCurs && <Addendes sessioId={sessio.id} addendes={addendes} bloquejada={bloquejada} onAfegida={onRecarregar} />}
 
-      <p className="detall">
+      <p className="detall enllac-tractaments">
         <Link to={`/pacients/${sessio.pacientId}/tractaments`}>{t.tractaments.titol}</Link>
       </p>
     </main>
-  )
-}
-
-/** Escala 0–10: un botó per valor, amb la de l'última sessió al costat */
-function Escala({
-  etiqueta,
-  valor,
-  anterior,
-  onCanviar,
-}: {
-  etiqueta: string
-  valor: number | null
-  anterior: number | null
-  onCanviar(v: number | null): void
-}) {
-  return (
-    <div className="camp escala-visita">
-      <span className="etiqueta-camp">{etiqueta}</span>
-      <div className="segmentat escala" role="radiogroup" aria-label={etiqueta}>
-        {Array.from({ length: 11 }, (_, n) => (
-          <button key={n} type="button" role="radio" aria-checked={valor === n} onClick={() => onCanviar(valor === n ? null : n)}>
-            {n}
-          </button>
-        ))}
-      </div>
-      {anterior !== null && <span className="detall">{formatar(t.visita.escalaAnterior, { n: String(anterior) })}</span>}
-    </div>
   )
 }
 
@@ -560,7 +566,7 @@ function Tractament({
   const dif = anterior ? diferenciaPunts(dades.punts, anterior.punts) : null
   const auto = agullesDelsPunts(dades.punts)
   return (
-    <div className="eines-tractament">
+    <div className="eines-tractament barra-tractament">
       {teAnterior && editable && (
         <>
           <Boto variant="secundari" onClick={() => (Object.keys(dades.punts).length > 0 ? setPreguntant(true) : repetir(true))}>
@@ -568,7 +574,7 @@ function Tractament({
           </Boto>
           {preguntant && (
             <div className="pregunta-repetir" role="group" aria-label={v.repetirPregunta}>
-              <p>{v.repetirPregunta}</p>
+              <p>{v.repetirPreguntaCurta}</p>
               <Boto variant="secundari" onClick={() => repetir(true)}>
                 {v.substituir}
               </Boto>
