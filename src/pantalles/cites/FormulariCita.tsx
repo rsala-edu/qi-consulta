@@ -387,7 +387,7 @@ function TriarPacient({
           autoComplete="off"
         />
         {obert && (
-          <div className="llista-pacients" id={idLlista}>
+          <div className="desplegable-llista" id={idLlista}>
             {trobats.length === 0 && <p className="detall">{c.capPacient}</p>}
             {delsRecents.length > 0 && (
               <>
