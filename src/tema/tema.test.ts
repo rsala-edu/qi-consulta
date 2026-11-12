@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { atributTema, canviarTema, CLAU_TEMA, llegirTema, temaSeguent } from './tema'
+import { atributTema, canviarTema, CLAU_TEMA, llegirTema, temaAlternat, temaEfectiu } from './tema'
 
 afterEach(() => {
   localStorage.clear()
@@ -7,10 +7,14 @@ afterEach(() => {
 })
 
 describe('tema', () => {
-  it('cicle Sistema → Clar → Fosc → Sistema', () => {
-    expect(temaSeguent('sistema')).toBe('clar')
-    expect(temaSeguent('clar')).toBe('fosc')
-    expect(temaSeguent('fosc')).toBe('sistema')
+  it('la icona només alterna clar ↔ fosc, a partir del que es veu', () => {
+    expect(temaAlternat('clar', true)).toBe('fosc')
+    expect(temaAlternat('fosc', false)).toBe('clar')
+    // «Com el sistema» només val fins al primer toc
+    expect(temaAlternat('sistema', false)).toBe('fosc')
+    expect(temaAlternat('sistema', true)).toBe('clar')
+    expect(temaEfectiu('sistema', true)).toBe('fosc')
+    expect(temaEfectiu('clar', true)).toBe('clar')
   })
 
   it('per defecte, com el sistema; un valor estrany també', () => {

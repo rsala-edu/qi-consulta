@@ -9,9 +9,37 @@ export type Tema = (typeof TEMES)[number]
 
 export const CLAU_TEMA = 'qi.tema'
 
-/** Ordre del cicle de la icona: Sistema → Clar → Fosc → Sistema */
-export function temaSeguent(t: Tema): Tema {
-  return TEMES[(TEMES.indexOf(t) + 1) % TEMES.length]!
+/** El que es veu: «com el sistema» és clar o fosc segons el sistema */
+export function temaEfectiu(t: Tema, sistemaFosc: boolean): 'clar' | 'fosc' {
+  return t === 'sistema' ? (sistemaFosc ? 'fosc' : 'clar') : t
+}
+
+/**
+ * La icona només alterna clar ↔ fosc (respecte del que es veu). «Com el
+ * sistema» només val fins al primer toc, o si es tria a Ajustos > Aparença.
+ */
+export function temaAlternat(t: Tema, sistemaFosc: boolean): 'clar' | 'fosc' {
+  return temaEfectiu(t, sistemaFosc) === 'clar' ? 'fosc' : 'clar'
+}
+
+const CONSULTA_FOSC = '(prefers-color-scheme: dark)'
+
+export function sistemaEsFosc(): boolean {
+  try {
+    return window.matchMedia(CONSULTA_FOSC).matches
+  } catch {
+    return false
+  }
+}
+
+export function subscriureSistema(f: () => void): () => void {
+  try {
+    const m = window.matchMedia(CONSULTA_FOSC)
+    m.addEventListener('change', f)
+    return () => m.removeEventListener('change', f)
+  } catch {
+    return () => {}
+  }
 }
 
 export function esTema(v: unknown): v is Tema {

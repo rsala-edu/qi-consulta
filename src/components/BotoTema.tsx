@@ -1,24 +1,28 @@
 // Icona del tema a la barra superior (i, petita, a la pantalla d'entrada).
-// Cada toc canvia de mode: Sistema → Clar → Fosc → Sistema.
+// Mostra el tema que es veu, i cada toc alterna clar ↔ fosc i ho desa en
+// aquest dispositiu. «Com el sistema» és només el punt de partida (o el que
+// es triï a Ajustos > Aparença).
 // Icones SVG pròpies, de traç arrodonit com la resta de l'app.
 
 import { formatar, t } from '../i18n/t'
-import { temaSeguent, type Tema } from '../tema/tema'
-import { useTema } from '../tema/useTema'
+import { temaAlternat, temaEfectiu, type Tema } from '../tema/tema'
+import { useSistemaFosc, useTema } from '../tema/useTema'
 
 export function BotoTema({ petit = false }: { petit?: boolean }) {
   const [tema, canviar] = useTema()
-  const etiqueta = formatar(t.tema.etiqueta, { tema: t.tema.noms[tema] })
+  const sistemaFosc = useSistemaFosc()
+  const efectiu = temaEfectiu(tema, sistemaFosc)
+  const etiqueta = formatar(t.tema.etiqueta, { tema: t.tema.noms[efectiu] })
   return (
     <button
       type="button"
       className={`boto-tema${petit ? ' petit' : ''}`}
       aria-label={etiqueta}
       title={etiqueta}
-      data-tema={tema}
-      onClick={() => canviar(temaSeguent(tema))}
+      data-tema={efectiu}
+      onClick={() => canviar(temaAlternat(tema, sistemaFosc))}
     >
-      <IconaTema tema={tema} />
+      <IconaTema tema={efectiu} />
     </button>
   )
 }
