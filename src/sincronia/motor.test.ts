@@ -145,6 +145,8 @@ describe('dos dispositius', () => {
     await sincronitzar(a.db, a.clau, drive, DIA)
     const b = await nou(drive)
     await a.m.actualitzarPacient(p.id, pacientInventat({ telefon: '611 111 111' }))
+    // El de B, de debò més nou: en el mateix mil·lisegon, l'empat el desfà l'identificador del dispositiu (a l'atzar)
+    await new Promise((r) => setTimeout(r, 3))
     await b.m.actualitzarPacient(p.id, pacientInventat({ telefon: '622 222 222' }))
     for (const x of [a, b, a, b]) await sincronitzar(x.db, x.clau, drive, DIA)
     for (const x of [a, b]) {
