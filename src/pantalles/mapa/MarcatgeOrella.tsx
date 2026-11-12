@@ -2,6 +2,7 @@
 // zoom, marcatge amb les tècniques de l'orella i correcció de la posició.
 
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { LlegendaColors } from '../../mapa/components/LlegendaColors'
 import { Boto } from '../../components/Boto'
 import {
   COLOR_TECNICA,
@@ -155,14 +156,9 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
               {zones ? t.orella.amagarZones : t.orella.mostrarZones}
             </button>
           </div>
-          <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
-            {TECNIQUES.map((tec) => (
-              <li key={tec}>
-                <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
-                {t.orella.tecnica[tec as keyof typeof t.orella.tecnica]}
-              </li>
-            ))}
-          </ul>
+          <LlegendaColors
+            tecniques={TECNIQUES.map((tecnica) => ({ tecnica, nom: t.orella.tecnica[tecnica as keyof typeof t.orella.tecnica] }))}
+          />
         </div>
       </div>
 

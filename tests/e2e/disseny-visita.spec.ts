@@ -68,4 +68,22 @@ test('visita: capçalera en una fila, escala en barra, secundaris a demanda i Tr
   expect(visor.y + visor.height).toBeGreaterThan((page.viewportSize()!.height) * 0.8)
   // La barra fina, sobre el mapa
   await expect(page.locator('.capcalera-mapa .barra-tractament')).toBeVisible()
+
+  // Llegenda de colors: amb poca alçada, amagada darrere «ⓘ Colors» (un globus en tocar-lo)
+  const llegenda = page.getByRole('list', { name: 'Tècnica' })
+  const colors = page.getByRole('button', { name: 'ⓘ Colors' })
+  if (page.viewportSize()!.height <= 800) {
+    await expect(llegenda).toBeHidden()
+    await colors.click()
+    await expect(colors).toHaveAttribute('aria-expanded', 'true')
+    await expect(llegenda.getByText('Moxa')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(llegenda).toBeHidden()
+    await colors.click()
+    await page.getByRole('searchbox', { name: /Cerca un punt/ }).click()
+    await expect(llegenda).toBeHidden()
+  } else {
+    await expect(colors).toBeHidden()
+    await expect(llegenda.getByText('Moxa')).toBeVisible()
+  }
 })

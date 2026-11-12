@@ -20,6 +20,7 @@ import {
 } from '../../domini/puntMarcat'
 import { formatar, t } from '../../i18n/t'
 import { BarraVistes } from '../../mapa/components/BarraVistes'
+import { LlegendaColors } from '../../mapa/components/LlegendaColors'
 import { Visor2D } from '../../mapa/components/Visor2D'
 import { desarMode, modeInicial, type ModeMapa } from '../../mapa/modeMapa'
 import { ErrorCos3D, Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
@@ -303,15 +304,8 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
               </button>
             ))}
           </div>
+          <LlegendaColors tecniques={TECNIQUES.map((tecnica) => ({ tecnica, nom: t.mapa.tecnica[tecnica] }))} />
           <BarraVistes visor={visor} />
-          <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
-            {TECNIQUES.map((tec) => (
-              <li key={tec}>
-                <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
-                {t.mapa.tecnica[tec]}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 

@@ -317,6 +317,7 @@ export const ca = {
     },
     costatTitol: 'Costat',
     tecnicaTitol: 'Tècnica',
+    colors: 'ⓘ Colors',
     marcar: 'Marcar',
     actualitzar: 'Actualitzar',
     desmarcar: 'Desmarcar',
