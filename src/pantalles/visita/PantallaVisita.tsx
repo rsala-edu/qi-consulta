@@ -51,6 +51,7 @@ import type { AjustosCatalegs } from '../../cataleg/motor'
 import { llegirAjustosCatalegs } from '../../db/ajustosCatalegs'
 import { hiHaEmbaras, type DadesValoracio, type Valoracio } from '../../domini/valoracio'
 import { useRetencio } from '../../visita/retencio'
+import { avisarSortidaVisita } from '../../visita/sortidaVisita'
 
 type Pestanya = 'valoracio' | 'comEsta' | 'exploracio' | 'diagnostic' | 'orl' | 'tractament' | 'tancar'
 const PESTANYES: readonly Pestanya[] = ['valoracio', 'comEsta', 'exploracio', 'diagnostic', 'orl', 'tractament', 'tancar']
@@ -245,6 +246,13 @@ function Visita({
       if (p.pendent && !p.bloquejada) void magatzem.actualitzarSessio(sessio.id, p.dades, desada.current).catch(() => {})
     },
     [magatzem, sessio.id],
+  )
+  // En sortir de la pantalla amb la visita encara en curs: avís suau (es pot reprendre des d'Avui)
+  useEffect(
+    () => () => {
+      if (perDesar.current.dades.estat === 'enCurs') avisarSortidaVisita()
+    },
+    [],
   )
 
   const editable = !bloquejada

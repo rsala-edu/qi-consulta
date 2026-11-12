@@ -3906,3 +3906,80 @@ fieldset {
   text-underline-offset: 3px;
   cursor: pointer;
 }
+
+/* Avís suau en sortir d'una visita en curs */
+.avis-sortida-visita {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 32px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 18px;
+  border-radius: var(--radi);
+  background: var(--clar);
+  color: var(--tinta);
+  border: 1px solid var(--linia);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.16);
+  animation: apareix-avis 0.2s ease-out;
+}
+
+.avis-sortida-visita p {
+  margin: 0;
+  flex: 1;
+}
+
+.avis-sortida-visita a {
+  color: var(--accent-fosc);
+  font-weight: 600;
+}
+
+.tancar-avis {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--tinta-suau);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+@keyframes apareix-avis {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
+/* Avui: visites començades un altre dia i no finalitzades */
+.avis-en-curs {
+  background: var(--avis-suau);
+}
+
+.avis-en-curs h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  color: var(--cinabri);
+}
+
+.avis-en-curs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.avis-en-curs li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}

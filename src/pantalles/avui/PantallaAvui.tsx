@@ -8,7 +8,7 @@ import { EstatCopia } from '../../components/EstatCopia'
 import { Indicador } from '../../components/Indicador'
 import { diaDe, diaHoraDe, fiDe, sumarDies } from '../../domini/cita'
 import { nomComplet } from '../../domini/pacient'
-import { diaLlarg, formatar, hora, t } from '../../i18n/t'
+import { diaCurtAmbMes, diaLlarg, formatar, hora, t } from '../../i18n/t'
 import { llegirAjustosVisita } from '../../db/ajustosVisita'
 import { teClauRecuperacio, teEmpremta } from '../../sessio/claus'
 import { useMagatzem, useSessio } from '../../sessio/ContextSessio'
@@ -23,8 +23,9 @@ export function PantallaAvui() {
   const [ara] = useState(() => new Date())
   const avui = diaDe(ara)
   const [carrega] = useCarrega(async () => {
-    const [cites, pacients, empremta, clau, ajustos] = await Promise.all([
+    const [cites, anteriors, pacients, empremta, clau, ajustos] = await Promise.all([
       magatzem.llistarCites(avui, sumarDies(avui, 1)),
+      magatzem.llistarCites('0000', avui),
       magatzem.llistarPacients(),
       teEmpremta(db),
       teClauRecuperacio(db),
@@ -32,7 +33,9 @@ export function PantallaAvui() {
     ])
     // Les sessions dels pacients d'avui: per saber el número de sessió de cada seguiment
     const sessions = (await Promise.all([...new Set(cites.map((c) => c.pacientId))].map((p) => magatzem.sessionsDelPacient(p)))).flat()
-    return { cites, pacients, empremta, clau, ajustos, sessions }
+    // Visites començades un altre dia que no s'han finalitzat
+    const enCurs = anteriors.filter((c) => c.estat === 'enCurs' && c.inici < avui).sort((x, y) => x.inici.localeCompare(y.inici))
+    return { cites, enCurs, pacients, empremta, clau, ajustos, sessions }
   }, [magatzem, db, avui])
   const [comencant, setComencant] = useState<string | null>(null)
 
@@ -72,6 +75,41 @@ export function PantallaAvui() {
               <Link className="boto boto-secundari" to="/ajustos/seguretat">
                 {a.anarSeguretat}
               </Link>
+            </section>
+          )}
+
+          {carrega.dades.enCurs.length > 0 && (
+            <section
+              className="panell avis-en-curs"
+              aria-label={
+                carrega.dades.enCurs.length === 1
+                  ? a.senseFinalitzar.un
+                  : formatar(a.senseFinalitzar.diverses, { n: String(carrega.dades.enCurs.length) })
+              }
+            >
+              <h2>
+                {carrega.dades.enCurs.length === 1
+                  ? a.senseFinalitzar.un
+                  : formatar(a.senseFinalitzar.diverses, { n: String(carrega.dades.enCurs.length) })}
+              </h2>
+              <ul>
+                {carrega.dades.enCurs.map((c) => {
+                  const p = carrega.dades.pacients.find((x) => x.id === c.pacientId)
+                  return (
+                    <li key={c.id}>
+                      <span>{formatar(a.visitaDel, { nom: p ? nomComplet(p) : '—', dia: diaCurtAmbMes(c.inici), hora: hora(c.inici) })}</span>
+                      <button
+                        type="button"
+                        className="boto boto-secundari"
+                        disabled={comencant === c.id}
+                        onClick={() => void comencar(c.id, carrega.dades.ajustos.minutsRetencio)}
+                      >
+                        {a.continuarVisita}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
             </section>
           )}
 

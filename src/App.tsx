@@ -1,6 +1,7 @@
 import { Fragment, lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { HashRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { AvisRetencioAcabada, ProveidorRetencio, RetencioBloqueig } from './visita/retencio'
+import { AvisSortidaVisita } from './visita/sortidaVisita'
 import { LimitError } from './components/LimitError'
 import { Boto } from './components/Boto'
 import { Simbol } from './components/Simbol'
@@ -101,6 +102,7 @@ function Marc() {
         </header>
         <AvisVersioNova />
         <AvisRetencioAcabada onAnar={(id) => void navegar(`/visita/${id}`)} />
+        <AvisSortidaVisita />
         <AvisVersioAntiga />
         <AvisFinestraPrivada />
         <AvisCanvis />

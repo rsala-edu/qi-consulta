@@ -620,6 +620,8 @@ export const ca = {
     activarEmpremta: 'Activa l\'empremta per obrir l\'app més de pressa.',
     imprimirClau: 'Imprimeix la clau de recuperació, per si un dia oblides la contrasenya.',
     anarSeguretat: 'Anar a Seguretat',
+    senseFinalitzar: { un: 'Tens 1 visita sense finalitzar', diverses: 'Tens {n} visites sense finalitzar' },
+    visitaDel: '{nom} · {dia} a les {hora}',
   },
   tema: {
     etiqueta: 'Tema: {tema}',
@@ -670,6 +672,11 @@ export const ca = {
     properaCita: 'Propera cita: {dia} a les {hora}',
     canviarCita: 'Canviar',
     canviarProperaCita: 'Canviar la propera cita',
+    sortida: {
+      text: 'La visita continua en curs. La pots reprendre des d\'',
+      avui: 'Avui',
+      tancar: 'Tancar l\'avís',
+    },
     retencio: 'Retenció',
     minuts: '{n} min',
     menysMinut: 'Un minut menys',

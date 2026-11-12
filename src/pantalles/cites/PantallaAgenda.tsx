@@ -420,6 +420,7 @@ function FitxaCita({
       {cita.notes && <p className="detall">{cita.notes}</p>}
       <div className="accions accions-esquerra">
         {esAvui && cita.estat === 'programada' && <Boto onClick={onComencar}>{c.comencarVisita}</Boto>}
+        {cita.estat === 'enCurs' && <Boto onClick={onComencar}>{t.avui.continuarVisita}</Boto>}
         <Boto variant="secundari" onClick={onEditar}>
           {c.editar}
         </Boto>
