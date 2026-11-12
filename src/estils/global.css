@@ -4432,9 +4432,10 @@ fieldset {
   }
 }
 
-/* La barra fina del Tractament, en una fila pròpia sota Cos/Orella quan no
-   hi cap al costat (tauleta horitzontal i ordinadors petits) */
-@media (min-width: 901px) and (max-width: 1279px) {
+/* Fins a 1599 px, la capçalera del mapa de la visita (Cos/Orella i la barra
+   fina) no hi cap al costat de la columna dreta: ocupa tota l'amplada i, a la
+   tauleta horitzontal, la barra passa a una fila pròpia sota Cos/Orella */
+@media (min-width: 901px) and (max-width: 1599px) {
   /* La capçalera del mapa, a tota l'amplada i amb l'alçada que calgui (la
      columna dreta comença a sota, en lloc de pujar-hi al costat) */
   .pantalla-visita.amb-mapa .capcalera-mapa {
