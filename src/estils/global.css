@@ -754,10 +754,21 @@ fieldset {
 }
 
 .accions-barra {
-  justify-self: end;
+  /* Ocupa la columna (que s'encongeix si cal) i el text de Drive s'escurça */
+  justify-self: stretch;
   display: flex;
+  justify-content: flex-end;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+
+.accions-barra > * {
+  flex: none;
+}
+
+.accions-barra > .indicador-copia-arrel {
+  flex: 0 1 auto;
   min-width: 0;
 }
 
@@ -4316,14 +4327,21 @@ fieldset {
     gap: 8px 14px;
   }
 
+  /* El nom i «Primera visita · Sessió 2 de 6», en dues línies dins la fila */
+  .capcalera-visita .qui-visita {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
   .capcalera-visita h1 {
-    font-size: 1.35rem;
-    flex-shrink: 0.3;
+    max-width: 100%;
+    font-size: 1.25rem;
   }
 
   .capcalera-visita .qui-visita p {
+    max-width: 100%;
     font-size: 0.85rem;
-    flex-shrink: 3;
   }
 
   .capcalera-visita .temporitzador {
@@ -4411,5 +4429,26 @@ fieldset {
     border-radius: 12px;
     box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
     white-space: nowrap;
+  }
+}
+
+/* La barra fina del Tractament, en una fila pròpia sota Cos/Orella quan no
+   hi cap al costat (tauleta horitzontal i ordinadors petits) */
+@media (min-width: 901px) and (max-width: 1279px) {
+  /* La capçalera del mapa, a tota l'amplada i amb l'alçada que calgui (la
+     columna dreta comença a sota, en lloc de pujar-hi al costat) */
+  .pantalla-visita.amb-mapa .capcalera-mapa {
+    height: auto;
+    margin-right: 0;
+    overflow: visible;
+    flex-wrap: wrap;
+  }
+
+  .pantalla-visita.amb-mapa .panell-mapa.amb-pestanyes {
+    margin-top: 0;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament {
+    flex-wrap: wrap;
   }
 }

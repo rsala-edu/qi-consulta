@@ -82,10 +82,14 @@ async function marcarCos(page: Page, cerca: string, codi: string, costat: string
     await camp.press('Enter')
     await expect(fitxa).toBeVisible({ timeout: 2_000 })
   }).toPass({ timeout: 60_000 })
-  // (a la tauleta vertical, una barra fixa pot quedar a sobre: el clic va igualment al botó)
-  await fitxa.getByRole('radio', { name: costat }).click({ force: true })
-  await fitxa.getByRole('radio', { name: 'Agulla' }).click({ force: true })
-  await fitxa.getByRole('button', { name: 'Marcar' }).click({ force: true })
+  // A la tauleta vertical, una barra fixa pot quedar a sobre: l'esdeveniment va directament al botó
+  await fitxa.getByRole('radio', { name: costat }).dispatchEvent('click')
+  await fitxa.getByRole('radio', { name: 'Agulla' }).dispatchEvent('click')
+  const marcats = page.getByRole('tab', { name: /^Marcats/ })
+  const abans = await marcats.textContent()
+  await fitxa.getByRole('button', { name: 'Marcar' }).dispatchEvent('click')
+  // S'ha marcat de debò
+  await expect(marcats).not.toHaveText(abans ?? '')
 }
 
 async function obrirSeccio(page: Page, nom: string) {
@@ -166,7 +170,7 @@ test('disseny de la visita, la barra i el mapa', async ({ page }, info) => {
     const cerca = page.getByRole('searchbox', { name: /Cerca un punt de l'orella/ })
     await cerca.fill(codi)
     await cerca.press('Enter')
-    await page.getByRole('region', { name: codi }).getByRole('button', { name: 'Marcar' }).click({ force: true })
+    await page.getByRole('region', { name: codi }).getByRole('button', { name: 'Marcar' }).dispatchEvent('click')
   }
   await page.waitForTimeout(800)
   await capturar(page, '8-orella', projecte)
