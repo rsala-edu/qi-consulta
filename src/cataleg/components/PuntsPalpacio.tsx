@@ -2,12 +2,13 @@
 // propi («Dolor a la palpació»), separats dels punts del tractament. Es desen
 // a l'exploració de la sessió com «codi → costat».
 
-import { lazy, Suspense, useState, type Dispatch, type SetStateAction } from 'react'
+import { Suspense, useState, type Dispatch, type SetStateAction } from 'react'
+import { lazyAmbVersio } from '../../actualitzacio/trossos'
 import { Indicador } from '../../components/Indicador'
 import { COLOR_TECNICA, nouPuntMarcat, type CostatMarcat, type PuntMarcat } from '../../domini/puntMarcat'
 import { formatar, t } from '../../i18n/t'
 
-const MapaTractament = lazy(() => import('../../pantalles/mapa/PantallaProvaMapa').then((m) => ({ default: m.MapaTractament })))
+const MapaTractament = lazyAmbVersio(() => import('../../pantalles/mapa/PantallaProvaMapa').then((m) => ({ default: m.MapaTractament })))
 
 type Valor = Record<string, { costat: CostatMarcat }>
 
