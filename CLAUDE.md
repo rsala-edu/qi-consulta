@@ -26,3 +26,4 @@ Estat actual, decisions pendents i el que queda: docs/estat.md (llegir-lo en com
 - No fer cap push nou fins que el «Publicar» anterior ha acabat (un push nou el cancel·la). Mentrestant es pot continuar treballant en local
 - Els commits que només toquen docs/ o fitxers .md no executen el CI ni publiquen (paths-ignore): per a aquests no cal esperar res
 - Treballar per parts, amb un commit per part i un resum curt de cada una quan el CI és verd
+- Que no es perdi mai feina: la feina en curs es desa sempre dins el repositori, mai en worktrees ni carpetes temporals fora del repo (el scratchpad només per a fitxers d'un sol ús: registres, captures de prova). Commits petits i freqüents a la branca de treball, i push d'aquesta branca (no de main) com a mínim cada hora i sempre abans d'aturar-se. Si una sessió s'acaba, la següent ha de poder continuar des de GitHub (els pushos de branques que no són main no executen el CI ni publiquen)
