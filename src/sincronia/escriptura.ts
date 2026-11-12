@@ -36,9 +36,18 @@ export function rellotgeDe(db: QiDB): Promise<Rellotge> {
   return r
 }
 
+let escriptures = 0
+
+/**
+ * Puja a cada escriptura local. Una pantalla que ha llegit mentre s'escrivia
+ * pot tenir les dades d'abans: torna a llegir (useCarrega).
+ */
+export const comptadorEscriptures = (): number => escriptures
+
 /** Apunta a la cua els registres canviats. S'ha de cridar dins una transacció amb canvisPropis i meta. */
 export async function encuar(db: QiDB, entrades: readonly { taula: string; clau: string }[], hlc: Hlc): Promise<void> {
   if (entrades.length === 0) return
+  escriptures++
   const seq = (((await db.meta.get('seq'))?.valor as number | undefined) ?? 0) + entrades.length
   await db.canvisPropis.bulkPut(entrades.map((e, i) => ({ id: `${e.taula}:${e.clau}`, taula: e.taula, clau: e.clau, seq: seq - entrades.length + 1 + i })))
   await db.meta.bulkPut([

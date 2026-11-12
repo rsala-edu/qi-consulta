@@ -203,6 +203,12 @@ function Visita({
     setPendent(true)
   }, [])
 
+  // L'últim que s'ha escrit (si s'escriu mentre es desa, encara queda pendent)
+  const ultimes = useRef(dades)
+  useEffect(() => {
+    ultimes.current = dades
+  }, [dades])
+
   // Es desa sol uns moments després de l'últim canvi
   useEffect(() => {
     if (!pendent || bloquejada) return
@@ -214,7 +220,9 @@ function Visita({
         .then(
           (s) => {
             desada.current = dadesDe(s)
-            setPendent(JSON.stringify(aDesar) !== JSON.stringify(dades))
+            // Comparar amb el d'ara, no amb el d'aquest moment: si no, un canvi fet
+            // mentre es desava es quedaria sense desar
+            setPendent(JSON.stringify(aDesar) !== JSON.stringify(ultimes.current))
           },
           (e: unknown) => {
             if (e instanceof ErrorSessioBloquejada) setBloquejada(true)
