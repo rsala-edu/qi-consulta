@@ -879,7 +879,11 @@ fieldset {
   }
 
   .panell-mapa .panell-lateral,
-  .panell-mapa > .llista-marcats-seccio {
+  .panell-mapa > .llista-marcats-seccio,
+  /* La llista de marcats també pren l'alçada que necessita (si no, a la
+     tauleta vertical quedava amb alçada zero sota «Punt / Marcats») */
+  .panell-mapa .panell-lateral-marcats > .llista-marcats-seccio,
+  .panell-mapa .llista-marcats-desplacament {
     flex: none;
     min-height: auto;
   }
