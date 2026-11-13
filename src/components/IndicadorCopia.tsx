@@ -82,6 +82,30 @@ export function IndicadorCopia() {
         : estat === 'al-dia' && (pendent || pendents > 0)
           ? textPendents
           : s.curt[estat]
+  // A la píndola, un text curt (amplada fixa: el menú no es mou quan canvia)
+  const pc = s.pindola
+  const curt = estat === 'cal-connectar'
+    ? pc['cal-connectar']
+    : dies
+    ? pc.senseCopia
+    : nomesLectura
+      ? pc.nomesLectura
+      : senseConnexio
+        ? pc.senseConnexio
+        : estat === 'al-dia' && (pendent || pendents > 0)
+          ? pendents === 1
+            ? pc.unPendent
+            : pendents > 1
+              ? formatar(pc.pendents, { n: String(pendents) })
+              : pc.pendent
+          : pc[estat]
+  // El punt d'estat: verd (al dia), ambre (pujant o pendent), cinabri (cal fer alguna cosa)
+  const punt =
+    estat === 'al-dia' && !pendent && pendents === 0 && !dies && !nomesLectura
+      ? 'be'
+      : estat === 'sincronitzant' || (estat === 'al-dia' && !dies && !nomesLectura)
+        ? 'pendent'
+        : 'malament'
   const calGoogle = estat === 'cal-connectar' || error?.motiu === 'permis'
   const missatge =
     estat === 'error' && error
@@ -98,10 +122,22 @@ export function IndicadorCopia() {
         type="button"
         className={`indicador-copia estat-${estat === 'cal-connectar' ? estat : dies ? 'sense-copia' : senseConnexio ? 'sense-connexio' : estat}`}
         title={text}
+        aria-label={text}
         aria-expanded={obert}
+        data-punt={punt}
         onClick={() => setObert((o) => !o)}
       >
-        {text}
+        <svg className="nuvol-copia" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path
+            d="M7 18h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.4 9.1 4.5 4.5 0 0 0 7 18z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinejoin="round"
+          />
+          <circle className={`punt-copia ${punt}`} cx="18.5" cy="17.5" r="3.6" />
+        </svg>
+        <span className="text-copia">{curt}</span>
       </button>
       {obert && (
         <section className="panell-copia" aria-label={s.panell} role="dialog">

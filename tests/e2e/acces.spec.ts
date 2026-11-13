@@ -40,7 +40,7 @@ async function nouPacient(page: Page, nom: string, llinatges: string, telefon = 
 
 /** Espera que la còpia arribi a Drive (es puja uns segons després de desar). */
 async function esperarCopia(page: Page) {
-  await expect(page.locator('.indicador-copia')).toHaveText('Drive: al dia', { timeout: 20_000 })
+  await expect(page.locator('.indicador-copia')).toHaveAttribute('aria-label', 'Drive: al dia', { timeout: 20_000 })
 }
 
 async function segonDispositiu(browser: Browser, google: GoogleSimulat, projecte: object) {
@@ -115,7 +115,7 @@ test('si la renovació silenciosa falla, queda «Cal tornar a connectar amb Goog
 
   await menu(page, 'Pacients').click()
   const indicador = page.locator('.indicador-copia')
-  await expect(indicador).toHaveText('Cal tornar a connectar amb Google')
+  await expect(indicador).toHaveAttribute('aria-label', 'Cal tornar a connectar amb Google')
   expect(google.autoritzacions.at(-1)).toEqual({ prompt: 'none', pista: 'sub-doctora' })
   // Un altre toc no torna a provar-ho de seguida
   await menu(page, 'Avui').click()
@@ -355,7 +355,7 @@ test('«Drive: error»: la píndola explica el motiu, l\'última còpia correcta
   google.fallaDrive = 503
   await nouPacient(page, 'Biel', 'Prova Inventat')
   const indicador = page.locator('.indicador-copia')
-  await expect(indicador).toHaveText('Drive: error', { timeout: 20_000 })
+  await expect(indicador).toHaveAttribute('aria-label', 'Drive: error', { timeout: 20_000 })
   await indicador.click()
   const panell = page.getByRole('dialog', { name: 'Còpia a Google Drive' })
   await expect(panell.getByRole('status')).toHaveText('Google Drive no ha respost bé. Es tornarà a provar d\'aquí a una estona.')
@@ -390,7 +390,7 @@ test('la mateixa fitxa clínica editada en dos dispositius: no es perd res i la 
 
   /** Sincronitza ara i espera que la còpia de Drive s'hagi baixat (i, si cal, pujat) */
   const sincronitzarAra = async (p: Page) => {
-    await expect(p.locator('.indicador-copia')).not.toHaveText('Drive: desant…')
+    await expect(p.locator('.indicador-copia')).not.toHaveAttribute('aria-label', 'Drive: desant…')
     const baixada = p.waitForResponse((r) => r.url().includes('alt=media'))
     await p.locator('.indicador-copia').click()
     await p.getByRole('dialog', { name: 'Còpia a Google Drive' }).getByRole('button', { name: 'Desar ara a Drive' }).click()
@@ -450,10 +450,10 @@ test('una setmana sense obrir l\'app i Google ja no renova el permís: l\'app fu
   await menu(page, 'Pacients').click()
   await expect(page.getByRole('link', { name: /Aina Provencal Inventada/ })).toBeVisible()
   await nouPacient(page, 'Bernat', 'Prova Inventat', '600 222 333')
-  await expect(page.locator('.indicador-copia')).toHaveText('Cal tornar a connectar amb Google')
+  await expect(page.locator('.indicador-copia')).toHaveAttribute('aria-label', 'Cal tornar a connectar amb Google')
   // I en tornar a connectar, es puja
   google.silenciosaFalla = false
   await page.locator('.indicador-copia').click()
   await page.getByRole('button', { name: 'Tornar a entrar amb Google' }).click()
-  await expect(page.locator('.indicador-copia')).toHaveText('Drive: al dia')
+  await expect(page.locator('.indicador-copia')).toHaveAttribute('aria-label', 'Drive: al dia')
 })

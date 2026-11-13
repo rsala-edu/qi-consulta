@@ -2193,6 +2193,11 @@ fieldset {
 }
 
 .indicador-copia {
+  /* Amplada fixa: canviar de text («Al dia» ↔ «2 pendents») no mou res de la barra */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 8.6rem;
   border: 1px solid var(--linia);
   background: transparent;
   border-radius: 999px;
@@ -2200,12 +2205,36 @@ fieldset {
   font-size: 0.8rem;
   color: var(--tinta-suau);
   min-height: 36px;
-  padding: 0 14px;
+  padding: 0 12px;
   cursor: pointer;
   white-space: nowrap;
-  max-width: 100%;
+}
+
+.indicador-copia .text-copia {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.nuvol-copia {
+  flex: none;
+}
+
+.punt-copia {
+  stroke: var(--fons);
+  stroke-width: 1.5;
+}
+
+.punt-copia.be {
+  fill: #3f9a6b;
+}
+
+.punt-copia.pendent {
+  fill: #d29a2a;
+}
+
+.punt-copia.malament {
+  fill: var(--avis);
 }
 
 .indicador-copia.estat-cal-connectar,
@@ -2978,6 +3007,11 @@ fieldset {
   background: var(--avis);
   border-color: var(--avis);
   font-weight: 600;
+}
+
+.indicador-copia.estat-sense-copia .punt-copia {
+  fill: var(--paper, #fff);
+  stroke: var(--avis);
 }
 
 .panell-copia .avis-fort,
@@ -4947,3 +4981,21 @@ fieldset {
   display: block;
   flex: none;
 }
+
+/* Barra de l'app: a l'ordinador, el menú centrat a tota la barra (les dues
+   columnes dels costats fan el mateix), sigui quin sigui l'estat de Drive */
+@media (min-width: 1200px) {
+  .barra-app {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+}
+
+/* Capçalera de la visita: «Desat» / «Desant…» en un espai fix, perquè el
+   temporitzador i els botons no es moguin quan apareix o desapareix */
+.capcalera-visita .accions-visita > .detall[role='status'] {
+  display: inline-block;
+  min-width: 4.6em;
+  text-align: right;
+  white-space: nowrap;
+}
+

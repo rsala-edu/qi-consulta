@@ -73,7 +73,7 @@ async function desarAra(page: Page) {
 }
 
 async function alDia(page: Page) {
-  await expect(pindola(page)).toHaveText('Drive: al dia')
+  await expect(pindola(page)).toHaveAttribute('aria-label', 'Drive: al dia')
 }
 
 /** Les cites de la setmana del 2 de novembre, en ordre */
@@ -155,7 +155,7 @@ test('clau diferent (DRV-K): fusionar les dades del Chrome amb les de Drive; els
   googleB.fitxers = google.fitxers
   const abans = JSON.stringify([...google.fitxers.values()])
   let panell = await desarAra(b.page)
-  await expect(pindola(b.page)).toHaveText('Drive: error')
+  await expect(pindola(b.page)).toHaveAttribute('aria-label', 'Drive: error')
   await expect(panell.getByRole('status').first()).toHaveText('Aquest dispositiu i Google Drive tenen dades diferents.')
   await expect(panell).toContainText('Codi: DRV-K')
   // Detalls tècnics: versions i empremtes curtes de les claus (diferents), sense cap dada
@@ -237,7 +237,7 @@ test('més de 24 hores sense poder fer cap còpia: la píndola ho diu i Avui en 
   // Drive deixa de respondre bé
   google.fallaDrive = 500
   await desarAra(page)
-  await expect(pindola(page)).toHaveText('Drive: error')
+  await expect(pindola(page)).toHaveAttribute('aria-label', 'Drive: error')
   await page.keyboard.press('Escape')
 
   await page.clock.fastForward('49:00:00')
@@ -246,7 +246,7 @@ test('més de 24 hores sense poder fer cap còpia: la píndola ho diu i Avui en 
   await expect(contrasenya).toBeVisible()
   await contrasenya.fill(PA)
   await page.getByRole('button', { name: 'Desbloquejar' }).click()
-  await expect(pindola(page)).toHaveText('Fa 2 dies que no es fa cap còpia')
+  await expect(pindola(page)).toHaveAttribute('aria-label', 'Fa 2 dies que no es fa cap còpia')
   await menu(page, 'Pacients').click()
   await menu(page, 'Avui').click()
   const avis = page.getByRole('alert').filter({ hasText: 'Fa 2 dies que no es fa cap còpia' })

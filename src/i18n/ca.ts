@@ -531,6 +531,19 @@ export const ca = {
       error: 'Drive: error',
       senseConnexio: 'Drive: sense connexió',
     },
+    /** El text de la píndola (amplada fixa): el detall és al panell i al nom accessible */
+    pindola: {
+      'cal-connectar': 'Connectar',
+      sincronitzant: 'Pujant…',
+      'al-dia': 'Al dia',
+      pendent: 'Pendent',
+      unPendent: '1 pendent',
+      pendents: '{n} pendents',
+      nomesLectura: 'Actualitza',
+      error: 'Error',
+      senseConnexio: 'Sense xarxa',
+      senseCopia: 'Sense còpia',
+    },
     panell: 'Còpia a Google Drive',
     estats: {
       'al-dia': 'La còpia de Google Drive està al dia.',
