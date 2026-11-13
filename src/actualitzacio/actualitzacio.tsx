@@ -70,7 +70,8 @@ export function ProveidorActualitzacio({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (import.meta.env.DEV || !('serviceWorker' in navigator)) return
+    // (ni en desenvolupament ni al build de les proves E2E: vite build --mode proves)
+    if (import.meta.env.DEV || import.meta.env.MODE === 'proves' || !('serviceWorker' in navigator)) return
     let actiu = true
     const vigilar = (r: ServiceWorkerRegistration) => {
       const esperant = () => {

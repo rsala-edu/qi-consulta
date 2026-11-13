@@ -31,9 +31,19 @@ describe('iteracions de PBKDF2 per a un embolcall nou', () => {
     expect(() => comprovarIteracions()).not.toThrow()
   })
 
+  it('al build de les proves E2E (mode «proves»), com en desenvolupament: es poden baixar i arrenca', () => {
+    vi.stubEnv('DEV', false)
+    vi.stubEnv('PROD', true)
+    vi.stubEnv('MODE', 'proves')
+    localStorage.setItem(CLAU, '1000')
+    expect(iteracionsNoves()).toBe(1000)
+    expect(() => comprovarIteracions()).not.toThrow()
+  })
+
   it('la comprovació en arrencar a producció falla si no són 600.000', () => {
     vi.stubEnv('DEV', true)
     vi.stubEnv('PROD', true)
+    vi.stubEnv('MODE', 'production')
     localStorage.setItem(CLAU, '1000')
     expect(() => comprovarIteracions()).toThrow(/1000 iteracions en lloc de 600000/)
   })

@@ -28,3 +28,9 @@ test-results
 playwright-report
 blob-report
 coverage
+
+# Build de les proves E2E (vite build --mode proves)
+dist-proves
+
+# Captures de disseny (ja són a l'artifact «Captures de Qi»)
+docs/captures/disseny/

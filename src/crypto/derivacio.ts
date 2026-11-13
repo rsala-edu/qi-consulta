@@ -10,13 +10,14 @@ export const MIDA_SAL = 16
 
 /**
  * Iteracions per a un embolcall nou (contrasenya nova o canviada). Sempre
- * ITERACIONS_PBKDF2, llevat del servidor de desenvolupament, on les proves E2E
- * les poden baixar (localStorage `qi:proves:iteracions`) perquè cada contrasenya
- * no trigui mig segon. El build de producció no conté aquesta branca, i en
- * arrencar comprova que són 600.000 (comprovarIteracions).
+ * ITERACIONS_PBKDF2, llevat del servidor de desenvolupament i del build de
+ * proves (`vite build --mode proves`), on les proves E2E les poden baixar
+ * (localStorage `qi:proves:iteracions`) perquè cada contrasenya no trigui mig
+ * segon. El build publicat no conté aquesta branca (la condició es resol en
+ * compilar), i en arrencar comprova que són 600.000 (comprovarIteracions).
  */
 export function iteracionsNoves(): number {
-  if (import.meta.env.DEV) {
+  if (import.meta.env.DEV || import.meta.env.MODE === 'proves') {
     try {
       const n = Number(localStorage.getItem('qi:proves:iteracions'))
       if (Number.isInteger(n) && n > 0) return n
@@ -27,9 +28,9 @@ export function iteracionsNoves(): number {
   return ITERACIONS_PBKDF2
 }
 
-/** A producció, l'app no arrenca si les iteracions no són les de debò */
+/** Al build publicat, l'app no arrenca si les iteracions no són les de debò */
 export function comprovarIteracions(): void {
-  if (import.meta.env.PROD && iteracionsNoves() !== ITERACIONS_PBKDF2) {
+  if (import.meta.env.PROD && import.meta.env.MODE !== 'proves' && iteracionsNoves() !== ITERACIONS_PBKDF2) {
     throw new Error(`PBKDF2: ${iteracionsNoves()} iteracions en lloc de ${ITERACIONS_PBKDF2}`)
   }
 }
