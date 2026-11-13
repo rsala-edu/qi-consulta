@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { diaCurtMes, formatar, t } from '../i18n/t'
+import { nombre } from './textos'
 
 export type Forma = 'cercle' | 'quadrat' | 'triangle'
 
@@ -86,7 +87,7 @@ export function GraficEscala({ titol, columnes, series, min, max, marques, detal
 
   const valorsText = (i: number) =>
     series
-      .map((s) => formatar(t.evolucio.valor, { nom: s.nom, n: s.valors[i] === null || s.valors[i] === undefined ? t.evolucio.senseValor : String(s.valors[i]) }))
+      .map((s) => formatar(t.evolucio.valor, { nom: s.nom, n: s.valors[i] === null || s.valors[i] === undefined ? t.evolucio.senseValor : nombre(s.valors[i]!) }))
       .join(', ')
 
   return (
@@ -166,13 +167,14 @@ export function GraficEscala({ titol, columnes, series, min, max, marques, detal
         <div
           className="globus-grafic"
           role="status"
-          style={{ left: Math.min(Math.max(x(triat), 90), amplada - 90), top: 4 }}
+          // Al costat del punt (a la dreta, o a l'esquerra si no hi cap), per tapar-ne poc
+          style={x(triat) + 200 < amplada ? { left: x(triat) + 16, top: 4 } : { right: amplada - x(triat) + 16, top: 4 }}
         >
           <strong>{formatar(t.evolucio.sessioDia, { n: String(columnes[triat].numero), dia: diaCurtMes(columnes[triat].dia) })}</strong>
           {series.map((s) => (
             <span key={s.id} className="linia-globus">
               <MostraSerie serie={s} />
-              {formatar(t.evolucio.valor, { nom: s.nom, n: s.valors[triat] === null || s.valors[triat] === undefined ? '—' : String(s.valors[triat]) })}
+              {formatar(t.evolucio.valor, { nom: s.nom, n: s.valors[triat] === null || s.valors[triat] === undefined ? '—' : nombre(s.valors[triat]!) })}
             </span>
           ))}
           {detall?.(triat)}

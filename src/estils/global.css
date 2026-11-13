@@ -5080,21 +5080,24 @@ fieldset {
 
 .globus-grafic {
   position: absolute;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 160px;
-  padding: 8px 12px;
+  gap: 1px;
+  max-width: 190px;
+  padding: 6px 10px;
   border-radius: 12px;
   background: var(--clar);
   color: var(--tinta);
   border: 1px solid var(--linia);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.14);
-  font-size: 0.85rem;
-  line-height: 1.35;
+  font-size: 0.78rem;
+  line-height: 1.3;
   pointer-events: none;
   z-index: 2;
+}
+
+.globus-grafic .detall {
+  font-size: 0.75rem;
 }
 
 .linia-globus {
@@ -5161,8 +5164,14 @@ fieldset {
 }
 
 /* Minigràfic a «Com està» */
+.capcalera-escala:has(.minigrafic) {
+  justify-content: flex-start;
+}
+
 .capcalera-escala .minigrafic {
-  margin-left: auto;
+  flex: none;
+  margin-left: 4px;
+  align-self: center;
 }
 
 .minigrafic polyline {
@@ -5518,11 +5527,13 @@ fieldset {
 
   .barres-us li {
     grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 12px;
   }
 
   .barres-us .barra-us {
     grid-column: 1 / -1;
     grid-row: 2;
+    height: 8px;
   }
 
   .fila-comparar {

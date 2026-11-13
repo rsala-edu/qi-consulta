@@ -76,8 +76,9 @@ export function Evolucio({ sessions, sessionsPacient, valoracions }: Props) {
             const p = serie[i]!
             return (
               <>
-                <span className="linia-globus">{formatar(e.puntsN, { n: String(p.punts) })}</span>
-                <span className="linia-globus">{p.retencio === null ? e.senseRetencio : formatar(e.retencioN, { n: String(p.retencio) })}</span>
+                <span className="linia-globus">
+                  {formatar(e.puntsN, { n: String(p.punts) })} · {p.retencio === null ? e.senseRetencio : formatar(e.retencioN, { n: String(p.retencio) })}
+                </span>
                 {p.canviTractament && <span className="linia-globus">◇ {e.canviTractament}</span>}
               </>
             )
@@ -115,7 +116,7 @@ export function Evolucio({ sessions, sessionsPacient, valoracions }: Props) {
                 {e.escales[x.id]}
                 {(() => {
                   const r = resumEscala(x.punts)
-                  return r ? <span className="detall"> · {textResum(r)}</span> : null
+                  return r ? <span className="detall">&nbsp;· {textResum(r)}</span> : null
                 })()}
               </summary>
               <GraficEscala
