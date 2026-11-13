@@ -23,10 +23,11 @@ export interface AspecteMarcador {
   anell: [number, number] | null
 }
 
-export function aspecteMarcador(m: { color?: string; destacat?: boolean }): AspecteMarcador {
+/** `escala`: mida relativa (l'evolució fa més grans els punts més usats) */
+export function aspecteMarcador(m: { color?: string; destacat?: boolean; escala?: number }): AspecteMarcador {
   const color = m.color ?? COLOR_NEUTRE
   // El seleccionat té la mida d'un punt marcat encara que no ho estigui
-  const radi = m.destacat || m.color !== undefined ? RADI_MARCAT : RADI_NEUTRE
+  const radi = (m.destacat || m.color !== undefined ? RADI_MARCAT : RADI_NEUTRE) * (m.escala ?? 1)
   const ambVora = m.destacat || m.color !== undefined
   return {
     radi,

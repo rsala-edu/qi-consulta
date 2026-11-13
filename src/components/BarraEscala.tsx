@@ -3,7 +3,7 @@
 // el de l'última sessió, amb un punt petit a la seva casella. Es tria tocant o
 // lliscant el dit (o amb les fletxes del teclat); tocar el valor triat el treu.
 
-import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
+import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import { formatar, t } from '../i18n/t'
 
 interface Props {
@@ -15,6 +15,8 @@ interface Props {
   /** El de l'última sessió (punt petit a la casella) */
   anterior?: number | null
   onCanviar(v: number | null): void
+  /** Al costat de l'etiqueta (a «Com està», el minigràfic de les sessions anteriors) */
+  extra?: ReactNode
   disabled?: boolean
   min?: number
   max?: number
@@ -23,7 +25,7 @@ interface Props {
 /** Moviment mínim (px) perquè un toc passi a ser lliscar */
 const LLISCAR = 6
 
-export function BarraEscala({ etiqueta, etiquetaVisible, valor, anterior = null, onCanviar, disabled = false, min = 0, max = 10 }: Props) {
+export function BarraEscala({ etiqueta, etiquetaVisible, valor, anterior = null, onCanviar, extra, disabled = false, min = 0, max = 10 }: Props) {
   const barra = useRef<HTMLDivElement>(null)
   const gest = useRef<{ x: number; mogut: boolean } | null>(null)
   const valors = Array.from({ length: max - min + 1 }, (_, i) => min + i)
@@ -75,6 +77,7 @@ export function BarraEscala({ etiqueta, etiquetaVisible, valor, anterior = null,
             <span className="punt-anterior" aria-hidden="true" /> {formatar(t.visita.escalaAnterior, { n: String(anterior) })}
           </span>
         )}
+        {extra}
       </div>
       <div
         ref={barra}

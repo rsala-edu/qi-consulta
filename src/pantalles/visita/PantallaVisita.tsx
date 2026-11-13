@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { useParams } from 'react-router'
+import { Minigrafic } from '../../evolucio/Minigrafic'
 import { nomEpisodi } from '../../domini/episodi'
 import type { TipusCita } from '../../domini/cita'
 import { BarraEscala } from '../../components/BarraEscala'
@@ -109,11 +110,17 @@ export function PantallaVisita() {
     // L'última sessió d'abans del mateix episodi (per a l'escala i «Repetir el tractament»)
     const anterior =
       sessions.filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.iniciAt < sessio.iniciAt).at(-1) ?? null
+    // L'escala de les sessions anteriors de l'episodi (minigràfic a «Com està»)
+    const escalesAnteriors = sessions
+      .filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.numero < sessio.numero)
+      .sort((a, b) => a.numero - b.numero)
+      .map((s) => s.comEsta.escala)
     return {
       sessio,
       pacient,
       episodi,
       anterior,
+      escalesAnteriors,
       tipusCita: cita?.tipus ?? null,
       motiusCites,
       ajustos,
@@ -142,6 +149,7 @@ function Visita({
   pacient,
   episodi,
   anterior,
+  escalesAnteriors,
   tipusCita,
   motiusCites,
   ajustos,
@@ -158,6 +166,7 @@ function Visita({
   pacient: Awaited<ReturnType<ReturnType<typeof useMagatzem>['obtenirPacient']>>
   episodi: Awaited<ReturnType<ReturnType<typeof useMagatzem>['obtenirEpisodi']>>
   anterior: Sessio | null
+  escalesAnteriors: (number | null)[]
   tipusCita: TipusCita | null
   motiusCites: string[]
   ajustos: Awaited<ReturnType<typeof llegirAjustosVisita>>
@@ -325,11 +334,11 @@ function Visita({
           </h1>
           {/* L'hora d'inici, en passar-hi per sobre: la capçalera cap en una sola fila */}
           <p className="detall" title={formatar(v.inici, { hora: new Date(dades.iniciAt).toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' }) })}>
-            {/* «Lumbàlgia · Seguiment · Sessió 5 de 10» */}
+            {/* «Sessió 5 de 10 · Lumbàlgia · Seguiment»: la sessió primer, perquè no es talli mai */}
             {[
+              pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) }),
               episodi ? nomEpisodi(episodi, motiusCites) : '',
               tipusCita ? t.cites.tipusNoms[tipusCita] : '',
-              pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) }),
             ]
               .filter(Boolean)
               .join(' · ')}
@@ -471,6 +480,7 @@ function Visita({
               etiqueta={v.escala}
               valor={dades.comEsta.escala}
               anterior={anterior?.comEsta.escala ?? null}
+              extra={<Minigrafic valors={[...escalesAnteriors, dades.comEsta.escala]} />}
               disabled={!editable}
               onCanviar={(escala) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, escala } }))}
             />

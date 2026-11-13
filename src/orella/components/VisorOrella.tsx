@@ -31,6 +31,8 @@ export interface PuntDibuix {
   /** Color de la tècnica, si està marcat */
   color?: string
   destacat?: boolean
+  /** Mida relativa (1 per defecte) */
+  escala?: number
   etiqueta: string
   etiquetaLlarga: string
 }
@@ -308,7 +310,7 @@ export function VisorOrella({ ref, costat, punts, modeToc, onTocarPunt, onTocarP
           })}
         {/* Els punts, com al cos: disc de color, vora blanca i, el seleccionat, anell de tinta */}
         {enPantalla.map((p) => {
-          const a = aspecteMarcador({ color: p.color, destacat: p.destacat })
+          const a = aspecteMarcador({ color: p.color, destacat: p.destacat, escala: p.escala })
           const r = (px: number) => px * PX_PER_RADI * u
           return (
             <g key={p.id} data-punt={p.id}>

@@ -40,6 +40,18 @@ export function diaCurtAmbMes(dia: string): string {
   return `${t.dates.diesCurts[p.setmana]} ${p.dia}/${p.mes + 1}`
 }
 
+/** «3 set.» */
+export function diaCurtMes(dia: string): string {
+  const p = parts(dia)
+  return `${p.dia} ${t.dates.mesosCurts[p.mes]}`
+}
+
+/** «3 de setembre» */
+export function diaMes(dia: string): string {
+  const p = parts(dia)
+  return `${p.dia} ${t.dates.mesos[p.mes]}`
+}
+
 /** «novembre de 2026» */
 export function mesAny(dia: string): string {
   const p = parts(dia)
