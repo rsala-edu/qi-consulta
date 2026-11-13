@@ -71,6 +71,8 @@ export const esquemaDadesSessio = z.object({
   exploracio: z.preprocess(migrarExploracio, z.object({ seccions: esquemaDadesSeccions })),
   /** MYMOP: a la primera sessió de l'episodi i cada 4 (les d'abans de la 3B no en tenen) */
   mymop: esquemaMymop.nullable().default(null),
+  /** (4B) El protocol del qual s'ha partit (el nom, per si després s'esborra) */
+  protocol: z.object({ id: z.string(), nom: z.string() }).nullable().default(null),
   /** (4A) Quan es va començar la visita sense el consentiment d'acupuntura vigent («Continuar igualment») */
   senseConsentiment: z.string().nullable().default(null),
   /** PGIC: impressió global de canvi, de 1 (molt millor) a 7 (molt pitjor) (les d'abans no en tenen) */
@@ -104,6 +106,7 @@ export function novaSessio(d: { citaId: string; episodiId: string; numero: numbe
     mymop: null,
     pgic: null,
     senseConsentiment: null,
+    protocol: null,
     punts: {},
     agulles: { posades: null, retirades: null, motiu: '' },
     tancar: { recomanacions: '', incidencies: '', capIncidencia: false },

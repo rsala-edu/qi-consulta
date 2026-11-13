@@ -35,6 +35,7 @@ import {
   type Plantilla,
 } from '../domini/consentiment'
 import { plantillaInicial } from '../domini/plantillesInicials'
+import { EXEMPLES, esquemaDadesProtocol, type DadesProtocol, type Protocol } from '../domini/protocol'
 import { episodisActius, esquemaDadesEpisodi, idEpisodiDeCita, nouEpisodi, senseMotiu, type DadesEpisodi, type Episodi } from '../domini/episodi'
 import {
   esEditable,
@@ -140,6 +141,13 @@ export interface Magatzem {
   /** Desa un consentiment signat (amb el PDF): ja no es podrà modificar */
   signarConsentiment(pacientId: string, dades: DadesConsentiment): Promise<Consentiment>
   revocarConsentiment(id: string, motiu: string): Promise<Consentiment>
+
+  // --- Etapa 4B: protocols de punts ---
+  /** Tots (també els arxivats). La primera vegada en aquest dispositiu, es creen els exemples */
+  protocols(): Promise<Protocol[]>
+  /** Desa un protocol (id null: un de nou) */
+  desarProtocol(id: string | null, dades: DadesProtocol): Promise<Protocol>
+  esborrarProtocol(id: string): Promise<void>
 
   // --- Part 2: ajuntar fitxes de la mateixa persona ---
   /** Les dades del pacient i la fitxa clínica per comparar-les */
@@ -711,6 +719,40 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       const nou = revocar(dades, motiu, araIso())
       comprovarCanvi(dades, nou)
       return guardarConsentiment(id, pacientId, creatAt, nou)
+    },
+  })
+
+  // --- Protocols de punts (etapa 4B) ---
+
+  async function llegirProtocol(r: RegistreXifrat): Promise<Protocol> {
+    const d = esquemaDadesProtocol.parse(await desxifrarJson(clau, r.xifrat, context('protocols', r.id)))
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, ...d }
+  }
+
+  async function guardarProtocol(id: string, dades: DadesProtocol): Promise<Protocol> {
+    const d = esquemaDadesProtocol.parse(dades)
+    const existent = await db.protocols.get(id)
+    const at = araIso()
+    await desarSencer(db, 'protocols', { id, creatAt: existent?.creatAt ?? at, modificatAt: at, xifrat: await xifrarJson(clau, d, context('protocols', id)) }, id)
+    return { id, creatAt: existent?.creatAt ?? at, modificatAt: at, ...d }
+  }
+
+  Object.assign(magatzem, {
+    async protocols() {
+      // Els exemples, una sola vegada per dispositiu (amb ids fixos: no es dupliquen entre dispositius,
+      // i si la doctora n'esborra un, l'esborrat arriba als altres)
+      if (!(await db.meta.get('protocolsExemple'))) {
+        for (const { id, ...e } of EXEMPLES) if (!(await db.protocols.get(id))) await guardarProtocol(id, { ...e, arxivat: false, exemple: true })
+        await db.meta.put({ clau: 'protocolsExemple', valor: araIso() })
+      }
+      const tots = await Promise.all((await db.protocols.toArray()).map(llegirProtocol))
+      return tots.sort((a, b) => a.nom.localeCompare(b.nom, 'ca'))
+    },
+    async desarProtocol(id: string | null, dades: DadesProtocol) {
+      return guardarProtocol(id ?? nouId(), dades)
+    },
+    async esborrarProtocol(id: string) {
+      await esborrarRegistres(db, 'protocols', [id])
     },
   })
 

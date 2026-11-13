@@ -104,6 +104,8 @@ export type RegistreMeta =
   | { clau: 'versionsLocals'; valor: string }
   /** Quan s'ha vist que un dispositiu amb una versió antiga escrivia a qi-dades.json (fins que la doctora ho tanca) */
   | { clau: 'versioAntigaAt'; valor: string }
+  /** S'han creat els protocols d'exemple en aquest dispositiu (data): no es tornen a crear si s'esborren */
+  | { clau: 'protocolsExemple'; valor: string }
   /** S'han creat els episodis de les cites d'abans de l'etapa 3A (data) */
   | { clau: 'episodisMigrats'; valor: string }
   /**
@@ -131,6 +133,7 @@ export type TaulaSincronitzada =
   | 'valoracions'
   | 'plantillesConsentiment'
   | 'consentiments'
+  | 'protocols'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -236,6 +239,7 @@ export type NomTaula =
   | 'valoracions'
   | 'plantillesConsentiment'
   | 'consentiments'
+  | 'protocols'
 
 export class QiDB extends Dexie {
   meta!: Table<RegistreMeta, RegistreMeta['clau']>
@@ -269,6 +273,8 @@ export class QiDB extends Dexie {
   plantillesConsentiment!: Table<RegistreXifrat, string>
   /** Consentiments signats: no es modifiquen mai, només es revoquen */
   consentiments!: Table<RegistreXifrat, string>
+  /** Protocols de punts (etapa 4B) */
+  protocols!: Table<RegistreXifrat, string>
   /** Cua de canvis pendents de pujar a Drive (i diari propi fins que una foto el cobreix) */
   canvisPropis!: Table<CanviPropi, string>
   /** Registres de taules que aquesta versió no coneix (d'una versió més nova) */
@@ -341,6 +347,9 @@ export class QiDB extends Dexie {
     this.version(14).stores({
       plantillesConsentiment: 'id',
       consentiments: 'id, pacientId',
+    })
+    this.version(15).stores({
+      protocols: 'id',
     })
   }
 }
