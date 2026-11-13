@@ -4,9 +4,10 @@
 
 /**
  * Part del dibuix que es mostra sencera, amb marge per als noms de les zones
- * (per sota, perquè «Lòbul», a y = 462, es vegi sencer també a la tauleta)
+ * (per sota, perquè «Lòbul», a y = 462, es vegi sencer també a la tauleta) i
+ * per dalt (perquè l'hèlix no toqui la vora i l'orella quedi centrada)
  */
-export const LIMITS = { x1: -20, x2: 360, y1: 0, y2: 488 } as const
+export const LIMITS = { x1: -20, x2: 360, y1: -20, y2: 488 } as const
 export const ESCALA_MAXIMA = 6
 
 export type CostatOrella = 'E' | 'D'

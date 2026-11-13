@@ -10,7 +10,7 @@ import { continuarAmbGoogle, expect, test } from '../e2e/google.js'
 const SUFIX = process.env.CAPTURES_SUFIX ?? 'proves'
 const P = 'contrasenya-inventada-disseny'
 test.describe.configure({ timeout: 300_000 })
-test.use({ actionTimeout: 20_000 })
+test.use({ actionTimeout: 20_000, cos3D: true })
 
 const dia = (n: number) => {
   const d = new Date()
@@ -179,4 +179,72 @@ test('disseny de la visita, la barra i el mapa', async ({ page }, info) => {
     await zones.click()
     await capturar(page, '8-orella-zones', projecte)
   }
+})
+
+// Retocs a–d de la part B (només «després»): b) en entrar a Tractament, el cos
+// sencer; d) l'orella sencera i centrada (Tractament i Mapa); a) amb «Tot el
+// cos», només les etiquetes dels punts marcats i del seleccionat; c) «⤢ Ampliar»
+// amb el temporitzador en petit (i, a la tauleta horitzontal, «Agulles posades»
+// a la fila de «Repetir»)
+test.describe(() => {
+  test.use({ cos3D: true })
+  test('retocs a–d: Tractament, orella i «Ampliar»', async ({ page }, info) => {
+    const projecte = info.project.name
+    await entrar(page)
+    await pacient(page, 'Bruna', 'Retoc Inventada')
+    await cita(page, 'Bruna', dia(0), horaDaqui(1), 'Cervicàlgia')
+    await cita(page, 'Bruna', dia(0), horaDaqui(2), 'Cervicàlgia')
+    // Primera sessió amb tres punts, perquè a la segona hi hagi «Repetir»
+    await comencar(page)
+    await pestanya(page, 'Tractament').click()
+    await marcarCos(page, 'LI4', 'LI4', 'Bilateral')
+    await marcarCos(page, 'zusanli', 'ST36', 'Bilateral')
+    await marcarCos(page, 'GB20', 'GB20', 'Bilateral')
+    await page.locator('.capcalera-visita').getByRole('button', { name: 'Finalitzar visita' }).click()
+    await page.getByRole('region', { name: 'Finalitzar visita' }).getByRole('button', { name: 'Confirmar i finalitzar' }).click()
+    await expect(page.getByText(/Visita finalitzada/)).toBeVisible()
+
+    // b) Segona sessió: en entrar a Tractament, abans de marcar res
+    await comencar(page)
+    await page.locator('.capcalera-visita').getByRole('button', { name: 'Agulles posades: començar' }).click()
+    await pestanya(page, 'Tractament').click()
+    await expect(page.getByTestId('visor3d')).toHaveAttribute('data-llest', 'si', { timeout: 60_000 })
+    await expect(page.getByTestId('visor3d')).toHaveAttribute('data-moviment', 'no', { timeout: 15_000 })
+    await page.waitForTimeout(1000)
+    await capturar(page, 'b-tractament-en-entrar', projecte)
+
+    // d) L'orella, en entrar (Tractament)
+    await page.getByRole('tab', { name: 'Orella' }).click()
+    await expect(page.getByTestId('visor-orella')).toBeVisible()
+    await page.waitForTimeout(800)
+    await capturar(page, 'd-orella-tractament', projecte)
+    await page.getByRole('tab', { name: 'Cos' }).click()
+
+    // a) Repetir i un punt més; «Tot el cos»: etiquetes només dels marcats i del seleccionat
+    await page.getByRole('button', { name: 'Repetir el tractament de l\'última sessió' }).click()
+    await marcarCos(page, 'PC6', 'PC6', 'Bilateral')
+    await page.getByRole('button', { name: 'Tot el cos' }).click()
+    await expect(page.getByTestId('visor3d')).toHaveAttribute('data-moviment', 'no', { timeout: 15_000 })
+    await page.waitForTimeout(1000)
+    await capturar(page, 'a-etiquetes-tot-el-cos', projecte)
+
+    // c) «⤢ Ampliar»: el mapa a tota la pantalla, el temporitzador en petit
+    await page.getByRole('button', { name: '⤢ Ampliar' }).click()
+    await page.waitForTimeout(1200)
+    await capturar(page, 'c-ampliat-cos', projecte)
+    await page.getByRole('tab', { name: 'Orella' }).click()
+    await page.waitForTimeout(800)
+    await capturar(page, 'c-ampliat-orella', projecte)
+    await page.keyboard.press('Escape')
+
+    // d) L'orella, en entrar (pantalla Mapa)
+    await menu(page, 'Mapa').click()
+    // (l'avís «La visita continua en curs» es tanca: no forma part del retoc)
+    const tancarAvis = page.locator('.tancar-avis')
+    if (await tancarAvis.isVisible().catch(() => false)) await tancarAvis.click()
+    await page.getByRole('tab', { name: 'Orella' }).click()
+    await expect(page.getByTestId('visor-orella')).toBeVisible()
+    await page.waitForTimeout(800)
+    await capturar(page, 'd-orella-mapa', projecte)
+  })
 })

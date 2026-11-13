@@ -5,6 +5,9 @@
 import { test } from './google.js'
 import { capcalera, comencarVisita, entrar, expect, novaCita, nouPacient, pestanya } from './ajudes-visita.js'
 
+// Passa pel cos 3D (Tractament i «Ampliar»)
+test.use({ cos3D: true })
+
 test.describe.configure({ timeout: 240_000 })
 
 test('visita: capçalera en una fila, escala en barra, secundaris a demanda i Tractament sense desplaçar la pàgina', async ({ page }) => {

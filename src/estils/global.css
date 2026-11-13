@@ -3116,8 +3116,18 @@ fieldset {
   gap: 6px;
 }
 
-.controls-retencio .boto {
+.controls-retencio {
+  gap: 2px;
+}
+
+/* Botons d'icona: quadrats, prou grans per al dit (44 px) */
+.controls-retencio .boto-icona {
+  min-width: 44px;
   min-height: 44px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-variant-numeric: tabular-nums;
 }
 
@@ -4583,4 +4593,14 @@ fieldset {
   min-height: 32px;
   padding: 0 10px;
   font-size: 0.85rem;
+}
+
+/* Ampliat: del temporitzador, només el temps i Pausa/Continuar */
+.pantalla-visita.ampliat .controls-retencio .boto-icona:not(.principal-retencio) {
+  display: none;
+}
+
+.pantalla-visita.ampliat .controls-retencio .boto-icona {
+  min-width: 36px;
+  min-height: 36px;
 }
