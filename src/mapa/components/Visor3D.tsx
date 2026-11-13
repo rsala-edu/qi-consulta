@@ -40,6 +40,8 @@ export interface MarcadorVisor {
   /** Text de l'etiqueta per a cada nivell de zoom (null: sense etiqueta) */
   etiquetes: EtiquetesPerNivell
   destacat?: boolean
+  /** Mida relativa del punt (1 per defecte) */
+  escala?: number
 }
 
 export interface TocPell {

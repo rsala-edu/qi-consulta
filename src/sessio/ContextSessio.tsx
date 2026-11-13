@@ -113,6 +113,19 @@ export function ProveidorSessio({
   const [db, setDb] = useState<QiDB | null>(inicial)
   const navegar = useNavigate()
   const [estat, setEstat] = useState<EstatSessio>({ tipus: 'carregant' })
+
+  // Proves E2E (només en desenvolupament i al mode «proves»; el build publicat
+  // no ho conté): el magatzem obert, per crear episodis inventats amb moltes
+  // sessions. Les dades passen igualment pel xifratge del magatzem.
+  useEffect(() => {
+    if (!(import.meta.env.DEV || import.meta.env.MODE === 'proves')) return
+    if (estat.tipus !== 'desbloquejat') return
+    const w = window as unknown as { __qiProvesMagatzem?: Magatzem }
+    w.__qiProvesMagatzem = estat.magatzem
+    return () => {
+      delete w.__qiProvesMagatzem
+    }
+  }, [estat])
   const [minutsBloqueig, setMinutsBloqueig] = useState(MINUTS_BLOQUEIG_PER_DEFECTE)
 
   useEffect(() => {

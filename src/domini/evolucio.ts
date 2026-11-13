@@ -5,6 +5,7 @@
 import { resumSeccio } from '../cataleg/motor'
 import { EXPLORACIO } from '../cataleg/exploracio'
 import type { Camp, DadesSeccio, DadesSeccions, Seccio } from '../cataleg/tipus'
+import { diaDe } from './cita'
 import { perfilMymop } from './escales'
 import type { PuntMarcat, Tecnica } from './puntMarcat'
 import { diferenciaPunts, llistaPunts, type Sessio } from './sessio'
@@ -20,6 +21,9 @@ export type SessioEvolucio = Pick<
 export function ordenades<S extends Pick<Sessio, 'numero' | 'iniciAt'>>(sessions: readonly S[]): S[] {
   return [...sessions].sort((a, b) => a.numero - b.numero || a.iniciAt.localeCompare(b.iniciAt))
 }
+
+/** El dia local d'una hora ISO («2026-09-09») */
+const dia = (iso: string) => diaDe(new Date(iso))
 
 /** Punts de tractament (els dolorosos a la palpació són exploració, no tractament) */
 export function puntsTractament(punts: Sessio['punts']): PuntMarcat[] {
@@ -58,7 +62,7 @@ export function serieEvolucio(sessions: readonly SessioEvolucio[]): PuntSerie[] 
     return {
       sessioId: s.id,
       numero: s.numero,
-      dia: s.iniciAt.slice(0, 10),
+      dia: dia(s.iniciAt),
       principal: s.comEsta.escala,
       secundari1: s.comEsta.secundari1.escala,
       secundari2: s.comEsta.secundari2.escala,
@@ -137,7 +141,7 @@ export function serieEscalaOrl(
     if (typeof valor !== 'number' || valor === abans) continue
     abans = valor
     const s = v.sessioId ? perId.get(v.sessioId) : undefined
-    resultat.push({ sessioId: s?.id ?? null, numero: s?.numero ?? 1, dia: (s?.iniciAt ?? v.creadaAt).slice(0, 10), valor })
+    resultat.push({ sessioId: s?.id ?? null, numero: s?.numero ?? 1, dia: dia(s?.iniciAt ?? v.creadaAt), valor })
   }
   return resultat
 }
@@ -146,7 +150,7 @@ export function serieEscalaOrl(
 export function serieMymop(sessions: readonly SessioEvolucio[]): PuntEscala[] {
   return ordenades(sessions).flatMap((s) => {
     const valor = perfilMymop(s.mymop)
-    return valor === null ? [] : [{ sessioId: s.id, numero: s.numero, dia: s.iniciAt.slice(0, 10), valor }]
+    return valor === null ? [] : [{ sessioId: s.id, numero: s.numero, dia: dia(s.iniciAt), valor }]
   })
 }
 
@@ -177,7 +181,7 @@ export function puntsMesUsats(sessions: readonly SessioEvolucio[], filtre: Filtr
     for (const p of puntsTractament(s.punts)) {
       if (filtre !== 'tots' && p.mapa !== filtre) continue
       const clau = `${p.mapa}:${p.codi}`
-      const quan = { numero: s.numero, dia: s.iniciAt.slice(0, 10) }
+      const quan = { numero: s.numero, dia: dia(s.iniciAt) }
       const u = perClau.get(clau) ?? {
         clau,
         mapa: p.mapa,
@@ -322,8 +326,10 @@ export interface ResumTancament {
 
 export function resumTancament(sessions: readonly SessioEvolucio[]): ResumTancament {
   const llista = ordenades(sessions)
-  const des = llista[0]?.iniciAt.slice(0, 10) ?? null
-  const fins = llista.at(-1)?.iniciAt.slice(0, 10) ?? null
+  const primera = llista[0]
+  const darrera = llista.at(-1)
+  const des = primera ? dia(primera.iniciAt) : null
+  const fins = darrera ? dia(darrera.iniciAt) : null
   const dies = des && fins ? Math.round((Date.parse(fins) - Date.parse(des)) / 86_400_000) : 0
   return {
     sessions: llista.length,

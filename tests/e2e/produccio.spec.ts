@@ -59,7 +59,12 @@ test('PBKDF2 a producció: 600.000 iteracions encara que localStorage digui el c
   const dir = new URL('../../dist/assets/', import.meta.url)
   const js = readdirSync(dir).filter((f) => f.endsWith('.js'))
   expect(js.length).toBeGreaterThan(0)
-  for (const f of js) expect(readFileSync(new URL(f, dir), 'utf8'), f).not.toContain('qi:proves')
+  for (const f of js) {
+    const codi = readFileSync(new URL(f, dir), 'utf8')
+    expect(codi, f).not.toContain('qi:proves')
+    // Ni el magatzem obert per a les proves (etapa 3C)
+    expect(codi, f).not.toContain('__qiProvesMagatzem')
+  }
 })
 
 test('amb dades recuperades de Drive: el mapa obert directament, una fitxa i totes les pantalles', async ({ page, google }) => {

@@ -177,7 +177,8 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   await page.getByRole('link', { name: 'Tractaments' }).click()
   const episodi = page.getByRole('article', { name: 'Lumbàlgia' })
   await expect(episodi.getByRole('listitem')).toHaveCount(2)
-  await expect(episodi.getByRole('listitem').first()).toContainText('escala 7 · 2 punts')
+  // La cronologia (3C): la primera sessió, amb l'escala i els punts
+  await expect(episodi.getByRole('link', { name: /^Sessió 1 · .*escala 7, 2 punts/ })).toBeVisible()
 })
 
 /** Compta els sons que fa l'app (Web Audio) */

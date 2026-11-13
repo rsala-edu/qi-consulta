@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { useParams } from 'react-router'
+import { Minigrafic } from '../../evolucio/Minigrafic'
 import { BarraEscala } from '../../components/BarraEscala'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
@@ -100,11 +101,17 @@ export function PantallaVisita() {
     // L'última sessió d'abans del mateix episodi (per a l'escala i «Repetir el tractament»)
     const anterior =
       sessions.filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.iniciAt < sessio.iniciAt).at(-1) ?? null
+    // L'escala de les sessions anteriors de l'episodi (minigràfic a «Com està»)
+    const escalesAnteriors = sessions
+      .filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.numero < sessio.numero)
+      .sort((a, b) => a.numero - b.numero)
+      .map((s) => s.comEsta.escala)
     return {
       sessio,
       pacient,
       episodi,
       anterior,
+      escalesAnteriors,
       ajustos,
       addendes,
       conflictes,
@@ -131,6 +138,7 @@ function Visita({
   pacient,
   episodi,
   anterior,
+  escalesAnteriors,
   ajustos,
   addendes,
   conflictes,
@@ -145,6 +153,7 @@ function Visita({
   pacient: Awaited<ReturnType<ReturnType<typeof useMagatzem>['obtenirPacient']>>
   episodi: Awaited<ReturnType<ReturnType<typeof useMagatzem>['obtenirEpisodi']>>
   anterior: Sessio | null
+  escalesAnteriors: (number | null)[]
   ajustos: Awaited<ReturnType<typeof llegirAjustosVisita>>
   addendes: Awaited<ReturnType<ReturnType<typeof useMagatzem>['addendesDe']>>
   conflictes: CampEnConflicte[]
@@ -432,6 +441,7 @@ function Visita({
               etiqueta={v.escala}
               valor={dades.comEsta.escala}
               anterior={anterior?.comEsta.escala ?? null}
+              extra={<Minigrafic valors={[...escalesAnteriors, dades.comEsta.escala]} />}
               disabled={!editable}
               onCanviar={(escala) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, escala } }))}
             />

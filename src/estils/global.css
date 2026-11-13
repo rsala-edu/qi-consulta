@@ -4898,3 +4898,637 @@ fieldset {
     font-size: 0.9rem;
   }
 }
+
+/* --- Etapa 3C: evolució de l'episodi ---
+   Línia principal en jade; els secundaris, en ocre i en blau pissarra, amb
+   traç i forma diferents (no només el color). */
+:root {
+  --serie-2: #a86f12;
+  --serie-3: #4d64a8;
+  --afegit: #2e7d4f;
+  --tret: var(--cinabri);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --serie-2: #e0b25f;
+    --serie-3: #9fb2ea;
+    --afegit: #7fcf9c;
+  }
+}
+
+:root[data-theme='dark'] {
+  --serie-2: #e0b25f;
+  --serie-3: #9fb2ea;
+  --afegit: #7fcf9c;
+}
+
+.sessions-episodi .capcalera-sessions,
+.apartat-evolucio > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.sessions-episodi h4,
+.apartat-evolucio h4,
+.bloc-evolucio h4,
+.punts-usats h4 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.apartat-evolucio > summary {
+  justify-content: flex-start;
+  min-height: 44px;
+  cursor: pointer;
+  border-top: 1px solid var(--linia);
+  padding-top: 10px;
+}
+
+.apartat-evolucio > summary h4 {
+  display: inline;
+}
+
+.evolucio-buida {
+  margin: 6px 0 0;
+  padding: 14px 16px;
+  border-radius: var(--radi);
+  background: var(--accent-suau);
+  color: var(--tinta-suau);
+}
+
+.evolucio {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.bloc-evolucio {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.resum-evolucio {
+  margin: 0;
+  font-family: var(--lletra-titol);
+  font-size: 1.15rem;
+  color: var(--jade);
+}
+
+/* El gràfic */
+.grafic-escala {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radi);
+  background: var(--clar);
+  border: 1px solid var(--linia);
+}
+
+.grafic-escala svg {
+  display: block;
+  font-family: var(--lletra);
+}
+
+.graella-grafic line {
+  stroke: var(--linia);
+  stroke-width: 1;
+}
+
+.graella-grafic text,
+.eix-x text {
+  fill: var(--tinta-suau);
+  font-size: 12px;
+}
+
+.eix-x .data-eix {
+  font-size: 11px;
+}
+
+.eix-x.triat text {
+  fill: var(--tinta);
+  font-weight: 600;
+}
+
+.guia-grafic {
+  stroke: var(--tinta-suau);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.6;
+}
+
+.serie polyline {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.serie .punt-serie {
+  stroke: var(--clar);
+  stroke-width: 1.5;
+}
+
+.serie-principal polyline {
+  stroke: var(--jade);
+}
+
+.serie-principal .punt-serie {
+  fill: var(--jade);
+}
+
+.serie-2 polyline {
+  stroke: var(--serie-2);
+  stroke-dasharray: 7 4;
+}
+
+.serie-2 .punt-serie {
+  fill: var(--serie-2);
+}
+
+.serie-3 polyline {
+  stroke: var(--serie-3);
+  stroke-dasharray: 2 4;
+}
+
+.serie-3 .punt-serie {
+  fill: var(--serie-3);
+}
+
+.marca-canvi {
+  fill: var(--clar);
+  stroke: var(--tinta-suau);
+  stroke-width: 1.5;
+}
+
+.zona-toc {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.zona-toc:focus-visible {
+  fill: var(--accent-suau);
+  fill-opacity: 0.5;
+}
+
+.globus-grafic {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--clar);
+  color: var(--tinta);
+  border: 1px solid var(--linia);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.14);
+  font-size: 0.85rem;
+  line-height: 1.35;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.linia-globus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mostra-serie {
+  flex: none;
+  vertical-align: middle;
+}
+
+.mostra-serie polyline {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+.llegenda-grafic {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  font-size: 0.9rem;
+  color: var(--tinta-suau);
+}
+
+.llegenda-grafic > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.interruptor {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-left: auto;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.interruptor input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--jade);
+}
+
+/* Altres escales: plegades */
+.escala-petita {
+  border-top: 1px solid var(--linia);
+}
+
+.escala-petita > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.escala-petita[open] > summary {
+  margin-bottom: 6px;
+}
+
+/* Minigràfic a «Com està» */
+.capcalera-escala .minigrafic {
+  margin-left: auto;
+}
+
+.minigrafic polyline {
+  fill: none;
+  stroke: var(--jade);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.minigrafic circle {
+  fill: var(--jade);
+}
+
+.minigrafic circle.darrer {
+  stroke: var(--clar);
+  stroke-width: 1.5;
+}
+
+.base-minigrafic {
+  stroke: var(--linia);
+}
+
+/* Punts més usats */
+.punts-usats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filtres-us {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.filtres-us .segmentat button {
+  min-height: 44px;
+}
+
+.barres-us {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.barres-us li {
+  display: grid;
+  grid-template-columns: minmax(9rem, 14rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.nom-us {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barra-us {
+  height: 14px;
+  border-radius: 7px;
+  background: var(--accent-suau);
+  overflow: hidden;
+}
+
+.barra-us > span {
+  display: block;
+  height: 100%;
+  border-radius: 7px;
+  background: var(--jade);
+}
+
+.quantes-us {
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.taula-us-desplacable {
+  overflow-x: auto;
+}
+
+.taula-us {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.taula-us th,
+.taula-us td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--linia);
+  white-space: nowrap;
+}
+
+.taula-us thead th {
+  color: var(--tinta-suau);
+  font-weight: 500;
+}
+
+.taula-us tbody th {
+  font-weight: 600;
+}
+
+.mapes-us {
+  display: grid;
+  gap: 16px;
+}
+
+.mapes-us.dos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.columna-us {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.zona-us {
+  height: 440px;
+}
+
+.columna-us .visor3d-vistes .boto {
+  min-height: 40px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+}
+
+.llegenda-us {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.llegenda-us .detall {
+  margin-left: 6px;
+}
+
+.fitxa-us {
+  margin: 4px 0 0;
+  min-height: 1.6em;
+}
+
+/* Cronologia */
+.cronologia {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.targeta-sessio {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  align-items: baseline;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--clar);
+  border: 1px solid var(--linia);
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.targeta-sessio:hover {
+  border-color: var(--jade);
+}
+
+.num-sessio {
+  font-weight: 600;
+  color: var(--jade);
+}
+
+.dia-sessio {
+  justify-self: end;
+  color: var(--tinta-suau);
+  font-size: 0.85rem;
+}
+
+.escala-sessio {
+  grid-column: 1 / -1;
+  font-family: var(--lletra-titol);
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+.fletxa {
+  margin-left: 6px;
+  font-family: var(--lletra);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.fletxa.baixa {
+  color: var(--afegit);
+}
+
+.fletxa.puja {
+  color: var(--tret);
+}
+
+.fletxa.igual {
+  color: var(--tinta-suau);
+}
+
+.targeta-sessio .detall {
+  font-size: 0.85rem;
+}
+
+.icones-sessio {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+}
+
+.icona-cronologia {
+  display: inline-flex;
+  color: var(--tinta-suau);
+}
+
+.icona-cronologia.incidencia {
+  color: var(--avis);
+}
+
+/* Comparar sessions */
+.comparar-sessions {
+  margin-top: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radi);
+  background: var(--clar);
+  border: 1px solid var(--linia);
+}
+
+.comparar-sessions h5 {
+  margin: 16px 0 6px;
+  font-size: 0.95rem;
+  color: var(--tinta-suau);
+  font-weight: 600;
+}
+
+.tria-sessions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.tria-sessio {
+  flex: 1 1 200px;
+}
+
+.fila-comparar {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 1.4fr) minmax(0, 1.4fr);
+  gap: 8px 14px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--linia);
+}
+
+.capcalera-comparar {
+  margin-top: 12px;
+  border-bottom-width: 2px;
+}
+
+.nom-fila {
+  color: var(--tinta-suau);
+}
+
+.dif.baixa {
+  color: var(--afegit);
+  font-weight: 600;
+}
+
+.dif.puja {
+  color: var(--tret);
+  font-weight: 600;
+}
+
+.columnes-comparar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.punts-comparar {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.92rem;
+}
+
+.punts-comparar li {
+  display: block;
+  padding: 4px 8px 4px 28px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.punts-comparar .signe {
+  position: absolute;
+  left: 8px;
+  font-weight: 700;
+}
+
+.punts-comparar .afegit {
+  color: var(--afegit);
+  background: color-mix(in srgb, var(--afegit) 10%, transparent);
+}
+
+.punts-comparar .tret {
+  color: var(--tret);
+  background: color-mix(in srgb, var(--tret) 10%, transparent);
+}
+
+.punts-comparar .mantingut {
+  color: var(--tinta-suau);
+}
+
+.punts-comparar .afegit .detall,
+.punts-comparar .tret .detall {
+  color: inherit;
+}
+
+.estat-punt {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.canvi-punt {
+  color: var(--tinta);
+  font-style: italic;
+}
+
+@media (max-width: 700px) {
+  .mapes-us.dos {
+    grid-template-columns: 1fr;
+  }
+
+  .barres-us li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .barres-us .barra-us {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .fila-comparar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .fila-comparar .nom-fila {
+    grid-column: 1 / -1;
+  }
+}
