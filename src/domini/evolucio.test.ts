@@ -173,6 +173,14 @@ describe('altres escales', () => {
       { sessioId: 's4', numero: 4, dia: '2026-09-24', valor: 46 },
     ])
     expect(serieEscalaOrl('dhi', [versio(1, 's1', 58)], sessions)).toEqual([])
+    // La 0–10 de símptomes nasals es desa com un número
+    const nasal = (n: number, sessioId: string, v: number): Pick<Valoracio, 'versio' | 'sessioId' | 'creadaAt' | 'seccions'> => ({
+      versio: n,
+      sessioId,
+      creadaAt: '2026-09-03T10:00:00Z',
+      seccions: { 'orl:escales': { valors: { nasal010: v } } },
+    })
+    expect(serieEscalaOrl('nasal010', [nasal(1, 's1', 7), nasal(2, 's4', 4)], sessions).map((x) => x.valor)).toEqual([7, 4])
   })
 
   it('MYMOP: el perfil de les sessions on es va fer', () => {

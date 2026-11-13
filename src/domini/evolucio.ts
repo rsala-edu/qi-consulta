@@ -121,7 +121,7 @@ export interface PuntEscala {
   valor: number
 }
 
-export type IdEscalaEvolucio = 'thi' | 'dhi' | 'snot22' | 'mymop' | 'pgic'
+export type IdEscalaEvolucio = 'thi' | 'dhi' | 'snot22' | 'nasal010' | 'mymop' | 'pgic'
 
 /**
  * Cada versió de la valoració porta les escales ORL (una revisió copia les
@@ -129,7 +129,7 @@ export type IdEscalaEvolucio = 'thi' | 'dhi' | 'snot22' | 'mymop' | 'pgic'
  * canvia. Cada punt va a la sessió on es va fer la versió.
  */
 export function serieEscalaOrl(
-  id: 'thi' | 'dhi' | 'snot22',
+  id: 'thi' | 'dhi' | 'snot22' | 'nasal010',
   valoracions: readonly Pick<Valoracio, 'versio' | 'sessioId' | 'creadaAt' | 'seccions'>[],
   sessions: readonly SessioEvolucio[],
 ): PuntEscala[] {
@@ -137,7 +137,9 @@ export function serieEscalaOrl(
   const resultat: PuntEscala[] = []
   let abans: number | null = null
   for (const v of [...valoracions].sort((a, b) => a.versio - b.versio)) {
-    const valor = (v.seccions['orl:escales']?.valors?.[id] as { total?: unknown } | undefined)?.total
+    const cru = v.seccions['orl:escales']?.valors?.[id]
+    // Les escales amb ítems desen { total }; la 0–10 nasal, el número
+    const valor = typeof cru === 'number' ? cru : (cru as { total?: unknown } | undefined)?.total
     if (typeof valor !== 'number' || valor === abans) continue
     abans = valor
     const s = v.sessioId ? perId.get(v.sessioId) : undefined

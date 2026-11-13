@@ -53,6 +53,7 @@ export function Evolucio({ sessions, sessionsPacient, valoracions }: Props) {
     { id: 'thi' as const, punts: serieEscalaOrl('thi', valoracions, llista), max: 100 },
     { id: 'dhi' as const, punts: serieEscalaOrl('dhi', valoracions, llista), max: 100 },
     { id: 'snot22' as const, punts: serieEscalaOrl('snot22', valoracions, llista), max: 110 },
+    { id: 'nasal010' as const, punts: serieEscalaOrl('nasal010', valoracions, llista), max: 10 },
     { id: 'mymop' as const, punts: serieMymop(llista), max: 6 },
     { id: 'pgic' as const, punts: seriePgic(llista), max: 7, min: 1 },
   ].filter((x) => x.punts.length > 0)

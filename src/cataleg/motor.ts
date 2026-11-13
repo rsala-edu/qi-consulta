@@ -205,6 +205,7 @@ export function resumSeccio(seccio: Seccio, d: DadesSeccio | undefined, textNorm
     if (!teValor(v)) continue
     if (c.tipus === 'simple' || c.tipus === 'multiple') parts.push(valorsTriats(v).map((id) => nomOpcio(c, id)).join(', '))
     else if (c.tipus === 'nombre') parts.push(`${c.ca}: ${String(v)}${c.unitat ? ` ${c.unitat}` : ''}`)
+    else if (c.tipus === 'especial' && c.component === 'barra010' && typeof v === 'number') parts.push(`${c.ca}: ${v}`)
     else if (typeof v === 'string') parts.push(v)
     else parts.push(resumValor(c, v as ValorCamp))
   }

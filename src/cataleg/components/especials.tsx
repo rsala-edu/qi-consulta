@@ -9,6 +9,7 @@ import { Audiograma } from './Audiograma'
 import { Escala } from './Escala'
 import type { IdEscala } from '../../domini/escales'
 import { ZonesLlengua } from './ZonesLlengua'
+import { BarraEscala } from '../../components/BarraEscala'
 
 export const ESPECIALS: Especials = {
   codiCim: ({ camp, valor, onCanviar, editable }) => (
@@ -19,6 +20,10 @@ export const ESPECIALS: Especials = {
   audiograma: ({ valor, onCanviar, editable }) => <Audiograma valor={valor} editable={editable} onCanviar={onCanviar} />,
   escala: ({ camp, valor, onCanviar, editable }) => (
     <Escala id={(camp.config ?? 'thi') as IdEscala} valor={valor} editable={editable} onCanviar={(v) => onCanviar(v ? { ...v } : null)} />
+  ),
+  // Escala 0–10 lliure (p. ex. símptomes nasals): la mateixa barra que la de «Com està»
+  barra010: ({ camp, valor, onCanviar, editable }) => (
+    <BarraEscala etiqueta={camp.ca} etiquetaVisible="" valor={typeof valor === 'number' ? valor : null} disabled={!editable} onCanviar={(v) => onCanviar(v)} />
   ),
   sindromes: ({ camp, valor, onCanviar, editable }) => (
     <Sindromes

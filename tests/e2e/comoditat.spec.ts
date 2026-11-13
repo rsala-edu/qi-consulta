@@ -72,6 +72,11 @@ test('SNOT-22 i MYMOP: amagats per defecte, amb la nota de llicència; la doctor
   const escales = await obrirSeccio(page, 'Escales')
   await expect(escales.locator('.camp-especial').filter({ hasText: 'THI' })).toBeVisible()
   await expect(escales.locator('.camp-especial').filter({ hasText: 'SNOT-22' })).toHaveCount(0)
+  // L'alternativa lliure: símptomes nasals 0–10, amb la mateixa barra
+  const nasal = escales.getByRole('radiogroup', { name: 'Símptomes nasals (0–10)' })
+  await expect(nasal).toHaveClass(/caselles-escala/)
+  await nasal.getByRole('radio', { name: '6' }).click()
+  await expect(nasal.getByRole('radio', { name: '6' })).toHaveAttribute('aria-checked', 'true')
 
   await menu(page, 'Ajustos').click()
   await page.getByRole('link', { name: /^Catàlegs/ }).click()

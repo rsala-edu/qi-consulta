@@ -831,6 +831,7 @@ export const ca = {
       thi: 'THI · acúfens (0–100)',
       dhi: 'DHI · vertigen (0–100)',
       snot22: 'SNOT-22 · nas i sins (0–110)',
+      nasal010: 'Símptomes nasals (0–10)',
       mymop: 'MYMOP · perfil (0–6, 0 és el millor)',
       pgic: 'PGIC · impressió de canvi (1–7, 1 és molt millor)',
     },

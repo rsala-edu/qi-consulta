@@ -58,7 +58,7 @@ export interface CampGraella extends CampBase {
 /** Camps amb un component propi (dibuix de la llengua, audiograma, escales, codis…) */
 export interface CampEspecial extends CampBase {
   tipus: 'especial'
-  component: 'zonesLlengua' | 'audiograma' | 'escala' | 'codiCim' | 'sindromes' | 'mymop' | 'puntsPalpacio'
+  component: 'zonesLlengua' | 'audiograma' | 'escala' | 'codiCim' | 'sindromes' | 'mymop' | 'puntsPalpacio' | 'barra010'
   /** Configuració del component (p. ex. quina escala) */
   config?: string
   /** Noms dels valors possibles (per al resum de la secció; p. ex. les zones de la llengua) */

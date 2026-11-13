@@ -234,6 +234,8 @@ export const ORL: Grup = {
         { id: 'thi', ca: 'THI (acúfens)', tipus: 'especial', component: 'escala', config: 'thi' },
         { id: 'dhi', ca: 'DHI (vertigen)', tipus: 'especial', component: 'escala', config: 'dhi' },
         { id: 'snot22', ca: 'SNOT-22 (nas i sins)', tipus: 'especial', component: 'escala', config: 'snot22' },
+        // Alternativa lliure al SNOT-22 (que requereix llicència): una sola puntuació 0–10
+        { id: 'nasal010', ca: 'Símptomes nasals (0–10)', tipus: 'especial', component: 'barra010', ajuda: 'Obstrucció, mucositat, esternuts, olfacte… en conjunt: 0 cap molèstia, 10 la pitjor' },
       ],
     },
   ],
