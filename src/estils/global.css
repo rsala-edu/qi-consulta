@@ -4036,23 +4036,22 @@ fieldset {
   cursor: pointer;
 }
 
-/* Avís suau en sortir d'una visita en curs */
+/* Avís suau en sortir d'una visita en curs: dins el flux, just sota la
+   barra, perquè no tapi cap control de la pantalla (el contingut baixa
+   mentre es veu) */
 .avis-sortida-visita {
-  position: fixed;
-  z-index: 30;
-  left: 50%;
-  bottom: max(20px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  width: min(560px, calc(100% - 32px));
+  flex: none;
+  margin: 0 auto 8px;
+  width: min(560px, calc(100% - 2 * var(--espai)));
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 12px 12px 18px;
+  padding: 8px 8px 8px 18px;
   border-radius: var(--radi);
   background: var(--clar);
   color: var(--tinta);
   border: 1px solid var(--linia);
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.16);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.1);
   animation: apareix-avis 0.2s ease-out;
 }
 
@@ -4081,7 +4080,7 @@ fieldset {
 @keyframes apareix-avis {
   from {
     opacity: 0;
-    transform: translate(-50%, 8px);
+    transform: translateY(-6px);
   }
 }
 
@@ -4424,7 +4423,7 @@ fieldset {
 /* Pestanya Tractament: sota el mapa, el 3D/2D i les vistes en una sola fila
    (el mapa guanya alçada); en pantalles baixes, sense la llegenda de colors
    (els colors ja surten en triar la tècnica i a la llista de marcats) */
-@media (min-width: 901px) {
+@media (min-width: 600px) {
   .pantalla-visita.amb-mapa .barra-visor {
     gap: 6px 12px;
     justify-content: flex-start;
@@ -4446,7 +4445,7 @@ fieldset {
   display: none;
 }
 
-@media (min-width: 901px) and (max-height: 800px) {
+@media (min-width: 901px) and (max-height: 800px), (min-width: 600px) and (max-width: 900px) {
   .pantalla-visita.amb-mapa .barra-visor .llegenda-colors {
     order: 0;
     position: relative;
@@ -4603,4 +4602,299 @@ fieldset {
 .pantalla-visita.ampliat .controls-retencio .boto-icona {
   min-width: 36px;
   min-height: 36px;
+}
+
+/* --- Visita a la tauleta vertical ---
+   Capçalera en dues línies (nom, episodi i sessió i «Desat»; temporitzador i
+   «Finalitzar visita»), pestanyes en una fila que es desplaça de costat i, a
+   Tractament, Cos/Orella, Repetir, la diferència i les agulles en una fila;
+   el mapa omple la resta de l'alçada (la llista de marcats queda a sota, dins
+   la mateixa zona, i s'hi arriba desplaçant-la). */
+
+/* Formes curtes: per defecte, la llarga */
+.barra-tractament .text-curt,
+.barra-tractament .icona-repetir {
+  display: none;
+}
+
+.boto-repetir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .pestanyes-visita {
+    display: flex;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pestanyes-visita > button {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 900px) {
+  .capcalera-visita {
+    gap: 4px 12px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  /* Primera línia: nom · episodi i sessió (s'escurcen) i «Desat» */
+  .capcalera-visita .qui-visita {
+    order: 0;
+    flex: 1 1 calc(100% - 90px);
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .capcalera-visita h1,
+  .capcalera-visita .qui-visita p {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .capcalera-visita h1 {
+    flex: 0 1 auto;
+    font-size: 1.25rem;
+  }
+
+  .capcalera-visita .qui-visita p {
+    flex: 0 1 auto;
+    font-size: 0.85rem;
+  }
+
+  .capcalera-visita .accions-visita {
+    display: contents;
+  }
+
+  .capcalera-visita .accions-visita > .detall {
+    order: 1;
+    flex: none;
+    font-size: 0.85rem;
+  }
+
+  /* Segona línia: temporitzador i «Finalitzar visita» */
+  .capcalera-visita .temporitzador {
+    order: 2;
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .capcalera-visita .temporitzador > span {
+    font-size: 1.3rem;
+  }
+
+  /* Abans de començar: minuts i «Agulles posades: començar», més petits */
+  .capcalera-visita .temporitzador .boto-gran {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 0.9rem;
+  }
+
+  .capcalera-visita .minuts-retencio {
+    gap: 0;
+  }
+
+  .capcalera-visita .minuts-retencio .boto {
+    min-width: 40px;
+    padding: 0 6px;
+  }
+
+  .capcalera-visita .minuts-retencio output {
+    min-width: 0;
+    padding: 4px 8px;
+  }
+
+  .capcalera-visita .accions-visita > .boto {
+    order: 3;
+    margin-left: auto;
+    min-height: 44px;
+    padding: 0 16px;
+    font-size: 0.95rem;
+  }
+
+  /* Tractament: la pàgina no es desplaça; el mapa omple la resta */
+  #root:has(> .pantalla-visita.amb-mapa) {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pantalla-visita.amb-mapa {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .capcalera-visita {
+    position: static;
+    margin-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .pestanyes-visita {
+    flex: none;
+    margin-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa > .contingut-visita,
+  .pantalla-visita.amb-mapa .tractament-visita {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pantalla-visita.amb-mapa .tractament-visita {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .pantalla-visita.amb-mapa .mapa-visita {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pantalla-visita.amb-mapa > .enllac-tractaments,
+  .pantalla-visita.amb-mapa > .addendes {
+    display: none;
+  }
+
+  .pantalla-visita.amb-mapa .panell-pestanya:not([hidden]) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* El mapa (i la barra de sota) ocupa tota la zona; la llista, a sota */
+  .pantalla-visita.amb-mapa .disseny-mapa {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .pantalla-visita.amb-mapa .disseny-mapa > .columna-visor {
+    flex: 0 0 100%;
+    min-height: 0;
+  }
+
+  .pantalla-visita.amb-mapa .columna-visor .zona-visor {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+
+  .pantalla-visita.amb-mapa .disseny-mapa > .panell-mapa {
+    flex: none;
+  }
+
+  /* Cos/Orella, Repetir, la diferència i les agulles en una sola fila */
+  .pantalla-visita.amb-mapa .capcalera-mapa {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .pantalla-visita.amb-mapa .pestanyes-mapa {
+    flex: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament {
+    flex: 1 1 auto;
+    flex-basis: auto;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow: visible;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .text-llarg {
+    display: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .text-curt,
+  .pantalla-visita.amb-mapa .barra-tractament .icona-repetir {
+    display: inline;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .boto-repetir {
+    padding: 0 12px;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament [data-testid='diferencia-punts'] {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .agulles-posades {
+    gap: 2px;
+  }
+
+  /* Sota el mapa, 3D/2D, les vistes i «ⓘ Colors» en una sola fila */
+  .pantalla-visita.amb-mapa .barra-visor {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor > * {
+    flex: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .visor3d-vistes {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .visor3d-vistes .boto,
+  .pantalla-visita.amb-mapa .barra-visor .boto-colors {
+    flex: none;
+    min-height: 40px;
+    padding: 0 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .text-colors {
+    display: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .boto-colors {
+    min-width: 40px;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .mode-mapa button {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 0.9rem;
+  }
 }

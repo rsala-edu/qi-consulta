@@ -28,8 +28,21 @@ export function LlegendaColors({ tecniques }: { tecniques: readonly { tecnica: T
 
   return (
     <div ref={caixa} className="llegenda-colors">
-      <button type="button" className="boto-colors" aria-expanded={oberta} aria-controls={id} onClick={() => setOberta((o) => !o)}>
-        {t.mapa.colors}
+      <button
+        type="button"
+        className="boto-colors"
+        aria-label={t.mapa.colors}
+        title={t.mapa.colors}
+        aria-expanded={oberta}
+        aria-controls={id}
+        onClick={() => setOberta((o) => !o)}
+      >
+        {/* A la tauleta vertical, només «ⓘ» */}
+        <span aria-hidden="true">{t.mapa.colorsIcona}</span>
+        <span className="text-colors" aria-hidden="true">
+          {' '}
+          {t.mapa.colorsText}
+        </span>
       </button>
       <ul id={id} className={`llegenda${oberta ? ' oberta' : ''}`} aria-label={t.mapa.tecnicaTitol}>
         {tecniques.map(({ tecnica, nom }) => (

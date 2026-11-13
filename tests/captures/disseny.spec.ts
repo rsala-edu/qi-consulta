@@ -225,6 +225,8 @@ test.describe(() => {
     await marcarCos(page, 'PC6', 'PC6', 'Bilateral')
     await page.getByRole('button', { name: 'Tot el cos' }).click()
     await expect(page.getByTestId('visor3d')).toHaveAttribute('data-moviment', 'no', { timeout: 15_000 })
+    // (a la tauleta vertical, la cerca deixa la zona del mapa desplaçada cap a la llista)
+    await page.locator('.disseny-mapa').first().evaluate((e) => e.scrollTo(0, 0))
     await page.waitForTimeout(1000)
     await capturar(page, 'a-etiquetes-tot-el-cos', projecte)
 
@@ -239,12 +241,20 @@ test.describe(() => {
 
     // d) L'orella, en entrar (pantalla Mapa)
     await menu(page, 'Mapa').click()
-    // (l'avís «La visita continua en curs» es tanca: no forma part del retoc)
-    const tancarAvis = page.locator('.tancar-avis')
-    if (await tancarAvis.isVisible().catch(() => false)) await tancarAvis.click()
+    // L'avís «La visita continua en curs», sota la barra: no tapa cap control
     await page.getByRole('tab', { name: 'Orella' }).click()
     await expect(page.getByTestId('visor-orella')).toBeVisible()
+    await expect(page.locator('.avis-sortida-visita')).toBeVisible()
     await page.waitForTimeout(800)
+    await capturar(page, 'e-avis-sortida-orella', projecte)
+    await page.locator('.tancar-avis').click()
+    await page.waitForTimeout(500)
     await capturar(page, 'd-orella-mapa', projecte)
+
+    // El cos sencer a la pantalla Mapa
+    await page.getByRole('tab', { name: 'Cos' }).click()
+    await expect(page.getByTestId('visor3d')).toHaveAttribute('data-moviment', 'no', { timeout: 15_000 })
+    await page.waitForTimeout(1000)
+    await capturar(page, 'f-mapa-cos', projecte)
   })
 })

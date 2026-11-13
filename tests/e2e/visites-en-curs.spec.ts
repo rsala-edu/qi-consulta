@@ -21,6 +21,20 @@ test('una visita en curs es pot reprendre des de l\'Agenda i des d\'Avui, i en s
   await expect(page.getByRole('status').filter({ hasText: 'La visita continua en curs' })).toHaveText(
     /La visita continua en curs\. La pots reprendre des d'Avui/,
   )
+  // Sota la barra, dins el flux: no tapa cap control de la pantalla
+  await page.waitForTimeout(400) // (l'animació d'entrada)
+  const avis = (await page.locator('.avis-sortida-visita').boundingBox())!
+  const tapats = await page.evaluate(
+    ({ x, y, width, height }) =>
+      [...document.querySelectorAll('button, a, input, select, [role="tab"]')]
+        .filter((e) => !e.closest('.avis-sortida-visita'))
+        .map((e) => e.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.left < x + width && r.right > x && r.top < y + height && r.bottom > y).length,
+    avis,
+  )
+  expect(tapats).toBe(0)
+  const barra = (await page.locator('.barra-app').boundingBox())!
+  expect(avis.y).toBeGreaterThanOrEqual(barra.y + barra.height - 1)
 
   // A l'Agenda, la cita en curs té «Continuar la visita»
   await page.evaluate(() => {

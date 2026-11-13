@@ -580,8 +580,19 @@ function Tractament({
     <div className="eines-tractament barra-tractament">
       {teAnterior && editable && (
         <>
-          <Boto variant="secundari" onClick={() => (Object.keys(dades.punts).length > 0 ? setPreguntant(true) : repetir(true))}>
-            {v.repetir}
+          {/* A la tauleta vertical, la icona i «Repetir» (el nom accessible és el sencer) */}
+          <Boto
+            variant="secundari"
+            className="boto-repetir"
+            aria-label={v.repetir}
+            title={v.repetir}
+            onClick={() => (Object.keys(dades.punts).length > 0 ? setPreguntant(true) : repetir(true))}
+          >
+            <svg className="icona-repetir" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M4 12a8 8 0 0 1 13.7-5.6M20 4v5h-5M20 12a8 8 0 0 1-13.7 5.6M4 20v-5h5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-llarg">{v.repetir}</span>
+            <span className="text-curt">{v.repetirCurt}</span>
           </Boto>
           {preguntant && (
             <div className="pregunta-repetir" role="group" aria-label={v.repetirPregunta}>
@@ -601,12 +612,16 @@ function Tractament({
       )}
       {dif && teAnterior && (
         <p className="detall" data-testid="diferencia-punts" title={formatar(v.diferencia, { mes: String(dif.mes), menys: String(dif.menys) })}>
-          {formatar(v.diferencia, { mes: String(dif.mes), menys: String(dif.menys) })}
+          <span className="text-llarg">{v.diferenciaPrefix}</span>
+          {formatar(v.diferenciaValor, { mes: String(dif.mes), menys: String(dif.menys) })}
         </p>
       )}
       {controlAgulles && (
         <div className="agulles-posades">
-          <span className="etiqueta-camp">{v.agullesPosades}</span>
+          <span className="etiqueta-camp">
+            {v.agulles}
+            <span className="text-llarg"> {v.posades}</span>
+          </span>
           <Boto
             variant="discret"
             aria-label={`${v.agullesPosades}: −1`}

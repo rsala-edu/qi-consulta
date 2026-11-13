@@ -16,6 +16,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -25,7 +26,7 @@ import {
 import { Box3, Group, Mesh, Raycaster, Vector2, Vector3, type BufferGeometry } from 'three'
 import { LimitError } from '../../components/LimitError'
 import { t } from '../../i18n/t'
-import { azimutMesProper, CAMERA, nivellEtiquetes, VISTES, vistaCapAlPunt, type Vista } from '../camera'
+import { azimutMesProper, CAMERA, enquadramentCos, nivellEtiquetes, VISTES, vistaCapAlPunt, type Vista } from '../camera'
 import { colocarEtiquetes, type EtiquetaColocada } from '../etiquetes'
 import { textEtiqueta, type EtiquetesPerNivell } from '../etiquetaPunt'
 import { mesProperAlToc, projectarVisibles, type ProjeccioPantalla } from '../seleccio'
@@ -262,6 +263,19 @@ const Escena = memo(function Escena({
   const grupMarcadors = useRef<Group>(null)
   const { camera, size, invalidate } = useThree()
 
+  // «Tot el cos»: el cos sencer omple el requadre (i torna a omplir-lo si el
+  // requadre canvia de mida, com en ampliar el mapa, mentre la càmera no
+  // s'hagi mogut d'aquí)
+  const enquadrament = useMemo(() => {
+    if (!geometria.boundingBox) geometria.computeBoundingBox()
+    return enquadramentCos(geometria.boundingBox!, size.width, size.height)
+  }, [geometria, size.width, size.height])
+  const enquadramentActual = useRef(enquadrament)
+  useLayoutEffect(() => {
+    enquadramentActual.current = enquadrament
+  }, [enquadrament])
+  const aplicat = useRef<{ alcada: number; distancia: number } | null>(null)
+
   // Configuració dels controls: gir horitzontal, zoom i desplaçament
   useEffect(() => {
     const c = controls.current
@@ -284,9 +298,26 @@ const Escena = memo(function Escena({
     c.touches.two = A.TOUCH_DOLLY
     c.touches.three = A.NONE
     c.setBoundary(new Box3(new Vector3(...CAMERA.limits.min), new Vector3(...CAMERA.limits.max)))
-    void c.setLookAt(0, CAMERA.alcadaInicial, CAMERA.distanciaInicial, 0, CAMERA.alcadaInicial, 0, false)
+    const e = enquadramentActual.current
+    aplicat.current = e
+    void c.setLookAt(0, e.alcada, e.distancia, 0, e.alcada, 0, false)
     onLlesta()
   }, [onLlesta])
+
+  useEffect(() => {
+    const c = controls.current
+    const abans = aplicat.current
+    if (!c || !abans) return
+    if (Math.abs(enquadrament.distancia - abans.distancia) < 1e-3 && Math.abs(enquadrament.alcada - abans.alcada) < 1e-3) return
+    const objectiu = c.getTarget(new Vector3(), false)
+    const quiet =
+      Math.abs(c.distance - abans.distancia) < 0.01 && Math.abs(objectiu.y - abans.alcada) < 0.01 && Math.abs(objectiu.x) < 0.01
+    if (!quiet) return
+    aplicat.current = enquadrament
+    void c.dollyTo(enquadrament.distancia, false)
+    void c.moveTo(0, enquadrament.alcada, 0, false)
+    invalidate()
+  }, [enquadrament, invalidate])
 
   // data-moviment al contenidor: «si» mentre la càmera es mou, «no» quan s'atura.
   // Ho fan servir les proves (i no provoca cap render de React).
@@ -336,8 +367,10 @@ const Escena = memo(function Escena({
       if (!c) return
       fixarPolar(c, CAMERA.polar)
       const a = c.azimuthAngle
-      const d = CAMERA.distanciaInicial
-      const h = CAMERA.alcadaInicial
+      const e = enquadramentActual.current
+      aplicat.current = e
+      const d = e.distancia
+      const h = e.alcada
       void c.setLookAt(Math.sin(a) * d, h, Math.cos(a) * d, 0, h, 0, true)
     },
   }))

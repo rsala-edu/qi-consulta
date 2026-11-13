@@ -2,6 +2,7 @@
 // escala 0–10 en barra (tocar i lliscar), símptomes secundaris amagats fins
 // que s'afegeixen i la pestanya Tractament sense desplaçar la pàgina.
 // Només dades inventades.
+import type { Page } from '@playwright/test'
 import { test } from './google.js'
 import { capcalera, comencarVisita, entrar, expect, novaCita, nouPacient, pestanya } from './ajudes-visita.js'
 
@@ -9,6 +10,21 @@ import { capcalera, comencarVisita, entrar, expect, novaCita, nouPacient, pestan
 test.use({ cos3D: true })
 
 test.describe.configure({ timeout: 240_000 })
+
+/**
+ * Part de l'alçada del requadre que ocupa el cos sencer (1,66 m), segons la
+ * distància de la càmera (fov vertical de 35°). Si el requadre és estret,
+ * l'alçada que queda limitada per l'amplada.
+ */
+async function ocupacioCos(page: Page): Promise<number> {
+  const visor = page.getByTestId('visor3d')
+  const d = Number(await visor.getAttribute('data-distancia'))
+  const caixa = (await visor.boundingBox())!
+  const tan = Math.tan((35 * Math.PI) / 360)
+  const perAlcada = 1.66 / (2 * d * tan)
+  const perAmplada = 1.05 / (2 * d * tan * (caixa.width / caixa.height))
+  return Math.max(perAlcada, perAmplada)
+}
 
 test('visita: capçalera en una fila, escala en barra, secundaris a demanda i Tractament sense desplaçar la pàgina', async ({ page }) => {
   await entrar(page)
@@ -117,6 +133,9 @@ test('Tractament: cos sencer en entrar, etiquetes només dels marcats, «⤢ Amp
   // Amb el cos sencer, només les del punt marcat
   await page.getByRole('button', { name: 'Tot el cos' }).click()
   await expect(visor).toHaveAttribute('data-moviment', 'no')
+  // I el cos omple el requadre (uns 85–90 % de l'alçada)
+  await expect.poll(() => ocupacioCos(page)).toBeGreaterThan(0.83)
+  expect(await ocupacioCos(page)).toBeLessThan(0.93)
   await expect.poll(() => etiquetes.count()).toBeLessThanOrEqual(2)
   for (const text of await etiquetes.allTextContents()) expect(text).toBe('LI4')
   expect(await etiquetes.count()).toBeGreaterThan(0)
@@ -128,6 +147,9 @@ test('Tractament: cos sencer en entrar, etiquetes només dels marcats, «⤢ Amp
   await expect(page.getByRole('navigation', { name: 'Navegació principal' })).toBeHidden()
   await expect(page.locator('.capcalera-visita').getByRole('button', { name: 'Finalitzar visita' })).toBeHidden()
   await expect(page.locator('.capcalera-visita .temporitzador')).toBeVisible()
+  // El cos creix amb el requadre: n'ocupa la mateixa part
+  await expect.poll(() => ocupacioCos(page)).toBeGreaterThan(0.83)
+  expect(await ocupacioCos(page)).toBeLessThan(0.93)
   const desplacament = await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight)
   expect(desplacament).toBeLessThanOrEqual(1)
   // Es torna amb el mateix botó (o amb Esc)
@@ -148,4 +170,55 @@ test('Tractament: cos sencer en entrar, etiquetes només dels marcats, «⤢ Amp
   expect(dibuix.y).toBeGreaterThanOrEqual(caixa.y)
   expect(dibuix.x + dibuix.width).toBeLessThanOrEqual(caixa.x + caixa.width + 1)
   expect(dibuix.y + dibuix.height).toBeLessThanOrEqual(caixa.y + caixa.height + 1)
+})
+
+test.describe('tauleta vertical', () => {
+  test.use({ viewport: { width: 640, height: 1024 }, hasTouch: true })
+
+  test('Tractament compacte: capçalera en dues línies, pestanyes en una fila i el mapa omple la resta sense desplaçar la pàgina', async ({ page }, info) => {
+    test.skip(info.project.name !== 'tauleta', 'una sola vegada')
+    await entrar(page)
+    await nouPacient(page, 'Aina', 'Provencal Inventada')
+    await novaCita(page, 'Aina', '2026-11-04', '10:00', 'Lumbàlgia')
+    await comencarVisita(page)
+    await pestanya(page, 'Tractament').click()
+    const visor = page.getByTestId('visor3d')
+    await expect(visor).toHaveAttribute('data-llest', 'si', { timeout: 60_000 })
+    const mig = async (sel: ReturnType<Page['locator']>) => {
+      const b = (await sel.boundingBox())!
+      return b.y + b.height / 2
+    }
+
+    // Capçalera: nom i «episodi · sessió» en una línia; temporitzador i «Finalitzar visita» en una altra
+    const cap = capcalera(page)
+    const nom = await mig(cap.locator('h1'))
+    expect(Math.abs((await mig(cap.locator('.qui-visita p'))) - nom)).toBeLessThan(12)
+    const temps = await mig(cap.locator('.temporitzador'))
+    expect(Math.abs((await mig(cap.getByRole('button', { name: 'Finalitzar visita' }))) - temps)).toBeLessThan(12)
+    expect(temps).toBeGreaterThan(nom + 15)
+
+    // Les pestanyes, en una sola fila (que es desplaça de costat)
+    const pestanyes = page.getByRole('tablist', { name: 'Visita' }).getByRole('tab')
+    const ys = new Set<number>()
+    for (const p of await pestanyes.all()) ys.add(Math.round(await mig(p)))
+    expect(Math.max(...ys) - Math.min(...ys)).toBeLessThan(2)
+
+    // Cos/Orella i les agulles a la mateixa fila
+    const fila = await mig(page.getByRole('tablist', { name: 'Mapa', exact: true }))
+    expect(Math.abs((await mig(page.locator('.barra-tractament .agulles-posades'))) - fila)).toBeLessThan(12)
+
+    // El mapa omple la resta: la pàgina no es desplaça i la barra de sota el mapa hi cap
+    const desplacament = await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight)
+    expect(desplacament).toBeLessThanOrEqual(1)
+    const zona = (await page.locator('.mapa-visita .zona-visor').first().boundingBox())!
+    expect(zona.height).toBeGreaterThan(1024 * 0.5)
+    const barra = (await page.locator('.mapa-visita .barra-visor').first().boundingBox())!
+    expect(barra.y + barra.height).toBeLessThanOrEqual(1024)
+    expect(barra.height).toBeLessThan(60)
+    await expect(page.getByRole('button', { name: 'Tot el cos' })).toBeInViewport({ ratio: 1 })
+
+    // I el cos sencer l'omple
+    await expect(visor).toHaveAttribute('data-moviment', 'no', { timeout: 15_000 })
+    expect(await ocupacioCos(page)).toBeGreaterThan(0.83)
+  })
 })
