@@ -126,3 +126,14 @@ export function perfilMymop(m: Mymop | null | undefined): number | null {
 
 /** El MYMOP es demana a la primera sessió de l'episodi i cada 4 sessions (1, 5, 9…) */
 export const tocaMymop = (numeroSessio: number) => numeroSessio >= 1 && (numeroSessio - 1) % 4 === 0
+
+// --- PGIC (Patient Global Impression of Change) ------------------------------
+// Set nivells, de 1 (molt millor) a 7 (molt pitjor), amb etiquetes pròpies en
+// català (no és el text de cap qüestionari). Ve de la família de la CGI (Guy,
+// 1976, manual ECDEU de l'NIMH); versió de 7 nivells àmpliament usada (Hurst
+// i Bolton, 2004). Vegeu docs/especificacions.md, «Llicències».
+
+export const NIVELLS_PGIC = [1, 2, 3, 4, 5, 6, 7] as const
+
+/** El PGIC es demana com el MYMOP: a la primera sessió de l'episodi i cada 4 sessions */
+export const tocaPgic = tocaMymop

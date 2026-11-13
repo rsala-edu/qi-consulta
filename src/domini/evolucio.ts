@@ -15,7 +15,7 @@ import type { Valoracio } from './valoracio'
 export type SessioEvolucio = Pick<
   Sessio,
   'id' | 'episodiId' | 'numero' | 'iniciAt' | 'estat' | 'comEsta' | 'punts' | 'retencio' | 'tancar' | 'mymop' | 'exploracio'
->
+> & { pgic?: number | null }
 
 /** Les sessions de l'episodi en ordre (número i, si n'hi ha dos d'iguals, hora) */
 export function ordenades<S extends Pick<Sessio, 'numero' | 'iniciAt'>>(sessions: readonly S[]): S[] {
@@ -121,7 +121,7 @@ export interface PuntEscala {
   valor: number
 }
 
-export type IdEscalaEvolucio = 'thi' | 'dhi' | 'snot22' | 'mymop'
+export type IdEscalaEvolucio = 'thi' | 'dhi' | 'snot22' | 'mymop' | 'pgic'
 
 /**
  * Cada versió de la valoració porta les escales ORL (una revisió copia les
@@ -152,6 +152,13 @@ export function serieMymop(sessions: readonly SessioEvolucio[]): PuntEscala[] {
     const valor = perfilMymop(s.mymop)
     return valor === null ? [] : [{ sessioId: s.id, numero: s.numero, dia: dia(s.iniciAt), valor }]
   })
+}
+
+/** El PGIC (1–7, 1 és molt millor) de les sessions on es va fer */
+export function seriePgic(sessions: readonly SessioEvolucio[]): PuntEscala[] {
+  return ordenades(sessions).flatMap((s) =>
+    s.pgic === null || s.pgic === undefined ? [] : [{ sessioId: s.id, numero: s.numero, dia: dia(s.iniciAt), valor: s.pgic }],
+  )
 }
 
 // --- Punts més usats ------------------------------------------------------------

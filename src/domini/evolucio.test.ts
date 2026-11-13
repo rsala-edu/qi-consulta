@@ -185,6 +185,20 @@ describe('altres escales', () => {
   })
 })
 
+describe('PGIC', () => {
+  it('els nivells (1–7) de les sessions on es va fer', async () => {
+    const { seriePgic } = await import('./evolucio')
+    const s = [sessio(1, '2026-09-03', 8), sessio(2, '2026-09-10', 6), sessio(5, '2026-10-01', 4)]
+    s[0]!.pgic = 4
+    s[2]!.pgic = 2
+    expect(seriePgic(s).map((x) => [x.numero, x.valor])).toEqual([
+      [1, 4],
+      [5, 2],
+    ])
+    expect(seriePgic([])).toEqual([])
+  })
+})
+
 describe('resum en tancar l\'episodi', () => {
   it('sessions, durada, escala inicial i final i els punts més usats', () => {
     const r = resumTancament([

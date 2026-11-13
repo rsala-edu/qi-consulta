@@ -138,6 +138,17 @@ export const ca = {
     perfil: 'Perfil: {n}',
     perfilAnterior: 'l\'anterior: {n}',
   },
+  pgic: {
+    titol: 'PGIC',
+    nom: 'Impressió global de canvi (PGIC)',
+    afegir: 'Afegir el PGIC en aquesta sessió',
+    toca: 'Avui toca el PGIC (sessió {n}: a la primera i cada 4 sessions).',
+    explicacio: 'Com està la persona, en conjunt, des que va començar el tractament: de 1 (molt millor) a 7 (molt pitjor).',
+    escala: 'PGIC (1–7)',
+    /** Etiquetes pròpies (no el text de cap qüestionari) */
+    nivells: ['', 'Molt millor', 'Bastant millor', 'Una mica millor', 'Sense canvis', 'Una mica pitjor', 'Bastant pitjor', 'Molt pitjor'],
+    triat: '{n} · {nom}',
+  },
   pla: {
     titol: 'Pla de tractament',
     sessions: 'Sessions previstes',
@@ -821,6 +832,7 @@ export const ca = {
       dhi: 'DHI · vertigen (0–100)',
       snot22: 'SNOT-22 · nas i sins (0–110)',
       mymop: 'MYMOP · perfil (0–6, 0 és el millor)',
+      pgic: 'PGIC · impressió de canvi (1–7, 1 és molt millor)',
     },
     minigrafic: 'Evolució de l\'escala a l\'episodi: {valors}',
     // Punts més usats

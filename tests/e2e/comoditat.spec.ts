@@ -44,10 +44,17 @@ test('el MYMOP i els secundaris fan servir la mateixa barra que l\'escala 0–10
   const secundari = page.getByRole('radiogroup', { name: 'Símptoma secundari 1 · Escala (0–10)' })
   const mymop = page.getByRole('region', { name: 'MYMOP' }).getByRole('radiogroup', { name: 'Puntuació: Símptoma 1' })
   const benestar = page.getByRole('radiogroup', { name: 'Benestar general' })
+  // PGIC (1–7): a la primera sessió toca; la mateixa barra
+  const pgic = page.getByRole('region', { name: 'Impressió global de canvi (PGIC)' })
+  await expect(pgic.getByRole('note')).toContainText('Avui toca el PGIC')
+  const barraPgic = pgic.getByRole('radiogroup', { name: 'PGIC (1–7)' })
+  await expect(barraPgic.getByRole('radio')).toHaveCount(7)
+  await barraPgic.getByRole('radio', { name: '3' }).click()
+  await expect(pgic.getByRole('status')).toHaveText('3 · Una mica millor')
   await expect(mymop.getByRole('radio')).toHaveCount(7)
-  for (const r of [secundari, mymop, benestar]) await expect(r).toHaveClass(/caselles-escala/)
+  for (const r of [secundari, mymop, benestar, barraPgic]) await expect(r).toHaveClass(/caselles-escala/)
   const ample = (await principal.boundingBox())!.width
-  for (const r of [secundari, mymop, benestar]) expect(Math.abs((await r.boundingBox())!.width - ample)).toBeLessThan(2)
+  for (const r of [secundari, mymop, benestar, barraPgic]) expect(Math.abs((await r.boundingBox())!.width - ample)).toBeLessThan(2)
   // Es tria igual: tocar
   await mymop.getByRole('radio', { name: '4' }).click()
   await expect(mymop.getByRole('radio', { name: '4' })).toHaveAttribute('aria-checked', 'true')

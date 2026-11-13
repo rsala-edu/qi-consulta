@@ -12,6 +12,7 @@ import {
   serieEscalaOrl,
   serieEvolucio,
   serieMymop,
+  seriePgic,
   type IdEscalaEvolucio,
   type PuntEscala,
   type SessioEvolucio,
@@ -48,11 +49,12 @@ export function Evolucio({ sessions, sessionsPacient, valoracions }: Props) {
   if (secundaris && serie.some((p) => p.secundari2 !== null))
     series.push({ id: 's2', nom: noms.secundari2 || formatar(e.secundari, { n: '2' }), valors: serie.map((p) => p.secundari2), forma: 'triangle', classe: 'serie-3' })
 
-  const altres: { id: IdEscalaEvolucio; punts: PuntEscala[]; max: number }[] = [
+  const altres: { id: IdEscalaEvolucio; punts: PuntEscala[]; max: number; min?: number }[] = [
     { id: 'thi' as const, punts: serieEscalaOrl('thi', valoracions, llista), max: 100 },
     { id: 'dhi' as const, punts: serieEscalaOrl('dhi', valoracions, llista), max: 100 },
     { id: 'snot22' as const, punts: serieEscalaOrl('snot22', valoracions, llista), max: 110 },
     { id: 'mymop' as const, punts: serieMymop(llista), max: 6 },
+    { id: 'pgic' as const, punts: seriePgic(llista), max: 7, min: 1 },
   ].filter((x) => x.punts.length > 0)
 
   const obrir = (id: string) => void navegar(`/visita/${id}`)
@@ -115,6 +117,11 @@ export function Evolucio({ sessions, sessionsPacient, valoracions }: Props) {
               <summary>
                 {e.escales[x.id]}
                 {(() => {
+                  // PGIC: nivells, no una puntuació (el percentatge no hi té sentit): l'últim, amb el nom
+                  if (x.id === 'pgic') {
+                    const darrer = x.punts.at(-1)!.valor
+                    return <span className="detall">&nbsp;· {formatar(t.pgic.triat, { n: String(darrer), nom: t.pgic.nivells[darrer] ?? '' })}</span>
+                  }
                   const r = resumEscala(x.punts)
                   return r ? <span className="detall">&nbsp;· {textResum(r)}</span> : null
                 })()}
@@ -123,7 +130,7 @@ export function Evolucio({ sessions, sessionsPacient, valoracions }: Props) {
                 titol={e.escales[x.id]}
                 columnes={x.punts.map((p) => ({ numero: p.numero, dia: p.dia, sessioId: p.sessioId }))}
                 series={[{ id: x.id, nom: e.escales[x.id], valors: x.punts.map((p) => p.valor), forma: 'cercle', classe: 'serie-principal' }]}
-                min={0}
+                min={x.min ?? 0}
                 max={x.max}
                 onObrir={obrir}
                 alcada={160}

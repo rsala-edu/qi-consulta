@@ -71,6 +71,8 @@ export const esquemaDadesSessio = z.object({
   exploracio: z.preprocess(migrarExploracio, z.object({ seccions: esquemaDadesSeccions })),
   /** MYMOP: a la primera sessió de l'episodi i cada 4 (les d'abans de la 3B no en tenen) */
   mymop: esquemaMymop.nullable().default(null),
+  /** PGIC: impressió global de canvi, de 1 (molt millor) a 7 (molt pitjor) (les d'abans no en tenen) */
+  pgic: z.number().int().min(1).max(7).nullable().default(null),
   /** «mapa:codi» → punt */
   punts: z.record(z.string(), esquemaPuntMarcat),
   agulles: z.object({
@@ -98,6 +100,7 @@ export function novaSessio(d: { citaId: string; episodiId: string; numero: numbe
     comEsta: { canvis: '', escala: null, secundari1: buit, secundari2: { ...buit } },
     exploracio: { seccions: {} },
     mymop: null,
+    pgic: null,
     punts: {},
     agulles: { posades: null, retirades: null, motiu: '' },
     tancar: { recomanacions: '', incidencies: '', capIncidencia: false },

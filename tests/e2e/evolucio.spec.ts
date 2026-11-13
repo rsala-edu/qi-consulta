@@ -58,6 +58,11 @@ test('evolució: gràfic, punts més usats, comparar, cronologia, minigràfic i 
   await dhi.locator('summary').click()
   await expect(dhi.getByRole('group', { name: /DHI/ }).locator('.punt-serie')).toHaveCount(3)
   await expect(altres.locator('details', { hasText: 'MYMOP' })).toBeVisible()
+  // PGIC: tres punts (sessions 1, 5 i 8) i, al resum, l'últim nivell
+  const pgic = altres.locator('details', { hasText: 'PGIC' })
+  await expect(pgic.locator('summary')).toContainText('2 · Bastant millor')
+  await pgic.locator('summary').click()
+  await expect(pgic.getByRole('group', { name: /PGIC/ }).locator('.punt-serie')).toHaveCount(3)
 
   // Punts més usats: barres (per defecte)
   const usats = episodi.getByRole('region', { name: 'Punts més usats' })

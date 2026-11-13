@@ -40,8 +40,9 @@ export const FONTS: Record<IdFont, Font> = {
     llicencia: 'Coneixement clínic general; textos propis de l\'app',
   },
   escala: {
-    titol: 'Escales de resultats (THI, DHI, SNOT-22, MYMOP)',
-    detall: 'Només es desen les puntuacions i el grau de gravetat; el text dels ítems no és a l\'app.',
-    llicencia: 'THI i DHI: copyright dels autors i de l\'AMA, sense llicència clínica publicada. SNOT-22: cal llicència de la Washington University. MYMOP: cal llicència de Meaningful Measures Ltd.',
+    titol: 'Escales de resultats (THI, DHI, SNOT-22, MYMOP, PGIC)',
+    detall: 'Només es desen les puntuacions i el grau de gravetat; el text dels ítems no és a l\'app. El PGIC fa servir etiquetes pròpies en català.',
+    llicencia:
+      'THI i DHI: copyright dels autors i de l\'AMA, sense llicència clínica publicada. SNOT-22: cal llicència de la Washington University (amagat fins que s\'activa). MYMOP: cal llicència de Meaningful Measures Ltd (amagat fins que s\'activa). PGIC: deriva de la CGI (Guy, 1976, manual ECDEU de l\'NIMH, publicació del govern dels EUA); versió de 7 nivells de Hurst i Bolton (2004); no consta cap llicència ni pagament i es reprodueix lliurement en protocols i recursos públics.',
   },
 }

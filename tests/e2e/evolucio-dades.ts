@@ -21,6 +21,8 @@ export interface SessioInventada {
   retencio?: number | null
   incidencies?: string
   mymop?: { simptoma1: number; simptoma2: number; activitat: number; benestar: number }
+  /** PGIC (1–7) */
+  pgic?: number
   /** DHI (valoració): es desa a la sessió */
   dhi?: number
   /** Es deixa en curs (no es finalitza) */
@@ -96,6 +98,7 @@ export async function crearEpisodiInventat(page: Page, e: EpisodiInventat): Prom
               benestar: s.mymop.benestar,
             }
           : null,
+        pgic: s.pgic ?? null,
         punts,
         tancar: { recomanacions: '', incidencies: s.incidencies ?? '', capIncidencia: !s.incidencies },
       }
@@ -156,7 +159,7 @@ export function cervicalgiaInventada(pacientId: string): EpisodiInventat {
     motiu: 'Cervicàlgia',
     noms: { secundari1: 'Insomni', secundari2: 'Mal de cap', mymop: ['Dolor de coll', 'Insomni', 'Treballar a l\'ordinador'] },
     sessions: [
-      { dia: '2026-09-09', escala: 8, secundari1: 7, secundari2: 6, punts: cervical(), retencio: 20, mymop: { simptoma1: 5, simptoma2: 4, activitat: 5, benestar: 4 }, dhi: 46 },
+      { dia: '2026-09-09', escala: 8, secundari1: 7, secundari2: 6, punts: cervical(), retencio: 20, mymop: { simptoma1: 5, simptoma2: 4, activitat: 5, benestar: 4 }, pgic: 4, dhi: 46 },
       { dia: '2026-09-16', escala: 7, secundari1: 7, secundari2: 6, punts: cervical([{ codi: 'ST36' }]), retencio: 25 },
       { dia: '2026-09-23', escala: 6, secundari1: 6, secundari2: 5, punts: cervical([{ codi: 'ST36' }]), retencio: 25 },
       { dia: '2026-09-30', escala: 5, secundari1: 5, secundari2: 4, punts: [...sense('GB21', cervical([{ codi: 'ST36' }])), { codi: 'TE5' }], retencio: 28 },
@@ -168,12 +171,13 @@ export function cervicalgiaInventada(pacientId: string): EpisodiInventat {
         punts: [...sense('GB21', cervical([{ codi: 'ST36' }, { codi: 'LR3' }, { codi: 'GB34', tecnica: 'moxa' }])), { codi: 'TE5' }],
         retencio: 28,
         mymop: { simptoma1: 4, simptoma2: 4, activitat: 4, benestar: 3 },
+        pgic: 3,
         dhi: 34,
         incidencies: 'Petit hematoma a GB21 (inventat)',
       },
       { dia: '2026-10-14', escala: 5, secundari1: 4, secundari2: 4, punts: [...sense('GB21', cervical([{ codi: 'ST36' }, { codi: 'LR3' }])), { codi: 'TE5' }], retencio: 28 },
       { dia: '2026-10-21', escala: 4, secundari1: 4, secundari2: 3, punts: [...sense('GB21', cervical([{ codi: 'ST36' }])), { codi: 'TE5' }], retencio: 25 },
-      { dia: '2026-10-28', escala: 3, secundari1: 3, secundari2: 2, punts: [...sense('GB21', cervical([{ codi: 'ST36' }])), { codi: 'TE5' }], retencio: 25, dhi: 22 },
+      { dia: '2026-10-28', escala: 3, secundari1: 3, secundari2: 2, punts: [...sense('GB21', cervical([{ codi: 'ST36' }])), { codi: 'TE5' }], retencio: 25, pgic: 2, dhi: 22 },
     ],
     addenda: { sessio: 5, text: 'Ha trucat: el coll li fa menys mal (inventat)' },
   }

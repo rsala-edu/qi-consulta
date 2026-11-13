@@ -49,6 +49,7 @@ import { orlActiu } from '../../cataleg/orl'
 import { PlaTractament } from './PlaTractament'
 import { ProperaCita } from './ProperaCita'
 import { BlocMymop } from './BlocMymop'
+import { BlocPgic } from './BlocPgic'
 import { esActivada } from '../../cataleg/motor'
 import type { Mymop } from '../../domini/escales'
 import { GrupCataleg } from '../../cataleg/components/Cataleg'
@@ -106,6 +107,9 @@ export function PantallaVisita() {
     // El MYMOP més recent de l'episodi (per comparar i per repetir els símptomes triats)
     const mymopAnterior =
       sessions.filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.iniciAt < sessio.iniciAt && s.mymop).at(-1)?.mymop ?? null
+    // L'últim PGIC de l'episodi (punt petit a la barra)
+    const pgicAnterior =
+      sessions.filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.iniciAt < sessio.iniciAt && s.pgic !== null).at(-1)?.pgic ?? null
     const darreraValoracio = valoracions.at(-1)
     const conflictesValoracio = darreraValoracio ? await magatzem.conflictesDe(darreraValoracio.id) : []
     // L'última sessió d'abans del mateix episodi (per a l'escala i «Repetir el tractament»)
@@ -132,6 +136,7 @@ export function PantallaVisita() {
       catalegs,
       embarasFitxa: fitxa.contraindicacions.embaras,
       mymopAnterior,
+      pgicAnterior,
     }
   }, [magatzem, db, id, versio])
 
@@ -161,6 +166,7 @@ function Visita({
   catalegs,
   embarasFitxa,
   mymopAnterior,
+  pgicAnterior,
   onRecarregar,
 }: {
   sessio: Sessio
@@ -178,6 +184,7 @@ function Visita({
   catalegs: AjustosCatalegs
   embarasFitxa: boolean
   mymopAnterior: Mymop | null
+  pgicAnterior: number | null
   onRecarregar(): void
 }) {
   const magatzem = useMagatzem()
@@ -494,6 +501,14 @@ function Visita({
                 onCanviar={(mymop) => setDades((d) => ({ ...d, mymop }))}
               />
             )}
+            {/* PGIC: activat per defecte (sense llicència), al mateix ritme que el MYMOP */}
+            <BlocPgic
+              numero={dades.numero}
+              valor={dades.pgic}
+              anterior={pgicAnterior}
+              disabled={!editable}
+              onCanviar={(pgic) => setDades((d) => ({ ...d, pgic }))}
+            />
             {/* Símptomes secundaris: amagats fins que se n'afegeix un (fins a 2) */}
             {(['secundari1', 'secundari2'] as const).slice(0, secundaris).map((k, i) => (
               <div key={k} className="simptoma-secundari">
