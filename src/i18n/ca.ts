@@ -759,6 +759,10 @@ export const ca = {
     controlAgullesDesc: 'Cal confirmar quantes agulles s\'han retirat: «Agulles retirades: 18 de 18».',
   },
   ajustCatalegs: {
+    escalesLlicencia: 'Escales amb llicència',
+    escalesLlicenciaExplicacio: 'Aquestes escales tenen drets d\'autor i l\'ús clínic requereix una llicència. Estan amagades fins que les actives; el que ja hi hagi desat es continua veient.',
+    activar: 'Activar el {nom}',
+    requereixLlicencia: 'Requereix llicència d\'ús clínic ({titular})',
     titol: 'Catàlegs',
     desc: 'Seccions i opcions de la valoració, l\'exploració i el diagnòstic: amagar-les i ordenar-les.',
     explicacio:

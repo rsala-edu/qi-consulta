@@ -135,3 +135,19 @@ describe('amagar i reordenar (Ajustos > Catàlegs)', () => {
     expect(ids('')).toContain('anamnesi:ginecologia')
   })
 })
+
+describe('escales amb llicència (SNOT-22, MYMOP)', () => {
+  it('amagades per defecte; es veuen si s\'activen o si ja tenen valor', async () => {
+    const { AJUSTOS_CATALEGS_PER_DEFECTE, campsVisibles, esActivada } = await import('./motor')
+    const { ORL } = await import('./orl')
+    const escales = ORL.seccions.find((s) => s.id === 'orl:escales')!
+    const ids = (a = AJUSTOS_CATALEGS_PER_DEFECTE, d?: Parameters<typeof campsVisibles>[2]) => campsVisibles(escales, a, d).map((c) => c.id)
+    expect(ids()).not.toContain('snot22')
+    expect(ids()).toContain('thi')
+    expect(ids({ ...AJUSTOS_CATALEGS_PER_DEFECTE, activats: ['orl:escales/snot22'] })).toContain('snot22')
+    expect(ids(AJUSTOS_CATALEGS_PER_DEFECTE, { valors: { snot22: { total: 12 } } })).toContain('snot22')
+    expect(esActivada(AJUSTOS_CATALEGS_PER_DEFECTE, 'mymop')).toBe(false)
+    expect(esActivada({ activats: ['mymop'] }, 'mymop')).toBe(true)
+    expect(esActivada(AJUSTOS_CATALEGS_PER_DEFECTE, 'qualsevol')).toBe(true)
+  })
+})

@@ -1,11 +1,12 @@
 // Diagnòstic de MTC, pla de tractament i MYMOP (etapa 3B, part 3). Només dades inventades.
 import { test } from './google.js'
-import { capcalera, comencarVisita, entrar, expect, finalitzar, novaCita, nouPacient, obrirSeccio, pestanya, xip } from './ajudes-visita.js'
+import { capcalera, comencarVisita, entrar, expect, finalitzar, novaCita, nouPacient, obrirSeccio, pestanya, xip, activarEscales } from './ajudes-visita.js'
 
 test.describe.configure({ timeout: 240_000 })
 
 test('diagnòstic amb síndromes de la CIM-11, pla de tractament («Sessió 1 de 10») i MYMOP', async ({ page }) => {
   await entrar(page)
+  await activarEscales(page, ['MYMOP'])
   await nouPacient(page, 'Pau', 'Exemple Inventat', 'Home')
   await novaCita(page, 'Pau', '2026-11-04', '10:00', 'Acúfens')
   await comencarVisita(page)

@@ -19,9 +19,24 @@ export const esquemaAjustosCatalegs = z.object({
   ordreSeccions: z.record(z.string(), z.array(z.string())).default({}),
   /** «seccio/camp» → ids d'opcions en l'ordre triat */
   ordreOpcions: z.record(z.string(), z.array(z.string())).default({}),
+  /** Escales amb llicència d'ús clínic que la doctora ha activat (AMB_LLICENCIA) */
+  activats: z.array(z.string()).default([]),
 })
 export type AjustosCatalegs = z.infer<typeof esquemaAjustosCatalegs>
-export const AJUSTOS_CATALEGS_PER_DEFECTE: AjustosCatalegs = { amagats: [], ordreSeccions: {}, ordreOpcions: {} }
+export const AJUSTOS_CATALEGS_PER_DEFECTE: AjustosCatalegs = { amagats: [], ordreSeccions: {}, ordreOpcions: {}, activats: [] }
+
+/**
+ * Escales que requereixen llicència d'ús clínic (docs/especificacions.md,
+ * «Llicències»): amagades per defecte; la doctora les activa a Ajustos >
+ * Catàlegs si té la llicència. El que ja estigui desat es continua veient.
+ */
+export const AMB_LLICENCIA = [
+  { clau: 'orl:escales/snot22', nom: 'SNOT-22', titular: 'Washington University in St. Louis' },
+  { clau: 'mymop', nom: 'MYMOP', titular: 'Meaningful Measures Ltd' },
+] as const
+
+export const esActivada = (ajustos: Pick<AjustosCatalegs, 'activats'>, clau: string) =>
+  !AMB_LLICENCIA.some((x) => x.clau === clau) || ajustos.activats.includes(clau)
 
 export const clauCamp = (s: Pick<Seccio, 'id'>, c: Pick<Camp, 'id'>) => `${s.id}/${c.id}`
 export const clauOpcio = (s: Pick<Seccio, 'id'>, c: Pick<Camp, 'id'>, op: Pick<Opcio, 'id'>) => `${s.id}/${c.id}/${op.id}`
@@ -61,7 +76,10 @@ const valorsTriats = (v: ValorCamp | undefined): string[] =>
 /** Camps que es mostren (un camp amagat amb valor es continua mostrant) */
 export function campsVisibles(seccio: Seccio, ajustos: AjustosCatalegs, dades?: DadesSeccio): Camp[] {
   const amagats = new Set(ajustos.amagats)
-  return seccio.camps.filter((c) => !amagats.has(clauCamp(seccio, c)) || teValor(dades?.valors?.[c.id]))
+  return seccio.camps.filter(
+    (c) =>
+      (!amagats.has(clauCamp(seccio, c)) && esActivada(ajustos, clauCamp(seccio, c))) || teValor(dades?.valors?.[c.id]),
+  )
 }
 
 /** Opcions d'un camp que es mostren: les visibles, en l'ordre triat, i les amagades que ja estan triades */

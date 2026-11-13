@@ -8,7 +8,7 @@ import { Indicador } from '../../components/Indicador'
 import { xines } from '../../cataleg/components/Cataleg'
 import { FONTS } from '../../cataleg/fonts'
 import { GRUPS } from '../../cataleg/index'
-import { clauCamp, clauOpcio, ordenar, type AjustosCatalegs } from '../../cataleg/motor'
+import { AMB_LLICENCIA, clauCamp, clauOpcio, ordenar, type AjustosCatalegs } from '../../cataleg/motor'
 import type { Camp, Grup, Opcio, Seccio } from '../../cataleg/tipus'
 import { desarAjustosCatalegs, llegirAjustosCatalegs } from '../../db/ajustosCatalegs'
 import { formatar, t } from '../../i18n/t'
@@ -48,6 +48,34 @@ export function PantallaAjustCatalegs() {
           {GRUPS.map((g) => (
             <AjustGrup key={g.id} grup={g} ajustos={carrega.dades} canviar={canviar} />
           ))}
+          {/* Escales amb llicència d'ús clínic: amagades fins que s'activen */}
+          <section className="ajust-grup escales-llicencia" aria-label={a.escalesLlicencia}>
+            <h2>{a.escalesLlicencia}</h2>
+            <p className="detall">{a.escalesLlicenciaExplicacio}</p>
+            <ul className="llista-ajust">
+              {AMB_LLICENCIA.map((x) => {
+                const actiu = carrega.dades.activats.includes(x.clau)
+                return (
+                  <li key={x.clau}>
+                    <label className="casella">
+                      <input
+                        type="checkbox"
+                        checked={actiu}
+                        onChange={() =>
+                          canviar({
+                            ...carrega.dades,
+                            activats: actiu ? carrega.dades.activats.filter((y) => y !== x.clau) : [...carrega.dades.activats, x.clau],
+                          })
+                        }
+                      />
+                      {formatar(a.activar, { nom: x.nom })}
+                    </label>
+                    <span className="nota-llicencia">{formatar(a.requereixLlicencia, { titular: x.titular })}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
           <section className="fonts-catalegs" aria-label={a.fonts}>
             <h2>{a.fonts}</h2>
             <ul>

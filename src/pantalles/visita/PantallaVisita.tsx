@@ -49,6 +49,7 @@ import { orlActiu } from '../../cataleg/orl'
 import { PlaTractament } from './PlaTractament'
 import { ProperaCita } from './ProperaCita'
 import { BlocMymop } from './BlocMymop'
+import { esActivada } from '../../cataleg/motor'
 import type { Mymop } from '../../domini/escales'
 import { GrupCataleg } from '../../cataleg/components/Cataleg'
 import type { AjustosCatalegs } from '../../cataleg/motor'
@@ -484,12 +485,15 @@ function Visita({
               disabled={!editable}
               onCanviar={(escala) => setDades((d) => ({ ...d, comEsta: { ...d.comEsta, escala } }))}
             />
-            <BlocMymop
-              numero={dades.numero}
-              mymop={dades.mymop}
-              anterior={mymopAnterior}
-              onCanviar={(mymop) => setDades((d) => ({ ...d, mymop }))}
-            />
+            {/* MYMOP: requereix llicència; només si la doctora l'ha activat (o si ja n'hi ha de desat) */}
+            {(esActivada(catalegs, 'mymop') || dades.mymop) && (
+              <BlocMymop
+                numero={dades.numero}
+                mymop={dades.mymop}
+                anterior={mymopAnterior}
+                onCanviar={(mymop) => setDades((d) => ({ ...d, mymop }))}
+              />
+            )}
             {/* Símptomes secundaris: amagats fins que se n'afegeix un (fins a 2) */}
             {(['secundari1', 'secundari2'] as const).slice(0, secundaris).map((k, i) => (
               <div key={k} className="simptoma-secundari">

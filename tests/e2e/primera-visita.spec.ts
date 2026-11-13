@@ -2,13 +2,14 @@
 // exploració, diagnòstic, mòdul ORL (s'activa sol amb «Acúfens»), pla de
 // tractament, tractament i finalitzar. Només dades inventades.
 import { test } from './google.js'
-import { capcalera, comencarVisita, menu, entrar, expect, finalitzar, novaCita, nouPacient, obrirSeccio, pestanya, xip } from './ajudes-visita.js'
+import { capcalera, comencarVisita, menu, entrar, expect, finalitzar, novaCita, nouPacient, obrirSeccio, pestanya, xip, activarEscales } from './ajudes-visita.js'
 
 test.describe.configure({ timeout: 300_000 })
 
 test('primera visita completa amb el mòdul ORL', async ({ page }, info) => {
   test.skip(info.project.name !== 'tauleta', 'És la prova de la tauleta')
   await entrar(page)
+  await activarEscales(page, ['SNOT-22', 'MYMOP'])
   await nouPacient(page, 'Rosa', 'Exemple Inventada')
   await novaCita(page, 'Rosa', '2026-11-04', '10:00', 'Acúfens')
   await comencarVisita(page)

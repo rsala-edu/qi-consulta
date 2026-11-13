@@ -2,7 +2,7 @@
 // pestanya (a l'última, «Finalitzar visita»), i totes les escales amb el
 // mateix component que la barra 0–10 i la mateixa amplada. Només dades inventades.
 import { test } from './google.js'
-import { capcalera, comencarVisita, entrar, expect, novaCita, nouPacient, pestanya } from './ajudes-visita.js'
+import { capcalera, comencarVisita, entrar, expect, novaCita, nouPacient, pestanya, activarEscales, menu, obrirSeccio } from './ajudes-visita.js'
 
 test.describe.configure({ timeout: 120_000 })
 
@@ -34,6 +34,7 @@ test('anterior i següent al final de cada pestanya; a l\'última, «Finalitzar 
 
 test('el MYMOP i els secundaris fan servir la mateixa barra que l\'escala 0–10, amb la mateixa amplada', async ({ page }) => {
   await entrar(page)
+  await activarEscales(page, ['MYMOP'])
   await nouPacient(page, 'Nil', 'Escales Inventat', 'Home')
   await novaCita(page, 'Nil', '2026-11-04', '10:00', 'Lumbàlgia')
   await comencarVisita(page)
@@ -50,4 +51,30 @@ test('el MYMOP i els secundaris fan servir la mateixa barra que l\'escala 0–10
   // Es tria igual: tocar
   await mymop.getByRole('radio', { name: '4' }).click()
   await expect(mymop.getByRole('radio', { name: '4' })).toHaveAttribute('aria-checked', 'true')
+})
+
+test('SNOT-22 i MYMOP: amagats per defecte, amb la nota de llicència; la doctora els activa a Ajustos > Catàlegs', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Nil', 'Llicència Inventat', 'Home')
+  await novaCita(page, 'Nil', '2026-11-04', '10:00', 'Rinitis')
+  await comencarVisita(page)
+  await pestanya(page, 'Com està').click()
+  await expect(page.getByRole('region', { name: 'MYMOP' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Afegir el MYMOP en aquesta sessió' })).toHaveCount(0)
+  await pestanya(page, 'ORL').click()
+  const escales = await obrirSeccio(page, 'Escales')
+  await expect(escales.locator('.camp-especial').filter({ hasText: 'THI' })).toBeVisible()
+  await expect(escales.locator('.camp-especial').filter({ hasText: 'SNOT-22' })).toHaveCount(0)
+
+  await menu(page, 'Ajustos').click()
+  await page.getByRole('link', { name: /^Catàlegs/ }).click()
+  const seccio = page.getByRole('region', { name: 'Escales amb llicència' })
+  await expect(seccio).toContainText('Requereix llicència d\'ús clínic')
+  await expect(seccio.getByRole('checkbox', { name: 'Activar el SNOT-22' })).not.toBeChecked()
+  await activarEscales(page, ['SNOT-22', 'MYMOP'])
+  await comencarVisita(page)
+  await pestanya(page, 'Com està').click()
+  await expect(page.getByRole('region', { name: 'MYMOP' })).toBeVisible()
+  await pestanya(page, 'ORL').click()
+  await expect((await obrirSeccio(page, 'Escales')).locator('.camp-especial').filter({ hasText: 'SNOT-22' })).toBeVisible()
 })

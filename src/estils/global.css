@@ -5686,3 +5686,16 @@ fieldset {
   padding: 0 14px;
   font-size: 0.9rem;
 }
+
+/* Ajustos > Catàlegs: escales amb llicència */
+.escales-llicencia .llista-ajust li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+}
+
+.nota-llicencia {
+  font-size: 0.85rem;
+  color: var(--avis);
+}

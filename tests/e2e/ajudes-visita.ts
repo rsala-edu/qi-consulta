@@ -101,3 +101,11 @@ export async function desarAra(page: Page) {
   await expect(page.locator('.indicador-copia')).toHaveAttribute('aria-label', 'Drive: al dia')
   await page.keyboard.press('Escape')
 }
+
+/** Ajustos > Catàlegs: activa escales amb llicència d'ús clínic (MYMOP, SNOT-22) */
+export async function activarEscales(page: Page, noms: readonly string[]) {
+  await menu(page, 'Ajustos').click()
+  await page.getByRole('link', { name: /^Catàlegs/ }).click()
+  const seccio = page.getByRole('region', { name: 'Escales amb llicència' })
+  for (const nom of noms) await seccio.getByRole('checkbox', { name: `Activar el ${nom}` }).check()
+}
