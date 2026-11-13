@@ -11,18 +11,19 @@ export interface Font {
 export const FONTS: Record<IdFont, Font> = {
   'oms-ist-2022': {
     titol: 'WHO International Standard Terminologies on Traditional Chinese Medicine (OMS, 2022)',
-    detall: 'Terminologia de la llengua, el pols, les deu preguntes, els vuit principis, els zang-fu i els principis de tractament. Termes traduïts al català per a aquesta app.',
+    detall:
+      'Llengua, pols, deu preguntes, vuit principis, zang-fu i principis de tractament: només noms curts propis en català, basat en la terminologia de l\'OMS (2022). No s\'hi reprodueix cap definició de l\'OMS.',
     llicencia: 'CC BY-NC-SA 3.0 IGO (la traducció catalana es comparteix amb la mateixa llicència)',
   },
   'cim11-tm1': {
     titol: 'CIM-11 (ICD-11 MMS), capítol 26: Traditional Medicine Module 1 (OMS, versió de gener de 2025)',
-    detall: 'Patrons (síndromes) amb el codi i el títol oficial en anglès, sense modificar.',
-    llicencia: 'CC BY-ND 3.0 IGO: no es pot traduir sense permís de l\'OMS; per això el títol es mostra en anglès',
+    detall: 'Patrons (síndromes) amb el codi i el títol oficial en anglès, sense modificar. Font: Organització Mundial de la Salut, ICD-11 for Mortality and Morbidity Statistics (icd.who.int).',
+    llicencia: '© Organització Mundial de la Salut. CC BY-ND 3.0 IGO: no es pot traduir sense permís de l\'OMS; per això el títol es mostra en anglès',
   },
   'cim11-mms': {
     titol: 'CIM-11 (ICD-11 MMS), capítols 1 a 25 (OMS, versió de gener de 2025)',
-    detall: 'Diagnòstic occidental: codi i títol oficial en anglès, sense modificar.',
-    llicencia: 'CC BY-ND 3.0 IGO',
+    detall: 'Diagnòstic occidental: codi i títol oficial en anglès, sense modificar. Font: Organització Mundial de la Salut, ICD-11 for Mortality and Morbidity Statistics (icd.who.int).',
+    llicencia: '© Organització Mundial de la Salut. CC BY-ND 3.0 IGO',
   },
   'zyyxh-t157-2009': {
     titol: 'ZYYXH/T157-2009 · Classificació i determinació de la constitució en MTC (China Association of Chinese Medicine)',

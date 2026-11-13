@@ -400,7 +400,12 @@ Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplic
 ### Llicències
 - **Terminologia de l'OMS (2022):** CC BY-NC-SA 3.0 IGO. La traducció catalana es comparteix amb la mateixa llicència. L'ús ha de ser no comercial: cal valorar-ho si la consulta és privada.
 - **CIM-11:** CC BY-ND 3.0 IGO. No es pot traduir sense permís de l'OMS, així que els títols es mostren en anglès, sense modificar.
-- **Escales:** THI i DHI tenen copyright dels autors i de l'AMA, sense cap llicència clínica publicada. El SNOT-22 necessita una llicència de la Washington University (la clínica és de pagament). El MYMOP necessita una llicència de Meaningful Measures Ltd. Per això l'app no inclou el text dels ítems: només es desen les puntuacions i el grau de gravetat.
+- **Terminologia de l'OMS (2022), com s'aplica:** només noms curts propis en català, amb la nota «basat en la terminologia de l'OMS (2022)» a Fonts (Ajustos > Catàlegs). No s'hi reprodueix cap definició de l'OMS (revisat el 13/11/2026: els catàlegs només tenen noms, pinyin i caràcters).
+- **CIM-11, com s'aplica:** codi i títol oficial en anglès, sense modificar, amb l'atribució «© Organització Mundial de la Salut, ICD-11 for Mortality and Morbidity Statistics (icd.who.int), CC BY-ND 3.0 IGO» a Fonts.
+- **Escales:** THI i DHI tenen copyright dels autors i de l'AMA, sense cap llicència clínica publicada; es queden com estan. El SNOT-22 necessita una llicència de la Washington University (la clínica és de pagament). El MYMOP necessita una llicència de Meaningful Measures Ltd. Per això l'app no inclou el text dels ítems: només es desen les puntuacions i el grau de gravetat.
+  - **SNOT-22 i MYMOP:** amagats per defecte, amb la nota «Requereix llicència d'ús clínic» a Ajustos > Catàlegs. La doctora els activa si en té la llicència. El que ja estigui desat es continua veient.
+  - **Alternativa lliure al SNOT-22:** escala 0–10 de símptomes nasals, dins el mòdul ORL.
+  - **PGIC (Patient Global Impression of Change, 7 nivells):** activat per defecte. Deriva de la CGI (Guy, 1976, *ECDEU Assessment Manual*, NIMH, publicació del govern dels EUA); la versió de 7 nivells més citada és la de Hurst i Bolton (2004). No consta cap llicència ni pagament: es reprodueix sense restriccions en protocols i recursos públics (PhenX Toolkit, health.mil). Tot i així, l'app no copia cap text: fa servir etiquetes pròpies en català (de «Molt millor» a «Molt pitjor»). Comprovat el 13/11/2026; no hi ha cap font que en declari explícitament el domini públic.
 
 ### Exploració (a cada sessió)
 - **Inspecció:** vitalitat (shen), color de la tez, constitució física, veu i respiració.
@@ -425,6 +430,10 @@ Quan dues fitxes són la mateixa persona (l'avís «Per revisar: possible duplic
 ### Pla de tractament (a l'episodi)
 - Sessions previstes, freqüència, objectius, tècniques previstes i data de revisió del pla. Es desa a l'episodi, camp a camp.
 - Amb sessions previstes, la capçalera de la visita diu «Sessió 4 de 10».
+
+### PGIC (a la sessió, pestanya «Com està»)
+- Impressió global de canvi des que va començar el tractament, de 1 (molt millor) a 7 (molt pitjor), amb la mateixa barra que l'escala 0–10.
+- Es demana a la primera sessió de l'episodi i cada 4 sessions (1, 5, 9…), com el MYMOP. Té el seu gràfic a «Altres escales» de l'evolució.
 
 ### MYMOP (a la sessió, pestanya «Com està»)
 - Dos símptomes i una activitat, amb les paraules de la persona, i el benestar, tot de 0 a 6. El perfil és la mitjana de les puntuacions que hi ha, i es mostra al costat del de l'última vegada.
