@@ -4,6 +4,7 @@
 //
 // Aquí va sortir la pantalla del mapa en blanc a la versió 27a60e3: en un
 // navegador sense WebGL, el visor 3D petava i s'enduia tota l'app.
+import { readdirSync, readFileSync } from 'node:fs'
 import { continuarAmbGoogle, test } from './google.js'
 import {
   anar,
@@ -11,6 +12,7 @@ import {
   CONTRASENYA,
   cosLlest,
   expect,
+  iteracionsDesades,
   orellaLlesta,
   pantallaBe,
   posarCopia,
@@ -39,6 +41,25 @@ test('perfil buit: el mapa obert directament (cap punt marcat ni seleccionat) i 
   await expect(barra(page)).toBeVisible()
   await expect(page.getByText('Aquesta pantalla ha tingut un problema')).toHaveCount(0)
   expect(errors).toEqual([])
+})
+
+// Les proves E2E en desenvolupament baixen les iteracions de PBKDF2 amb
+// localStorage `qi:proves:iteracions`; el build de producció no ho ha de fer mai
+test('PBKDF2 a producció: 600.000 iteracions encara que localStorage digui el contrari, i cap rastre de «qi:proves» al build', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('qi:proves:iteracions', '1000'))
+  await page.goto('/qi-consulta/')
+  await continuarAmbGoogle(page)
+  await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+  await page.getByLabel('Repeteix la contrasenya').fill(CONTRASENYA)
+  await page.getByRole('button', { name: 'Crear i entrar' }).click()
+  await pantallaBe(page, 'Avui')
+  expect(await iteracionsDesades(page)).toEqual([600_000])
+
+  // El build que serveix vite preview (dist/)
+  const dir = new URL('../../dist/assets/', import.meta.url)
+  const js = readdirSync(dir).filter((f) => f.endsWith('.js'))
+  expect(js.length).toBeGreaterThan(0)
+  for (const f of js) expect(readFileSync(new URL(f, dir), 'utf8'), f).not.toContain('qi:proves')
 })
 
 test('amb dades recuperades de Drive: el mapa obert directament, una fitxa i totes les pantalles', async ({ page, google }) => {

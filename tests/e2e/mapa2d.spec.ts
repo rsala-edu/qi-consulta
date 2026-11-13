@@ -4,6 +4,9 @@
 import { type Page } from '@playwright/test'
 import { continuarAmbGoogle, expect as expectBase, test } from './google.js'
 
+// Proves del cos 3D: amb WebGL (per programari)
+test.use({ cos3D: true })
+
 const CONTRASENYA = 'contrasenya-de-prova-mapa2d'
 const expect = expectBase.configure({ timeout: 15_000 })
 test.describe.configure({ timeout: 240_000 })

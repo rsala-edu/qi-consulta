@@ -10,7 +10,7 @@
 
 import { base64ABytes, bytesABase64, bytesAleatoris } from './codificacio'
 import { MIDA_IV } from './aesGcm'
-import { derivarClauEmbolcall, generarSal, ITERACIONS_PBKDF2 } from './derivacio'
+import { derivarClauEmbolcall, generarSal, iteracionsNoves } from './derivacio'
 
 export interface ClauEmbolcallada {
   versio: 1
@@ -96,7 +96,7 @@ async function desembolcallarAmbKek(
  */
 export async function crearClauMestra(
   contrasenya: string,
-  iteracions: number = ITERACIONS_PBKDF2,
+  iteracions: number = iteracionsNoves(),
 ): Promise<{ embolcall: ClauEmbolcallada; clau: CryptoKey }> {
   const extractable = await crypto.subtle.generateKey(ALGORISME, true, USOS)
   const { embolcall, kek } = await embolcallar(extractable, contrasenya, iteracions)
@@ -122,7 +122,7 @@ export async function canviarContrasenya(
   embolcall: ClauEmbolcallada,
   contrasenyaActual: string,
   contrasenyaNova: string,
-  iteracions: number = ITERACIONS_PBKDF2,
+  iteracions: number = iteracionsNoves(),
 ): Promise<ClauEmbolcallada> {
   const extractable = await desembolcallar(embolcall, contrasenyaActual, true)
   const { embolcall: nou } = await embolcallar(extractable, contrasenyaNova, iteracions)
@@ -241,7 +241,7 @@ export async function contrasenyaNovaAmbSecret(
   e: EmbolcallSecret,
   secret: Uint8Array<ArrayBuffer>,
   contrasenyaNova: string,
-  iteracions: number = ITERACIONS_PBKDF2,
+  iteracions: number = iteracionsNoves(),
 ): Promise<{ embolcall: ClauEmbolcallada; clau: CryptoKey }> {
   const extractable = await obrirAmbSecret(e, secret, true)
   const { embolcall, kek } = await embolcallar(extractable, contrasenyaNova, iteracions)

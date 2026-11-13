@@ -75,3 +75,32 @@ export async function recuperar(page: Page) {
   await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
   await page.getByRole('button', { name: 'Obrir' }).click()
 }
+
+/** Iteracions de PBKDF2 de l'embolcall de la clau mestra desat (taula meta, clau «clauMestra») */
+export async function iteracionsDesades(page: Page): Promise<number[]> {
+  return page.evaluate(async () => {
+    const obrir = (nom: string) =>
+      new Promise<IDBDatabase>((resol, falla) => {
+        const r = indexedDB.open(nom)
+        r.onsuccess = () => resol(r.result)
+        r.onerror = () => falla(r.error)
+      })
+    const llegir = (db: IDBDatabase) =>
+      new Promise<{ valor?: { iteracions?: number } } | undefined>((resol, falla) => {
+        const r = db.transaction('meta').objectStore('meta').get('clauMestra')
+        r.onsuccess = () => resol(r.result)
+        r.onerror = () => falla(r.error)
+      })
+    const totes: number[] = []
+    for (const { name } of await indexedDB.databases()) {
+      if (!name) continue
+      const db = await obrir(name)
+      if (db.objectStoreNames.contains('meta')) {
+        const r = await llegir(db)
+        if (r?.valor?.iteracions !== undefined) totes.push(r.valor.iteracions)
+      }
+      db.close()
+    }
+    return totes
+  })
+}

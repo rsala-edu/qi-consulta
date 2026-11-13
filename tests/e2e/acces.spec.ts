@@ -12,6 +12,7 @@ import {
   test,
   type GoogleSimulat,
 } from './google.js'
+import { iteracionsDesades } from './pantalles.js'
 
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 const expect = expectBase.configure({ timeout: 15_000 })
@@ -47,6 +48,23 @@ async function segonDispositiu(browser: Browser, google: GoogleSimulat, projecte
   await simularGoogle(context, google)
   return context.newPage()
 }
+
+test('les proves E2E creen la contrasenya amb 1.000 iteracions de PBKDF2 (només en desenvolupament)', async ({ page }) => {
+  await crearContrasenya(page)
+  expect(await iteracionsDesades(page)).toEqual([1000])
+})
+
+test.describe(() => {
+  test.use({ iteracionsReals: true })
+  test('amb iteracionsReals, la contrasenya es crea amb 600.000 iteracions i s\'obre', async ({ page }) => {
+    await crearContrasenya(page)
+    expect(await iteracionsDesades(page)).toEqual([600_000])
+    await page.getByRole('button', { name: 'Bloquejar' }).click()
+    await page.getByLabel('Contrasenya', { exact: true }).fill(CONTRASENYA)
+    await page.getByRole('button', { name: 'Desbloquejar' }).click()
+    await expect(page.getByRole('heading', { name: 'Avui', exact: true })).toBeVisible()
+  })
+})
 
 test('un altre compte de Google no pot entrar', async ({ browser }, info) => {
   const context = await browser.newContext(info.project.use)

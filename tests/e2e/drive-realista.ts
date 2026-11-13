@@ -14,6 +14,7 @@
 // - es poden retenir les escriptures (PATCH) per provocar una cursa;
 // - un dispositiu es pot quedar sense connexió (la petició falla com sense xarxa).
 import type { BrowserContext } from '@playwright/test'
+import { prepararProves, PROVES_RAPIDES } from './google.js'
 
 export interface FitxerReal {
   id: string
@@ -114,6 +115,7 @@ const espera = (ms: number) => new Promise((r) => setTimeout(r, ms))
 let retingudes: (() => void)[] = []
 
 export async function simularDispositiu(context: BrowserContext, mon: Mon, disp: Dispositiu): Promise<void> {
+  await prepararProves(context, PROVES_RAPIDES)
   // Rellotge del servidor (real, no el de la pàgina): com Drive
   let pas = 0
   const ara = () => new Date(mon.ara() + pas++).toISOString()

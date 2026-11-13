@@ -31,7 +31,38 @@ export interface GoogleSimulat {
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' }
 
-export async function simularGoogle(context: BrowserContext, google: GoogleSimulat): Promise<void> {
+/**
+ * Opcions de les proves per accelerar-les:
+ * - iteracionsReals: false → les contrasenyes noves amb 1.000 iteracions de
+ *   PBKDF2 en lloc de 600.000 (només ho fa el servidor de desenvolupament; el
+ *   build de producció sempre en fa servir 600.000).
+ * - cos3D: false → el navegador no té WebGL i el mapa s'obre en 2D (el cos 3D
+ *   per programari és el que més CPU gasta). Només el volen les proves del mapa.
+ */
+export interface OpcionsProves {
+  iteracionsReals: boolean
+  cos3D: boolean
+}
+export const PROVES_RAPIDES: OpcionsProves = { iteracionsReals: false, cos3D: false }
+
+export async function prepararProves(context: BrowserContext, { iteracionsReals, cos3D }: OpcionsProves): Promise<void> {
+  if (!iteracionsReals) await context.addInitScript(() => localStorage.setItem('qi:proves:iteracions', '1000'))
+  if (!cos3D) {
+    await context.addInitScript(() => {
+      // (sense els tipus del DOM: aquest fitxer també el compila la configuració de Playwright)
+      type Ctx = (this: unknown, tipus: string, ...resta: unknown[]) => unknown
+      const proto = (globalThis as unknown as { HTMLCanvasElement: { prototype: { getContext: Ctx } } }).HTMLCanvasElement.prototype
+      const original = proto.getContext
+      proto.getContext = function (tipus, ...resta) {
+        return /webgl/i.test(tipus) ? null : original.call(this, tipus, ...resta)
+      }
+    })
+  }
+}
+
+/** Google simulat i, si no es diu el contrari, les proves ràpides (PROVES_RAPIDES) */
+export async function simularGoogle(context: BrowserContext, google: GoogleSimulat, opcions: OpcionsProves = PROVES_RAPIDES): Promise<void> {
+  await prepararProves(context, opcions)
   let rellotge = 0
   const ara = () => new Date(Date.now() + rellotge++).toISOString()
   const sense = ({ contingut: _c, ...f }: FitxerSimulat) => f
@@ -94,14 +125,17 @@ export function nouGoogle(correu = CORREU_DOCTORA): GoogleSimulat {
 }
 
 /** Totes les proves tenen Google simulat (cada una el seu Drive buit). */
-export const test = base.extend<{ google: GoogleSimulat }>({
+export const test = base.extend<{ google: GoogleSimulat } & OpcionsProves>({
+  // test.use({ cos3D: true }) a les proves del mapa; iteracionsReals a la que comprova les 600.000
+  iteracionsReals: [false, { option: true }],
+  cos3D: [false, { option: true }],
   // Playwright llegeix els paràmetres per saber quines dependències té cada fixture
   // oxlint-disable-next-line no-empty-pattern
   google: async ({}, usar) => {
     await usar(nouGoogle())
   },
-  context: async ({ context, google }, usar) => {
-    await simularGoogle(context, google)
+  context: async ({ context, google, iteracionsReals, cos3D }, usar) => {
+    await simularGoogle(context, google, { iteracionsReals, cos3D })
     await usar(context)
   },
 })
