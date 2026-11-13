@@ -153,6 +153,7 @@ export const esquemaAjuntament = z.object({
     sessions: z.array(z.string()),
     addendes: z.array(z.string()),
     valoracions: z.array(z.string()).default([]),
+    consentiments: z.array(z.string()).default([]),
   }),
   /** Cites repetides que es van treure (per tornar-les a posar si es desfà) */
   citesTretes: z.array(esquemaCitaTreta),

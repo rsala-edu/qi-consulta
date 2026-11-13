@@ -129,6 +129,8 @@ export type TaulaSincronitzada =
   | 'sessions'
   | 'addendes'
   | 'valoracions'
+  | 'plantillesConsentiment'
+  | 'consentiments'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -222,7 +224,18 @@ export interface RegistreDiaTancat {
   hlc?: string
 }
 
-export type NomTaula = 'pacients' | 'fitxesCliniques' | 'esborranys' | 'cites' | 'conflictes' | 'episodis' | 'sessions' | 'addendes' | 'valoracions'
+export type NomTaula =
+  | 'pacients'
+  | 'fitxesCliniques'
+  | 'esborranys'
+  | 'cites'
+  | 'conflictes'
+  | 'episodis'
+  | 'sessions'
+  | 'addendes'
+  | 'valoracions'
+  | 'plantillesConsentiment'
+  | 'consentiments'
 
 export class QiDB extends Dexie {
   meta!: Table<RegistreMeta, RegistreMeta['clau']>
@@ -252,6 +265,10 @@ export class QiDB extends Dexie {
   valoracions!: Table<RegistreXifrat, string>
   /** Addendes de les sessions tancades: només s'afegeixen */
   addendes!: Table<RegistreXifrat, string>
+  /** Plantilles de consentiment, una fila per versió (etapa 4A) */
+  plantillesConsentiment!: Table<RegistreXifrat, string>
+  /** Consentiments signats: no es modifiquen mai, només es revoquen */
+  consentiments!: Table<RegistreXifrat, string>
   /** Cua de canvis pendents de pujar a Drive (i diari propi fins que una foto el cobreix) */
   canvisPropis!: Table<CanviPropi, string>
   /** Registres de taules que aquesta versió no coneix (d'una versió més nova) */
@@ -320,6 +337,10 @@ export class QiDB extends Dexie {
     })
     this.version(13).stores({
       valoracions: 'id, pacientId, episodiId',
+    })
+    this.version(14).stores({
+      plantillesConsentiment: 'id',
+      consentiments: 'id, pacientId',
     })
   }
 }

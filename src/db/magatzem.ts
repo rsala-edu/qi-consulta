@@ -19,6 +19,22 @@ import {
 import { esquemaCitaGuardada, esquemaDadesCita, type Cita, type DadesCita } from '../domini/cita'
 import { esquemaEsborranyGuardat, type Esborrany, type EsborranyGuardat } from '../domini/esborrany'
 import { araIso, nouId } from '../domini/registre'
+import {
+  aprovar,
+  comprovarCanvi,
+  esEditable as plantillaEditable,
+  esquemaDadesConsentiment,
+  esquemaDadesPlantilla,
+  idPlantilla,
+  nouEsborrany,
+  revocar,
+  TIPUS_CONSENTIMENT,
+  type Consentiment,
+  type DadesConsentiment,
+  type DadesPlantilla,
+  type Plantilla,
+} from '../domini/consentiment'
+import { plantillaInicial } from '../domini/plantillesInicials'
 import { episodisActius, esquemaDadesEpisodi, idEpisodiDeCita, nouEpisodi, senseMotiu, type DadesEpisodi, type Episodi } from '../domini/episodi'
 import {
   esEditable,
@@ -109,6 +125,21 @@ export interface Magatzem {
   desarValoracio(dades: DadesValoracio, inicial?: DadesValoracio): Promise<Valoracio>
   /** «Revisar la valoració»: una versió nova a partir de l'última (l'anterior es conserva) */
   revisarValoracio(episodiId: string, sessioId: string | null): Promise<Valoracio>
+
+  // --- Etapa 4A: consentiment informat ---
+  /** Totes les versions de les plantilles; si no n'hi ha cap, es creen les tres inicials («Pendent de revisió») */
+  plantillesConsentiment(): Promise<Plantilla[]>
+  /** Desa una plantilla editable (esborrany o pendent de revisió) */
+  desarPlantilla(id: string, dades: DadesPlantilla): Promise<Plantilla>
+  /** Aprova una plantilla: en crea una versió nova, aprovada i no editable (l'aprovada anterior es retira) */
+  aprovarPlantilla(id: string): Promise<Plantilla>
+  /** Editar una aprovada: un esborrany nou (la versió següent) */
+  nouEsborranyPlantilla(id: string): Promise<Plantilla>
+  retirarPlantilla(id: string): Promise<void>
+  consentimentsDe(pacientId: string): Promise<Consentiment[]>
+  /** Desa un consentiment signat (amb el PDF): ja no es podrà modificar */
+  signarConsentiment(pacientId: string, dades: DadesConsentiment): Promise<Consentiment>
+  revocarConsentiment(id: string, motiu: string): Promise<Consentiment>
 
   // --- Part 2: ajuntar fitxes de la mateixa persona ---
   /** Les dades del pacient i la fitxa clínica per comparar-les */
@@ -581,9 +612,111 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     },
   })
 
+  // --- Consentiment informat (etapa 4A) ---
+
+  async function llegirPlantilla(r: RegistreXifrat): Promise<Plantilla> {
+    const d = esquemaDadesPlantilla.parse(await desxifrarJson(clau, r.xifrat, context('plantillesConsentiment', r.id)))
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, ...d }
+  }
+
+  async function guardarPlantilla(id: string, dades: DadesPlantilla): Promise<Plantilla> {
+    const d = esquemaDadesPlantilla.parse(dades)
+    const existent = await db.plantillesConsentiment.get(id)
+    const at = araIso()
+    await desarSencer(
+      db,
+      'plantillesConsentiment',
+      { id, creatAt: existent?.creatAt ?? at, modificatAt: at, xifrat: await xifrarJson(clau, d, context('plantillesConsentiment', id)) },
+      id,
+    )
+    return { id, creatAt: existent?.creatAt ?? at, modificatAt: at, ...d }
+  }
+
+  async function llegirConsentiment(r: RegistreXifrat): Promise<Consentiment> {
+    const d = esquemaDadesConsentiment.parse(await desxifrarJson(clau, r.xifrat, context('consentiments', r.id)))
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, ...d }
+  }
+
+  async function guardarConsentiment(id: string, pacientId: string, creatAt: string, dades: DadesConsentiment): Promise<Consentiment> {
+    const d = esquemaDadesConsentiment.parse(dades)
+    const at = araIso()
+    await desarSencer(
+      db,
+      'consentiments',
+      { id, creatAt, modificatAt: at, pacientId, xifrat: await xifrarJson(clau, d, context('consentiments', id)) },
+      id,
+    )
+    return { id, creatAt, modificatAt: at, pacientId, ...d }
+  }
+
+  const plantillaExistent = async (id: string) => {
+    const r = await db.plantillesConsentiment.get(id)
+    if (!r) throw new Error(`No existeix la plantilla ${id}`)
+    return llegirPlantilla(r)
+  }
+  const sensePlantillaMeta = ({ id: _i, creatAt: _c, modificatAt: _m, ...d }: Plantilla): DadesPlantilla => d
+
+  Object.assign(magatzem, {
+    async plantillesConsentiment() {
+      let registres = await db.plantillesConsentiment.toArray()
+      if (registres.length === 0) {
+        // Les tres inicials, «Pendent de revisió» (el mateix id a tots els dispositius)
+        const ara = araIso()
+        for (const tipus of TIPUS_CONSENTIMENT) await guardarPlantilla(idPlantilla(tipus, 1), plantillaInicial(tipus, ara))
+        registres = await db.plantillesConsentiment.toArray()
+      }
+      return (await Promise.all(registres.map(llegirPlantilla))).sort((a, b) => a.tipus.localeCompare(b.tipus) || b.versio - a.versio)
+    },
+    async desarPlantilla(id: string, dades: DadesPlantilla) {
+      const actual = await plantillaExistent(id)
+      if (!plantillaEditable(actual)) throw new Error('Una plantilla aprovada o retirada no es pot editar')
+      return guardarPlantilla(id, { ...dades, tipus: actual.tipus, versio: actual.versio, estat: actual.estat === 'esborrany' ? 'esborrany' : dades.estat })
+    },
+    async aprovarPlantilla(id: string) {
+      const actual = await plantillaExistent(id)
+      const totes = (await magatzem.plantillesConsentiment()).map(sensePlantillaMeta)
+      const { nova, retirades } = aprovar(sensePlantillaMeta(actual), totes, araIso())
+      for (const r of retirades) await guardarPlantilla(idPlantilla(r.tipus, r.versio), r)
+      // L'esborrany aprovat deixa d'existir com a editable: passa a retirat (la versió bona és la nova)
+      await guardarPlantilla(id, { ...sensePlantillaMeta(actual), estat: 'retirada' })
+      return guardarPlantilla(idPlantilla(nova.tipus, nova.versio), nova)
+    },
+    async nouEsborranyPlantilla(id: string) {
+      const base = await plantillaExistent(id)
+      const totes = (await magatzem.plantillesConsentiment()).map(sensePlantillaMeta)
+      const nova = nouEsborrany(sensePlantillaMeta(base), totes, araIso())
+      return guardarPlantilla(idPlantilla(nova.tipus, nova.versio), nova)
+    },
+    async retirarPlantilla(id: string) {
+      const actual = await plantillaExistent(id)
+      await guardarPlantilla(id, { ...sensePlantillaMeta(actual), estat: 'retirada' })
+    },
+    async consentimentsDe(pacientId: string) {
+      const registres = await db.consentiments.where('pacientId').equals(pacientId).toArray()
+      return (await Promise.all(registres.map(llegirConsentiment))).sort((a, b) => b.signatAt.localeCompare(a.signatAt))
+    },
+    async signarConsentiment(pacientId: string, dades: DadesConsentiment) {
+      await pacientExistent(pacientId)
+      const plantilla = await plantillaExistent(dades.plantillaId)
+      if (plantilla.estat !== 'aprovada') throw new Error('Només es poden fer signar plantilles aprovades')
+      if (plantilla.text !== dades.text || plantilla.versio !== dades.versio) throw new Error('El text signat ha de ser el de la plantilla aprovada')
+      const at = araIso()
+      return guardarConsentiment(nouId(), pacientId, at, { ...dades, estat: 'vigent', revocacio: null })
+    },
+    async revocarConsentiment(id: string, motiu: string) {
+      const r = await db.consentiments.get(id)
+      if (!r) throw new Error(`No existeix el consentiment ${id}`)
+      const actual = await llegirConsentiment(r)
+      const { id: _i, creatAt, modificatAt: _m, pacientId, ...dades } = actual
+      const nou = revocar(dades, motiu, araIso())
+      comprovarCanvi(dades, nou)
+      return guardarConsentiment(id, pacientId, creatAt, nou)
+    },
+  })
+
   // --- Ajuntar fitxes ---
 
-  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes', 'valoracions'] as const
+  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes', 'valoracions', 'consentiments'] as const
 
   const senseMeta = <T extends { id: string; creatAt: string; modificatAt: string }>(x: T) => {
     const { id: _i, creatAt: _c, modificatAt: _m, ...resta } = x
@@ -623,9 +756,10 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       const { pacientId: _p, ...dades } = senseMeta(actual)
       await guardarValoracio(a, dades, dades)
     } else {
-      const r = await db.addendes.get(id)
+      // Addendes i consentiments: registres sencers (només canvia el pacient)
+      const r = await db.table<RegistreXifrat, string>(taula).get(id)
       if (!r || r.pacientId === a) return false
-      await desarSencer(db, 'addendes', { ...r, pacientId: a, modificatAt: araIso() }, id)
+      await desarSencer(db, taula, { ...r, pacientId: a, modificatAt: araIso() }, id)
     }
     return true
   }
@@ -673,7 +807,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       await esborrarRegistres(db, 'cites', citesTretes.map((c) => c.id))
 
       // Primer els episodis (les cites i les sessions hi apunten), després la resta
-      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [], valoracions: [] }
+      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [], valoracions: [], consentiments: [] }
       for (const taula of TAULES_MOGUDES) {
         for (const id of await idsDe(taula, treuId)) if (await moure(taula, id, quedaId)) moguts[taula].push(id)
       }
