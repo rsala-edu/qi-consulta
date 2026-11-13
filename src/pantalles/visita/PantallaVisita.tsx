@@ -50,6 +50,7 @@ import { PlaTractament } from './PlaTractament'
 import { ProperaCita } from './ProperaCita'
 import { BlocMymop } from './BlocMymop'
 import { BlocPgic } from './BlocPgic'
+import { BotonsProtocols } from './ProtocolsVisita'
 import { esActivada } from '../../cataleg/motor'
 import type { Mymop } from '../../domini/escales'
 import { GrupCataleg } from '../../cataleg/components/Cataleg'
@@ -219,6 +220,8 @@ function Visita({
     [episodi?.motiu ?? '', typeof motiuV === 'string' ? motiuV : '', typeof diagV?.text === 'string' ? diagV.text : ''],
     codiCim,
   )
+  // (4B) Per suggerir protocols: el motiu de l'episodi i les síndromes del diagnòstic
+  const textosSuggeriment = [episodi ? nomEpisodi(episodi, motiusCites) : '', ...textosDe(valoracions.at(-1)?.seccions['diagnostic:sindromes'])]
   const pestanyes = PESTANYES.filter((p) => p !== 'orl' || ambOrl)
   const canviarPestanya = (p: Pestanya) => {
     setPestanya(p)
@@ -581,7 +584,17 @@ function Visita({
                 nomesLectura={!editable}
                 marcats={marcats}
                 setMarcats={setMarcats}
-                barra={<Tractament dades={dades} anterior={anterior} setDades={setDades} controlAgulles={ajustos.controlAgulles} editable={editable} />}
+                barra={
+                  <Tractament
+                    dades={dades}
+                    anterior={anterior}
+                    setDades={setDades}
+                    controlAgulles={ajustos.controlAgulles}
+                    editable={editable}
+                    textosSuggeriment={textosSuggeriment}
+                    etiquetaEpisodi={episodi ? nomEpisodi(episodi, motiusCites) : ''}
+                  />
+                }
                 cantonada={
                   <button type="button" className="boto-ampliar" aria-pressed={mapaAmpliat} onClick={() => setAmpliat((x) => !x)}>
                     {mapaAmpliat ? v.reduir : v.ampliar}
@@ -652,12 +665,16 @@ function Tractament({
   setDades,
   controlAgulles,
   editable,
+  textosSuggeriment,
+  etiquetaEpisodi,
 }: {
   dades: DadesSessio
   anterior: Sessio | null
   setDades: Dispatch<SetStateAction<DadesSessio>>
   controlAgulles: boolean
   editable: boolean
+  textosSuggeriment: readonly string[]
+  etiquetaEpisodi: string
 }) {
   const v = t.visita
   const [preguntant, setPreguntant] = useState(false)
@@ -702,6 +719,8 @@ function Tractament({
           )}
         </>
       )}
+      {/* (4B) Protocols: aplicar-ne un o desar els punts com a protocol */}
+      <BotonsProtocols dades={dades} setDades={setDades} editable={editable} textosSuggeriment={textosSuggeriment} etiquetaEpisodi={etiquetaEpisodi} />
       {dif && teAnterior && (
         <p className="detall" data-testid="diferencia-punts" title={formatar(v.diferencia, { mes: String(dif.mes), menys: String(dif.menys) })}>
           <span className="text-llarg">{v.diferenciaPrefix}</span>
@@ -800,6 +819,14 @@ function Finalitzar({
  * Al final de cada pestanya: «← Anterior: Com està» i «Següent: Exploració →»,
  * perquè no calgui pujar fins a les pestanyes. A l'última, «Finalitzar visita».
  */
+/** Tots els textos d'un valor (p. ex. els títols de les síndromes triades) */
+function textosDe(v: unknown): string[] {
+  if (typeof v === 'string') return [v]
+  if (Array.isArray(v)) return v.flatMap(textosDe)
+  if (v && typeof v === 'object') return Object.values(v).flatMap(textosDe)
+  return []
+}
+
 function NavegacioPestanyes({
   pestanyes,
   actual,

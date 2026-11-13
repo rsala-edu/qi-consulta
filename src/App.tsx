@@ -14,6 +14,7 @@ import { PestanyaTractaments } from './pantalles/fitxa-pacient/PestanyaTractamen
 import { PestanyaConsentiments } from './pantalles/fitxa-pacient/PestanyaConsentiments'
 import { PantallaSignarConsentiment } from './pantalles/consentiments/PantallaSignarConsentiment'
 import { PantallaAjustConsentiments } from './pantalles/ajustos/PantallaAjustConsentiments'
+import { PantallaProtocols } from './pantalles/ajustos/PantallaProtocols'
 import { PantallaAgenda } from './pantalles/cites/PantallaAgenda'
 import { PestanyaFitxaClinica } from './pantalles/fitxa-pacient/PestanyaFitxaClinica'
 import { PantallaFitxaPacient } from './pantalles/fitxa-pacient/PantallaFitxaPacient'
@@ -239,6 +240,7 @@ function PortaOberta() {
             <Route path="ajustos/quant-a" element={<P codi="UI-QUANT-A"><PantallaQuantA /></P>} />
             <Route path="ajustos/visita" element={<P codi="UI-AJUST-VISITA"><PantallaAjustVisita /></P>} />
             <Route path="ajustos/consentiments" element={<P codi="UI-AJUST-CONSENTIMENTS"><PantallaAjustConsentiments /></P>} />
+            <Route path="ajustos/protocols" element={<P codi="UI-PROTOCOLS"><PantallaProtocols /></P>} />
             <Route path="ajustos/catalegs" element={<P codi="UI-AJUST-CATALEGS"><PantallaAjustCatalegs /></P>} />
             <Route path="visita/:id" element={<P codi="UI-VISITA"><PantallaVisita /></P>} />
             <Route path="*" element={<Navigate to="/avui" replace />} />

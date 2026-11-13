@@ -15,7 +15,7 @@ import type { Valoracio } from './valoracio'
 export type SessioEvolucio = Pick<
   Sessio,
   'id' | 'episodiId' | 'numero' | 'iniciAt' | 'estat' | 'comEsta' | 'punts' | 'retencio' | 'tancar' | 'mymop' | 'exploracio'
-> & { pgic?: number | null }
+> & { pgic?: number | null; protocol?: { id: string; nom: string } | null }
 
 /** Les sessions de l'episodi en ordre (número i, si n'hi ha dos d'iguals, hora) */
 export function ordenades<S extends Pick<Sessio, 'numero' | 'iniciAt'>>(sessions: readonly S[]): S[] {
@@ -52,6 +52,8 @@ export interface PuntSerie {
   /** S'han afegit o tret punts respecte de la sessió anterior */
   canviTractament: boolean
   incidencies: boolean
+  /** (4B) El protocol del qual s'ha partit */
+  protocol: string | null
 }
 
 export function serieEvolucio(sessions: readonly SessioEvolucio[]): PuntSerie[] {
@@ -70,6 +72,7 @@ export function serieEvolucio(sessions: readonly SessioEvolucio[]): PuntSerie[] 
       retencio: minutsRetencio(s),
       canviTractament: !!dif && dif.mes + dif.menys > 0,
       incidencies: s.tancar.incidencies.trim() !== '',
+      protocol: s.protocol?.nom ?? null,
     }
   })
 }

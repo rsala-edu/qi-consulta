@@ -59,6 +59,7 @@ export function Cronologia({
                 p.incidencies ? e.ambIncidencies : '',
                 addendes.has(p.sessioId) ? e.ambAddendes : '',
                 enCurs.has(p.sessioId) ? t.tractaments.enCurs : '',
+                p.protocol ? formatar(t.protocols.partit, { nom: p.protocol }) : '',
               ]
                 .filter(Boolean)
                 .join(', ')}
@@ -75,6 +76,7 @@ export function Cronologia({
               </span>
               <span className="detall">{formatar(e.puntsN, { n: String(p.punts) })}</span>
               <span className="detall">{p.retencio === null ? e.senseRetencio : formatar(e.minuts, { n: String(p.retencio) })}</span>
+              {p.protocol && <span className="protocol-sessio">{formatar(t.protocols.partit, { nom: p.protocol })}</span>}
               <span className="icones-sessio">
                 {enCurs.has(p.sessioId) && <span className="etiqueta">{t.tractaments.enCurs}</span>}
                 {p.incidencies && <Icona tipus="incidencia" titol={e.ambIncidencies} />}

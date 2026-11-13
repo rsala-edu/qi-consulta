@@ -5919,3 +5919,134 @@ fieldset {
   color: var(--tinta);
   font-weight: 600;
 }
+
+/* --- Etapa 4B: protocols --- */
+.protocol-sessio {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--accent-fosc);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.llista-protocols {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.protocol.arxivat {
+  opacity: 0.7;
+}
+
+.capcalera-protocol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.capcalera-protocol h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.etiqueta-exemple {
+  background: var(--avis-suau);
+  color: var(--avis);
+}
+
+.punts-protocol {
+  margin: 6px 0;
+  font-weight: 600;
+}
+
+.etiquetes-protocol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 6px;
+}
+
+.xip-etiqueta {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-suau);
+  font-size: 0.85rem;
+}
+
+.punts-editor ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.punts-editor li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.resultats-punts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dialeg-protocols {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.cerca-protocols {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.dialeg-protocols h3 {
+  margin: 12px 0 6px;
+  font-size: 1rem;
+}
+
+.llista-protocols-visita {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fila-protocol {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--linia);
+  border-radius: 12px;
+  background: var(--clar);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fila-protocol:hover {
+  border-color: var(--accent);
+}
+
+.barra-tractament .boto-protocols {
+  flex: none;
+}
