@@ -9,11 +9,16 @@ import {
   copiarTractament,
   diferenciaPunts,
   editableFins,
+  esquemaDadesSessio,
   esEditable,
+  accionsRetencio as A,
+  estatRetencio,
   formatTemps,
+  iniciEquivalent,
   mapaPunts,
   novaSessio,
   tempsRestant,
+  tramsRetencio,
 } from './sessio'
 
 const sessio = () => novaSessio({ citaId: 'c1', episodiId: 'e1', numero: 1, iniciAt: '2026-11-04T16:00:00.000Z' })
@@ -110,6 +115,67 @@ describe('temporitzador', () => {
     expect(formatTemps(28 * 60_000)).toBe('28:00')
     expect(formatTemps(61_500)).toBe('1:02')
     expect(formatTemps(-5_000)).toBe('0:00')
+  })
+
+  it('A7: pausa, continuar, ±1 min, aturar, tornar a començar; el temps surt dels trams', () => {
+    const t0 = Date.parse('2026-11-04T16:00:00.000Z')
+    const m = (min: number) => t0 + min * 60_000
+    const iso = (min: number) => new Date(m(min)).toISOString()
+    let r = sessio().retencio
+    expect(estatRetencio(r, m(0))).toBe('perComencar')
+
+    r = A.comencar(r, iso(0))
+    expect(estatRetencio(r, m(5))).toBe('enMarxa')
+    expect(iniciEquivalent(r, m(5))).toBe(iso(0))
+
+    // Pausa als 10 min: no corre; el registre de l'app, null
+    r = A.pausar(r, iso(10))
+    expect(estatRetencio(r, m(15))).toBe('pausa')
+    expect(tempsRestant(r, m(15))).toBe(18 * 60_000)
+    expect(iniciEquivalent(r, m(15))).toBeNull()
+
+    // Continua als 15: l'inici equivalent és 5 min més tard
+    r = A.continuar(r, iso(15))
+    expect(tempsRestant(r, m(20))).toBe(13 * 60_000)
+    expect(iniciEquivalent(r, m(20))).toBe(iso(5))
+
+    // +1 i −1 minut, entre 1 i 120
+    expect(tempsRestant(A.minuts(r, 1), m(20))).toBe(14 * 60_000)
+    expect(A.minuts({ ...r, minuts: 1 }, -1).minuts).toBe(1)
+    expect(A.minuts({ ...r, minuts: 120 }, 1).minuts).toBe(120)
+
+    // S'acaba als 33 (28 en marxa)
+    expect(estatRetencio(r, m(33))).toBe('acabada')
+    expect(iniciEquivalent(r, m(33))).toBe(iso(5))
+
+    // Aturar abans d'hora: aturada, sense registre; continuar ho desfà
+    const aturada = A.aturar(r, iso(20))
+    expect(estatRetencio(aturada, m(40))).toBe('aturada')
+    expect(iniciEquivalent(aturada, m(40))).toBeNull()
+    expect(tempsRestant(aturada, m(40))).toBe(13 * 60_000)
+    const represa = A.continuar(aturada, iso(40))
+    expect(estatRetencio(represa, m(41))).toBe('enMarxa')
+    expect(tempsRestant(represa, m(41))).toBe(12 * 60_000)
+
+    // Tornar a començar: els minuts sencers, i les estones d'abans es conserven
+    const nova = A.tornarAComencar(r, iso(25))
+    expect(tempsRestant(nova, m(25))).toBe(28 * 60_000)
+    expect(iniciEquivalent(nova, m(26))).toBe(iso(25))
+    expect(tramsRetencio(nova)).toEqual([
+      { inici: iso(0), fi: iso(10) },
+      { inici: iso(15), fi: iso(25) },
+      { inici: iso(25), fi: null, reinici: true },
+    ])
+    expect(nova.iniciAt).toBe(iso(0))
+  })
+
+  it('A7: les sessions d\'abans (sense trams) continuen igual, i l\'esquema les accepta', () => {
+    const vella = { iniciAt: '2026-11-04T16:00:00.000Z', minuts: 28 }
+    const t0 = Date.parse(vella.iniciAt)
+    expect(tramsRetencio(vella)).toEqual([{ inici: vella.iniciAt, fi: null }])
+    expect(estatRetencio(vella, t0 + 60_000)).toBe('enMarxa')
+    expect(iniciEquivalent(vella, t0 + 60_000)).toBe(vella.iniciAt)
+    expect(esquemaDadesSessio.parse({ ...sessio(), retencio: vella }).retencio).toEqual(vella)
   })
 })
 
