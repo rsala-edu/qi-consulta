@@ -611,12 +611,6 @@ function Visita({
 
         {pestanya === 'tancar' && (
           <section id="visita-tancar" role="tabpanel" aria-labelledby="pestanya-tancar" className="panell">
-            {/* (4D) Informe de la sessió en PDF, amb el que hi ha ara */}
-            {pacient && (
-              <p className="accions accions-esquerra">
-                <BotoInformeSessio pacient={pacient} episodi={episodi ?? null} sessio={{ ...sessio, ...dades }} />
-              </p>
-            )}
             <Camp etiqueta={v.recomanacions}>
               <textarea
                 rows={3}
@@ -643,6 +637,13 @@ function Visita({
           </section>
         )}
       </fieldset>
+
+      {/* (4D) Informe de la sessió en PDF, amb el que hi ha ara. Fora del fieldset: també d'una sessió tancada */}
+      {pestanya === 'tancar' && pacient && (
+        <p className="accions accions-esquerra informe-sessio">
+          <BotoInformeSessio pacient={pacient} episodi={episodi ?? null} sessio={{ ...sessio, ...dades }} />
+        </p>
+      )}
 
       {pestanya === 'tancar' && <ProperaCita sessio={sessio} />}
 

@@ -1084,7 +1084,7 @@ export const ca = {
     sessioN: 'Sessió {n}',
     comEsta: 'Com està',
     canvis: 'Canvis des de l\'última sessió',
-    escalaPrincipal: 'Escala del símptoma principal (0–10)',
+    escalaPrincipal: 'Escala principal (0–10)',
     exploracio: 'Exploració',
     punts: 'Punts',
     capPunt: 'Cap punt.',

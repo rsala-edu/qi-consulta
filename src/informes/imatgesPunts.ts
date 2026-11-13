@@ -48,13 +48,23 @@ async function svgCos(db: QiDB, marcats: readonly PuntMarcat[], vista: Vista): P
   const [x, y, w, h] = s.caixa
   const vb = [x - marge, y - marge, w + 2 * marge, h + 2 * marge]
   const del = marcats.filter((p) => p.mapa === 'cos' && p.tecnica !== 'palpacio')
+  // Un punt bilateral té dos marcadors: l'etiqueta, només al primer que es veu
+  const etiquetats = new Set<string>()
+  const posades: { x: number; y: number }[] = []
   const punts = puntsSobreModel(efectiu, m).flatMap((p) => {
     const tecnica = tecnicaDelMarcador(del, p.punt.codi, p.costat)
     if (!tecnica || !esVeu(p.normal, vista)) return []
     const q = projectar(p.posicio, vista)
-    return [`<circle cx="${q.x}" cy="${q.y}" r="0.016" fill="${COLOR_TECNICA[tecnica]}" stroke="#fff" stroke-width="0.005"/>` + `<text x="${q.x + 0.022}" y="${q.y + 0.01}" font-size="0.04" font-family="Helvetica, Arial, sans-serif" fill="#1f2421">${esc(p.punt.codi)}</text>`]
+    const cercle = `<circle cx="${q.x}" cy="${q.y}" r="0.016" fill="${COLOR_TECNICA[tecnica]}" stroke="#fff" stroke-width="0.005"/>`
+    if (etiquetats.has(p.punt.codi)) return [{ cercle, text: '' }]
+    etiquetats.add(p.punt.codi)
+    // Si tocaria una etiqueta ja posada, més avall
+    let ty = q.y + 0.01
+    while (posades.some((e) => Math.abs(e.x - q.x) < 0.12 && Math.abs(e.y - ty) < 0.042)) ty += 0.045
+    posades.push({ x: q.x, y: ty })
+    return [{ cercle, text: `<text x="${q.x + 0.022}" y="${ty}" font-size="0.04" font-family="Helvetica, Arial, sans-serif" fill="#1f2421" stroke="#fff" stroke-width="0.01" paint-order="stroke">${esc(p.punt.codi)}</text>` }]
   })
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb.join(' ')}" width="400" height="${Math.round((400 * vb[3]!) / vb[2]!)}"><path d="${s.cami}" fill="#e9d8c8"/>${punts.join('')}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb.join(' ')}" width="400" height="${Math.round((400 * vb[3]!) / vb[2]!)}"><path d="${s.cami}" fill="#e9d8c8"/>${punts.map((x) => x.cercle).join('')}${punts.map((x) => x.text).join('')}</svg>`
 }
 
 async function svgOrella(db: QiDB, marcats: readonly PuntMarcat[]): Promise<string> {

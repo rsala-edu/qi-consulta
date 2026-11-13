@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises'
 import type { Page } from '@playwright/test'
 import { PDFDict, PDFDocument, PDFName } from 'pdf-lib'
 import { test } from './google.js'
+import { cervicalgiaInventada, crearEpisodiInventat, idPacient } from './evolucio-dades.js'
 import { comencarVisita, entrar, expect, finalitzar, menu, novaCita, nouPacient, pestanya } from './ajudes-visita.js'
 
 test.describe.configure({ timeout: 240_000 })
@@ -87,4 +88,19 @@ test('informes: dades de la consulta, informe de la sessió, de l\'episodi i his
   const historial = (await descarregar(page, 'Historial complet'))
   expect(historial.nom).toMatch(/^historial-informe-inventat-\d{4}-\d{2}-\d{2}\.pdf$/)
   expect(historial.doc.getTitle()).toBe('Historial complet')
+})
+
+test('informes: l\'informe d\'una sessió antiga (tancada, en lectura) també es pot generar', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Carme', 'Lectura Inventada')
+  await crearEpisodiInventat(page, cervicalgiaInventada(await idPacient(page, 'Carme Lectura Inventada')))
+  await menu(page, 'Pacients').click()
+  await page.getByRole('link', { name: /Carme Lectura Inventada/ }).click()
+  await page.getByRole('link', { name: 'Tractaments' }).click()
+  await page.locator('.cronologia > li').last().getByRole('link').first().click()
+  await pestanya(page, 'Tancar').click()
+  // En lectura: els camps no es poden tocar, però l'informe sí
+  await expect(page.getByLabel('Recomanacions')).toBeDisabled()
+  const sessio = await descarregar(page, 'Informe de la sessió')
+  expect(sessio.nom).toBe('informe-sessio-8-2026-10-28.pdf')
 })

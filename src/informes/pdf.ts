@@ -131,12 +131,17 @@ export async function generarInforme(inf: Informe): Promise<string> {
     } else if (b.tipus === 'paragraf') {
       paragraf(b.text)
     } else if (b.tipus === 'parelles') {
+      // L'etiqueta, en una columna de 170 com a màxim: si no hi cap, en dues línies
       const amp = Math.min(170, Math.max(...b.files.map(([e]) => negreta.widthOfTextAtSize(textPerPdf(e), 9.5))) + 12)
       for (const [e, v] of b.files) {
+        const etiqueta = partir(e, 9.5, negreta, amp - 12)
         const linies = partir(v || '—', 9.5, normal, ample - amp)
-        cal(linies.length * 13.3)
-        pagina.drawText(textPerPdf(e), { x: MARGE, y: y - 9.5, size: 9.5, font: negreta, color: c(SUAU) })
+        const alt = Math.max(etiqueta.length, linies.length) * 13.3
+        cal(alt)
+        etiqueta.forEach((l, j) => pagina.drawText(l, { x: MARGE, y: y - 9.5 - j * 13.3, size: 9.5, font: negreta, color: c(SUAU) }))
+        const y0 = y
         for (const l of linies) linia(l, 9.5, normal, TINTA, MARGE + amp)
+        y = Math.min(y, y0 - alt)
       }
     } else if (b.tipus === 'taula') {
       const n = b.columnes.length
@@ -144,18 +149,25 @@ export async function generarInforme(inf: Informe): Promise<string> {
       const total = amples.reduce((a, x) => a + x, 0)
       const xs = amples.map((_, i) => MARGE + (amples.slice(0, i).reduce((a, x) => a + x, 0) / total) * ample)
       const w = (i: number) => (amples[i]! / total) * ample - 6
-      const fila = (celles: readonly string[], font: PDFFont, color = TINTA) => {
+      const fila = (celles: readonly string[], font: PDFFont, color = TINTA, capcaleraTaula = false) => {
         const parts = celles.map((t, i) => partir(t, 8.5, font, w(i)))
         const alt = Math.max(...parts.map((p) => p.length)) * 11.5 + 4
+        // En passar de pàgina, es repeteix la fila de capçalera
+        if (!capcaleraTaula && y - alt < MARGE + 24) {
+          capcalera()
+          fila(b.columnes, negreta, SUAU, true)
+        }
         cal(alt)
         parts.forEach((p, i) => p.forEach((l, j) => pagina.drawText(l, { x: xs[i]!, y: y - 9 - j * 11.5, size: 8.5, font, color: c(color) })))
         y -= alt
         pagina.drawLine({ start: { x: MARGE, y: y + 1 }, end: { x: A4[0] - MARGE, y: y + 1 }, thickness: 0.3, color: rgb(0.8, 0.84, 0.82) })
       }
-      fila(b.columnes, negreta, SUAU)
+      cal(40)
+      fila(b.columnes, negreta, SUAU, true)
       for (const f of b.files) fila(f, normal)
     } else if (b.tipus === 'imatges') {
       const alt = b.alcada ?? 220
+      y -= 10
       cal(alt + 20)
       const amp = ample / b.imatges.length
       for (const [i, im] of b.imatges.entries()) {

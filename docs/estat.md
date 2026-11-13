@@ -1,9 +1,14 @@
 # Estat del projecte
 
-Actualitzat el 7 de novembre de 2026.
+Actualitzat el 13 de novembre de 2026.
 
 ## On som
-- **Publicat:** etapa 3B (primera visita i catàlegs clínics), versió **a132dc7**. «Publicar» i «Proves completes» en verd.
+- **Publicat:** fins a les llicències (versió **6c04d6f**): 3C evolució i escales amb llicència amagades fins activar-les. «Publicar» i «Proves completes» en verd.
+- **Etapa 4, en branques encadenades i sense fusionar** (`etapa-4a` → `etapa-4b` → `etapa-4c` → `etapa-4d`). Es fusionen a main en ordre quan la doctora aprovi els textos de consentiment de la 4A:
+  - 4A: consentiment informat (plantilles versionades, signatura a la tauleta, PDF a la fitxa, revocar);
+  - 4B: protocols de punts;
+  - 4C: fotos clíniques (sense EXIF, xifrades, a Drive com a fitxers a part);
+  - 4D: informes en PDF (sessió, episodi, historial complet) amb les dades de la consulta a Ajustos > Consulta, i l'exportació de dades del pacient preparada (sense botó encara).
 - **Etapes fetes:**
   - 1 i 2 (pacients, fitxa clínica, cites, mapa del cos i de l'orella);
   - sincronia amb Drive (format 2, blocs 1–3);
@@ -32,5 +37,5 @@ Fins que no es decideixi, l'app no inclou el text de cap qüestionari: només de
 1. **Revisar la 3B amb la doctora:** seccions, opcions i ordre dels catàlegs (es poden amagar i reordenar a Ajustos > Catàlegs), i les captures de la pàgina de revisió.
 2. **Provar la tauleta amb el seu compte de Google:** instal·lació, entrada, sincronia amb el Drive de la doctora i una visita sencera.
 3. **La fitxa clínica nova de la doctora:** substitueix o amplia la fitxa clínica actual.
-4. **3C · evolució:** gràfics i seguiment de les escales, del MYMOP i de l'escala 0–10 al llarg de les sessions de l'episodi.
-5. **Etapa 4:** vegeu el pla de treball a `docs/especificacions.md`.
+4. **Aprovar els textos de consentiment (4A)** i, després, fusionar 4A–4D a main.
+5. **Resta de l'etapa 4:** vegeu el pla de treball a `docs/especificacions.md`.
