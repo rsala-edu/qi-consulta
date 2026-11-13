@@ -96,7 +96,9 @@ test('consentiment d\'acupuntura: aprovar la plantilla, signar a la tauleta, veu
   await expect(acup).toContainText('Versió 2 · signat el')
   await acup.getByRole('button', { name: 'Veure el document' }).click()
   const visor = page.getByRole('dialog', { name: 'Acupuntura i tècniques associades' })
-  await expect(visor.locator('iframe')).toHaveAttribute('src', /^blob:/)
+  await expect(visor).toContainText('Dra. Inventada Prova')
+  await expect(visor.getByRole('img', { name: 'Signatura del pacient' })).toHaveAttribute('src', /^data:image\/png/)
+  await expect(visor.getByRole('img', { name: 'Signatura de la doctora' })).toBeVisible()
   await visor.getByRole('button', { name: 'Tancar el document' }).click()
 
   // Amb el consentiment vigent: la visita comença sense cap avís

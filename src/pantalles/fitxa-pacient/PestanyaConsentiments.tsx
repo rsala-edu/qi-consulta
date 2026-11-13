@@ -3,13 +3,14 @@
 // aprovada) i l'historial de documents signats, que es poden veure, imprimir,
 // descarregar (amb l'avís que el fitxer ja no està xifrat) i revocar.
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { Indicador } from '../../components/Indicador'
 import { aprovadaDe, estatDelTipus, TIPUS_CONSENTIMENT, type Consentiment } from '../../domini/consentiment'
-import { descarregarPdf, nomFitxer, urlPdf } from '../../consentiment/document'
+import { descarregarPdf, nomFitxer } from '../../consentiment/document'
+import { nomComplet } from '../../domini/pacient'
 import { formatar, t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
 import { useCarrega } from '../../sessio/useCarrega'
@@ -64,7 +65,7 @@ export function PestanyaConsentiments() {
           </article>
         )
       })}
-      {obert && <VisorPdf consentiment={obert} onTancar={() => setObert(null)} />}
+      {obert && <VisorDocument consentiment={obert} pacient={nomComplet(pacient)} onTancar={() => setObert(null)} />}
     </section>
   )
 }
@@ -117,21 +118,55 @@ function Document({ consentiment: x, onVeure, onRevocat }: { consentiment: Conse
   )
 }
 
-/** El PDF dins l'app (sense sortir-ne); imprimir avisa que surt sense xifrar */
-function VisorPdf({ consentiment: x, onTancar }: { consentiment: Consentiment; onTancar(): void }) {
-  const [url] = useState(() => urlPdf(x.pdf))
-  const marc = useRef<HTMLIFrameElement>(null)
-  useEffect(() => () => URL.revokeObjectURL(url), [url])
+/**
+ * El document signat dins l'app, amb les mateixes dades que el PDF (text,
+ * versió, data i signatures). No es fa servir el visor de PDF del navegador:
+ * el Chrome de les tauletes Android no el mostra dins la pàgina.
+ */
+function VisorDocument({ consentiment: x, pacient, onTancar }: { consentiment: Consentiment; pacient: string; onTancar(): void }) {
+  useEffect(() => {
+    document.body.classList.add('imprimint-document')
+    return () => document.body.classList.remove('imprimint-document')
+  }, [])
   return (
     <div className="fons-dialeg" onClick={(e) => e.target === e.currentTarget && onTancar()}>
-      <section className="dialeg dialeg-pdf" role="dialog" aria-modal="true" aria-label={x.titol}>
-        <h2>{x.titol}</h2>
-        <iframe ref={marc} className="visor-pdf" src={url} title={x.titol} />
+      <section className="dialeg dialeg-document" role="dialog" aria-modal="true" aria-label={x.titol}>
+        <article className="document-signat">
+          <h2>{x.titol}</h2>
+          <p className="detall">
+            {c.pacient}: {pacient} · {c.versio} {x.versio} · {c.data}: {quan(x.signatAt)}
+          </p>
+          <div className="text-document">
+            {x.text.split('\n').map((p, i) => (p.trim() ? <p key={i}>{p}</p> : <br key={i} />))}
+          </div>
+          <div className="signatures-document">
+            <figure>
+              <img src={x.signaturaPacient} alt={c.signaturaPacient} />
+              <figcaption>
+                {c.signaturaPacient} · {pacient}
+              </figcaption>
+            </figure>
+            {x.representant && (
+              <figure>
+                <img src={x.representant.signatura} alt={c.signaturaRepresentant} />
+                <figcaption>
+                  {c.signaturaRepresentant} · {x.representant.nom}
+                  {x.representant.dni && ` · ${x.representant.dni}`} · {c.relacions[x.representant.relacio]}
+                </figcaption>
+              </figure>
+            )}
+            <figure>
+              <img src={x.signaturaDoctora} alt={c.signaturaDoctora} />
+              <figcaption>{c.signaturaDoctora}</figcaption>
+            </figure>
+          </div>
+          {x.revocacio && <p className="avis">{formatar(c.revocatEl, { quan: quan(x.revocacio.at), motiu: x.revocacio.motiu })}</p>}
+        </article>
         <div className="accions">
           <Boto
             variant="secundari"
             onClick={() => {
-              if (window.confirm(c.avisDescarrega)) marc.current?.contentWindow?.print()
+              if (window.confirm(c.avisDescarrega)) window.print()
             }}
           >
             {c.imprimir}

@@ -5815,16 +5815,85 @@ fieldset {
   opacity: 0.8;
 }
 
-.dialeg-pdf {
+.dialeg-document {
   width: min(900px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
 }
 
-.visor-pdf {
-  width: 100%;
-  height: min(70vh, 900px);
-  border: 1px solid var(--linia);
+/* El document, com en paper (també en fosc) */
+.document-signat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 28px;
   border-radius: 10px;
-  background: #fff;
+  background: #fcfbf7;
+  color: #1f2421;
+  border: 1px solid var(--linia);
+}
+
+.document-signat h2,
+.document-signat p,
+.document-signat strong {
+  color: #1f2421;
+}
+
+.document-signat h2 {
+  margin-top: 0;
+}
+
+.document-signat .detall,
+.document-signat figcaption {
+  color: #59615c;
+}
+
+.text-document p {
+  margin: 0 0 6px;
+}
+
+.signatures-document {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin-top: 20px;
+}
+
+.signatures-document figure {
+  margin: 0;
+}
+
+.signatures-document img {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+  border-bottom: 1px solid #9aa39e;
+}
+
+.signatures-document figcaption {
+  font-size: 0.85rem;
+  color: #59615c;
+}
+
+/* Imprimir: només el document */
+@media print {
+  body.imprimint-document * {
+    visibility: hidden;
+  }
+
+  body.imprimint-document .document-signat,
+  body.imprimint-document .document-signat * {
+    visibility: visible;
+  }
+
+  body.imprimint-document .document-signat {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    border: none;
+  }
 }
 
 .dialeg-consentiment {
