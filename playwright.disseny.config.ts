@@ -13,7 +13,7 @@ const PORT = Number(process.env.CAPTURES_PORT ?? 5197)
 export default defineConfig({
   ...base,
   testDir: './tests/captures',
-  testMatch: ['disseny.spec.ts', 'evolucio.spec.ts', 'blocs.spec.ts', 'consentiment.spec.ts'],
+  testMatch: ['disseny.spec.ts', 'evolucio.spec.ts', 'blocs.spec.ts', 'consentiment.spec.ts', 'protocols.spec.ts'],
   testIgnore: undefined,
   fullyParallel: true,
   workers: 2,
