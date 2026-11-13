@@ -3434,7 +3434,8 @@ fieldset {
   fill: #e9d8c8;
   stroke: none;
 }
-.marcador-2d {
+.marcador-2d,
+.zones-toc-2d circle {
   cursor: pointer;
 }
 .visor3d-recuperant {

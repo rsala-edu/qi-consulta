@@ -123,10 +123,31 @@ export function Visor2D({ geometria, marcadors, etiquetesSempre = false, onTocar
         preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label={`${t.mapa.mapa2d} · ${t.mapa.vista[vista]}`}
+        onClick={(e) => {
+          // El punt més proper al toc (dins el radi de toc): si n'hi ha de
+          // veïns, les zones de toc es trepitgen i guanyaria el de sobre
+          const ctm = svg.current?.getScreenCTM()
+          if (!ctm || !onTocarMarcador) return
+          const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse())
+          let millor: { id: string; d: number } | null = null
+          for (const { m, p } of visibles) {
+            const d = Math.hypot(p.x - q.x, p.y - q.y) / mpp
+            const radi = Math.max(RADI_TOC_PX, (aspecteMarcador(m).radi * Math.max(1, (3 * mpp) / aspecteMarcador(m).radi)) / mpp)
+            if (d <= radi && (!millor || d < millor.d)) millor = { id: m.id, d }
+          }
+          if (millor) onTocarMarcador(millor.id)
+        }}
       >
         <path className="silueta" d={forma.cami} />
+        {/* Primer totes les zones de toc i després els punts: cap zona tapa el punt d'un veí */}
+        <g className="zones-toc-2d">
+          {visibles.map(({ m, p }) => {
+            const a = aspecteMarcador(m)
+            return <circle key={m.id} cx={p.x} cy={p.y} r={Math.max(RADI_TOC_PX * mpp, a.radi * Math.max(1, (3 * mpp) / a.radi))} fill="transparent" />
+          })}
+        </g>
         {visibles.map(({ m, p }) => (
-          <Marcador key={m.id} m={m} p={p} mpp={mpp} onTocar={onTocarMarcador} />
+          <Marcador key={m.id} m={m} p={p} mpp={mpp} />
         ))}
       </svg>
       <div className="visor3d-etiquetes" aria-hidden="true">
@@ -140,23 +161,13 @@ export function Visor2D({ geometria, marcadors, etiquetesSempre = false, onTocar
   )
 }
 
-function Marcador({
-  m,
-  p,
-  mpp,
-  onTocar,
-}: {
-  m: MarcadorVisor
-  p: Punt2D
-  mpp: number
-  onTocar?(id: string): void
-}) {
+function Marcador({ m, p, mpp }: { m: MarcadorVisor; p: Punt2D; mpp: number }) {
   const a = aspecteMarcador(m)
   // Mida mínima a la pantalla (amb el cos sencer, els punts serien massa petits)
   const escala = Math.max(1, (3 * mpp) / a.radi)
   return (
-    <g className="marcador-2d" data-id={m.id} onClick={() => onTocar?.(m.id)}>
-      <circle cx={p.x} cy={p.y} r={Math.max(RADI_TOC_PX * mpp, a.radi * escala)} fill="transparent" />
+    // El toc el resol el visor (el punt més proper)
+    <g className="marcador-2d" data-id={m.id}>
       {a.anell && <circle cx={p.x} cy={p.y} r={a.anell[1] * escala} fill={COLOR_ANELL} />}
       {a.vora && <circle cx={p.x} cy={p.y} r={a.vora * escala} fill={COLOR_VORA} />}
       <circle cx={p.x} cy={p.y} r={a.radi * escala} fill={a.color} />
