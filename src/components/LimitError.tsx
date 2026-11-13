@@ -7,6 +7,20 @@
 import { Component, useState, type ErrorInfo, type ReactNode } from 'react'
 import { t } from '../i18n/t'
 import { Boto } from './Boto'
+import { actualitzarAra } from '../actualitzacio/actualitzacio'
+import { esErrorDeTros } from '../actualitzacio/trossos'
+
+/** Falta un tros de l'app (s'ha publicat una versió nova): «Hi ha una versió nova · Actualitzar» */
+export function AvisTrosVersioNova() {
+  return (
+    <main className="pantalla-error">
+      <div className="error-pantalla" role="alert">
+        <p>{t.app.versioNova}</p>
+        <Boto onClick={actualitzarAra}>{t.app.actualitzar}</Boto>
+      </div>
+    </main>
+  )
+}
 
 interface Props {
   /** Codi curt per identificar on ha fallat (UI-MAPA, UI-COS3D…) */
@@ -20,6 +34,8 @@ interface Props {
 
 interface Estat {
   error: boolean
+  /** Un tros de l'app que no s'ha pogut carregar (s'ha publicat una versió nova) */
+  versioNova?: boolean
 }
 
 /** El que es pot escriure a la consola d'un error, sense dades clíniques. */
@@ -40,8 +56,8 @@ export const textResum = (r: ReturnType<typeof resumError>) =>
 export class LimitError extends Component<Props, Estat> {
   state: Estat = { error: false }
 
-  static getDerivedStateFromError(): Estat {
-    return { error: true }
+  static getDerivedStateFromError(error: unknown): Estat {
+    return { error: true, versioNova: esErrorDeTros(error) }
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo) {
@@ -54,6 +70,8 @@ export class LimitError extends Component<Props, Estat> {
 
   render() {
     if (!this.state.error) return this.props.children
+    // Mai una pantalla mig buida: si falta un tros de l'app, la versió nova
+    if (this.state.versioNova) return <AvisTrosVersioNova />
     return this.props.alternativa ?? <ErrorPantalla codi={this.props.codi} />
   }
 }

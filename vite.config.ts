@@ -62,4 +62,21 @@ export default defineConfig({
       },
     }),
   ],
+  // Només per a les proves de publicació (tests/e2e/produccio-actualitzacio):
+  // QI_SAL_TROSSOS canvia el nom de tots els trossos, com si fos una versió
+  // nova amb el codi canviat (si no, les dues versions de prova en tindrien
+  // molts d'iguals)
+  ...(process.env.QI_SAL_TROSSOS
+    ? {
+        build: {
+          rollupOptions: {
+            output: {
+              entryFileNames: `assets/[name]-${process.env.QI_SAL_TROSSOS}-[hash].js`,
+              chunkFileNames: `assets/[name]-${process.env.QI_SAL_TROSSOS}-[hash].js`,
+              assetFileNames: `assets/[name]-${process.env.QI_SAL_TROSSOS}-[hash][extname]`,
+            },
+          },
+        },
+      }
+    : {}),
 })

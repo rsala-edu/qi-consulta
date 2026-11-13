@@ -3096,6 +3096,31 @@ fieldset {
   font-size: 1.2rem;
 }
 
+/* A7: en pausa o aturada, el temps en gris; els controls al costat (i a sota si no hi caben) */
+.temporitzador {
+  flex-wrap: wrap;
+}
+
+.temporitzador.estat-pausa > span,
+.temporitzador.estat-aturada strong {
+  color: var(--tinta-suau);
+}
+
+.temporitzador.estat-aturada strong {
+  font-size: 1.2rem;
+}
+
+.controls-retencio {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.controls-retencio .boto {
+  min-height: 44px;
+  font-variant-numeric: tabular-nums;
+}
+
 .minuts-retencio {
   display: inline-flex;
   align-items: center;

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:proves": "vite build --mode proves --outDir dist-proves",
     "preview": "vite preview",
     "lint": "oxlint",
     "typecheck": "tsc -b",

@@ -20,6 +20,8 @@ Estat actual, decisions pendents i el que queda: docs/estat.md (llegir-lo en com
 - Interfície en català, amb els textos en un fitxer de traduccions
 - Cada funcionalitat nova amb proves; npm test ha de passar abans de cada commit
 - Abans de cada push, executar en local la tanda completa: npm run lint, npm test, npx playwright test i npm run test:e2e:produccio
+- E2E en local: contra un build de proves (vite build --mode proves + vite preview, dist-proves/) amb 4 workers (13/11: 6,1 min; amb 6 surten errors per temps esgotat, amb 11 la màquina es queda sense memòria). QI_E2E_DEV=1 fa servir el servidor de desenvolupament, com el CI
+- Opcions de les proves (tests/e2e/google.ts): per defecte, PBKDF2 amb 1.000 iteracions i sense WebGL (el mapa en 2D). test.use({ cos3D: true }) només a les proves que necessiten el cos 3D; test.use({ iteracionsReals: true }) per provar les 600.000. La rebaixa de PBKDF2 només existeix en desenvolupament i al mode «proves»: el build publicat no la conté i no arrenca si no són 600.000
 - CI amb dos workflows. «Publicar» (lint, unitàries, E2E @essencial, producció i build) bloqueja el desplegament. «Proves completes» (totes les E2E, en 4 shards) no bloqueja
 - Després de cada push, esperar «Publicar» (gh run watch). Una versió no està publicada fins que «Publicar» és verd i version.json de GitHub Pages coincideix amb el commit. Si falla, dir-ho el primer de tot al resum
 - Abans de començar la part següent, comprovar que «Proves completes» és verd. Si ha fallat, dir-ho el primer de tot i arreglar-ho abans de continuar amb res més

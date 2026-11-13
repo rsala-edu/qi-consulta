@@ -1,4 +1,4 @@
-import { Fragment, lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
+import { Fragment, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { HashRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { AvisRetencioAcabada, ProveidorRetencio, RetencioBloqueig } from './visita/retencio'
 import { AvisSortidaVisita } from './visita/sortidaVisita'
@@ -38,14 +38,16 @@ import { PantallaAjustVisita } from './pantalles/ajustos/PantallaAjustVisita'
 import { PantallaVisita } from './pantalles/visita/PantallaVisita'
 import { PantallaAjustCatalegs } from './pantalles/ajustos/PantallaAjustCatalegs'
 import { ProveidorActualitzacio, useActualitzacio } from './actualitzacio/actualitzacio'
+import { lazyAmbVersio } from './actualitzacio/trossos'
 import { AvisVersioNova } from './components/AvisVersioNova'
 import { AvisVersioAntiga } from './components/AvisVersioAntiga'
 
 // Les pantalles amb el mapa 3D es carreguen a part (Three.js és gran)
-const PantallaCalibratge = lazy(() =>
+// (si un tros ja no hi és perquè s'ha publicat una versió nova, l'app es recarrega amb la nova)
+const PantallaCalibratge = lazyAmbVersio(() =>
   import('./pantalles/ajustos/PantallaCalibratge').then((m) => ({ default: m.PantallaCalibratge })),
 )
-const PantallaProvaMapa = lazy(() =>
+const PantallaProvaMapa = lazyAmbVersio(() =>
   import('./pantalles/mapa/PantallaProvaMapa').then((m) => ({ default: m.PantallaProvaMapa })),
 )
 import { useRevisioSincronia } from './sincronia/revisio'

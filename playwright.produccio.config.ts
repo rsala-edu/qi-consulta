@@ -3,14 +3,16 @@
 // errades només surten minificades o amb el codi partit en fragments.
 import { defineConfig } from '@playwright/test'
 import base, { ENTORN_PROVES } from './playwright.config.ts'
+import type { OpcionsProves } from './tests/e2e/google.ts'
 
 const PORT = 5198
 
-export default defineConfig({
+export default defineConfig<OpcionsProves>({
   ...base,
   testIgnore: undefined,
   testMatch: '**/produccio*.spec.ts',
-  use: { ...base.use, baseURL: `http://localhost:${PORT}` },
+  // Com a producció: el cos 3D (si hi ha WebGL) i PBKDF2 de debò (el build no fa cas de localStorage)
+  use: { ...base.use, baseURL: `http://localhost:${PORT}`, cos3D: true, iteracionsReals: true },
   webServer: {
     command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}/qi-consulta/`,

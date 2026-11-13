@@ -108,10 +108,23 @@ export function Visor3D({ ref, onUsar2D, ...props }: Props & { onUsar2D?(): void
   useEffect(() => () => netejar.current(), [])
   const recrear = useCallback(() => setGeneracio((g) => g + 1), [])
 
+  // Si es demana un moviment de càmera abans que l'escena estigui a punt (el
+  // WebGL triga a arrencar; p. ex. es cerca un punt just en obrir el mapa),
+  // es fa quan ho estigui: abans es perdia sense dir res
+  const pendent = useRef<((c: ControlVisor) => void) | null>(null)
+  const fer = (f: (c: ControlVisor) => void) => {
+    if (control.current) f(control.current)
+    else pendent.current = f
+  }
+  const escenaLlesta = useCallback(() => {
+    const f = pendent.current
+    pendent.current = null
+    if (f && control.current) f(control.current)
+  }, [])
   useImperativeHandle(ref, () => ({
-    anarA: (p, n) => control.current?.anarA(p, n),
-    vista: (v) => control.current?.vista(v),
-    restablir: () => control.current?.restablir(),
+    anarA: (p, n) => fer((c) => c.anarA(p, n)),
+    vista: (v) => fer((c) => c.vista(v)),
+    restablir: () => fer((c) => c.restablir()),
   }))
 
   return (
@@ -148,7 +161,7 @@ export function Visor3D({ ref, onUsar2D, ...props }: Props & { onUsar2D?(): void
         gl={{ antialias: true, preserveDrawingBuffer: false }}
         fallback={<p className="avis">{t.mapa.senseWebgl}</p>}
       >
-        <Escena {...props} control={control} onEtiquetes={setEtiquetes} />
+        <Escena {...props} control={control} onEtiquetes={setEtiquetes} onLlesta={escenaLlesta} />
       </Canvas>
       </LimitError>
       <AvisRecuperant visor={visorEl} onRecrear={recrear} />
@@ -237,9 +250,12 @@ const Escena = memo(function Escena({
   onArrossegar,
   control,
   onEtiquetes,
+  onLlesta,
 }: Omit<Props, 'ref'> & {
   control: RefObject<ControlVisor | null>
   onEtiquetes(e: Etiqueta[]): void
+  /** Els controls de la càmera ja hi són (es fa el moviment que s'hagi demanat abans) */
+  onLlesta(): void
 }) {
   const controls = useRef<CameraControlsImpl>(null)
   const malla = useRef<Mesh>(null)
@@ -269,7 +285,8 @@ const Escena = memo(function Escena({
     c.touches.three = A.NONE
     c.setBoundary(new Box3(new Vector3(...CAMERA.limits.min), new Vector3(...CAMERA.limits.max)))
     void c.setLookAt(0, CAMERA.alcadaInicial, CAMERA.distanciaInicial, 0, CAMERA.alcadaInicial, 0, false)
-  }, [])
+    onLlesta()
+  }, [onLlesta])
 
   // data-moviment al contenidor: «si» mentre la càmera es mou, «no» quan s'atura.
   // Ho fan servir les proves (i no provoca cap render de React).

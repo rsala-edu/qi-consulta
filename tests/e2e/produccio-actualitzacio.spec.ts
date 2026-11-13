@@ -40,9 +40,11 @@ const nomesEscriptori = (nom: string) => nom === 'escriptori'
 // oxlint-disable-next-line no-empty-pattern
 test.beforeAll(({}, info) => {
   if (!nomesEscriptori(info.project.name)) return
-  for (const v of ['prova-a', 'prova-b']) {
+  // La C té tots els trossos amb un altre nom (com una versió amb el codi canviat):
+  // els de l'A ja no hi són
+  for (const v of ['prova-a', 'prova-b', 'prova-c']) {
     execSync(`npx vite build --outDir ${join(DIR, v)} --emptyOutDir`, {
-      env: { ...process.env, ...ENTORN_PROVES, VITE_VERSIO_APP: v },
+      env: { ...process.env, ...ENTORN_PROVES, VITE_VERSIO_APP: v, ...(v === 'prova-c' ? { QI_SAL_TROSSOS: 'c' } : {}) },
       stdio: 'ignore',
     })
   }
@@ -123,4 +125,40 @@ test('una versió nova es detecta amb l\'app oberta (sense recarregar), s\'actua
   expect(await versioVisible(page)).toBe('Qi prova-a')
   await menu(page, 'Pacients').click()
   await expect(page.getByRole('link', { name: /Aina Provencal Inventada/ })).toBeVisible()
+})
+
+test.describe('un tros de l\'app que ja no és al servidor', () => {
+  // Una pestanya que el service worker encara no controla (la primera vegada
+  // que s'obre l'app, o si el navegador l'ha esborrat): els trossos van al servidor
+  test.use({ serviceWorkers: 'block' })
+
+  test('es publica una versió nova (sense els fitxers vells) amb l\'app oberta i s\'obre el Mapa: es recarrega sola amb la nova i la llista es veu', async ({ page }) => {
+    test.skip(!nomesEscriptori(test.info().project.name), 'Una vegada n\'hi ha prou')
+    publicada = 'prova-a'
+    await page.goto(ARREL)
+    await continuarAmbGoogle(page)
+    await page.getByLabel('Contrasenya', { exact: true }).fill(P)
+    await page.getByLabel('Repeteix la contrasenya').fill(P)
+    await page.getByRole('button', { name: 'Crear i entrar' }).click()
+    await menu(page, 'Pacients').click()
+    await page.getByRole('link', { name: 'Nou pacient' }).click()
+    await page.getByLabel('Nom', { exact: true }).fill('Aina')
+    await page.getByLabel('Llinatges').fill('Provencal Inventada')
+    await page.getByRole('button', { name: 'Desar' }).first().click()
+    await expect(page.getByRole('heading', { name: 'Aina Provencal Inventada' })).toBeVisible()
+
+    // Es publica la C: els trossos de l'A (el del Mapa, encara no carregat) ja no hi són
+    publicada = 'prova-c'
+    const recarrega = page.waitForEvent('load')
+    await menu(page, 'Mapa').click()
+    await recarrega
+    // La C, sense cap pantalla mig buida: l'app s'obre i el Mapa hi és
+    await desbloquejar(page)
+    await expect(page.getByRole('searchbox', { name: /Cerca un punt/ })).toBeVisible()
+    expect(await versioVisible(page)).toBe('Qi prova-c')
+    await menu(page, 'Pacients').click()
+    const aina = page.getByRole('list', { name: 'Pacients' }).getByRole('link', { name: /Aina Provencal Inventada/ })
+    await expect(aina).toBeVisible()
+    await expect(aina).toBeInViewport()
+  })
 })

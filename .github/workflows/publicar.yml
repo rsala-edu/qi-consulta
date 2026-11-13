@@ -51,7 +51,12 @@ jobs:
           # SHA-256 dels correus que poden entrar, separats per comes (variable
           # del repositori; mai els correus en clar)
           VITE_HASHOS_CORREUS_PERMESOS: ${{ vars.HASHOS_CORREUS_PERMESOS }}
-      - uses: actions/configure-pages@v6
+      - id: pages
+        uses: actions/configure-pages@v6
+      # Els trossos de la versió publicada ara es conserven una publicació més:
+      # les pestanyes obertes amb aquella versió encara els poden carregar
+      - name: Conservar els trossos de la versió anterior
+        run: node scripts/conservar-anteriors.mjs dist "${{ steps.pages.outputs.base_url }}"
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

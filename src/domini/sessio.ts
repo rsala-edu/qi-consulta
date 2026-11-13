@@ -47,7 +47,18 @@ export const esquemaDadesSessio = z.object({
   finalAt: z.string().nullable(),
   estat: z.enum(ESTATS_SESSIO),
   /** Temporitzador de retenció: quan s'han posat les agulles i quants minuts */
-  retencio: z.object({ iniciAt: z.string().nullable(), minuts: z.number().int().min(1).max(120) }),
+  retencio: z.object({
+    iniciAt: z.string().nullable(),
+    minuts: z.number().int().min(1).max(120),
+    /**
+     * (A7) Estones en marxa: una pausa tanca l'última (fi) i continuar n'obre
+     * una altra. «Tornar a començar» n'obre una amb reinici: el temps es compta
+     * des d'aquesta. Les sessions d'abans no en tenen: un sol tram des d'iniciAt
+     */
+    trams: z.array(z.object({ inici: z.string(), fi: z.string().nullable(), reinici: z.boolean().optional() })).optional(),
+    /** (A7) La doctora l'ha aturat abans d'hora */
+    aturadaAt: z.string().nullable().optional(),
+  }),
   comEsta: z.object({
     canvis: z.string(),
     /** Escala 0–10 del símptoma principal */
@@ -142,14 +153,84 @@ export function agullesQuadren(s: Pick<DadesSessio, 'agulles' | 'punts'>, retira
 
 // --- Temporitzador ----------------------------------------------------------
 
+type Retencio = DadesSessio['retencio']
+type Tram = NonNullable<Retencio['trams']>[number]
+
+/** Les estones en marxa (les sessions d'abans de l'A7: un sol tram des d'iniciAt) */
+export function tramsRetencio(r: Retencio): Tram[] {
+  return r.trams ?? (r.iniciAt ? [{ inici: r.iniciAt, fi: null }] : [])
+}
+
+/** Les estones que compten: des de l'últim «Tornar a començar» */
+function tramsQueCompten(r: Retencio): Tram[] {
+  const trams = tramsRetencio(r)
+  let des = 0
+  trams.forEach((t, i) => t.reinici && (des = i))
+  return trams.slice(des)
+}
+
+/** Mil·lisegons en marxa (sense les pauses), des de l'últim «Tornar a començar» */
+export function tempsTranscorregut(r: Retencio, ara: number): number {
+  return tramsQueCompten(r).reduce((suma, t) => suma + (t.fi ? Date.parse(t.fi) : ara) - Date.parse(t.inici), 0)
+}
+
 /**
  * Mil·lisegons que queden de retenció (negatiu: ja s'ha acabat), calculats a
- * partir de l'hora d'inici, mai amb un comptador: si la pantalla s'apaga, en
- * tornar continua bé. null: no s'ha començat.
+ * partir de les hores d'inici i de pausa, mai amb un comptador: si la pantalla
+ * s'apaga, en tornar continua bé. null: no s'ha començat.
  */
-export function tempsRestant(retencio: DadesSessio['retencio'], ara: number): number | null {
-  if (!retencio.iniciAt) return null
-  return Date.parse(retencio.iniciAt) + retencio.minuts * 60_000 - ara
+export function tempsRestant(r: Retencio, ara: number): number | null {
+  if (!r.iniciAt) return null
+  return r.minuts * 60_000 - tempsTranscorregut(r, ara)
+}
+
+export type EstatRetencio = 'perComencar' | 'enMarxa' | 'pausa' | 'acabada' | 'aturada'
+
+export function estatRetencio(r: Retencio, ara: number): EstatRetencio {
+  const restant = tempsRestant(r, ara)
+  if (restant === null) return 'perComencar'
+  if (r.aturadaAt) return 'aturada'
+  if (restant <= 0) return 'acabada'
+  return tramsRetencio(r).at(-1)?.fi ? 'pausa' : 'enMarxa'
+}
+
+/**
+ * L'hora d'inici que tindria si no hi hagués hagut pauses (per al registre de
+ * tota l'app: la pantalla de bloqueig i el so). Només si està en marxa (o
+ * acabada sense aturar-la): en pausa o aturada, null
+ */
+export function iniciEquivalent(r: Retencio, ara: number): string | null {
+  const estat = estatRetencio(r, ara)
+  if (estat !== 'enMarxa' && estat !== 'acabada') return null
+  const trams = tramsQueCompten(r)
+  const ultim = trams.at(-1)
+  if (!ultim || ultim.fi) return null
+  const abans = trams.slice(0, -1).reduce((suma, t) => suma + Date.parse(t.fi!) - Date.parse(t.inici), 0)
+  return new Date(Date.parse(ultim.inici) - abans).toISOString()
+}
+
+const tancarUltim = (trams: Tram[], ara: string): Tram[] =>
+  trams.map((t, i) => (i === trams.length - 1 && !t.fi ? { ...t, fi: ara } : t))
+
+/** Les accions del temporitzador (ara: ISO) */
+export const accionsRetencio = {
+  comencar: (r: Retencio, ara: string): Retencio => ({ ...r, iniciAt: ara, trams: [{ inici: ara, fi: null }], aturadaAt: null }),
+  pausar: (r: Retencio, ara: string): Retencio => ({ ...r, trams: tancarUltim(tramsRetencio(r), ara) }),
+  /** Després d'una pausa o d'aturar-lo */
+  continuar: (r: Retencio, ara: string): Retencio => ({
+    ...r,
+    trams: [...tancarUltim(tramsRetencio(r), ara), { inici: ara, fi: null }],
+    aturadaAt: null,
+  }),
+  aturar: (r: Retencio, ara: string): Retencio => ({ ...r, trams: tancarUltim(tramsRetencio(r), ara), aturadaAt: ara }),
+  /** Torna a comptar els minuts sencers (les estones d'abans es conserven) */
+  tornarAComencar: (r: Retencio, ara: string): Retencio => ({
+    ...r,
+    trams: [...tancarUltim(tramsRetencio(r), ara), { inici: ara, fi: null, reinici: true }],
+    aturadaAt: null,
+  }),
+  /** ±1 minut (entre 1 i 120) */
+  minuts: (r: Retencio, delta: number): Retencio => ({ ...r, minuts: Math.min(120, Math.max(1, r.minuts + delta)) }),
 }
 
 /** «27:59» (els segons que queden, arrodonits cap amunt) */

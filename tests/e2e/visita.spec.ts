@@ -240,6 +240,65 @@ test('retenció amb l\'app bloquejada: el temporitzador es veu sense cap dada, e
   expect(await sons(page)).toBe(1)
 })
 
+test('A7: temporitzador controlable: pausa, continuar, ±1 min, aturar i tornar a començar; es manté en sortir i tornar a la visita', async ({ page }) => {
+  await comptarSons(page)
+  await entrar(page)
+  // Bloqueig als 30 minuts (cap salt del rellotge hi arriba)
+  await menu(page, 'Ajustos').click()
+  await page.getByRole('link', { name: /Seguretat i còpia/ }).click()
+  await page.getByLabel('Bloquejar després de').selectOption('30')
+  await nouPacient(page, 'Clara', 'Pausa Inventada')
+  await novaCita(page, 'Clara', '2026-11-04', '10:00', 'Cervicàlgia')
+  await comencarVisita(page)
+  const rellotge = capcalera(page).getByRole('timer')
+  const controls = capcalera(page).getByRole('group', { name: 'Controls del temporitzador' })
+  await capcalera(page).getByRole('button', { name: 'Agulles posades: començar' }).click()
+  await page.clock.fastForward('10:00')
+  await expect(rellotge).toContainText(/Queden 1[78]:\d\d/)
+
+  // Pausa: el temps no corre, i la pantalla de bloqueig no en mostra cap
+  await controls.getByRole('button', { name: 'Pausa' }).click()
+  const enPausa = (await rellotge.textContent())!.match(/En pausa · (\d+:\d\d)/)![1]
+  await page.clock.fastForward('05:00')
+  await expect(rellotge).toContainText(`En pausa · ${enPausa}`)
+  await page.getByRole('button', { name: 'Bloquejar' }).click()
+  await expect(page.getByRole('button', { name: 'Desbloquejar' })).toBeVisible()
+  await expect(page.locator('.retencio-bloqueig')).toHaveCount(0)
+  await page.getByLabel('Contrasenya', { exact: true }).fill(P)
+  await page.getByRole('button', { name: 'Desbloquejar' }).click()
+
+  // Continuar, i un minut més i un de menys
+  await controls.getByRole('button', { name: 'Continuar' }).click()
+  await expect(rellotge).toContainText(`Queden ${enPausa}`)
+  await controls.getByRole('button', { name: 'Un minut més' }).click()
+  await expect(rellotge).toContainText(/Queden 1[89]:\d\d/)
+  await controls.getByRole('button', { name: 'Un minut menys' }).click()
+  await expect(rellotge).toContainText(/Queden 1[78]:\d\d/)
+
+  // Es desa a la sessió: en sortir i tornar a la visita, continua igual
+  await menu(page, 'Pacients').click()
+  await page.clock.fastForward('02:00')
+  await comencarVisita(page)
+  await expect(rellotge).toContainText(/Queden 1[56]:\d\d/)
+
+  // Aturar: «Retenció aturada», no sona ni es veu a la pantalla de bloqueig
+  await controls.getByRole('button', { name: 'Aturar' }).click()
+  await expect(rellotge).toContainText('Retenció aturada')
+  await page.clock.fastForward('20:00')
+  await expect(capcalera(page)).not.toHaveClass(/retencio-acabada/)
+  expect(await sons(page)).toBe(0)
+
+  // Tornar a començar: els minuts sencers; en acabar, sona un cop
+  await controls.getByRole('button', { name: 'Tornar a començar' }).click()
+  await expect(rellotge).toContainText(/Queden 2[78]:\d\d/)
+  await page.clock.fastForward('28:30')
+  await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
+  await expect.poll(() => sons(page)).toBe(1)
+  // Acabada: es pot allargar un minut
+  await controls.getByRole('button', { name: 'Un minut més' }).click()
+  await expect(rellotge).toContainText(/Queden 0:[0-3]\d/)
+})
+
 test('retenció acabada amb l\'app oberta: la capçalera passa a cinabri, sona un cop i no surt cap franja', async ({ page }) => {
   await comptarSons(page)
   await entrar(page)

@@ -4,6 +4,9 @@
 import { type Page } from '@playwright/test'
 import { continuarAmbGoogle, expect as expectBase, test } from './google.js'
 
+// Proves del cos 3D: amb WebGL (per programari)
+test.use({ cos3D: true })
+
 const CONTRASENYA = 'contrasenya-de-prova-e2e'
 
 // La primera càrrega de Three.js (en mode de desenvolupament) i el WebGL per

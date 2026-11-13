@@ -786,8 +786,9 @@ test('m) finestra privada: avís fix; si es tanca amb canvis pendents, el navega
   const altra = await dispositiu(browser, info, mon, 'incognit2', 'pc')
   await altra.page.goto('/qi-consulta/')
   await expect(altra.page.getByRole('button', { name: 'Continuar amb Google' })).toBeVisible()
-  // (només la frase d'entrada que aquesta mateixa finestra acaba d'escriure)
-  expect(await altra.page.evaluate(() => Object.keys(localStorage))).toEqual(['qi.fraseAnterior'])
+  // (només la frase d'entrada que aquesta mateixa finestra acaba d'escriure,
+  // i la clau de les proves que hi posa la fixture: prepararProves)
+  expect(await altra.page.evaluate(() => Object.keys(localStorage).filter((k) => !k.startsWith('qi:proves:')))).toEqual(['qi.fraseAnterior'])
   expect((await basesDeDades(altra.page)).filter((b) => b.startsWith('qi'))).toEqual([])
   // …i la cita és a Drive
   await altra.page.getByRole('button', { name: 'Continuar amb Google' }).click()

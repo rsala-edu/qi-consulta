@@ -29,5 +29,8 @@ playwright-report
 blob-report
 coverage
 
+# Build de les proves E2E (vite build --mode proves)
+dist-proves
+
 # Captures de revisió del disseny: només a la pàgina «Captures de Qi», no al repositori
 docs/captures/disseny/
