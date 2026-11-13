@@ -52,14 +52,22 @@ export function CompararSessions({ sessions }: { sessions: readonly SessioEvoluc
     </label>
   )
 
-  const fila = (nom: string, d: DiferenciaValor, unitat = (n: number) => String(n)) => (
+  // Verd i cinabri només a les escales (baixar és millorar); la retenció, en neutre
+  const fila = (nom: string, d: DiferenciaValor, unitat = (n: number) => String(n), neutre = false) => (
     <div className="fila-comparar" key={nom}>
       <span className="nom-fila">{nom}</span>
       <span>{d.abans === null ? '—' : unitat(d.abans)}</span>
       <span>
         {d.despres === null ? '—' : unitat(d.despres)}
         {d.diferencia !== null && d.diferencia !== 0 && (
-          <span className={`dif ${d.diferencia < 0 ? 'baixa' : 'puja'}`}> {formatar(e.diferencia, { signe: '', n: ambSigne(d.diferencia) })}</span>
+          <span className={`dif ${neutre ? 'neutre' : d.diferencia < 0 ? 'baixa' : 'puja'}`}>
+            {' '}
+            {formatar(e.diferencia, {
+              signe: '',
+              // Retenció: «(+8 min)»; escales: «(−5)»
+              n: neutre ? `${d.diferencia > 0 ? '+' : '−'}${unitat(Math.abs(d.diferencia))}` : ambSigne(d.diferencia),
+            })}
+          </span>
         )}
       </span>
     </div>
@@ -139,7 +147,7 @@ export function CompararSessions({ sessions }: { sessions: readonly SessioEvoluc
       )}
 
       <h5>{e.seccions.retencio}</h5>
-      {fila(e.retencio, c.retencio, (n) => formatar(e.minuts, { n: String(n) }))}
+      {fila(e.retencio, c.retencio, (n) => formatar(e.minuts, { n: String(n) }), true)}
       <div className="fila-comparar">
         <span className="nom-fila">{e.incidencies}</span>
         <span>{c.incidencies.abans || e.capIncidencia}</span>

@@ -94,46 +94,28 @@ function EpisodiAmbSessions({
         <h3>{episodi.motiu}</h3>
         <span className={`etiqueta etiqueta-episodi-${episodi.estat}`}>{tr.estats[episodi.estat]}</span>
         <span className="detall">{diaLlarg(episodi.dataInici)}</span>
+        {/* «Tancar l'episodi», al costat del seu estat */}
+        {episodi.estat === 'actiu' && !tancant && (
+          <Boto
+            variant="secundari"
+            className="tancar-episodi-boto"
+            onClick={() => {
+              // Es proposa un resum a partir de les sessions (es pot editar)
+              setNota((n) => n || textResumTancament(resumTancament(sessions)))
+              setTancant(true)
+            }}
+          >
+            {tr.tancarEpisodi}
+          </Boto>
+        )}
       </header>
-      {sessions.length === 0 ? (
-        <p className="detall">{tr.capSessio}</p>
-      ) : (
-        <section className="sessions-episodi" aria-label={ev.sessions}>
-          <div className="capcalera-sessions">
-            <h4>{ev.sessions}</h4>
-            {sessions.length > 1 && (
-              <Boto variant="secundari" aria-expanded={comparant} onClick={() => setComparant((x) => !x)}>
-                {comparant ? ev.tancarComparacio : ev.comparar}
-              </Boto>
-            )}
-          </div>
-          {comparant && <CompararSessions sessions={sessions} />}
-          <Cronologia sessions={sessions} addendes={addendes} enCurs={enCurs} />
-        </section>
-      )}
-      <details className="apartat-evolucio" open={episodi.estat === 'actiu'}>
-        <summary>
-          <h4>{ev.titol}</h4>
-        </summary>
-        <Evolucio sessions={sessions} sessionsPacient={sessionsPacient} valoracions={valoracions} />
-      </details>
       {episodi.estat !== 'actiu' ? (
         <p className="detall">
           {episodi.dataFinal && formatar(tr.tancat, { dia: diaLlarg(episodi.dataFinal) })}
           {episodi.notaFinal && ` · ${episodi.notaFinal}`}
         </p>
-      ) : !tancant ? (
-        <Boto
-          variant="discret"
-          onClick={() => {
-            // Es proposa un resum a partir de les sessions (es pot editar)
-            setNota((n) => n || textResumTancament(resumTancament(sessions)))
-            setTancant(true)
-          }}
-        >
-          {tr.tancarEpisodi}
-        </Boto>
       ) : (
+        tancant && (
         <div className="formulari tancar-episodi">
           <Camp etiqueta={tr.estatFinal}>
             <select value={estat} onChange={(e) => setEstat(e.target.value as EstatEpisodi)}>
@@ -163,7 +145,30 @@ function EpisodiAmbSessions({
             </Boto>
           </div>
         </div>
+        )
       )}
+      {sessions.length === 0 ? (
+        <p className="detall">{tr.capSessio}</p>
+      ) : (
+        <section className="sessions-episodi" aria-label={ev.sessions}>
+          <div className="capcalera-sessions">
+            <h4>{ev.sessions}</h4>
+            {sessions.length > 1 && (
+              <Boto variant="secundari" aria-expanded={comparant} onClick={() => setComparant((x) => !x)}>
+                {comparant ? ev.tancarComparacio : ev.comparar}
+              </Boto>
+            )}
+          </div>
+          {comparant && <CompararSessions sessions={sessions} />}
+          <Cronologia sessions={sessions} addendes={addendes} enCurs={enCurs} />
+        </section>
+      )}
+      <details className="apartat-evolucio" open={episodi.estat === 'actiu'}>
+        <summary>
+          <h4>{ev.titol}</h4>
+        </summary>
+        <Evolucio sessions={sessions} sessionsPacient={sessionsPacient} valoracions={valoracions} />
+      </details>
     </article>
   )
 }

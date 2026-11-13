@@ -334,11 +334,11 @@ function Visita({
           </h1>
           {/* L'hora d'inici, en passar-hi per sobre: la capçalera cap en una sola fila */}
           <p className="detall" title={formatar(v.inici, { hora: new Date(dades.iniciAt).toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' }) })}>
-            {/* «Lumbàlgia · Seguiment · Sessió 5 de 10» */}
+            {/* «Sessió 5 de 10 · Lumbàlgia · Seguiment»: la sessió primer, perquè no es talli mai */}
             {[
+              pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) }),
               episodi ? nomEpisodi(episodi, motiusCites) : '',
               tipusCita ? t.cites.tipusNoms[tipusCita] : '',
-              pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) }),
             ]
               .filter(Boolean)
               .join(' · ')}

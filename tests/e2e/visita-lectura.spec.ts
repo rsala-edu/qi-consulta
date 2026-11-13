@@ -70,11 +70,11 @@ test('capçalera: l\'episodi i el tipus real de la cita, encara que la primera c
   // La primera cita, sense motiu
   await novaCita(page, 'Laia', '2026-11-04', '10:00')
   await comencarVisita(page)
-  await expect(capcalera(page).locator('.qui-visita p')).toHaveText('Primera visita · Sessió 1')
+  await expect(capcalera(page).locator('.qui-visita p')).toHaveText('Sessió 1 · Primera visita')
   await finalitzar(page)
   await novaCita(page, 'Laia', '2026-11-04', '12:00', 'Lumbàlgia')
   await comencarVisita(page)
-  await expect(capcalera(page).locator('.qui-visita p')).toHaveText('Lumbàlgia · Seguiment · Sessió 2')
+  await expect(capcalera(page).locator('.qui-visita p')).toHaveText('Sessió 2 · Lumbàlgia · Seguiment')
   // L'episodi també agafa el motiu (fitxa del pacient)
   await menu(page, 'Pacients').click()
   await page.getByRole('link', { name: /Laia Capçalera Inventada/ }).click()

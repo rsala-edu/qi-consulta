@@ -5498,6 +5498,12 @@ fieldset {
   font-weight: 600;
 }
 
+/* La retenció no és ni millor ni pitjor */
+.dif.neutre {
+  color: var(--tinta-suau);
+  font-weight: 600;
+}
+
 .columnes-comparar {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5671,4 +5677,12 @@ fieldset {
 
 .pantalla-visita.ampliat .navegacio-pestanyes {
   display: none;
+}
+
+/* «Tancar l'episodi», a la capçalera de l'episodi, al costat del seu estat */
+.capcalera-episodi .tancar-episodi-boto {
+  margin-left: auto;
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.9rem;
 }
