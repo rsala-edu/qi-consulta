@@ -10,6 +10,8 @@
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { useParams } from 'react-router'
 import { Minigrafic } from '../../evolucio/Minigrafic'
+import { nomEpisodi } from '../../domini/episodi'
+import type { TipusCita } from '../../domini/cita'
 import { BarraEscala } from '../../components/BarraEscala'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
@@ -93,6 +95,13 @@ export function PantallaVisita() {
       llegirAjustosCatalegs(db),
       magatzem.obtenirFitxaClinica(sessio.pacientId),
     ])
+    // La cita (el tipus real: primera visita o seguiment) i els motius de les cites de l'episodi
+    const cites = await magatzem.citesDelPacient(sessio.pacientId)
+    const cita = cites.find((c) => c.id === sessio.citaId) ?? null
+    const motiusCites = cites
+      .filter((c) => c.episodiId === sessio.episodiId)
+      .sort((a, b) => a.inici.localeCompare(b.inici))
+      .map((c) => c.motiu)
     // El MYMOP més recent de l'episodi (per comparar i per repetir els símptomes triats)
     const mymopAnterior =
       sessions.filter((s) => s.episodiId === sessio.episodiId && s.id !== id && s.iniciAt < sessio.iniciAt && s.mymop).at(-1)?.mymop ?? null
@@ -112,6 +121,8 @@ export function PantallaVisita() {
       episodi,
       anterior,
       escalesAnteriors,
+      tipusCita: cita?.tipus ?? null,
+      motiusCites,
       ajustos,
       addendes,
       conflictes,
@@ -139,6 +150,8 @@ function Visita({
   episodi,
   anterior,
   escalesAnteriors,
+  tipusCita,
+  motiusCites,
   ajustos,
   addendes,
   conflictes,
@@ -154,6 +167,8 @@ function Visita({
   episodi: Awaited<ReturnType<ReturnType<typeof useMagatzem>['obtenirEpisodi']>>
   anterior: Sessio | null
   escalesAnteriors: (number | null)[]
+  tipusCita: TipusCita | null
+  motiusCites: string[]
   ajustos: Awaited<ReturnType<typeof llegirAjustosVisita>>
   addendes: Awaited<ReturnType<ReturnType<typeof useMagatzem>['addendesDe']>>
   conflictes: CampEnConflicte[]
@@ -197,6 +212,12 @@ function Visita({
     codiCim,
   )
   const pestanyes = PESTANYES.filter((p) => p !== 'orl' || ambOrl)
+  const canviarPestanya = (p: Pestanya) => {
+    setPestanya(p)
+    // En tornar a «Com està», només es veuen els secundaris que tenen alguna cosa
+    setSecundaris(0)
+    setAfegit(false)
+  }
   // Si es treu el mòdul ORL amb la pestanya oberta, es torna a la valoració
   if (pestanya === 'orl' && !ambOrl) setPestanya('valoracio')
   // El pla de tractament de l'episodi (es pot canviar a la pestanya Diagnòstic)
@@ -278,6 +299,8 @@ function Visita({
   )
 
   const editable = !bloquejada
+  // «Afegir una addenda» (al costat de l'avís de sessió tancada): el formulari, just a sota
+  const [addendaOberta, setAddendaOberta] = useState(false)
   // Símptomes secundaris a la vista: els que ja tenen alguna cosa, o els que s'han afegit
   const ambSecundari = (k: 'secundari1' | 'secundari2') => dades.comEsta[k].nom.trim() !== '' || dades.comEsta[k].escala !== null
   const [secundarisAfegits, setSecundaris] = useState(0)
@@ -311,8 +334,14 @@ function Visita({
           </h1>
           {/* L'hora d'inici, en passar-hi per sobre: la capçalera cap en una sola fila */}
           <p className="detall" title={formatar(v.inici, { hora: new Date(dades.iniciAt).toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' }) })}>
-            {episodi?.motiu ?? ''} ·{' '}
-            {pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) })}
+            {/* «Lumbàlgia · Seguiment · Sessió 5 de 10» */}
+            {[
+              episodi ? nomEpisodi(episodi, motiusCites) : '',
+              tipusCita ? t.cites.tipusNoms[tipusCita] : '',
+              pla?.sessions ? formatar(v.sessioDe, { n: String(dades.numero), total: String(pla.sessions) }) : formatar(v.sessio, { n: String(dades.numero) }),
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           </p>
         </div>
         {enCurs && (
@@ -326,9 +355,12 @@ function Visita({
           />
         )}
         <div className="accions-visita">
-          <span className="detall" role="status">
-            {desant ? v.desant : pendent ? '' : v.desat}
-          </span>
+          {/* Una sessió tancada no es desa: no hi ha res a dir */}
+          {editable && (
+            <span className="detall" role="status">
+              {desant ? v.desant : pendent ? '' : v.desat}
+            </span>
+          )}
           {enCurs && editable && (
             <Boto onClick={() => setFinalitzant((f) => !f)} aria-expanded={finalitzant}>
               {v.finalitzar}
@@ -358,9 +390,19 @@ function Visita({
       )}
 
       {!enCurs && (
-        <p className="avis" role="status">
-          {bloquejada ? v.nomesLectura : fins ? `${v.tancada} ${formatar(v.editableFins, { quan: quanEs(fins, new Date()) })}` : v.tancada}
-        </p>
+        <div className="avis-sessio-tancada">
+          <p className="avis" role="status">
+            {bloquejada ? v.nomesLectura : fins ? `${v.tancada} ${formatar(v.editableFins, { quan: quanEs(fins, new Date()) })}` : v.tancada}
+          </p>
+          {bloquejada && !addendaOberta && (
+            <Boto variant="secundari" onClick={() => setAddendaOberta(true)}>
+              {v.afegirAddendaBoto}
+            </Boto>
+          )}
+        </div>
+      )}
+      {!enCurs && bloquejada && addendaOberta && (
+        <Addendes sessioId={sessio.id} addendes={addendes} bloquejada={bloquejada} onAfegida={onRecarregar} autoFocus onTancar={() => setAddendaOberta(false)} />
       )}
 
       <RevisioConflictes
@@ -386,12 +428,7 @@ function Visita({
             id={`pestanya-${p}`}
             aria-controls={`visita-${p}`}
             aria-selected={pestanya === p}
-            onClick={() => {
-              setPestanya(p)
-              // En tornar a «Com està», només es veuen els secundaris que tenen alguna cosa
-              setSecundaris(0)
-              setAfegit(false)
-            }}
+            onClick={() => canviarPestanya(p)}
           >
             {v.pestanyes[p]}
           </button>
@@ -412,6 +449,7 @@ function Visita({
             valoracions={valoracions}
             conflictes={conflictesValoracio}
             grups={pestanya === 'diagnostic' ? [DIAGNOSTIC] : pestanya === 'orl' ? [ORL] : GRUPS_VALORACIO}
+            nom={pestanya === 'diagnostic' || pestanya === 'orl' ? v.pestanyes[pestanya] : undefined}
             orlActiu={ambOrl}
             ajustos={catalegs}
             sexe={pacient?.sexe}
@@ -427,7 +465,8 @@ function Visita({
           )}
       </section>
 
-      <fieldset className="contingut-visita" disabled={!editable}>
+      {/* Tancada: tot es pot consultar. Al mapa (Tractament) es pot mirar (vistes, zoom, fitxes, marcats) però no marcar */}
+      <fieldset className="contingut-visita" disabled={!editable && pestanya !== 'tractament'}>
         {pestanya === 'comEsta' && (
           <section id="visita-comEsta" role="tabpanel" aria-labelledby="pestanya-comEsta" className="panell">
             <Camp etiqueta={v.canvis}>
@@ -514,6 +553,7 @@ function Visita({
           <section id="visita-tractament" role="tabpanel" aria-labelledby="pestanya-tractament" className="panell tractament-visita">
             <div className="pantalla-mapa mapa-visita">
               <MapaTractament
+                nomesLectura={!editable}
                 marcats={marcats}
                 setMarcats={setMarcats}
                 barra={<Tractament dades={dades} anterior={anterior} setDades={setDades} controlAgulles={ajustos.controlAgulles} editable={editable} />}
@@ -558,7 +598,24 @@ function Visita({
 
       {pestanya === 'tancar' && <ProperaCita sessio={sessio} />}
 
-      {!enCurs && <Addendes sessioId={sessio.id} addendes={addendes} bloquejada={bloquejada} onAfegida={onRecarregar} />}
+      <NavegacioPestanyes
+        pestanyes={pestanyes}
+        actual={pestanya}
+        onAnar={(p) => {
+          canviarPestanya(p)
+          window.scrollTo(0, 0)
+        }}
+        onFinalitzar={
+          enCurs && editable
+            ? () => {
+                setFinalitzant(true)
+                window.scrollTo(0, 0)
+              }
+            : undefined
+        }
+      />
+
+      {!enCurs && !addendaOberta && <Addendes sessioId={sessio.id} addendes={addendes} bloquejada={bloquejada} onAfegida={onRecarregar} />}
 
     </main>
   )
@@ -635,6 +692,7 @@ function Tractament({
           <Boto
             variant="discret"
             aria-label={`${v.agullesPosades}: −1`}
+            disabled={!editable}
             onClick={() => setDades((d) => ({ ...d, agulles: { ...d.agulles, posades: Math.max(0, agullesPosades(d) - 1) } }))}
           >
             −
@@ -643,6 +701,7 @@ function Tractament({
           <Boto
             variant="discret"
             aria-label={`${v.agullesPosades}: +1`}
+            disabled={!editable}
             onClick={() => setDades((d) => ({ ...d, agulles: { ...d.agulles, posades: agullesPosades(d) + 1 } }))}
           >
             +
@@ -712,22 +771,66 @@ function Finalitzar({
   )
 }
 
+/**
+ * Al final de cada pestanya: «← Anterior: Com està» i «Següent: Exploració →»,
+ * perquè no calgui pujar fins a les pestanyes. A l'última, «Finalitzar visita».
+ */
+function NavegacioPestanyes({
+  pestanyes,
+  actual,
+  onAnar,
+  onFinalitzar,
+}: {
+  pestanyes: readonly Pestanya[]
+  actual: Pestanya
+  onAnar(p: Pestanya): void
+  onFinalitzar?(): void
+}) {
+  const v = t.visita
+  const i = pestanyes.indexOf(actual)
+  const anterior = pestanyes[i - 1]
+  const seguent = pestanyes[i + 1]
+  return (
+    <nav className="navegacio-pestanyes" aria-label={v.navegacioPestanyes}>
+      {anterior ? (
+        <Boto variant="discret" onClick={() => onAnar(anterior)}>
+          {formatar(v.anteriorPestanya, { nom: v.pestanyes[anterior] })}
+        </Boto>
+      ) : (
+        <span />
+      )}
+      {seguent ? (
+        <Boto variant="secundari" onClick={() => onAnar(seguent)}>
+          {formatar(v.seguentPestanya, { nom: v.pestanyes[seguent] })}
+        </Boto>
+      ) : (
+        onFinalitzar && <Boto onClick={onFinalitzar}>{v.finalitzar}</Boto>
+      )}
+    </nav>
+  )
+}
+
 function Addendes({
   sessioId,
   addendes,
   bloquejada,
   onAfegida,
+  autoFocus = false,
+  onTancar,
 }: {
   sessioId: string
   addendes: readonly { id: string; text: string; at: string }[]
   bloquejada: boolean
   onAfegida(): void
+  autoFocus?: boolean
+  /** Formulari obert des de l'avís: es pot tancar */
+  onTancar?(): void
 }) {
   const magatzem = useMagatzem()
   const [text, setText] = useState('')
   const v = t.visita
   return (
-    <section className="panell addendes" aria-label={v.addendes}>
+    <section className={`panell addendes${onTancar ? ' addenda-oberta' : ''}`} aria-label={v.addendes}>
       <h2>{v.addendes}</h2>
       {addendes.length === 0 ? (
         <p className="detall">{v.capAddenda}</p>
@@ -743,7 +846,7 @@ function Addendes({
       {bloquejada && (
         <>
           <Camp etiqueta={v.novaAddenda}>
-            <textarea rows={2} value={text} onChange={(e) => setText(e.target.value)} />
+            <textarea rows={2} value={text} autoFocus={autoFocus} onChange={(e) => setText(e.target.value)} />
           </Camp>
           <Boto
             variant="secundari"
@@ -757,6 +860,11 @@ function Addendes({
           >
             {v.afegirAddenda}
           </Boto>
+          {onTancar && (
+            <Boto variant="discret" onClick={onTancar}>
+              {t.mapa.tancar}
+            </Boto>
+          )}
         </>
       )}
     </section>

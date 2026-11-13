@@ -2,7 +2,7 @@
 // objectius, tècniques previstes i data de revisió. Es desa sol a l'episodi;
 // les sessions previstes surten a la capçalera de la visita («Sessió 4 de 10»).
 
-import { useId } from 'react'
+import { useId, useMemo } from 'react'
 import { Xip } from '../../cataleg/components/Cataleg'
 import { FREQUENCIES_PLA, PLA_BUIT, TECNIQUES_PLA, type DadesEpisodi, type Episodi, type Pla } from '../../domini/episodi'
 import { t } from '../../i18n/t'
@@ -19,8 +19,12 @@ const dadesDe = (e: Episodi): DadesEpisodi => {
 export function PlaTractament({ episodi, editable, onPla }: { episodi: Episodi; editable: boolean; onPla(pla: Pla | null): void }) {
   const magatzem = useMagatzem()
   const id = useId()
+  // Estable entre renders: si fos un objecte nou a cada render, en acabar de
+  // desar es prendria l'episodi d'en obrir la visita per una versió nova i es
+  // tornarien a veure els valors d'abans (el pla «no es deixava canviar»)
+  const desat = useMemo(() => dadesDe(episodi), [episodi])
   const { dades, setDades, desant, pendent } = useAutodesat<DadesEpisodi>(
-    dadesDe(episodi),
+    desat,
     async (d, inicial) => {
       const desat = dadesDe(await magatzem.actualitzarEpisodi(episodi.id, d, inicial))
       onPla(desat.pla)

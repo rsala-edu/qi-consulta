@@ -84,7 +84,8 @@ test('visita: capçalera en una fila, escala en barra, secundaris a demanda i Tr
   const desplacament = await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight)
   expect(desplacament).toBeLessThanOrEqual(1)
   const visor = (await page.locator('.mapa-visita .zona-visor').first().boundingBox())!
-  expect(visor.y + visor.height).toBeGreaterThan((page.viewportSize()!.height) * 0.8)
+  // (a sota hi ha la barra de les vistes i, des del bloc 3, «Anterior / Següent»)
+  expect(visor.y + visor.height).toBeGreaterThan((page.viewportSize()!.height) * 0.72)
   // La barra fina, sobre el mapa
   await expect(page.locator('.capcalera-mapa .barra-tractament')).toBeVisible()
 
@@ -217,6 +218,13 @@ test.describe('tauleta vertical', () => {
     expect(barra.height).toBeLessThan(60)
     await expect(page.getByRole('button', { name: 'Tot el cos' })).toBeInViewport({ ratio: 1 })
 
+    // La llista de marcats (a sota del mapa, dins la mateixa zona) té alçada i s'hi arriba
+    await page.getByRole('tab', { name: /Marcats/ }).click()
+    const llista = page.getByRole('region', { name: 'Punts marcats' })
+    await llista.scrollIntoViewIfNeeded()
+    expect((await llista.boundingBox())!.height).toBeGreaterThan(30)
+    await expect(llista.getByText('Encara no hi ha cap punt marcat.').or(llista.locator('.detall')).first()).toBeInViewport()
+    await page.getByRole('tab', { name: /Punt/ }).first().click()
     // I el cos sencer l'omple
     await expect(visor).toHaveAttribute('data-moviment', 'no', { timeout: 15_000 })
     expect(await ocupacioCos(page)).toBeGreaterThan(0.83)

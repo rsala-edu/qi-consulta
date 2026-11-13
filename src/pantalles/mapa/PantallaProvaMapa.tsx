@@ -72,6 +72,7 @@ export function MapaTractament({
   setMarcats,
   tecniques = TECNIQUES_DEL_MAPA.cos,
   nomesCos = false,
+  nomesLectura = false,
 }: {
   titol?: ReactNode
   avis?: ReactNode
@@ -85,6 +86,11 @@ export function MapaTractament({
   tecniques?: readonly Tecnica[]
   /** Sense la pestanya de l'orella (palpació) */
   nomesCos?: boolean
+  /**
+   * Sessió tancada: es pot mirar tot (vistes, zoom, la fitxa de cada punt, la
+   * llista de marcats) però no es pot marcar ni treure res
+   */
+  nomesLectura?: boolean
 }) {
   const carrega = useModelCos()
   const [pestanya, setPestanya] = useState<Mapa>('cos')
@@ -128,11 +134,19 @@ export function MapaTractament({
           onVeure={veure}
           tecniques={tecniques}
           cantonada={cantonada}
+          nomesLectura={nomesLectura}
         />
       </div>
       {pestanya === 'orella' && (
         <div id="mapa-orella" role="tabpanel" aria-labelledby="pestanya-orella" className="panell-pestanya">
-          <MarcatgeOrella marcats={marcats} setMarcats={setMarcats} peticio={peticions.orella} onVeure={veure} cantonada={cantonada} />
+          <MarcatgeOrella
+            marcats={marcats}
+            setMarcats={setMarcats}
+            peticio={peticions.orella}
+            onVeure={veure}
+            cantonada={cantonada}
+            nomesLectura={nomesLectura}
+          />
         </div>
       )}
     </>
@@ -164,9 +178,10 @@ interface PropsMarcatge {
   onVeure(m: PuntMarcat): void
   tecniques: readonly Tecnica[]
   cantonada?: ReactNode
+  nomesLectura?: boolean
 }
 
-function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tecniques: TECNIQUES, cantonada }: PropsMarcatge) {
+function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tecniques: TECNIQUES, cantonada, nomesLectura = false }: PropsMarcatge) {
   const visor = useRef<ControlVisor>(null)
   const { efectiu: calibrat, desar, restablir } = useCalibracions(model?.topologia ?? '')
   const { revisio } = usePrecaucions()
@@ -466,6 +481,7 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
                   type="button"
                   role="radio"
                   aria-checked={fitxa.costat === c}
+                  disabled={nomesLectura}
                   onClick={() => setFitxa({ ...fitxa, costat: c })}
                 >
                   {t.mapa.costat[c]}
@@ -480,6 +496,7 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
                   role="radio"
                   className={nomAmple(t.mapa.tecnica[tec])}
                   aria-checked={fitxa.tecnica === tec}
+                  disabled={nomesLectura}
                   onClick={() => setFitxa({ ...fitxa, tecnica: tec })}
                 >
                   <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
@@ -489,6 +506,7 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
             </div>
             <div className="accions accions-esquerra">
               <Boto
+                disabled={nomesLectura}
                 onClick={() => {
                   setMarcats((l) => marcar(l, nouPuntMarcat(fitxa.codi, fitxa.costat, fitxa.tecnica)))
                   setFitxa(null)
@@ -499,6 +517,7 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
               {jaMarcat && (
                 <Boto
                   variant="secundari"
+                  disabled={nomesLectura}
                   onClick={() => {
                     setMarcats((l) => desmarcar(l, fitxa.codi))
                     setFitxa(null)
@@ -549,8 +568,8 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
             setPestanyaPanell('punt')
             onVeure(m)
           }}
-          onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
-          onTreureTots={() => setMarcats([])}
+          onTreure={nomesLectura ? undefined : (m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
+          onTreureTots={nomesLectura ? undefined : () => setMarcats([])}
         />
         }
       />

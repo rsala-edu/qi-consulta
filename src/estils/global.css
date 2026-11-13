@@ -879,7 +879,11 @@ fieldset {
   }
 
   .panell-mapa .panell-lateral,
-  .panell-mapa > .llista-marcats-seccio {
+  .panell-mapa > .llista-marcats-seccio,
+  /* La llista de marcats també pren l'alçada que necessita (si no, a la
+     tauleta vertical quedava amb alçada zero sota «Punt / Marcats») */
+  .panell-mapa .panell-lateral-marcats > .llista-marcats-seccio,
+  .panell-mapa .llista-marcats-desplacament {
     flex: none;
     min-height: auto;
   }
@@ -2193,6 +2197,11 @@ fieldset {
 }
 
 .indicador-copia {
+  /* Amplada fixa: canviar de text («Al dia» ↔ «2 pendents») no mou res de la barra */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 8.6rem;
   border: 1px solid var(--linia);
   background: transparent;
   border-radius: 999px;
@@ -2200,12 +2209,36 @@ fieldset {
   font-size: 0.8rem;
   color: var(--tinta-suau);
   min-height: 36px;
-  padding: 0 14px;
+  padding: 0 12px;
   cursor: pointer;
   white-space: nowrap;
-  max-width: 100%;
+}
+
+.indicador-copia .text-copia {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.nuvol-copia {
+  flex: none;
+}
+
+.punt-copia {
+  stroke: var(--fons);
+  stroke-width: 1.5;
+}
+
+.punt-copia.be {
+  fill: #3f9a6b;
+}
+
+.punt-copia.pendent {
+  fill: #d29a2a;
+}
+
+.punt-copia.malament {
+  fill: var(--avis);
 }
 
 .indicador-copia.estat-cal-connectar,
@@ -2980,6 +3013,11 @@ fieldset {
   font-weight: 600;
 }
 
+.indicador-copia.estat-sense-copia .punt-copia {
+  fill: var(--paper, #fff);
+  stroke: var(--avis);
+}
+
 .panell-copia .avis-fort,
 .avis-sense-copia strong {
   color: var(--avis);
@@ -3184,10 +3222,10 @@ fieldset {
 }
 
 .simptoma-secundari {
-  display: grid;
-  grid-template-columns: minmax(12ch, 1fr) auto;
-  gap: 0 16px;
-  align-items: end;
+  /* El nom a sobre i la barra a sota, amb la mateixa amplada que la principal */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .eines-tractament {
@@ -3856,12 +3894,12 @@ fieldset {
 }
 .fila-mymop {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 .fila-mymop .camp {
-  flex: 1 1 14rem;
+  max-width: 720px;
 }
 .escala-mymop {
   display: flex;
@@ -5543,4 +5581,94 @@ fieldset {
   .fila-comparar .nom-fila {
     grid-column: 1 / -1;
   }
+}
+/* Valoració feta en una sessió anterior: només lectura fins que es revisa */
+.franja-lectura {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0 0 14px;
+  padding: 10px 14px 10px 16px;
+  border-radius: var(--radi);
+  background: var(--accent-suau);
+  border: 1px solid var(--linia);
+}
+
+.franja-lectura p {
+  margin: 0;
+}
+
+/* Els xips de només lectura no semblen actius: atenuats i sense canvi en passar-hi el ratolí */
+.nomes-lectura .xip:disabled,
+.xip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.nomes-lectura .xip:disabled[aria-pressed='true'],
+.xip:disabled[aria-pressed='true'] {
+  opacity: 0.7;
+}
+
+/* Sessió tancada: l'avís i «Afegir una addenda», al costat */
+.avis-sessio-tancada {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+.avis-sessio-tancada .avis {
+  margin: 0;
+}
+
+/* Obert des de l'avís, es veu també a Tractament */
+.pantalla-visita.amb-mapa > .addendes.addenda-oberta {
+  display: block;
+  flex: none;
+}
+
+/* Barra de l'app: a l'ordinador, el menú centrat a tota la barra (les dues
+   columnes dels costats fan el mateix), sigui quin sigui l'estat de Drive */
+@media (min-width: 1200px) {
+  .barra-app {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+}
+
+/* Capçalera de la visita: «Desat» / «Desant…» en un espai fix, perquè el
+   temporitzador i els botons no es moguin quan apareix o desapareix */
+.capcalera-visita .accions-visita > .detall[role='status'] {
+  display: inline-block;
+  min-width: 4.6em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Al final de cada pestanya de la visita: anterior i següent */
+.navegacio-pestanyes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+.pantalla-visita.amb-mapa .navegacio-pestanyes {
+  flex: none;
+  margin: 4px 0 0;
+}
+
+/* A Tractament, compacta: el mapa en perd el mínim */
+.pantalla-visita.amb-mapa .navegacio-pestanyes .boto {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 0.85rem;
+}
+
+.pantalla-visita.ampliat .navegacio-pestanyes {
+  display: none;
 }

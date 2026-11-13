@@ -7,7 +7,10 @@ import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent, type
 import { formatar, t } from '../i18n/t'
 
 interface Props {
+  /** Nom de l'escala (accessible); es veu si no hi ha `etiquetaVisible` */
   etiqueta: string
+  /** Text que es veu a sobre de la barra, si ha de ser més curt que el nom (MYMOP: «Puntuació (0–6)») */
+  etiquetaVisible?: string
   valor: number | null
   /** El de l'última sessió (punt petit a la casella) */
   anterior?: number | null
@@ -22,7 +25,7 @@ interface Props {
 /** Moviment mínim (px) perquè un toc passi a ser lliscar */
 const LLISCAR = 6
 
-export function BarraEscala({ etiqueta, valor, anterior = null, onCanviar, extra, disabled = false, min = 0, max = 10 }: Props) {
+export function BarraEscala({ etiqueta, etiquetaVisible, valor, anterior = null, onCanviar, extra, disabled = false, min = 0, max = 10 }: Props) {
   const barra = useRef<HTMLDivElement>(null)
   const gest = useRef<{ x: number; mogut: boolean } | null>(null)
   const valors = Array.from({ length: max - min + 1 }, (_, i) => min + i)
@@ -68,7 +71,7 @@ export function BarraEscala({ etiqueta, valor, anterior = null, onCanviar, extra
   return (
     <div className="camp barra-escala">
       <div className="capcalera-escala">
-        <span className="etiqueta-camp">{etiqueta}</span>
+        <span className="etiqueta-camp">{etiquetaVisible ?? etiqueta}</span>
         {anterior !== null && (
           <span className="detall escala-anterior">
             <span className="punt-anterior" aria-hidden="true" /> {formatar(t.visita.escalaAnterior, { n: String(anterior) })}
@@ -79,6 +82,8 @@ export function BarraEscala({ etiqueta, valor, anterior = null, onCanviar, extra
       <div
         ref={barra}
         className={`caselles-escala${disabled ? ' inactiva' : ''}`}
+        // Una casella per valor (0–10, o 0–6 al MYMOP), sempre amb la mateixa amplada total
+        style={{ gridTemplateColumns: `repeat(${valors.length}, minmax(0, 1fr))` }}
         role="radiogroup"
         aria-label={etiqueta}
         onPointerDown={baixar}

@@ -176,7 +176,7 @@ async function sincronitzar(mon: Mon, x: Disp) {
   if (!(await panell.isVisible())) await pindola(x.page).click()
   await panell.getByRole('button', { name: /Desar ara a Drive|Tornar-ho a provar/ }).click()
   await expect.poll(() => peticionsDe(mon, x.d.nom).length).toBeGreaterThan(abans)
-  await expect(pindola(x.page)).toHaveText('Drive: al dia')
+  await expect(pindola(x.page)).toHaveAttribute('aria-label', 'Drive: al dia')
   await x.page.keyboard.press('Escape')
 }
 
@@ -185,7 +185,7 @@ async function esperarPujada(mon: Mon, x: Disp, abans: number) {
   await expect
     .poll(() => peticionsDe(mon, x.d.nom).filter((p) => p.metode === 'PATCH' && p.estat === 200).length, { timeout: 20_000 })
     .toBeGreaterThan(abans)
-  await expect(pindola(x.page)).toHaveText('Drive: al dia')
+  await expect(pindola(x.page)).toHaveAttribute('aria-label', 'Drive: al dia')
 }
 const pujades = (mon: Mon, x: Disp) => peticionsDe(mon, x.d.nom).filter((p) => p.metode === 'PATCH' && p.estat === 200).length
 
@@ -206,11 +206,11 @@ async function primerDispositiu(browser: Browser, info: TestInfo, mon: Mon, nom 
 async function canviarDeCompte(x: Disp) {
   await pindola(x.page).click()
   await x.page.getByRole('button', { name: /Desar ara a Drive|Tornar-ho a provar/ }).click()
-  await expect(pindola(x.page)).toHaveText(/canvis? pendents?/)
+  await expect(pindola(x.page)).toHaveAttribute('aria-label', /canvis? pendents?/)
   await x.page.keyboard.press('Escape')
   // El toc següent prova la renovació silenciosa, que falla
   await menu(x.page, 'Avui').click()
-  await expect(pindola(x.page)).toHaveText('Cal tornar a connectar amb Google')
+  await expect(pindola(x.page)).toHaveAttribute('aria-label', 'Cal tornar a connectar amb Google')
   await pindola(x.page).click()
   await x.page.getByRole('button', { name: 'Tornar a entrar amb Google' }).click()
 }
@@ -262,7 +262,7 @@ test('b) tres dispositius oberts: una cita creada al PC 1 arriba sola a la taule
   const peticionsTauleta = peticionsDe(mon, 'tauleta').length
   await Promise.all(tots.map((x) => x.page.clock.runFor(CADA)))
   await expect.poll(() => peticionsDe(mon, 'tauleta').length).toBeGreaterThan(peticionsTauleta)
-  await expect(pindola(tauleta.page)).toHaveText('Drive: al dia')
+  await expect(pindola(tauleta.page)).toHaveAttribute('aria-label', 'Drive: al dia')
   // L'agenda oberta es refresca sola, sense tocar res
   await expect.poll(() => citesVisibles(tauleta.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
   await expect.poll(() => citesVisibles(pc2.page)).toEqual(['17:00–18:00 Aina Provencal Inventada'])
@@ -370,14 +370,14 @@ test('e) un dispositiu esborra una cita; l\'altre, que era sense connexió, no l
   // El PC 2, sense connexió, ho intenta i no pot
   await pindola(pc2.page).click()
   await pc2.page.getByRole('dialog', { name: 'Còpia a Google Drive' }).getByRole('button', { name: 'Desar ara a Drive' }).click()
-  await expect(pindola(pc2.page)).toHaveText('Drive: sense connexió')
+  await expect(pindola(pc2.page)).toHaveAttribute('aria-label', 'Drive: sense connexió')
   await pc2.page.keyboard.press('Escape')
   // Torna la connexió: el navegador avisa i l'app sincronitza sola
   pc2.d.senseXarxa = false
   const n = peticionsDe(mon, 'pc2').length
   await pc2.page.evaluate(() => window.dispatchEvent(new Event('online')))
   await expect.poll(() => peticionsDe(mon, 'pc2').length).toBeGreaterThan(n)
-  await expect(pindola(pc2.page)).toHaveText('Drive: al dia')
+  await expect(pindola(pc2.page)).toHaveAttribute('aria-label', 'Drive: al dia')
   // (la que queda passa a ser la primera visita: 40 minuts)
   await expect.poll(() => citesDeLaSetmana(pc2.page)).toEqual(['10:00–10:40 Aina Provencal Inventada'])
   await sincronitzar(mon, pc1)
@@ -407,7 +407,7 @@ test('f) un dispositiu treballa sense connexió tot un dia i després es reconne
   await menu(tauleta.page, 'Avui').click()
   await expect.poll(() => tauleta.d.autoritzacions.filter((a) => a.prompt === 'none').length).toBe(1)
   await expect.poll(() => citesDeLaSetmana(tauleta.page)).toHaveLength(3)
-  await expect(pindola(tauleta.page)).toHaveText('Drive: al dia')
+  await expect(pindola(tauleta.page)).toHaveAttribute('aria-label', 'Drive: al dia')
 
   await pc1.page.getByLabel('Contrasenya', { exact: true }).fill(P)
   await pc1.page.getByRole('button', { name: 'Desbloquejar' }).click()
@@ -500,7 +500,7 @@ test('h2) Drive respon 429 i 503: es torna a provar sol, cada cop esperant més,
   mon.errors.push({ estat: 429, dispositiu: 'pc1' }, { estat: 503, dispositiu: 'pc1' }, { estat: 503, metode: 'PATCH', dispositiu: 'pc1' })
   const n = pujades(mon, pc1)
   await novaCita(pc1.page, 'Aina', '2026-11-04', '17:00')
-  await expect(pindola(pc1.page)).toHaveText('Drive: error', { timeout: 20_000 })
+  await expect(pindola(pc1.page)).toHaveAttribute('aria-label', 'Drive: error', { timeout: 20_000 })
   await pindola(pc1.page).click()
   await expect(pc1.page.getByRole('dialog', { name: 'Còpia a Google Drive' })).toContainText('DRV-429')
   await pc1.page.keyboard.press('Escape')
@@ -511,7 +511,7 @@ test('h2) Drive respon 429 i 503: es torna a provar sol, cada cop esperant més,
     await expect.poll(() => peticionsDe(mon, 'pc1').length).toBeGreaterThan(abans)
   }
   await expect.poll(() => pujades(mon, pc1)).toBeGreaterThan(n)
-  await expect(pindola(pc1.page)).toHaveText('Drive: al dia')
+  await expect(pindola(pc1.page)).toHaveAttribute('aria-label', 'Drive: al dia')
   expect(mon.errors).toEqual([])
 })
 
@@ -593,7 +593,7 @@ test('k) s\'esborren les dades del navegador: es recupera de Drive tot el que la
   // Una cita nova: la píndola diu que encara no és a Drive…
   const n = pujades(mon, pc1)
   await novaCita(pc1.page, 'Aina', '2026-11-05', '10:00')
-  await expect(pindola(pc1.page)).toHaveText(/pendents? de pujar|desant/)
+  await expect(pindola(pc1.page)).toHaveAttribute('aria-label', /pendents? de pujar|desant/)
   // …i en uns 3 segons (sense tocar res) ja hi és
   await esperarPujada(mon, pc1, n)
   // S'esborren les dades del lloc (com «Esborrar dades de navegació»)
@@ -640,7 +640,7 @@ test('l) el permís d\'un altre compte de Google no es fa servir: res no va al s
   const panell = pc1.page.getByRole('dialog', { name: 'Còpia a Google Drive' })
   if (!(await panell.isVisible())) await pindola(pc1.page).click()
   await expect(panell.getByRole('alert')).toContainText('Has entrat amb un altre compte de Google')
-  await expect(pindola(pc1.page)).toHaveText('Cal tornar a connectar amb Google')
+  await expect(pindola(pc1.page)).toHaveAttribute('aria-label', 'Cal tornar a connectar amb Google')
   // Res no ha arribat al Drive del compte de proves, i el compte desat continua sent el de la doctora
   expect(driveDe(mon, CORREU_PROVES).size).toBe(0)
   expect(peticionsDe(mon, 'pc1').filter((p) => p.correu === CORREU_PROVES)).toEqual([])
@@ -659,7 +659,7 @@ test('l) el permís d\'un altre compte de Google no es fa servir: res no va al s
   // Tornant a entrar amb el compte de la doctora, tot continua
   pc1.d.correu = CORREU_DOCTORA
   await pc1.page.getByRole('button', { name: 'Tornar a entrar amb Google' }).click()
-  await expect(pindola(pc1.page)).toHaveText('Drive: al dia')
+  await expect(pindola(pc1.page)).toHaveAttribute('aria-label', 'Drive: al dia')
   expect(driveDe(mon, CORREU_PROVES).size).toBe(0)
 })
 
@@ -779,7 +779,7 @@ test('m) finestra privada: avís fix; si es tanca amb canvis pendents, el navega
   await incognit.page.close({ runBeforeUnload: true })
   expect(await avis).toBe('beforeunload')
   // S'hi queda; quan la píndola diu «al dia», es pot tancar sense perdre res
-  await expect(pindola(incognit.page)).toHaveText('Drive: al dia')
+  await expect(pindola(incognit.page)).toHaveAttribute('aria-label', 'Drive: al dia')
   await incognit.context.close()
 
   // Una altra finestra privada: no hi ha res (cap dada, cap contrasenya)…
@@ -844,14 +844,14 @@ test('n) el que es desa mentre una sincronia aplica canvis de Drive no es perd i
   // Ja ha llistat Drive i llegit les dades locals; ara baixa la còpia (1,5 s)
   await expect.poll(() => peticionsDe(mon, 'pc2').length).toBeGreaterThan(n)
   await nouPacient(pc2.page, 'Bernat', 'Prova Inventat')
-  await expect(pindola(pc2.page)).toHaveText('Drive: al dia', { timeout: 30_000 })
+  await expect(pindola(pc2.page)).toHaveAttribute('aria-label', 'Drive: al dia', { timeout: 30_000 })
   mon.latenciaMs = 150
   await menu(pc2.page, 'Avui').click()
   await menu(pc2.page, 'Pacients').click()
   await expect(pc2.page.getByRole('link', { name: /Aina Provencal Inventada/ })).toBeVisible()
   await expect(pc2.page.getByRole('link', { name: /Bernat Prova Inventat/ })).toBeVisible()
   // I arriba a Drive (sol, uns segons després) i al PC 1
-  await expect(pindola(pc2.page)).toHaveText('Drive: al dia', { timeout: 30_000 })
+  await expect(pindola(pc2.page)).toHaveAttribute('aria-label', 'Drive: al dia', { timeout: 30_000 })
   await sincronitzar(mon, pc2)
   await sincronitzar(mon, pc1)
   await menu(pc1.page, 'Avui').click()

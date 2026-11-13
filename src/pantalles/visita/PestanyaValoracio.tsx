@@ -19,6 +19,12 @@ import { useAutodesat } from './useAutodesat'
 
 const v = t.valoracio
 
+/** «12/11» */
+const diaBarra = (iso: string) => {
+  const d = new Date(iso)
+  return `${d.getDate()}/${d.getMonth() + 1}`
+}
+
 const dadesDe = (x: Valoracio): DadesValoracio => {
   const { id: _i, creatAt: _c, modificatAt: _m, pacientId: _p, ...d } = x
   return d
@@ -36,6 +42,7 @@ export function PestanyaValoracio({
   onRecarregar,
   onDades,
   orlActiu,
+  nom,
 }: {
   sessio: Sessio
   valoracions: readonly Valoracio[]
@@ -50,6 +57,8 @@ export function PestanyaValoracio({
   onDades?(d: DadesValoracio): void
   /** El mòdul ORL és actiu (sol o triat): el botó l'activa o el treu */
   orlActiu?: boolean
+  /** El nom de la pestanya («Diagnòstic»), per a la franja de només lectura */
+  nom?: string
 }) {
   const magatzem = useMagatzem()
   const darrera = valoracions.at(-1)
@@ -83,9 +92,19 @@ export function PestanyaValoracio({
     if (esDarrera) onDades?.(dades)
   }, [dades, esDarrera, onDades])
   const [revisant, setRevisant] = useState(false)
+  const revisar = async () => {
+    setRevisant(true)
+    try {
+      await magatzem.revisarValoracio(sessio.episodiId, sessio.id)
+      setVista(null)
+      onRecarregar()
+    } finally {
+      setRevisant(false)
+    }
+  }
 
   return (
-    <div className="pestanya-valoracio">
+    <div className={`pestanya-valoracio${editable ? '' : ' nomes-lectura'}`}>
       <div className="barra-valoracio">
         <p className="detall">
           {darrera
@@ -112,25 +131,27 @@ export function PestanyaValoracio({
             {orlActiu ? t.orl.desactivar : t.orl.activar}
           </Boto>
         )}
-        {editableSessio && esDarrera && !propia && (
-          <Boto
-            variant="secundari"
-            disabled={revisant}
-            onClick={async () => {
-              setRevisant(true)
-              try {
-                await magatzem.revisarValoracio(sessio.episodiId, sessio.id)
-                setVista(null)
-                onRecarregar()
-              } finally {
-                setRevisant(false)
-              }
-            }}
-          >
-            {darrera ? v.revisar : v.fer}
+        {editableSessio && esDarrera && !propia && !darrera && (
+          <Boto variant="secundari" disabled={revisant} onClick={revisar}>
+            {v.fer}
           </Boto>
         )}
       </div>
+
+      {/* Feta en una sessió anterior: de només lectura fins que es revisa (ha de quedar clar) */}
+      {editableSessio && esDarrera && !propia && darrera && (
+        <div className="franja-lectura" role="note">
+          <p>
+            <strong>
+              {nom ? formatar(v.lectura, { que: nom, dia: diaBarra(darrera.creadaAt) }) : formatar(v.lecturaValoracio, { dia: diaBarra(darrera.creadaAt) })}
+            </strong>{' '}
+            · {nom ? v.lecturaRevisar : v.lecturaRevisarLa}
+          </p>
+          <Boto variant="secundari" disabled={revisant} onClick={revisar}>
+            {v.revisar}
+          </Boto>
+        </div>
+      )}
 
       {mostrada && (
         <RevisioConflictes

@@ -19,7 +19,7 @@ import {
 import { esquemaCitaGuardada, esquemaDadesCita, type Cita, type DadesCita } from '../domini/cita'
 import { esquemaEsborranyGuardat, type Esborrany, type EsborranyGuardat } from '../domini/esborrany'
 import { araIso, nouId } from '../domini/registre'
-import { episodisActius, esquemaDadesEpisodi, idEpisodiDeCita, nouEpisodi, type DadesEpisodi, type Episodi } from '../domini/episodi'
+import { episodisActius, esquemaDadesEpisodi, idEpisodiDeCita, nouEpisodi, senseMotiu, type DadesEpisodi, type Episodi } from '../domini/episodi'
 import {
   esEditable,
   esquemaDadesAddenda,
@@ -464,6 +464,12 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       if (!cita) throw new Error(`No existeix la cita ${citaId}`)
       if (ja) return ja
       const episodiId = cita.episodiId ?? (await episodiDeCita(citaId, cita))
+      // Un episodi obert per una cita sense motiu agafa el de la primera cita que en porti
+      const episodi = await magatzem.obtenirEpisodi(episodiId)
+      if (episodi && senseMotiu(episodi.motiu) && !senseMotiu(cita.motiu)) {
+        const { id: _ei, creatAt: _ec, modificatAt: _em, pacientId: _ep, ...dadesEpisodi } = episodi
+        await magatzem.actualitzarEpisodi(episodiId, { ...dadesEpisodi, motiu: cita.motiu.trim() }, dadesEpisodi)
+      }
       const delEpisodi = (await magatzem.sessionsDelPacient(cita.pacientId)).filter((s) => s.episodiId === episodiId)
       const id = nouId()
       const sessio = await guardarSessio(

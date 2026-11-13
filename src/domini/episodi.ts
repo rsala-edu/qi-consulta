@@ -43,8 +43,24 @@ export type Episodi = Registre & { pacientId: string } & DadesEpisodi
 /** L'episodi que obre una cita amb «Nou episodi» (o la primera cita d'un pacient): el mateix id a tots els dispositius */
 export const idEpisodiDeCita = (citaId: string) => `episodi-${citaId}`
 
+/** El nom que rep un episodi obert per una cita sense motiu (no és un motiu de veritat) */
+export const MOTIU_PER_DEFECTE = 'Primera visita'
+
 export function nouEpisodi(motiu: string, dataInici: string): DadesEpisodi {
-  return { motiu: motiu.trim() || 'Primera visita', dataInici, estat: 'actiu', dataFinal: null, notaFinal: '', pla: null }
+  return { motiu: motiu.trim() || MOTIU_PER_DEFECTE, dataInici, estat: 'actiu', dataFinal: null, notaFinal: '', pla: null }
+}
+
+/** L'episodi encara no té cap motiu de veritat (es va obrir amb una cita sense motiu) */
+export const senseMotiu = (motiu: string) => !motiu.trim() || motiu.trim() === MOTIU_PER_DEFECTE
+
+/**
+ * Nom de l'episodi per mostrar: el seu motiu o, si no en té (abans es posava
+ * «Primera visita», que és el tipus de la cita i no un motiu), el primer motiu
+ * de les cites de l'episodi que en tingui.
+ */
+export function nomEpisodi(episodi: Pick<DadesEpisodi, 'motiu'>, motiusCites: readonly string[] = []): string {
+  if (!senseMotiu(episodi.motiu)) return episodi.motiu.trim()
+  return motiusCites.map((m) => m.trim()).find((m) => !senseMotiu(m)) ?? ''
 }
 
 /** Els episodis actius d'un pacient, del més recent al més antic */

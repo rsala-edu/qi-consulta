@@ -68,7 +68,7 @@ async function desarAra(page: Page) {
   const panell = page.getByRole('dialog', { name: 'Còpia a Google Drive' })
   const boto = panell.getByRole('button', { name: /Desar ara a Drive|Tornar-ho a provar/ })
   if (await boto.isVisible()) await boto.click()
-  await expect(page.locator('.indicador-copia')).toHaveText('Drive: al dia')
+  await expect(page.locator('.indicador-copia')).toHaveAttribute('aria-label', 'Drive: al dia')
   await page.keyboard.press('Escape')
 }
 

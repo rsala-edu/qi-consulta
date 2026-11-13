@@ -88,7 +88,7 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   // 1a visita
   await comencarVisita(page)
   await expect(capcalera(page)).toContainText('Aina Provencal Inventada')
-  await expect(capcalera(page)).toContainText('Lumbàlgia · Sessió 1')
+  await expect(capcalera(page)).toContainText('Lumbàlgia · Primera visita · Sessió 1')
   // La primera visita de l'episodi comença per la valoració
   await expect(pestanya(page, 'Valoració')).toHaveAttribute('aria-selected', 'true')
   // Com està
@@ -158,7 +158,7 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   await page.getByLabel('Contrasenya', { exact: true }).fill(P)
   await page.getByRole('button', { name: 'Desbloquejar' }).click()
   await comencarVisita(page)
-  await expect(capcalera(page)).toContainText('Lumbàlgia · Sessió 2')
+  await expect(capcalera(page)).toContainText('Lumbàlgia · Seguiment · Sessió 2')
   await expect(page.getByText('Última sessió: 7')).toBeVisible()
   await pestanya(page, 'Tractament').click()
   await page.getByRole('button', { name: 'Repetir el tractament de l\'última sessió' }).click()
@@ -380,7 +380,7 @@ async function desarAra(page: Page) {
   const panell = page.getByRole('dialog', { name: 'Còpia a Google Drive' })
   const boto = panell.getByRole('button', { name: /Desar ara a Drive|Tornar-ho a provar/ })
   if (await boto.isVisible()) await boto.click()
-  await expect(page.locator('.indicador-copia')).toHaveText('Drive: al dia')
+  await expect(page.locator('.indicador-copia')).toHaveAttribute('aria-label', 'Drive: al dia')
   await page.keyboard.press('Escape')
 }
 
