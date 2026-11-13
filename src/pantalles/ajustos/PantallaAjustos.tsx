@@ -25,6 +25,12 @@ export function PantallaAjustos() {
           </Link>
         </li>
         <li>
+          <Link to="/ajustos/consentiments">
+            <span className="nom">{t.consentiments.titol}</span>
+            <span className="detall">{t.consentiments.ajustDesc}</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/ajustos/catalegs">
             <span className="nom">{t.ajustCatalegs.titol}</span>
             <span className="detall">{t.ajustCatalegs.desc}</span>

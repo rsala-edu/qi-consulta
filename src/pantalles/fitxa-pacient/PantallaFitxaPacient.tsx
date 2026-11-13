@@ -22,6 +22,7 @@ const PESTANYES_ACTIVES = [
   { ruta: 'fitxa-clinica', text: p.fitxaClinica },
   { ruta: 'cites', text: p.cites },
   { ruta: 'tractaments', text: t.tractaments.titol },
+  { ruta: 'consentiments', text: t.consentiments.titol },
 ] as const
 const PESTANYES_FUTURES = [p.valoracions, p.evolucio]
 

@@ -2,8 +2,9 @@
 // següent; accessos ràpids; i l'estat de la còpia a Google Drive.
 
 import { AvisRellotge } from '../../components/AvisRellotge'
+import { useComencarVisita } from '../../consentiment/useComencarVisita'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { EstatCopia } from '../../components/EstatCopia'
 import { Indicador } from '../../components/Indicador'
 import { diaDe, diaHoraDe, fiDe, sumarDies } from '../../domini/cita'
@@ -19,7 +20,6 @@ import { diesSenseCopia, textSenseCopia } from '../../sincronia/senseCopia'
 export function PantallaAvui() {
   const magatzem = useMagatzem()
   const { db } = useSessio()
-  const navegar = useNavigate()
   const [ara] = useState(() => new Date())
   const avui = diaDe(ara)
   const [carrega] = useCarrega(async () => {
@@ -39,12 +39,14 @@ export function PantallaAvui() {
   }, [magatzem, db, avui])
   const [comencant, setComencant] = useState<string | null>(null)
 
+  // «Començar visita»: abans, si cal, l'avís del consentiment d'acupuntura (4A)
+  const visita = useComencarVisita()
+
   /** «Començar visita»: crea la sessió (o obre la que ja hi ha) i obre la pantalla de visita */
   async function comencar(citaId: string, minuts: number) {
     setComencant(citaId)
     try {
-      const s = await magatzem.comencarVisita(citaId, minuts)
-      void navegar(`/visita/${s.id}`)
+      await visita.comencar(citaId, minuts)
     } finally {
       setComencant(null)
     }
@@ -58,6 +60,7 @@ export function PantallaAvui() {
         <p className="dia-avui">{diaLlarg(avui)}</p>
       </header>
 
+      {visita.dialeg}
       <AvisSenseCopia />
       <AvisRellotge />
 

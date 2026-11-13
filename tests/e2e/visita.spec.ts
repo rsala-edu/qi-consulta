@@ -3,6 +3,7 @@
 // propera cita, sessió editada en dos dispositius i addendes. Només dades inventades.
 import type { Browser, BrowserContext, Page, TestInfo } from '@playwright/test'
 import { continuarAmbGoogle, expect as expectBase, simularGoogle, test, type GoogleSimulat } from './google.js'
+import { continuarSenseConsentiment } from './ajudes-visita.js'
 
 const expect = expectBase.configure({ timeout: 20_000 })
 const P = 'contrasenya-inventada-visita'
@@ -61,6 +62,7 @@ async function marcar(page: Page, consulta: string, codi: string, costat: string
 async function comencarVisita(page: Page) {
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).click()
+  await continuarSenseConsentiment(page)
   await expect(capcalera(page)).toBeVisible()
 }
 

@@ -2,6 +2,7 @@
 // Google Drive i restauració en un altre dispositiu, clau de recuperació,
 // empremta (autenticador virtual amb PRF) i pantalla Avui.
 // Google és simulat (tests/e2e/google.ts) i totes les dades són inventades.
+import { continuarSenseConsentiment } from './ajudes-visita.js'
 import type { Browser, Page } from '@playwright/test'
 import {
   continuarAmbGoogle,
@@ -344,6 +345,7 @@ test('Avui: les cites del dia en ordre i «Començar visita» a la següent', as
   await expect(cites.nth(1).getByRole('button', { name: 'Començar visita' })).toBeVisible()
   // Obre la pantalla de visita del Biel
   await cites.nth(1).getByRole('button', { name: 'Començar visita' }).click()
+  await continuarSenseConsentiment(page)
   await expect(page.locator('.capcalera-visita').getByRole('heading', { name: 'Biel Prova Inventat' })).toBeVisible()
 })
 

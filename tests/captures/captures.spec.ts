@@ -7,6 +7,7 @@
 import { mkdirSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { continuarAmbGoogle, expect, test } from '../e2e/google.js'
+import { continuarSenseConsentiment } from '../e2e/ajudes-visita.js'
 
 const CARPETA = `docs/captures/${process.env.CAPTURES ?? 'proves'}`
 const SUFIX = process.env.CAPTURES_SUFIX ? `-${process.env.CAPTURES_SUFIX}` : ''
@@ -96,6 +97,7 @@ test('Visita', async ({ page }) => {
   await cita(page, 'Aina', dia(0), hora, 'Lumbàlgia')
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).click()
+  await continuarSenseConsentiment(page)
   const capcalera = page.locator('.capcalera-visita')
   await expect(capcalera).toBeVisible()
   const pestanya = (nom: string) => page.getByRole('tablist', { name: 'Visita' }).getByRole('tab', { name: nom })
@@ -256,6 +258,7 @@ test('3B Valoració', async ({ page }) => {
   await cita(page, 'Mia', dia(0), hora, 'Acúfens')
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).click()
+  await continuarSenseConsentiment(page)
   await expect(page.locator('.capcalera-visita')).toBeVisible()
 
   const motiu = await obrir(page, 'Motiu de consulta i malaltia actual')
@@ -338,6 +341,7 @@ test('3B Exploració', async ({ page }) => {
   await cita(page, 'Nil', dia(0), enMinuts(9), '')
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).first().click()
+  await continuarSenseConsentiment(page)
   const pestanya = (nom: string) => page.getByRole('tablist', { name: 'Visita' }).getByRole('tab', { name: nom })
   await pestanya('Exploració').click()
   const shen = await obrir(page, 'Vitalitat (shen)')
@@ -388,6 +392,7 @@ test('3B Exploració', async ({ page }) => {
   await page.getByRole('region', { name: 'Finalitzar visita' }).getByRole('button', { name: 'Confirmar i finalitzar' }).click()
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).first().click()
+  await continuarSenseConsentiment(page)
   await pestanya('Exploració').click()
   await page.evaluate(() => window.scrollTo(0, 0))
   await capturar(page, 'exploracio-seguiment', false)
@@ -407,6 +412,7 @@ test('3B Diagnòstic, pla i MYMOP', async ({ page }) => {
   await cita(page, 'Pau', dia(0), enMinuts(4), 'Acúfens')
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).first().click()
+  await continuarSenseConsentiment(page)
   const pestanya = (nom: string) => page.getByRole('tablist', { name: 'Visita' }).getByRole('tab', { name: nom })
 
   await pestanya('Com està').click()
@@ -467,6 +473,7 @@ test('3B ORL', async ({ page }) => {
   await cita(page, 'Rosa', dia(0), `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`, 'Acúfens')
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).first().click()
+  await continuarSenseConsentiment(page)
   await page.getByRole('tablist', { name: 'Visita' }).getByRole('tab', { name: 'ORL' }).click()
   const oto = await obrir(page, 'Otoscòpia')
   await tocar(oto, 'Orella dreta: conducte auditiu extern', 'Normal')

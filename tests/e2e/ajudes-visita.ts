@@ -48,7 +48,18 @@ export async function novaCita(page: Page, pacient: string, dia: string, hora: s
 export async function comencarVisita(page: Page) {
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).first().click()
+  await continuarSenseConsentiment(page)
   await expect(capcalera(page)).toBeVisible()
+}
+
+/**
+ * (4A) Si el pacient no té el consentiment d'acupuntura vigent, en començar la
+ * visita surt un avís: les proves que no tracten del consentiment continuen igualment
+ */
+export async function continuarSenseConsentiment(page: Page) {
+  const avis = page.getByRole('alertdialog', { name: 'Falta el consentiment d\'acupuntura' })
+  await expect(avis.or(page.locator('.capcalera-visita')).first()).toBeVisible()
+  if (await avis.isVisible()) await avis.getByRole('button', { name: 'Continuar igualment' }).click()
 }
 
 export async function finalitzar(page: Page) {

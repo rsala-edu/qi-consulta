@@ -397,6 +397,12 @@ function Visita({
         />
       )}
 
+      {/* (4A) Començada amb «Continuar igualment», sense el consentiment d'acupuntura vigent */}
+      {dades.senseConsentiment && pestanya !== 'tractament' && (
+        <p className="avis-suau avis-sense-consentiment" role="note">
+          {formatar(t.consentiments.senseConsentimentSessio, { quan: new Date(dades.senseConsentiment).toLocaleString('ca', { dateStyle: 'short', timeStyle: 'short' }) })}
+        </p>
+      )}
       {!enCurs && (
         <div className="avis-sessio-tancada">
           <p className="avis" role="status">

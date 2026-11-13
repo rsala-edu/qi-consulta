@@ -5,6 +5,7 @@
 import { mkdirSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { continuarAmbGoogle, expect, test } from '../e2e/google.js'
+import { continuarSenseConsentiment } from '../e2e/ajudes-visita.js'
 
 const SUFIX = process.env.CAPTURES_SUFIX ?? 'proves'
 const P = 'contrasenya-inventada-blocs'
@@ -61,6 +62,7 @@ async function cita(page: Page, qui: string, hora: string, motiu: string) {
 async function comencar(page: Page) {
   await menu(page, 'Avui').click()
   await page.getByRole('button', { name: /^(Començar visita|Continuar la visita)$/ }).first().click()
+  await continuarSenseConsentiment(page)
   await expect(capcalera(page)).toBeVisible()
 }
 

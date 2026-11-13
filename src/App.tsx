@@ -11,6 +11,9 @@ import { t } from './i18n/t'
 import { PestanyaDades } from './pantalles/fitxa-pacient/PestanyaDades'
 import { PestanyaCites } from './pantalles/fitxa-pacient/PestanyaCites'
 import { PestanyaTractaments } from './pantalles/fitxa-pacient/PestanyaTractaments'
+import { PestanyaConsentiments } from './pantalles/fitxa-pacient/PestanyaConsentiments'
+import { PantallaSignarConsentiment } from './pantalles/consentiments/PantallaSignarConsentiment'
+import { PantallaAjustConsentiments } from './pantalles/ajustos/PantallaAjustConsentiments'
 import { PantallaAgenda } from './pantalles/cites/PantallaAgenda'
 import { PestanyaFitxaClinica } from './pantalles/fitxa-pacient/PestanyaFitxaClinica'
 import { PantallaFitxaPacient } from './pantalles/fitxa-pacient/PantallaFitxaPacient'
@@ -222,7 +225,9 @@ function PortaOberta() {
               <Route path="fitxa-clinica" element={<P codi="UI-FITXA-CLINICA"><PestanyaFitxaClinica /></P>} />
               <Route path="cites" element={<P codi="UI-FITXA-CITES"><PestanyaCites /></P>} />
               <Route path="tractaments" element={<P codi="UI-FITXA-TRACTAMENTS"><PestanyaTractaments /></P>} />
+              <Route path="consentiments" element={<P codi="UI-FITXA-CONSENTIMENTS"><PestanyaConsentiments /></P>} />
             </Route>
+            <Route path="pacients/:id/consentiments/:tipus/signar" element={<P codi="UI-SIGNAR"><PantallaSignarConsentiment /></P>} />
             <Route path="mapa" element={<P codi="UI-MAPA"><PantallaProvaMapa /></P>} />
             <Route path="ajustos" element={<P codi="UI-AJUSTOS"><PantallaAjustos /></P>} />
             <Route path="ajustos/calibratge" element={<P codi="UI-CALIBRATGE"><PantallaCalibratge /></P>} />
@@ -233,6 +238,7 @@ function PortaOberta() {
             <Route path="ajustos/agenda" element={<P codi="UI-AJUST-AGENDA"><PantallaAjustAgenda /></P>} />
             <Route path="ajustos/quant-a" element={<P codi="UI-QUANT-A"><PantallaQuantA /></P>} />
             <Route path="ajustos/visita" element={<P codi="UI-AJUST-VISITA"><PantallaAjustVisita /></P>} />
+            <Route path="ajustos/consentiments" element={<P codi="UI-AJUST-CONSENTIMENTS"><PantallaAjustConsentiments /></P>} />
             <Route path="ajustos/catalegs" element={<P codi="UI-AJUST-CATALEGS"><PantallaAjustCatalegs /></P>} />
             <Route path="visita/:id" element={<P codi="UI-VISITA"><PantallaVisita /></P>} />
             <Route path="*" element={<Navigate to="/avui" replace />} />

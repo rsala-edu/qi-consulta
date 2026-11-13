@@ -14,7 +14,7 @@
 import { llegirAjustosVisita } from '../../db/ajustosVisita'
 import { episodisActius } from '../../domini/episodi'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type TouchEvent } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Indicador } from '../../components/Indicador'
 import { canviarDiaTancat, llegirDiesTancats, llegirHorari } from '../../db/agenda'
@@ -56,6 +56,7 @@ import type { CampEnConflicte } from '../../db/magatzem'
 import { ambValor } from '../../sincronia/fusioCamps'
 import { useAvisTipus } from './AvisTipus'
 import { recalcularTipusVisita } from '../../db/tipusVisita'
+import { useComencarVisita } from '../../consentiment/useComencarVisita'
 
 type Obert =
   | { tipus: 'nova'; inici: string; plantilla?: Partial<DadesCita> }
@@ -133,7 +134,8 @@ export function PantallaAgenda() {
     async (pacientId: string) => episodisActius(await magatzem.llistarEpisodis(pacientId)),
     [magatzem],
   )
-  const navegar = useNavigate()
+  // «Començar visita»: abans, si cal, l'avís del consentiment d'acupuntura (4A)
+  const visita = useComencarVisita()
   const [params, setParams] = useSearchParams()
   const ara = useAra()
   const avui = diaDe(ara)
@@ -230,6 +232,7 @@ export function PantallaAgenda() {
 
   return (
     <main className={`pantalla pantalla-agenda${ambLateral ? ' amb-lateral' : ''}`}>
+      {visita.dialeg}
       {avisTipus}
       <div className="disseny-agenda">
         {ambLateral && <aside className="agenda-lateral">{minicalendari}</aside>}
@@ -310,11 +313,7 @@ export function PantallaAgenda() {
               <FitxaCita
                 cita={obert.cita}
                 esAvui={obert.cita.inici.slice(0, 10) === avui}
-                onComencar={() =>
-                  void llegirAjustosVisita(db)
-                    .then((aj) => magatzem.comencarVisita(obert.cita.id, aj.minutsRetencio))
-                    .then((s) => navegar(`/visita/${s.id}`))
-                }
+                onComencar={() => void llegirAjustosVisita(db).then((aj) => visita.comencar(obert.cita.id, aj.minutsRetencio))}
                 onEditar={() => setObert({ tipus: 'editar', cita: obert.cita })}
                 onTancar={() => setObert(null)}
                 onCanviada={() => {
