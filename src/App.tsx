@@ -12,6 +12,7 @@ import { PestanyaDades } from './pantalles/fitxa-pacient/PestanyaDades'
 import { PestanyaCites } from './pantalles/fitxa-pacient/PestanyaCites'
 import { PestanyaTractaments } from './pantalles/fitxa-pacient/PestanyaTractaments'
 import { PestanyaConsentiments } from './pantalles/fitxa-pacient/PestanyaConsentiments'
+import { PestanyaFotos } from './pantalles/fitxa-pacient/PestanyaFotos'
 import { PantallaSignarConsentiment } from './pantalles/consentiments/PantallaSignarConsentiment'
 import { PantallaAjustConsentiments } from './pantalles/ajustos/PantallaAjustConsentiments'
 import { PantallaProtocols } from './pantalles/ajustos/PantallaProtocols'
@@ -227,6 +228,7 @@ function PortaOberta() {
               <Route path="cites" element={<P codi="UI-FITXA-CITES"><PestanyaCites /></P>} />
               <Route path="tractaments" element={<P codi="UI-FITXA-TRACTAMENTS"><PestanyaTractaments /></P>} />
               <Route path="consentiments" element={<P codi="UI-FITXA-CONSENTIMENTS"><PestanyaConsentiments /></P>} />
+              <Route path="fotos" element={<P codi="UI-FITXA-FOTOS"><PestanyaFotos /></P>} />
             </Route>
             <Route path="pacients/:id/consentiments/:tipus/signar" element={<P codi="UI-SIGNAR"><PantallaSignarConsentiment /></P>} />
             <Route path="mapa" element={<P codi="UI-MAPA"><PantallaProvaMapa /></P>} />

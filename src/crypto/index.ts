@@ -1,4 +1,4 @@
-export { xifrarJson, desxifrarJson, ErrorDesxifratge, type DadesXifrades } from './aesGcm'
+export { xifrar, desxifrar, xifrarJson, desxifrarJson, ErrorDesxifratge, type DadesXifrades } from './aesGcm'
 export {
   crearClauMestra,
   desbloquejarClauMestra,

@@ -51,6 +51,7 @@ import { ProperaCita } from './ProperaCita'
 import { BlocMymop } from './BlocMymop'
 import { BlocPgic } from './BlocPgic'
 import { BotonsProtocols } from './ProtocolsVisita'
+import { FotosSessio } from '../../fotos/Fotos'
 import { esActivada } from '../../cataleg/motor'
 import type { Mymop } from '../../domini/escales'
 import { GrupCataleg } from '../../cataleg/components/Cataleg'
@@ -555,6 +556,8 @@ function Visita({
 
         {pestanya === 'exploracio' && (
           <section id="visita-exploracio" role="tabpanel" aria-labelledby="pestanya-exploracio" className="panell">
+            {/* (4C) Fotos clíniques de la sessió */}
+            <FotosSessio pacientId={sessio.pacientId} episodiId={sessio.episodiId} sessioId={sessio.id} />
             {anterior && Object.keys(anterior.exploracio.seccions).length > 0 && (
               <p className="accions accions-esquerra">
                 <Boto

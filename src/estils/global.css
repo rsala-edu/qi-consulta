@@ -6050,3 +6050,145 @@ fieldset {
 .barra-tractament .boto-protocols {
   flex: none;
 }
+
+/* --- Etapa 4C: fotos clíniques --- */
+.dialeg-foto {
+  width: min(900px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.video-camera,
+.previsualitzacio-foto {
+  display: block;
+  width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #111;
+}
+
+.triar-fitxer {
+  position: relative;
+  cursor: pointer;
+}
+
+.avis-sense-imatges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: var(--radi);
+  background: var(--avis-suau);
+}
+
+.avis-sense-imatges p {
+  margin: 0;
+}
+
+.miniatures-fotos {
+  list-style: none;
+  margin: 10px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.miniatura-foto {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 2px solid var(--linia);
+  border-radius: 12px;
+  background: var(--clar);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.miniatura-foto[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-suau);
+}
+
+.miniatura-foto img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #111;
+}
+
+.comparar-fotos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.imatge-foto {
+  margin: 0;
+}
+
+.imatge-foto img {
+  display: block;
+  width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #111;
+}
+
+.imatge-foto figcaption {
+  margin-top: 6px;
+  font-size: 0.9rem;
+}
+
+.imatge-pendent {
+  position: relative;
+}
+
+.imatge-pendent img {
+  filter: blur(3px);
+}
+
+.imatge-pendent p {
+  position: absolute;
+  inset: auto 0 10px;
+  text-align: center;
+  color: #fff;
+}
+
+.fotos-esborrades {
+  margin-top: 8px;
+  color: var(--tinta-suau);
+}
+
+.fotos-sessio {
+  margin-bottom: 16px;
+}
+
+.capcalera-fotos-sessio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.capcalera-fotos-sessio h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 700px) {
+  .comparar-fotos {
+    grid-template-columns: 1fr;
+  }
+}

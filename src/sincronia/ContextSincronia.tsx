@@ -11,9 +11,10 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { guardarEstatGoogle, llegirEstatGoogle, type EstatGoogle } from '../db/magatzem'
 import { useClauMestra, useSessio } from '../sessio/ContextSessio'
+import { pujarImatgesPendents } from '../fotos/driveImatges'
 import { pendentsDePujar } from './escriptura'
 import { ProveidorRevisio } from './revisio'
-import { driveGoogle, ErrorAutoritzacio, ErrorDrive } from './drive'
+import { driveGoogle, ErrorAutoritzacio, ErrorDrive, type Drive } from './drive'
 import {
   acceptarPermis,
   calRenovarPermis,
@@ -68,6 +69,8 @@ interface ValorSincronia {
   desfasMs: number | null
   /** Un dispositiu amb una versió antiga de l'app ha escrit dades a Drive */
   versioAntiga: boolean
+  /** (4C) Drive, per baixar i esborrar les imatges de les fotos (null sense connexió amb Google) */
+  driveImatges(): Drive | null
   tancarAvisVersioAntiga(): void
 }
 
@@ -206,6 +209,8 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         const nou = { ...anterior, connectatAt: anterior?.connectatAt ?? new Date().toISOString(), ultimaCopia: r.copiaAt }
         await guardarEstatGoogle(db, nou)
         google.current = nou
+        // (4C) Les imatges de les fotos noves, com a fitxers a part (no van al diari)
+        await pujarImatgesPendents(db, driveGoogle(tokenGoogle))
         // Canvis d'un altre dispositiu: les pantalles obertes es refresquen (revisio.tsx)
         if (r.baixat) setRevisio((n) => n + 1)
         setUltimaCopia(r.copiaAt)
@@ -446,6 +451,7 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
       desfasMs,
       versioAntiga,
       tancarAvisVersioAntiga,
+      driveImatges: () => (tokenGoogle() ? driveGoogle(tokenGoogle) : null),
     }),
     [
       estat,

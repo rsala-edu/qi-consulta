@@ -95,6 +95,7 @@ const TAULES_XIFRADES = [
   'plantillesConsentiment',
   'consentiments',
   'protocols',
+  'fotos',
 ] as const
 
 const SINCRONITZADES = (db: QiDB) => TAULES.map((t) => db.table(t.nom))

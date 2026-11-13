@@ -3,7 +3,7 @@
 
 import type { DadesConflicte } from '../sincronia/fusioClinica'
 import type { z } from 'zod'
-import { desxifrarJson, xifrarJson, type ClauEmbolcallada, type EmbolcallSecret } from '../crypto'
+import { desxifrar, desxifrarJson, xifrar, xifrarJson, type ClauEmbolcallada, type EmbolcallSecret } from '../crypto'
 import {
   esquemaDadesFitxaClinica,
   fitxaClinicaBuida,
@@ -36,6 +36,7 @@ import {
 } from '../domini/consentiment'
 import { plantillaInicial } from '../domini/plantillesInicials'
 import { EXEMPLES, esquemaDadesProtocol, type DadesProtocol, type Protocol } from '../domini/protocol'
+import { esquemaDadesFoto, type DadesFoto, type Foto } from '../domini/foto'
 import { episodisActius, esquemaDadesEpisodi, idEpisodiDeCita, nouEpisodi, senseMotiu, type DadesEpisodi, type Episodi } from '../domini/episodi'
 import {
   esEditable,
@@ -148,6 +149,17 @@ export interface Magatzem {
   /** Desa un protocol (id null: un de nou) */
   desarProtocol(id: string | null, dades: DadesProtocol): Promise<Protocol>
   esborrarProtocol(id: string): Promise<void>
+
+  // --- Etapa 4C: fotos clíniques ---
+  fotosDe(pacientId: string): Promise<Foto[]>
+  /** Desa una foto: les metadades (se sincronitzen) i la imatge sencera xifrada (es puja a Drive a part) */
+  afegirFoto(pacientId: string, dades: DadesFoto, jpeg: Uint8Array): Promise<Foto>
+  /** La imatge sencera (JPEG), si és en aquest dispositiu; null si cal baixar-la */
+  imatgeDe(id: string): Promise<Uint8Array | null>
+  /** Una imatge baixada de Drive (tal com hi era, xifrada) */
+  desarImatgeBaixada(id: string, text: string): Promise<void>
+  /** Esborrar: queda el registre (quan i per què), sense la imatge ni la miniatura */
+  esborrarFoto(id: string, motiu: string): Promise<Foto>
 
   // --- Part 2: ajuntar fitxes de la mateixa persona ---
   /** Les dades del pacient i la fitxa clínica per comparar-les */
@@ -756,9 +768,59 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     },
   })
 
+  // --- Fotos clíniques (etapa 4C) ---
+
+  async function llegirFoto(r: RegistreXifrat): Promise<Foto> {
+    const d = esquemaDadesFoto.parse(await desxifrarJson(clau, r.xifrat, context('fotos', r.id)))
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, ...d }
+  }
+
+  async function guardarFoto(id: string, pacientId: string, creatAt: string, dades: DadesFoto): Promise<Foto> {
+    const d = esquemaDadesFoto.parse(dades)
+    const at = araIso()
+    await desarSencer(db, 'fotos', { id, creatAt, modificatAt: at, pacientId, xifrat: await xifrarJson(clau, d, context('fotos', id)) }, id)
+    return { id, creatAt, modificatAt: at, pacientId, ...d }
+  }
+
+  Object.assign(magatzem, {
+    async fotosDe(pacientId: string) {
+      const registres = await db.fotos.where('pacientId').equals(pacientId).toArray()
+      return (await Promise.all(registres.map(llegirFoto))).sort((a, b) => b.presaAt.localeCompare(a.presaAt))
+    },
+    async afegirFoto(pacientId: string, dades: DadesFoto, jpeg: Uint8Array) {
+      await pacientExistent(pacientId)
+      const id = nouId()
+      // Primer la imatge (local, xifrada, pendent de pujar), després les metadades
+      // Els bytes del JPEG, xifrats directament (sense passar per JSON: la meitat de mida a Drive)
+      await db.imatges.put({ id, pujada: 0, xifrat: await xifrar(clau, new Uint8Array(jpeg), context('imatges', id)) })
+      return guardarFoto(id, pacientId, araIso(), dades)
+    },
+    async imatgeDe(id: string) {
+      const r = await db.imatges.get(id)
+      if (!r) return null
+      try {
+        return await desxifrar(clau, r.xifrat, context('imatges', id))
+      } catch {
+        // Xifrada amb una clau d'abans (p. ex. després de recuperar les dades de Drive): es tornarà a baixar
+        return null
+      }
+    },
+    async desarImatgeBaixada(id: string, text: string) {
+      await db.imatges.put({ id, pujada: 1, xifrat: JSON.parse(text) })
+    },
+    async esborrarFoto(id: string, motiu: string) {
+      const r = await db.fotos.get(id)
+      if (!r) throw new Error(`No existeix la foto ${id}`)
+      const f = await llegirFoto(r)
+      const { id: _i, creatAt, modificatAt: _m, pacientId, ...d } = f
+      await db.imatges.delete(id)
+      return guardarFoto(id, pacientId, creatAt, { ...d, miniatura: '', esborrada: { at: araIso(), motiu: motiu.trim() } })
+    },
+  })
+
   // --- Ajuntar fitxes ---
 
-  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes', 'valoracions', 'consentiments'] as const
+  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes', 'valoracions', 'consentiments', 'fotos'] as const
 
   const senseMeta = <T extends { id: string; creatAt: string; modificatAt: string }>(x: T) => {
     const { id: _i, creatAt: _c, modificatAt: _m, ...resta } = x
@@ -798,7 +860,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       const { pacientId: _p, ...dades } = senseMeta(actual)
       await guardarValoracio(a, dades, dades)
     } else {
-      // Addendes i consentiments: registres sencers (només canvia el pacient)
+      // Addendes, consentiments i fotos: registres sencers (només canvia el pacient)
       const r = await db.table<RegistreXifrat, string>(taula).get(id)
       if (!r || r.pacientId === a) return false
       await desarSencer(db, taula, { ...r, pacientId: a, modificatAt: araIso() }, id)
@@ -849,7 +911,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       await esborrarRegistres(db, 'cites', citesTretes.map((c) => c.id))
 
       // Primer els episodis (les cites i les sessions hi apunten), després la resta
-      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [], valoracions: [], consentiments: [] }
+      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [], valoracions: [], consentiments: [], fotos: [] }
       for (const taula of TAULES_MOGUDES) {
         for (const id of await idsDe(taula, treuId)) if (await moure(taula, id, quedaId)) moguts[taula].push(id)
       }

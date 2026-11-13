@@ -17,6 +17,8 @@ import type { Valoracio } from '../../domini/valoracio'
 import { CompararSessions } from '../../evolucio/CompararSessions'
 import { Cronologia } from '../../evolucio/Cronologia'
 import { Evolucio } from '../../evolucio/Evolucio'
+import { GaleriaFotos } from '../../fotos/Fotos'
+import type { Foto } from '../../domini/foto'
 import { textResumTancament } from '../../evolucio/resumTancament'
 import { diaLlarg, formatar, t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
@@ -28,7 +30,11 @@ export function PestanyaTractaments() {
   const { pacient } = useFitxaPacient()
   const [versio, setVersio] = useState(0)
   const [carrega] = useCarrega(async () => {
-    const [episodis, sessions] = await Promise.all([magatzem.llistarEpisodis(pacient.id), magatzem.sessionsDelPacient(pacient.id)])
+    const [episodis, sessions, fotos] = await Promise.all([
+      magatzem.llistarEpisodis(pacient.id),
+      magatzem.sessionsDelPacient(pacient.id),
+      magatzem.fotosDe(pacient.id),
+    ])
     // Per a l'evolució: les escales ORL de cada episodi i quines sessions tenen addendes
     const [valoracions, addendes] = await Promise.all([
       Promise.all(episodis.map((e) => magatzem.valoracionsDe(e.id))),
@@ -39,6 +45,7 @@ export function PestanyaTractaments() {
       sessions,
       valoracions: new Map(episodis.map((e, i) => [e.id, valoracions[i] ?? []])),
       addendes: new Set(sessions.filter((_, i) => (addendes[i]?.length ?? 0) > 0).map((s) => s.id)),
+      fotos,
     }
   }, [magatzem, pacient.id, versio])
   const tr = t.tractaments
@@ -57,6 +64,7 @@ export function PestanyaTractaments() {
           sessionsPacient={carrega.dades.sessions}
           valoracions={carrega.dades.valoracions.get(e.id) ?? []}
           addendes={carrega.dades.addendes}
+          fotos={carrega.dades.fotos.filter((f) => f.episodiId === e.id)}
           onCanviat={() => setVersio((n) => n + 1)}
         />
       ))}
@@ -70,6 +78,7 @@ function EpisodiAmbSessions({
   sessionsPacient,
   valoracions,
   addendes,
+  fotos,
   onCanviat,
 }: {
   episodi: Episodi
@@ -77,6 +86,7 @@ function EpisodiAmbSessions({
   sessionsPacient: Sessio[]
   valoracions: Valoracio[]
   addendes: ReadonlySet<string>
+  fotos: Foto[]
   onCanviat(): void
 }) {
   const magatzem = useMagatzem()
@@ -168,6 +178,12 @@ function EpisodiAmbSessions({
           <h4>{ev.titol}</h4>
         </summary>
         <Evolucio sessions={sessions} sessionsPacient={sessionsPacient} valoracions={valoracions} />
+        {fotos.length > 0 && (
+          <section className="bloc-evolucio" aria-label={t.fotos.fotosEpisodi}>
+            <h4>{t.fotos.fotosEpisodi}</h4>
+            <GaleriaFotos fotos={fotos} numeroSessio={(id) => sessions.find((s) => s.id === id)?.numero} onCanvi={onCanviat} />
+          </section>
+        )}
       </details>
     </article>
   )
