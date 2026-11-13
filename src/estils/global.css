@@ -27,6 +27,17 @@
   --avis-suau: #f3e3dd;
   --radi: 14px;
   --toc: 52px;
+  /* Càpsula del menú */
+  --capsula: rgb(47 93 80 / 0.08);
+  --capsula-activa: #ffffff;
+  --capsula-activa-tinta: #234a3f;
+  --capsula-ombra: 0 1px 3px rgb(31 36 33 / 0.12), 0 1px 1px rgb(31 36 33 / 0.06);
+  /* Mapa (cos i orella): fons al voltant i etiquetes */
+  --fons-visor: linear-gradient(#fcfbf7, #e9ede7);
+  --vora-visor: transparent;
+  --xip-etiqueta: rgb(252 251 247 / 0.88);
+  --xip-etiqueta-tinta: #1f2421;
+  --tinta-etiqueta-zona: #59615c;
   --espai: clamp(16px, 3vw, 32px);
   --lletra-titol: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
   --lletra: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -58,6 +69,15 @@
     --accent-fosc: #b4d9cb;
     --accent-suau: #26332d;
     --avis-suau: #3b2722;
+    --capsula: rgb(255 255 255 / 0.05);
+    --capsula-activa: #2f5d50;
+    --capsula-activa-tinta: #eef5f1;
+    --capsula-ombra: 0 1px 3px rgb(0 0 0 / 0.35);
+    --fons-visor: radial-gradient(ellipse at 50% 35%, #3a4448, #283034 75%);
+    --vora-visor: rgb(255 255 255 / 0.08);
+    --xip-etiqueta: rgb(24 30 33 / 0.86);
+    --xip-etiqueta-tinta: #eef0ec;
+    --tinta-etiqueta-zona: #c9d0cb;
   }
 
   :root:not([data-theme='light']) .zona-visor {
@@ -107,6 +127,15 @@
     --accent-fosc: #b4d9cb;
     --accent-suau: #26332d;
     --avis-suau: #3b2722;
+    --capsula: rgb(255 255 255 / 0.05);
+    --capsula-activa: #2f5d50;
+    --capsula-activa-tinta: #eef5f1;
+    --capsula-ombra: 0 1px 3px rgb(0 0 0 / 0.35);
+    --fons-visor: radial-gradient(ellipse at 50% 35%, #3a4448, #283034 75%);
+    --vora-visor: rgb(255 255 255 / 0.08);
+    --xip-etiqueta: rgb(24 30 33 / 0.86);
+    --xip-etiqueta-tinta: #eef0ec;
+    --tinta-etiqueta-zona: #c9d0cb;
 }
 
 :root[data-theme='dark'] .zona-visor {
@@ -208,11 +237,6 @@ a {
 /* --- Barra i pantalles --- */
 
 .barra-app {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px var(--espai);
-  border-bottom: 1px solid var(--linia);
   background: var(--fons);
 }
 
@@ -671,50 +695,93 @@ fieldset {
   gap: 8px;
 }
 
-/* --- Navegació --- */
+/* --- Navegació ---
+   El logo sol a l'esquerra; el menú en una càpsula de fons suau al mig (l'opció
+   activa, en blanc amb una ombra lleugera; en fosc, en jade fosc); Drive, el
+   tema i Bloquejar a la dreta. Sense línia separadora. */
 
 .barra-app {
-  gap: 16px;
+  display: grid;
+  /* La càpsula, centrada a l'espai que deixen el logo i les accions (a la
+     tauleta horitzontal no hi ha amplada per centrar-la a tota la barra) */
+  grid-template-columns: auto minmax(max-content, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: 12px 24px;
+  padding: 10px var(--espai);
+  border-bottom: none;
+}
+
+.barra-app .logotip {
+  justify-self: start;
+  padding: 4px 8px 4px 4px;
 }
 
 .navegacio {
-  display: flex;
-  gap: 4px;
-  /* El menú no s'escurça mai: si falta espai, s'escurça la píndola de Drive */
-  flex: 1 0 auto;
+  justify-self: center;
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--capsula);
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .navegacio a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: var(--radi);
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
   color: var(--tinta-suau);
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.navegacio a:hover {
+  color: var(--tinta);
 }
 
 .navegacio a.active {
-  color: var(--accent);
-  background: var(--accent-suau);
+  color: var(--capsula-activa-tinta);
+  background: var(--capsula-activa);
+  box-shadow: var(--capsula-ombra);
+  font-weight: 500;
 }
 
-/* Pantalla estreta (tauleta vertical): la navegació baixa a una fila pròpia */
-@media (max-width: 760px) {
-  .barra-app {
-    flex-wrap: wrap;
-    row-gap: 4px;
-  }
+.accions-barra {
+  /* Ocupa la columna (que s'encongeix si cal) i el text de Drive s'escurça */
+  justify-self: stretch;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
 
-  .barra-app .logotip {
-    margin-right: auto;
+.accions-barra > * {
+  flex: none;
+}
+
+.accions-barra > .indicador-copia-arrel {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Tauleta vertical (i pantalles estretes): la càpsula baixa a una segona fila, amb el mateix estil */
+@media (max-width: 900px) {
+  .barra-app {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   .navegacio {
-    order: 5;
-    flex-basis: 100%;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    max-width: 100%;
   }
 }
 
@@ -795,8 +862,26 @@ fieldset {
     height: auto;
   }
 
+  /* Una columna i la pàgina es desplaça: cada fila pren l'alçada que necessita
+     (si no, la barra de sota el mapa quedava tapada per Punt/Marcats) */
   .disseny-mapa {
     grid-template-columns: 1fr;
+    flex: none;
+    min-height: auto;
+  }
+
+  .columna-visor {
+    min-height: auto;
+  }
+
+  .panell-mapa.amb-pestanyes {
+    overflow: visible;
+  }
+
+  .panell-mapa .panell-lateral,
+  .panell-mapa > .llista-marcats-seccio {
+    flex: none;
+    min-height: auto;
   }
 
   .zona-visor {
@@ -809,9 +894,9 @@ fieldset {
   min-height: 0;
   border-radius: calc(var(--radi) * 1.5);
   overflow: hidden;
-  /* Paper d'arròs que s'esvaeix cap a la boira */
-  background: linear-gradient(#fcfbf7, #e9ede7);
-  border: none;
+  /* Paper d'arròs que s'esvaeix cap a la boira; en fosc, gris pissarra amb una vora suau */
+  background: var(--fons-visor);
+  box-shadow: inset 0 0 0 1px var(--vora-visor);
 }
 
 .visor3d {
@@ -843,8 +928,8 @@ fieldset {
   line-height: 1.2;
   padding: 1px 6px;
   border-radius: 6px;
-  background: rgb(252 251 247 / 0.88);
-  color: var(--tinta);
+  background: var(--xip-etiqueta);
+  color: var(--xip-etiqueta-tinta);
   white-space: nowrap;
 }
 
@@ -2596,7 +2681,7 @@ fieldset {
   padding: 0 6px;
   font-size: 0.8rem;
   letter-spacing: 0.02em;
-  color: var(--tinta-suau);
+  color: var(--tinta-etiqueta-zona);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -3031,8 +3116,18 @@ fieldset {
   gap: 6px;
 }
 
-.controls-retencio .boto {
+.controls-retencio {
+  gap: 2px;
+}
+
+/* Botons d'icona: quadrats, prou grans per al dit (44 px) */
+.controls-retencio .boto-icona {
+  min-width: 44px;
   min-height: 44px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3941,23 +4036,22 @@ fieldset {
   cursor: pointer;
 }
 
-/* Avís suau en sortir d'una visita en curs */
+/* Avís suau en sortir d'una visita en curs: dins el flux, just sota la
+   barra, perquè no tapi cap control de la pantalla (el contingut baixa
+   mentre es veu) */
 .avis-sortida-visita {
-  position: fixed;
-  z-index: 30;
-  left: 50%;
-  bottom: max(20px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  width: min(560px, calc(100% - 32px));
+  flex: none;
+  margin: 0 auto 8px;
+  width: min(560px, calc(100% - 2 * var(--espai)));
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 12px 12px 18px;
+  padding: 8px 8px 8px 18px;
   border-radius: var(--radi);
   background: var(--clar);
   color: var(--tinta);
   border: 1px solid var(--linia);
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.16);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.1);
   animation: apareix-avis 0.2s ease-out;
 }
 
@@ -3986,7 +4080,7 @@ fieldset {
 @keyframes apareix-avis {
   from {
     opacity: 0;
-    transform: translate(-50%, 8px);
+    transform: translateY(-6px);
   }
 }
 
@@ -4016,4 +4110,791 @@ fieldset {
   align-items: center;
   justify-content: space-between;
   gap: 8px 16px;
+}
+
+/* --- Escala 0–10 (BarraEscala): 11 caselles en una fila, de jade a cinabri --- */
+.barra-escala {
+  gap: 8px;
+}
+
+.capcalera-escala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.escala-anterior {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caselles-escala {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 3px;
+  max-width: 720px;
+  padding: 3px;
+  border-radius: 16px;
+  /* Degradat suau, només de fons */
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--jade) 18%, var(--clar)),
+    color-mix(in oklab, var(--cinabri) 18%, var(--clar))
+  );
+  /* Es pot lliscar el dit en horitzontal; la pàgina es continua desplaçant en vertical */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.casella-escala {
+  position: relative;
+  min-height: 48px;
+  padding: 0;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.casella-escala:hover {
+  background: rgb(255 255 255 / 0.35);
+}
+
+.casella-escala.triada {
+  color: #fff;
+  font-weight: 600;
+  background: color-mix(in oklab, var(--cinabri) var(--p), var(--jade));
+  box-shadow:
+    0 0 0 2px var(--clar),
+    0 2px 8px rgb(0 0 0 / 0.18);
+  transform: scale(1.08);
+  z-index: 1;
+}
+
+:root[data-theme='dark'] .casella-escala.triada {
+  color: #151917;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .casella-escala.triada {
+    color: #151917;
+  }
+}
+
+.caselles-escala:disabled,
+.casella-escala:disabled {
+  cursor: default;
+}
+
+.punt-anterior {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tinta-suau);
+}
+
+.casella-escala .punt-anterior {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  translate: -50% 0;
+}
+
+.casella-escala.triada .punt-anterior {
+  background: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .casella-escala {
+    transition: none;
+  }
+}
+
+/* --- Visita a pantalla completa ---
+   Capçalera en una sola fila (nom, episodi i sessió, temporitzador, agulles,
+   Desat i Finalitzar), pestanyes a sota i el contingut a tota l'amplada. */
+.pantalla.pantalla-visita {
+  max-width: none;
+}
+
+@media (min-width: 901px) {
+  .capcalera-visita {
+    flex-wrap: nowrap;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .capcalera-visita .qui-visita {
+    display: flex;
+    align-items: baseline;
+    gap: 6px 16px;
+    min-width: 0;
+  }
+
+  .capcalera-visita h1,
+  .capcalera-visita .qui-visita p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .capcalera-visita h1 {
+    flex: 0 1 auto;
+  }
+
+  .capcalera-visita .qui-visita p {
+    flex: 0 1 auto;
+    margin: 0;
+  }
+
+  .capcalera-visita .temporitzador,
+  .capcalera-visita .accions-visita {
+    flex: none;
+  }
+
+  .capcalera-visita .boto-gran {
+    min-height: 48px;
+    padding: 0 20px;
+    font-size: 1rem;
+  }
+}
+
+.pestanyes-visita {
+  margin-bottom: 12px;
+}
+
+/* Pestanya Tractament, com la pantalla Mapa: el mapa ocupa tota l'alçada sota
+   la capçalera i les pestanyes; la columna dreta es desplaça per dins i la
+   pàgina no es desplaça mai */
+@media (min-width: 901px) {
+  #root:has(> .pantalla-visita.amb-mapa) {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pantalla-visita.amb-mapa {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .capcalera-visita {
+    position: static;
+    margin-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .pestanyes-visita {
+    margin-bottom: 0;
+  }
+
+  .pantalla-visita.amb-mapa > .contingut-visita,
+  .pantalla-visita.amb-mapa .tractament-visita {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pantalla-visita.amb-mapa .tractament-visita {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .pantalla-visita.amb-mapa .mapa-visita {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .pantalla-visita.amb-mapa > .enllac-tractaments,
+  .pantalla-visita.amb-mapa > .addendes {
+    display: none;
+  }
+}
+
+/* La barra fina sobre el mapa: repetir l'última sessió, la diferència i el comptador d'agulles */
+.barra-tractament {
+  flex: 1;
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 8px 14px;
+  margin: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.barra-tractament > * {
+  flex: none;
+}
+
+.barra-tractament .boto {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.95rem;
+}
+
+.barra-tractament .detall {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.barra-tractament .pregunta-repetir {
+  width: auto;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.barra-tractament .pregunta-repetir p {
+  flex-basis: auto;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.barra-tractament .agulles-posades {
+  margin-left: auto;
+}
+
+@media (max-width: 900px) {
+  .barra-tractament {
+    flex-wrap: wrap;
+    flex-basis: 100%;
+  }
+}
+
+/* Tauleta horitzontal i ordinadors petits: la capçalera de la visita, més
+   compacta perquè hi càpiga en una fila; el nom té prioritat sobre el motiu */
+@media (min-width: 901px) and (max-width: 1279px) {
+  .capcalera-visita {
+    gap: 8px 14px;
+  }
+
+  /* El nom i «Primera visita · Sessió 2 de 6», en dues línies dins la fila */
+  .capcalera-visita .qui-visita {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .capcalera-visita h1 {
+    max-width: 100%;
+    font-size: 1.25rem;
+  }
+
+  .capcalera-visita .qui-visita p {
+    max-width: 100%;
+    font-size: 0.85rem;
+  }
+
+  .capcalera-visita .temporitzador {
+    gap: 4px;
+  }
+
+  .capcalera-visita .temporitzador > span {
+    font-size: 1.3rem;
+  }
+
+  .capcalera-visita .boto-gran {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Pestanya Tractament: sota el mapa, el 3D/2D i les vistes en una sola fila
+   (el mapa guanya alçada); en pantalles baixes, sense la llegenda de colors
+   (els colors ja surten en triar la tècnica i a la llista de marcats) */
+@media (min-width: 600px) {
+  .pantalla-visita.amb-mapa .barra-visor {
+    gap: 6px 12px;
+    justify-content: flex-start;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .visor3d-vistes {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
+/* La llegenda, al final de la barra (el botó «ⓘ Colors», amagat) */
+.barra-visor .llegenda-colors {
+  order: 1;
+}
+
+.boto-colors {
+  display: none;
+}
+
+@media (min-width: 901px) and (max-height: 800px), (min-width: 600px) and (max-width: 900px) {
+  .pantalla-visita.amb-mapa .barra-visor .llegenda-colors {
+    order: 0;
+    position: relative;
+  }
+
+  .pantalla-visita.amb-mapa .boto-colors {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--linia);
+    border-radius: 999px;
+    background: transparent;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--tinta-suau);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .pantalla-visita.amb-mapa .boto-colors[aria-expanded='true'] {
+    color: var(--tinta);
+    background: var(--accent-suau);
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .llegenda {
+    display: none;
+  }
+
+  /* El globus, a sobre del botó */
+  .pantalla-visita.amb-mapa .barra-visor .llegenda.oberta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    z-index: 10;
+    padding: 10px 14px;
+    background: var(--superficie);
+    border: 1px solid var(--linia);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
+    white-space: nowrap;
+  }
+}
+
+/* Fins a 1599 px, la capçalera del mapa de la visita (Cos/Orella i la barra
+   fina) no hi cap al costat de la columna dreta: ocupa tota l'amplada i, a la
+   tauleta horitzontal, la barra passa a una fila pròpia sota Cos/Orella */
+@media (min-width: 901px) and (max-width: 1599px) {
+  /* La capçalera del mapa, a tota l'amplada i amb l'alçada que calgui (la
+     columna dreta comença a sota, en lloc de pujar-hi al costat) */
+  .pantalla-visita.amb-mapa .capcalera-mapa {
+    height: auto;
+    margin-right: 0;
+    overflow: visible;
+    flex-wrap: wrap;
+  }
+
+  .pantalla-visita.amb-mapa .panell-mapa.amb-pestanyes {
+    margin-top: 0;
+  }
+
+  /* «Agulles posades» a la mateixa fila que «Repetir»: si no hi cap, la
+     diferència de punts s'escurça (sencera en passar-hi per sobre) */
+  .pantalla-visita.amb-mapa .barra-tractament {
+    flex-wrap: nowrap;
+    overflow: visible;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament [data-testid='diferencia-punts'] {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+  }
+}
+
+/* «⤢ Ampliar», a la cantonada del mapa (cos i orella) */
+.cantonada-visor {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
+.boto-ampliar {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--linia);
+  border-radius: 999px;
+  background: var(--clar);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+  cursor: pointer;
+}
+
+.boto-ampliar[aria-pressed='true'] {
+  background: var(--accent-suau);
+}
+
+/* Mapa ampliat: sense la barra de l'app, sense la capçalera de la visita ni
+   les pestanyes; només el temporitzador, en petit, en una franja fina */
+#root:has(> .pantalla-visita.ampliat) > .barra-app,
+#root:has(.pantalla-visita.ampliat) .barra-app {
+  display: none;
+}
+
+.pantalla-visita.ampliat .pestanyes-visita {
+  display: none;
+}
+
+.pantalla-visita.ampliat .capcalera-visita {
+  position: static;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  min-height: 0;
+  margin-bottom: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  /* (el fons es manté: en acabar la retenció, la franja també passa a cinabri) */
+  border-bottom: none;
+}
+
+.pantalla-visita.ampliat .capcalera-visita > :not(.temporitzador) {
+  display: none;
+}
+
+.pantalla-visita.ampliat .temporitzador {
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.pantalla-visita.ampliat .temporitzador > span,
+.pantalla-visita.ampliat .temporitzador output {
+  font-size: 1.05rem;
+}
+
+.pantalla-visita.ampliat .temporitzador .boto {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+}
+
+/* Ampliat: del temporitzador, només el temps i Pausa/Continuar */
+.pantalla-visita.ampliat .controls-retencio .boto-icona:not(.principal-retencio) {
+  display: none;
+}
+
+.pantalla-visita.ampliat .controls-retencio .boto-icona {
+  min-width: 36px;
+  min-height: 36px;
+}
+
+/* --- Visita a la tauleta vertical ---
+   Capçalera en dues línies (nom, episodi i sessió i «Desat»; temporitzador i
+   «Finalitzar visita»), pestanyes en una fila que es desplaça de costat i, a
+   Tractament, Cos/Orella, Repetir, la diferència i les agulles en una fila;
+   el mapa omple la resta de l'alçada (la llista de marcats queda a sota, dins
+   la mateixa zona, i s'hi arriba desplaçant-la). */
+
+/* Formes curtes: per defecte, la llarga */
+.barra-tractament .text-curt,
+.barra-tractament .icona-repetir {
+  display: none;
+}
+
+.boto-repetir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .pestanyes-visita {
+    display: flex;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pestanyes-visita > button {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 900px) {
+  .capcalera-visita {
+    gap: 4px 12px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  /* Primera línia: nom · episodi i sessió (s'escurcen) i «Desat» */
+  .capcalera-visita .qui-visita {
+    order: 0;
+    flex: 1 1 calc(100% - 90px);
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .capcalera-visita h1,
+  .capcalera-visita .qui-visita p {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .capcalera-visita h1 {
+    flex: 0 1 auto;
+    font-size: 1.25rem;
+  }
+
+  .capcalera-visita .qui-visita p {
+    flex: 0 1 auto;
+    font-size: 0.85rem;
+  }
+
+  .capcalera-visita .accions-visita {
+    display: contents;
+  }
+
+  .capcalera-visita .accions-visita > .detall {
+    order: 1;
+    flex: none;
+    font-size: 0.85rem;
+  }
+
+  /* Segona línia: temporitzador i «Finalitzar visita» */
+  .capcalera-visita .temporitzador {
+    order: 2;
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .capcalera-visita .temporitzador > span {
+    font-size: 1.3rem;
+  }
+
+  /* Abans de començar: minuts i «Agulles posades: començar», més petits */
+  .capcalera-visita .temporitzador .boto-gran {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 0.9rem;
+  }
+
+  .capcalera-visita .minuts-retencio {
+    gap: 0;
+  }
+
+  .capcalera-visita .minuts-retencio .boto {
+    min-width: 40px;
+    padding: 0 6px;
+  }
+
+  .capcalera-visita .minuts-retencio output {
+    min-width: 0;
+    padding: 4px 8px;
+  }
+
+  .capcalera-visita .accions-visita > .boto {
+    order: 3;
+    margin-left: auto;
+    min-height: 44px;
+    padding: 0 16px;
+    font-size: 0.95rem;
+  }
+
+  /* Tractament: la pàgina no es desplaça; el mapa omple la resta */
+  #root:has(> .pantalla-visita.amb-mapa) {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pantalla-visita.amb-mapa {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .capcalera-visita {
+    position: static;
+    margin-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa .pestanyes-visita {
+    flex: none;
+    margin-bottom: 8px;
+  }
+
+  .pantalla-visita.amb-mapa > .contingut-visita,
+  .pantalla-visita.amb-mapa .tractament-visita {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pantalla-visita.amb-mapa .tractament-visita {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .pantalla-visita.amb-mapa .mapa-visita {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pantalla-visita.amb-mapa > .enllac-tractaments,
+  .pantalla-visita.amb-mapa > .addendes {
+    display: none;
+  }
+
+  .pantalla-visita.amb-mapa .panell-pestanya:not([hidden]) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* El mapa (i la barra de sota) ocupa tota la zona; la llista, a sota */
+  .pantalla-visita.amb-mapa .disseny-mapa {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .pantalla-visita.amb-mapa .disseny-mapa > .columna-visor {
+    flex: 0 0 100%;
+    min-height: 0;
+  }
+
+  .pantalla-visita.amb-mapa .columna-visor .zona-visor {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+
+  .pantalla-visita.amb-mapa .disseny-mapa > .panell-mapa {
+    flex: none;
+  }
+
+  /* Cos/Orella, Repetir, la diferència i les agulles en una sola fila */
+  .pantalla-visita.amb-mapa .capcalera-mapa {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .pantalla-visita.amb-mapa .pestanyes-mapa {
+    flex: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament {
+    flex: 1 1 auto;
+    flex-basis: auto;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow: visible;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .text-llarg {
+    display: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .text-curt,
+  .pantalla-visita.amb-mapa .barra-tractament .icona-repetir {
+    display: inline;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .boto-repetir {
+    padding: 0 12px;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament [data-testid='diferencia-punts'] {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+  }
+
+  .pantalla-visita.amb-mapa .barra-tractament .agulles-posades {
+    gap: 2px;
+  }
+
+  /* Sota el mapa, 3D/2D, les vistes i «ⓘ Colors» en una sola fila */
+  .pantalla-visita.amb-mapa .barra-visor {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor > * {
+    flex: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .visor3d-vistes {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .visor3d-vistes .boto,
+  .pantalla-visita.amb-mapa .barra-visor .boto-colors {
+    flex: none;
+    min-height: 40px;
+    padding: 0 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .text-colors {
+    display: none;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .boto-colors {
+    min-width: 40px;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .pantalla-visita.amb-mapa .barra-visor .mode-mapa button {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 0.9rem;
+  }
 }

@@ -2,7 +2,7 @@
 import { BufferGeometry, Float32BufferAttribute, PerspectiveCamera, Vector3 } from 'three'
 import { describe, expect, it } from 'vitest'
 import { esquemaPosicio3D } from '../punts/esquema'
-import { azimutMesProper, CAMERA, nivellEtiquetes, VISTA_PEU, VISTES, vistaCapAlPunt } from './camera'
+import { azimutMesProper, enquadramentCos, OCUPACIO_COS, CAMERA, nivellEtiquetes, VISTA_PEU, VISTES, vistaCapAlPunt } from './camera'
 import {
   nombreTriangles,
   normalTriangle,
@@ -126,6 +126,20 @@ describe('càmera', () => {
     expect(azimutMesProper(0.2, VISTES.darrere)).toBeCloseTo(Math.PI)
     expect(azimutMesProper(-0.2, VISTES.darrere)).toBeCloseTo(-Math.PI)
     expect(azimutMesProper(Math.PI - 0.1, VISTES.dreta)).toBeCloseTo(1.5 * Math.PI)
+  })
+
+  it('«Tot el cos» omple el requadre: mana l\'alçada, o l\'amplada si el requadre és estret', () => {
+    const caixa = { min: { x: -0.5, y: 0, z: -0.1 }, max: { x: 0.5, y: 1.7, z: 0.3 } }
+    const tan = Math.tan((CAMERA.fov * Math.PI) / 360)
+    const ample = enquadramentCos(caixa, 1200, 600)
+    expect(ample.alcada).toBeCloseTo(0.85)
+    expect(1.7 / (2 * ample.distancia * tan)).toBeCloseTo(OCUPACIO_COS)
+    // La mida del requadre no compta si és prou ample: el cos creix amb el requadre
+    expect(enquadramentCos(caixa, 2400, 1200).distancia).toBeCloseTo(ample.distancia)
+    // Estret: l'amplada del cos ocupa la mateixa part de l'amplada del requadre
+    const estret = enquadramentCos(caixa, 300, 900)
+    expect(1 / (2 * estret.distancia * tan * (300 / 900))).toBeCloseTo(OCUPACIO_COS)
+    expect(estret.distancia).toBeLessThanOrEqual(CAMERA.distanciaMaxima)
   })
 
   it('mostra més informació com més a prop', () => {

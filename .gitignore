@@ -32,5 +32,5 @@ coverage
 # Build de les proves E2E (vite build --mode proves)
 dist-proves
 
-# Captures de disseny (ja són a l'artifact «Captures de Qi»)
+# Captures de revisió del disseny: només a la pàgina «Captures de Qi», no al repositori
 docs/captures/disseny/

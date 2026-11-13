@@ -40,7 +40,10 @@ test('84 punts per zones, orella esquerra i dreta en mirall', async ({ page }) =
   await expect(visor).toHaveAttribute('data-costat', 'E')
   await expect(page.getByRole('img', { name: 'Orella esquerra' })).toBeVisible()
 
-  // Noms de les zones amb l'orella sencera
+  // Els noms de les zones, amagats per defecte; amb «Mostrar zones», amb l'orella sencera
+  await expect(visor.getByText('Conca', { exact: true })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Mostrar zones' }).click()
+  await expect(page.getByRole('button', { name: 'Amagar zones' })).toHaveAttribute('aria-pressed', 'true')
   for (const zona of ['Hèlix', 'Escafa', 'Antihèlix', 'Fossa triangular', 'Tragus', 'Antitragus', 'Conca', 'Lòbul'])
     await expect(visor.getByText(zona, { exact: true })).toBeVisible()
 
@@ -185,6 +188,7 @@ test('el nom «Lòbul» es veu sencer a totes dues orelles', async ({ page }) =>
   await entrar(page)
   await obrirOrella(page)
   const visor = page.getByTestId('visor-orella')
+  await page.getByRole('button', { name: 'Mostrar zones' }).click()
   for (const orella of ['Orella esquerra', 'Orella dreta']) {
     await page.getByRole('radio', { name: orella }).click()
     const caixa = (await visor.boundingBox())!

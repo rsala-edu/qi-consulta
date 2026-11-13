@@ -1,7 +1,8 @@
 // Mapa de l'orella (escola xinesa, GB/T 13734-2008): orella esquerra o dreta,
 // zoom, marcatge amb les tècniques de l'orella i correcció de la posició.
 
-import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useMemo, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import { LlegendaColors } from '../../mapa/components/LlegendaColors'
 import { Boto } from '../../components/Boto'
 import {
   COLOR_TECNICA,
@@ -40,13 +41,16 @@ interface Props {
   /** Punt que s'ha de mostrar (des de la llista de marcats) */
   peticio: { codi: string; n: number } | null
   onVeure(m: PuntMarcat): void
+  /** A la cantonada del dibuix (a la visita: «⤢ Ampliar») */
+  cantonada?: ReactNode
 }
 
-export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props) {
+export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonada }: Props) {
   const visor = useRef<ControlOrella>(null)
   const { correccions, desar, treure } = useCorreccionsOrella()
   const [costatVist, setCostatVist] = useState<CostatOrella>('E')
   const [zona, setZona] = useState<ZonaOrella | ''>('')
+  const [zones, setZones] = useState(false)
   const [consulta, setConsulta] = useState('')
   const [fitxa, setFitxa] = useState<FitxaOberta | null>(null)
   const [corregint, setCorregint] = useState<string | null>(null)
@@ -119,6 +123,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
     <div className="disseny-mapa">
       <div className="columna-visor">
         <div className="zona-visor">
+          {cantonada && <div className="cantonada-visor">{cantonada}</div>}
           <VisorOrella
             ref={visor}
             costat={costatVist}
@@ -128,6 +133,8 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
             onTocarPosicio={(p) => corregint && desar(corregint, p.x, p.y)}
             arrossegable={corregint}
             onArrossegar={(p) => corregint && desar(corregint, p.x, p.y, false)}
+            // En corregir la posició d'un punt, les zones sempre es veuen
+            zones={zones || !!corregint}
           />
         </div>
         <div className="barra-visor">
@@ -148,15 +155,13 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure }: Props)
             <button type="button" className="boto boto-secundari" onClick={() => visor.current?.restablir()}>
               {t.orella.sencera}
             </button>
+            <button type="button" className="boto boto-secundari" aria-pressed={zones} onClick={() => setZones((z) => !z)}>
+              {zones ? t.orella.amagarZones : t.orella.mostrarZones}
+            </button>
           </div>
-          <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
-            {TECNIQUES.map((tec) => (
-              <li key={tec}>
-                <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
-                {t.orella.tecnica[tec as keyof typeof t.orella.tecnica]}
-              </li>
-            ))}
-          </ul>
+          <LlegendaColors
+            tecniques={TECNIQUES.map((tecnica) => ({ tecnica, nom: t.orella.tecnica[tecnica as keyof typeof t.orella.tecnica] }))}
+          />
         </div>
       </div>
 

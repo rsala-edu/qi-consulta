@@ -5,7 +5,7 @@
 import { useEffect, useId, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref } from 'react'
 import { t } from '../../i18n/t'
 import { colocarEtiquetes, type EtiquetaColocada } from '../../mapa/etiquetes'
-import { COLOR_ANELL, COLOR_NEUTRE, COLOR_VORA } from '../../mapa/aspecteMarcador'
+import { COLOR_ANELL, COLOR_VORA, RADI_MARCAT, aspecteMarcador } from '../../mapa/aspecteMarcador'
 import { NOMS_ZONES } from '../cataleg'
 import { CONTORN, NOM_ZONA, POLIGONS, RELLEU, SUBDIVISIONS, ZONES_ORELLA, camiArrodonit, camiRecte } from '../dibuix'
 import {
@@ -53,19 +53,22 @@ interface Props {
   /** Id del punt que es pot arrossegar (correcció) */
   arrossegable?: string | null
   onArrossegar?(p: { x: number; y: number }): void
+  /** Les línies i els noms de les zones (amagats per defecte: botó «Mostrar zones») */
+  zones?: boolean
   ref?: Ref<ControlOrella>
 }
 
-/** Mides dels marcadors a la pantalla (px), com al cos */
-const RADI = { neutre: 4, marcat: 6.5, vora: 1.6, anell: 11, gruixAnell: 3 }
+/** Mides dels marcadors a la pantalla (px), en la proporció del cos (aspecteMarcador) */
+const PX_PER_RADI = 7 / RADI_MARCAT
 const MOVIMENT_MAXIM_TOC = 8
 const RADI_SELECCIO = 22
-const COLOR_PELL = '#ead9c9'
-const COLOR_RELLEU = '#f1e5d8'
-const COLOR_CLOT = '#dcc6b3'
+/** La pell, del mateix to que el cos (Visor3D) */
+const COLOR_PELL = '#e9d8c8'
 const COLOR_LINIA = '#9c8270'
+/** Relleu: la conca, el més fons; l'escafa i la fossa, una mica; l'hèlix i l'antihèlix, clars */
+const FONS_ZONA: Record<string, string> = { CO: 'conca', SF: 'clot', TF: 'clot' }
 
-export function VisorOrella({ ref, costat, punts, modeToc, onTocarPunt, onTocarPosicio, arrossegable, onArrossegar }: Props) {
+export function VisorOrella({ ref, costat, punts, modeToc, onTocarPunt, onTocarPosicio, arrossegable, onArrossegar, zones = false }: Props) {
   const contenidor = useRef<HTMLDivElement>(null)
   const [mida, setMida] = useState<Mida>({ amplada: 600, alcada: 800 })
   const [vista, setVista] = useState<Vista>(VISTA_INICIAL)
@@ -202,11 +205,13 @@ export function VisorOrella({ ref, costat, punts, modeToc, onTocarPunt, onTocarP
   const u = unitatsPerPixel(vista, mida)
   const mirall = costat === 'D' ? 'translate(340,0) scale(-1,1)' : undefined
 
-  // Etiquetes: amb l'orella sencera, els noms de les zones; en ampliar, els codis
+  // Etiquetes: amb l'orella sencera, només les dels punts marcats i del
+  // seleccionat (i els noms de les zones, si es mostren); en ampliar, totes
   const etiquetes: EtiquetaColocada[] = useMemo(() => {
-    if (vista.escala < 1.6) return []
+    const sencera = vista.escala < 1.6
     const llarga = vista.escala >= 3
     const entrades = enPantalla
+      .filter((p) => !sencera || p.color || p.destacat)
       .map((p) => ({ p, s: aPantalla(vista, mida, p.dx, p.dy) }))
       .filter(({ s }) => s.x >= 0 && s.y >= 0 && s.x <= mida.amplada && s.y <= mida.alcada)
       .sort((a, b) => Number(Boolean(b.p.destacat)) - Number(Boolean(a.p.destacat)) || Number(Boolean(b.p.color)) - Number(Boolean(a.p.color)))
@@ -238,30 +243,54 @@ export function VisorOrella({ ref, costat, punts, modeToc, onTocarPunt, onTocarP
               ))}
             </clipPath>
           ))}
+          {/* Volum: la llum ve de dalt a l'esquerra, com al cos */}
+          <linearGradient id={`${id}-pell`} x1="0" y1="0" x2="0.6" y2="1">
+            <stop offset="0" stopColor="#f0e2d5" />
+            <stop offset="1" stopColor="#dfc9b6" />
+          </linearGradient>
+          <linearGradient id={`${id}-relleu`} x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0" stopColor="#f6ebe1" />
+            <stop offset="1" stopColor={COLOR_PELL} />
+          </linearGradient>
+          <radialGradient id={`${id}-clot`} cx="0.5" cy="0.5" r="0.7">
+            <stop offset="0" stopColor="#d6bea9" />
+            <stop offset="1" stopColor="#e2cdbb" />
+          </radialGradient>
+          <radialGradient id={`${id}-conca`} cx="0.45" cy="0.55" r="0.65">
+            <stop offset="0" stopColor="#c3a690" />
+            <stop offset="0.7" stopColor="#d3baa5" />
+            <stop offset="1" stopColor="#dfc8b5" />
+          </radialGradient>
+          <filter id={`${id}-ombra`} x="-10%" y="-10%" width="125%" height="125%">
+            <feDropShadow dx="3" dy="5" stdDeviation="6" floodColor="#3b2a20" floodOpacity="0.22" />
+          </filter>
         </defs>
         <g transform={mirall}>
-          <path d={camiArrodonit(CONTORN)} fill={COLOR_PELL} stroke="#8c7363" strokeWidth={1.2} />
+          <path d={camiArrodonit(CONTORN)} fill={`url(#${id}-pell)`} stroke="#b89c88" strokeWidth={0.8} filter={`url(#${id}-ombra)`} />
           {ZONES_ORELLA.map((z) =>
             POLIGONS[z].map((pol, i) => (
               <path
                 key={`${z}${i}`}
                 data-zona={z}
                 d={camiArrodonit(pol)}
-                fill={RELLEU[z] ? COLOR_RELLEU : COLOR_CLOT}
-                stroke="#b49a86"
-                strokeWidth={0.8}
+                fill={`url(#${id}-${FONS_ZONA[z] ?? (RELLEU[z] ? 'relleu' : 'clot')})`}
+                stroke={zones ? '#b49a86' : '#c8ae9a'}
+                strokeOpacity={zones ? 1 : 0.55}
+                strokeWidth={zones ? 0.8 : 0.6}
               />
             )),
           )}
-          {ZONES_ORELLA.map((z) => (
-            <g key={z} clipPath={`url(#${id}-${z})`}>
-              {SUBDIVISIONS[z].map((l, i) => (
-                <path key={i} d={camiRecte(l)} stroke={COLOR_LINIA} strokeWidth={0.7} strokeDasharray="3 2" fill="none" />
-              ))}
-            </g>
-          ))}
+          {zones &&
+            ZONES_ORELLA.map((z) => (
+              <g key={z} clipPath={`url(#${id}-${z})`}>
+                {SUBDIVISIONS[z].map((l, i) => (
+                  <path key={i} d={camiRecte(l)} stroke={COLOR_LINIA} strokeWidth={0.7} strokeDasharray="3 2" fill="none" />
+                ))}
+              </g>
+            ))}
         </g>
-        {vista.escala < 1.6 &&
+        {zones &&
+          vista.escala < 1.6 &&
           ZONES_ORELLA.map((z) => {
             const { text, ancora } = NOM_ZONA[z]
             return (
@@ -271,27 +300,28 @@ export function VisorOrella({ ref, costat, punts, modeToc, onTocarPunt, onTocarP
                 y1={text[1]}
                 x2={mirallX(ancora[0], costat)}
                 y2={ancora[1]}
-                stroke={COLOR_LINIA}
+                stroke="var(--tinta-etiqueta-zona)"
+                strokeOpacity={0.7}
                 strokeWidth={0.6}
               />
             )
           })}
+        {/* Els punts, com al cos: disc de color, vora blanca i, el seleccionat, anell de tinta */}
         {enPantalla.map((p) => {
-          const marcat = p.color !== undefined
-          const r = (marcat || p.destacat ? RADI.marcat : RADI.neutre) * u
+          const a = aspecteMarcador({ color: p.color, destacat: p.destacat })
+          const r = (px: number) => px * PX_PER_RADI * u
           return (
             <g key={p.id} data-punt={p.id}>
-              {p.destacat && (
-                <circle cx={p.dx} cy={p.dy} r={RADI.anell * u} fill="none" stroke={COLOR_ANELL} strokeWidth={RADI.gruixAnell * u} />
-              )}
-              {(marcat || p.destacat) && <circle cx={p.dx} cy={p.dy} r={r + RADI.vora * u} fill={COLOR_VORA} />}
-              <circle cx={p.dx} cy={p.dy} r={r} fill={p.color ?? COLOR_NEUTRE} />
+              {a.anell && <circle cx={p.dx} cy={p.dy} r={r(a.anell[1])} fill={COLOR_ANELL} />}
+              {a.vora && <circle cx={p.dx} cy={p.dy} r={r(a.vora)} fill={COLOR_VORA} />}
+              <circle cx={p.dx} cy={p.dy} r={r(a.radi)} fill={a.color} />
             </g>
           )
         })}
       </svg>
       <div className="visor3d-etiquetes" aria-hidden="true">
-        {vista.escala < 1.6 &&
+        {zones &&
+          vista.escala < 1.6 &&
           ZONES_ORELLA.map((z) => {
             const { text, costat: lloc } = NOM_ZONA[z]
             const s = aPantalla(vista, mida, mirallX(text[0], costat), text[1])

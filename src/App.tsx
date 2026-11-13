@@ -86,9 +86,9 @@ function Marc() {
         <RedireccioAjuntades />
         <header className="barra-app">
           <span className="logotip">
-          <Simbol />
-          {t.app.nom}
-        </span>
+            <Simbol />
+            {t.app.nom}
+          </span>
           <nav className="navegacio" aria-label={t.navegacio.principal}>
             <NavLink to="/avui">{t.navegacio.avui}</NavLink>
             <NavLink to="/agenda">{t.navegacio.agenda}</NavLink>
@@ -96,11 +96,13 @@ function Marc() {
             <NavLink to="/mapa">{t.navegacio.mapa}</NavLink>
             <NavLink to="/ajustos">{t.navegacio.ajustos}</NavLink>
           </nav>
-          <IndicadorCopia />
-          <BotoTema />
-          <Boto variant="discret" onClick={bloquejar}>
-            {t.app.bloquejar}
-          </Boto>
+          <div className="accions-barra">
+            <IndicadorCopia />
+            <BotoTema />
+            <Boto variant="discret" onClick={bloquejar}>
+              {t.app.bloquejar}
+            </Boto>
+          </div>
         </header>
         <AvisVersioNova />
         <AvisRetencioAcabada onAnar={(id) => void navegar(`/visita/${id}`)} />

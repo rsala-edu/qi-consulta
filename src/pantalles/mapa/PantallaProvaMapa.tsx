@@ -20,6 +20,7 @@ import {
 } from '../../domini/puntMarcat'
 import { formatar, t } from '../../i18n/t'
 import { BarraVistes } from '../../mapa/components/BarraVistes'
+import { LlegendaColors } from '../../mapa/components/LlegendaColors'
 import { Visor2D } from '../../mapa/components/Visor2D'
 import { desarMode, modeInicial, type ModeMapa } from '../../mapa/modeMapa'
 import { ErrorCos3D, Visor3D, type ControlVisor, type MarcadorVisor, type TocPell } from '../../mapa/components/Visor3D'
@@ -65,6 +66,8 @@ export function PantallaProvaMapa() {
 export function MapaTractament({
   titol,
   avis,
+  barra,
+  cantonada,
   marcats,
   setMarcats,
   tecniques = TECNIQUES_DEL_MAPA.cos,
@@ -72,6 +75,10 @@ export function MapaTractament({
 }: {
   titol?: ReactNode
   avis?: ReactNode
+  /** Barra fina sobre el mapa, al costat de Cos/Orella (a la visita: repetir, diferència i agulles) */
+  barra?: ReactNode
+  /** A la cantonada del mapa (cos i orella): a la visita, «⤢ Ampliar» */
+  cantonada?: ReactNode
   marcats: PuntMarcat[]
   setMarcats: Dispatch<SetStateAction<PuntMarcat[]>>
   /** Tècniques que es poden triar al cos (a la palpació, només «Dolor a la palpació») */
@@ -107,6 +114,7 @@ export function MapaTractament({
           ))}
         </div>}
         {avis}
+        {barra}
       </div>
       {/* El cos es queda muntat (i carregat) quan es mira l'orella */}
       <div id="mapa-cos" role="tabpanel" aria-labelledby="pestanya-cos" className="panell-pestanya" hidden={pestanya !== 'cos'}>
@@ -119,11 +127,12 @@ export function MapaTractament({
           peticio={peticions.cos}
           onVeure={veure}
           tecniques={tecniques}
+          cantonada={cantonada}
         />
       </div>
       {pestanya === 'orella' && (
         <div id="mapa-orella" role="tabpanel" aria-labelledby="pestanya-orella" className="panell-pestanya">
-          <MarcatgeOrella marcats={marcats} setMarcats={setMarcats} peticio={peticions.orella} onVeure={veure} />
+          <MarcatgeOrella marcats={marcats} setMarcats={setMarcats} peticio={peticions.orella} onVeure={veure} cantonada={cantonada} />
         </div>
       )}
     </>
@@ -154,9 +163,10 @@ interface PropsMarcatge {
   peticio: Peticio
   onVeure(m: PuntMarcat): void
   tecniques: readonly Tecnica[]
+  cantonada?: ReactNode
 }
 
-function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tecniques: TECNIQUES }: PropsMarcatge) {
+function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tecniques: TECNIQUES, cantonada }: PropsMarcatge) {
   const visor = useRef<ControlVisor>(null)
   const { efectiu: calibrat, desar, restablir } = useCalibracions(model?.topologia ?? '')
   const { revisio } = usePrecaucions()
@@ -258,6 +268,7 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
     <div className="disseny-mapa">
       <div className="columna-visor">
         <div className="zona-visor">
+          {cantonada && <div className="cantonada-visor">{cantonada}</div>}
           {model && !model.definitiu && <p className="avis avis-flotant">{t.mapa.maniquiProvisional}</p>}
           {model && tots.length === 0 && <p className="avis avis-flotant avis-segon">{t.mapa.sensePosicions}</p>}
           {!model && (carregant ? <Indicador text={t.mapa.carregantModel} /> : <ErrorCos3D />)}
@@ -299,15 +310,8 @@ function Marcatge({ model, carregant, marcats, setMarcats, peticio, onVeure, tec
               </button>
             ))}
           </div>
+          <LlegendaColors tecniques={TECNIQUES.map((tecnica) => ({ tecnica, nom: t.mapa.tecnica[tecnica] }))} />
           <BarraVistes visor={visor} />
-          <ul className="llegenda" aria-label={t.mapa.tecnicaTitol}>
-            {TECNIQUES.map((tec) => (
-              <li key={tec}>
-                <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
-                {t.mapa.tecnica[tec]}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 

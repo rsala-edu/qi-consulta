@@ -37,6 +37,34 @@ export function soCurt(): void {
   }
 }
 
+/** Icones dels controls (SVG dins el codi: res d'internet) */
+const ICONES = {
+  pausa: <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />,
+  continuar: <path d="M8 5l11 7-11 7z" />,
+  aturar: <rect x="6" y="6" width="12" height="12" rx="1.5" />,
+  tornar: (
+    <path
+      d="M12 5a7 7 0 1 1-6.6 4.7M5 4v5h5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+}
+
+/** Botó d'icona petit, amb el nom per als lectors de pantalla i com a rètol */
+function BotoIcona({ nom, icona, ...props }: { nom: string; icona: keyof typeof ICONES; onClick(): void; className?: string }) {
+  return (
+    <Boto variant="discret" className={`boto-icona ${props.className ?? ''}`} aria-label={nom} title={nom} onClick={props.onClick}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+        {ICONES[icona]}
+      </svg>
+    </Boto>
+  )
+}
+
 export function Temporitzador({
   sessioId,
   retencio,
@@ -142,20 +170,16 @@ export function Temporitzador({
       )}
       {editable && (
         <div className="controls-retencio" role="group" aria-label={v.controlsRetencio}>
-          {estat === 'enMarxa' && (
-            <Boto variant="discret" onClick={fer(A.pausar)}>
-              {v.pausa}
-            </Boto>
-          )}
+          {estat === 'enMarxa' && <BotoIcona nom={v.pausa} icona="pausa" className="principal-retencio" onClick={fer(A.pausar)} />}
           {(estat === 'pausa' || estat === 'aturada') && (
-            <Boto variant="discret" onClick={fer(A.continuar)}>
-              {v.continuar}
-            </Boto>
+            <BotoIcona nom={v.continuar} icona="continuar" className="principal-retencio" onClick={fer(A.continuar)} />
           )}
           {corrent && (
             <Boto
               variant="discret"
+              className="boto-icona"
               aria-label={v.menysMinut}
+              title={v.menysMinut}
               // Un minut menys no l'acaba de cop
               disabled={retencio.minuts <= 1 || restant <= 60_000}
               onClick={() => onCanviar(A.minuts(retencio, -1))}
@@ -164,18 +188,19 @@ export function Temporitzador({
             </Boto>
           )}
           {(corrent || acabada) && (
-            <Boto variant="discret" aria-label={v.mesMinut} disabled={retencio.minuts >= 120} onClick={() => onCanviar(A.minuts(retencio, 1))}>
+            <Boto
+              variant="discret"
+              className="boto-icona"
+              aria-label={v.mesMinut}
+              title={v.mesMinut}
+              disabled={retencio.minuts >= 120}
+              onClick={() => onCanviar(A.minuts(retencio, 1))}
+            >
               +1
             </Boto>
           )}
-          {corrent && (
-            <Boto variant="discret" onClick={fer(A.aturar)}>
-              {v.aturar}
-            </Boto>
-          )}
-          <Boto variant="discret" onClick={fer(A.tornarAComencar)}>
-            {v.tornarAComencar}
-          </Boto>
+          {corrent && <BotoIcona nom={v.aturar} icona="aturar" onClick={fer(A.aturar)} />}
+          <BotoIcona nom={v.tornarAComencar} icona="tornar" onClick={fer(A.tornarAComencar)} />
         </div>
       )}
     </div>

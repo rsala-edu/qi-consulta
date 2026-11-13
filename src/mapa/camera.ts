@@ -26,6 +26,39 @@ export const CAMERA = {
   limits: { min: [-0.7, -0.05, -0.4], max: [0.7, 1.85, 0.4] },
 } as const
 
+/** Part de l'alçada (o de l'amplada) del requadre que ocupa el cos sencer */
+export const OCUPACIO_COS = 0.86
+
+interface Caixa {
+  min: { x: number; y: number; z: number }
+  max: { x: number; y: number; z: number }
+}
+
+/**
+ * «Tot el cos»: alçada del punt de mira i distància perquè el cos sencer
+ * ocupi OCUPACIO_COS de l'alçada del requadre. Si el requadre és estret, mana
+ * l'amplada (la més gran de les dues de la caixa, perquè el cos gira).
+ */
+export function enquadramentCos(
+  caixa: Caixa,
+  amplada: number,
+  alcada: number,
+  ocupacio = OCUPACIO_COS,
+): { alcada: number; distancia: number } {
+  const tan = Math.tan((CAMERA.fov * Math.PI) / 360)
+  const alcadaCos = caixa.max.y - caixa.min.y
+  const ampladaCos = Math.max(caixa.max.x - caixa.min.x, caixa.max.z - caixa.min.z)
+  const aspecte = amplada > 0 && alcada > 0 ? amplada / alcada : 1
+  const perAlcada = alcadaCos / ocupacio / 2 / tan
+  const perAmplada = ampladaCos / ocupacio / 2 / (tan * aspecte)
+  // Mesurat al pla del centre: els peus, més endavant, es veuen una mica més grans
+  const distancia = Math.max(perAlcada, perAmplada)
+  return {
+    alcada: (caixa.min.y + caixa.max.y) / 2,
+    distancia: Math.min(CAMERA.distanciaMaxima, Math.max(CAMERA.distanciaMinima, distancia)),
+  }
+}
+
 /**
  * Angle d'azimut equivalent a `objectiu` més proper a `actual`. L'azimut de
  * camera-controls és acumulatiu (cada volta suma 2π); així el gir cap a una
