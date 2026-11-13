@@ -84,7 +84,8 @@ test('visita: capçalera en una fila, escala en barra, secundaris a demanda i Tr
   const desplacament = await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight)
   expect(desplacament).toBeLessThanOrEqual(1)
   const visor = (await page.locator('.mapa-visita .zona-visor').first().boundingBox())!
-  expect(visor.y + visor.height).toBeGreaterThan((page.viewportSize()!.height) * 0.8)
+  // (a sota hi ha la barra de les vistes i, des del bloc 3, «Anterior / Següent»)
+  expect(visor.y + visor.height).toBeGreaterThan((page.viewportSize()!.height) * 0.72)
   // La barra fina, sobre el mapa
   await expect(page.locator('.capcalera-mapa .barra-tractament')).toBeVisible()
 

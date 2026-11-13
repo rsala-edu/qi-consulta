@@ -203,6 +203,12 @@ function Visita({
     codiCim,
   )
   const pestanyes = PESTANYES.filter((p) => p !== 'orl' || ambOrl)
+  const canviarPestanya = (p: Pestanya) => {
+    setPestanya(p)
+    // En tornar a «Com està», només es veuen els secundaris que tenen alguna cosa
+    setSecundaris(0)
+    setAfegit(false)
+  }
   // Si es treu el mòdul ORL amb la pestanya oberta, es torna a la valoració
   if (pestanya === 'orl' && !ambOrl) setPestanya('valoracio')
   // El pla de tractament de l'episodi (es pot canviar a la pestanya Diagnòstic)
@@ -413,12 +419,7 @@ function Visita({
             id={`pestanya-${p}`}
             aria-controls={`visita-${p}`}
             aria-selected={pestanya === p}
-            onClick={() => {
-              setPestanya(p)
-              // En tornar a «Com està», només es veuen els secundaris que tenen alguna cosa
-              setSecundaris(0)
-              setAfegit(false)
-            }}
+            onClick={() => canviarPestanya(p)}
           >
             {v.pestanyes[p]}
           </button>
@@ -587,6 +588,23 @@ function Visita({
 
       {pestanya === 'tancar' && <ProperaCita sessio={sessio} />}
 
+      <NavegacioPestanyes
+        pestanyes={pestanyes}
+        actual={pestanya}
+        onAnar={(p) => {
+          canviarPestanya(p)
+          window.scrollTo(0, 0)
+        }}
+        onFinalitzar={
+          enCurs && editable
+            ? () => {
+                setFinalitzant(true)
+                window.scrollTo(0, 0)
+              }
+            : undefined
+        }
+      />
+
       {!enCurs && !addendaOberta && <Addendes sessioId={sessio.id} addendes={addendes} bloquejada={bloquejada} onAfegida={onRecarregar} />}
 
     </main>
@@ -740,6 +758,45 @@ function Finalitzar({
         </Boto>
       </div>
     </section>
+  )
+}
+
+/**
+ * Al final de cada pestanya: «← Anterior: Com està» i «Següent: Exploració →»,
+ * perquè no calgui pujar fins a les pestanyes. A l'última, «Finalitzar visita».
+ */
+function NavegacioPestanyes({
+  pestanyes,
+  actual,
+  onAnar,
+  onFinalitzar,
+}: {
+  pestanyes: readonly Pestanya[]
+  actual: Pestanya
+  onAnar(p: Pestanya): void
+  onFinalitzar?(): void
+}) {
+  const v = t.visita
+  const i = pestanyes.indexOf(actual)
+  const anterior = pestanyes[i - 1]
+  const seguent = pestanyes[i + 1]
+  return (
+    <nav className="navegacio-pestanyes" aria-label={v.navegacioPestanyes}>
+      {anterior ? (
+        <Boto variant="discret" onClick={() => onAnar(anterior)}>
+          {formatar(v.anteriorPestanya, { nom: v.pestanyes[anterior] })}
+        </Boto>
+      ) : (
+        <span />
+      )}
+      {seguent ? (
+        <Boto variant="secundari" onClick={() => onAnar(seguent)}>
+          {formatar(v.seguentPestanya, { nom: v.pestanyes[seguent] })}
+        </Boto>
+      ) : (
+        onFinalitzar && <Boto onClick={onFinalitzar}>{v.finalitzar}</Boto>
+      )}
+    </nav>
   )
 }
 

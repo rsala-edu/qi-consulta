@@ -3218,10 +3218,10 @@ fieldset {
 }
 
 .simptoma-secundari {
-  display: grid;
-  grid-template-columns: minmax(12ch, 1fr) auto;
-  gap: 0 16px;
-  align-items: end;
+  /* El nom a sobre i la barra a sota, amb la mateixa amplada que la principal */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .eines-tractament {
@@ -3889,12 +3889,12 @@ fieldset {
 }
 .fila-mymop {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 .fila-mymop .camp {
-  flex: 1 1 14rem;
+  max-width: 720px;
 }
 .escala-mymop {
   display: flex;
@@ -4999,3 +4999,27 @@ fieldset {
   white-space: nowrap;
 }
 
+/* Al final de cada pestanya de la visita: anterior i següent */
+.navegacio-pestanyes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+.pantalla-visita.amb-mapa .navegacio-pestanyes {
+  flex: none;
+  margin: 4px 0 0;
+}
+
+/* A Tractament, compacta: el mapa en perd el mínim */
+.pantalla-visita.amb-mapa .navegacio-pestanyes .boto {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 0.85rem;
+}
+
+.pantalla-visita.ampliat .navegacio-pestanyes {
+  display: none;
+}
