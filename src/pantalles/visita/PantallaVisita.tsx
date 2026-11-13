@@ -52,6 +52,7 @@ import { BlocMymop } from './BlocMymop'
 import { BlocPgic } from './BlocPgic'
 import { BotonsProtocols } from './ProtocolsVisita'
 import { FotosSessio } from '../../fotos/Fotos'
+import { BotoInformeSessio } from '../../informes/BotonsInformes'
 import { esActivada } from '../../cataleg/motor'
 import type { Mymop } from '../../domini/escales'
 import { GrupCataleg } from '../../cataleg/components/Cataleg'
@@ -610,6 +611,12 @@ function Visita({
 
         {pestanya === 'tancar' && (
           <section id="visita-tancar" role="tabpanel" aria-labelledby="pestanya-tancar" className="panell">
+            {/* (4D) Informe de la sessió en PDF, amb el que hi ha ara */}
+            {pacient && (
+              <p className="accions accions-esquerra">
+                <BotoInformeSessio pacient={pacient} episodi={episodi ?? null} sessio={{ ...sessio, ...dades }} />
+              </p>
+            )}
             <Camp etiqueta={v.recomanacions}>
               <textarea
                 rows={3}

@@ -17,6 +17,7 @@ import type { Valoracio } from '../../domini/valoracio'
 import { CompararSessions } from '../../evolucio/CompararSessions'
 import { Cronologia } from '../../evolucio/Cronologia'
 import { Evolucio } from '../../evolucio/Evolucio'
+import { BotoHistorial, BotoInformeEpisodi } from '../../informes/BotonsInformes'
 import { GaleriaFotos } from '../../fotos/Fotos'
 import type { Foto } from '../../domini/foto'
 import { textResumTancament } from '../../evolucio/resumTancament'
@@ -56,6 +57,10 @@ export function PestanyaTractaments() {
 
   return (
     <section className="tractaments" aria-label={tr.titol}>
+      {/* (4D) Historial complet del pacient en PDF */}
+      <p className="accions accions-esquerra">
+        <BotoHistorial pacient={pacient} />
+      </p>
       {carrega.dades.episodis.map((e) => (
         <EpisodiAmbSessions
           key={e.id}
@@ -90,6 +95,7 @@ function EpisodiAmbSessions({
   onCanviat(): void
 }) {
   const magatzem = useMagatzem()
+  const { pacient } = useFitxaPacient()
   const tr = t.tractaments
   const ev = t.evolucio
   const [tancant, setTancant] = useState(false)
@@ -104,6 +110,7 @@ function EpisodiAmbSessions({
         <h3>{episodi.motiu}</h3>
         <span className={`etiqueta etiqueta-episodi-${episodi.estat}`}>{tr.estats[episodi.estat]}</span>
         <span className="detall">{diaLlarg(episodi.dataInici)}</span>
+        {sessions.length > 0 && <BotoInformeEpisodi pacient={pacient} episodi={episodi} sessions={sessions} />}
         {/* «Tancar l'episodi», al costat del seu estat */}
         {episodi.estat === 'actiu' && !tancant && (
           <Boto

@@ -25,6 +25,12 @@ export function PantallaAjustos() {
           </Link>
         </li>
         <li>
+          <Link to="/ajustos/consulta">
+            <span className="nom">{t.informes.consultaTitol}</span>
+            <span className="detall">{t.informes.consultaDesc}</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/ajustos/protocols">
             <span className="nom">{t.protocols.titol}</span>
             <span className="detall">{t.protocols.desc}</span>

@@ -213,7 +213,7 @@ export interface RegistreCategoriaPrecaucio {
  * l'agenda). No és dada de pacient.
  */
 export interface RegistreConfiguracio {
-  clau: 'horari' | 'visita' | 'catalegs'
+  clau: 'horari' | 'visita' | 'catalegs' | 'consulta'
   valor: unknown
   modificatAt: string
   /** Sincronia: versió (HLC) del registre */

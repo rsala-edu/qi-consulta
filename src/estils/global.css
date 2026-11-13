@@ -6192,3 +6192,24 @@ fieldset {
     grid-template-columns: 1fr;
   }
 }
+
+/* (4D) Diàleg dels informes: estret, i l'error en cinabri */
+.dialeg-informe {
+  width: min(480px, 100%);
+}
+
+.dialeg-informe p[role='alert'] {
+  color: var(--cinabri);
+}
+
+/* Botó d'informe de l'episodi, a la capçalera, com «Tancar l'episodi» */
+.capcalera-episodi .informe-episodi-boto {
+  margin-left: auto;
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.9rem;
+}
+
+.capcalera-episodi .informe-episodi-boto ~ .tancar-episodi-boto {
+  margin-left: 0;
+}
