@@ -4898,3 +4898,52 @@ fieldset {
     font-size: 0.9rem;
   }
 }
+
+/* Valoració feta en una sessió anterior: només lectura fins que es revisa */
+.franja-lectura {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0 0 14px;
+  padding: 10px 14px 10px 16px;
+  border-radius: var(--radi);
+  background: var(--accent-suau);
+  border: 1px solid var(--linia);
+}
+
+.franja-lectura p {
+  margin: 0;
+}
+
+/* Els xips de només lectura no semblen actius: atenuats i sense canvi en passar-hi el ratolí */
+.nomes-lectura .xip:disabled,
+.xip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.nomes-lectura .xip:disabled[aria-pressed='true'],
+.xip:disabled[aria-pressed='true'] {
+  opacity: 0.7;
+}
+
+/* Sessió tancada: l'avís i «Afegir una addenda», al costat */
+.avis-sessio-tancada {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+.avis-sessio-tancada .avis {
+  margin: 0;
+}
+
+/* Obert des de l'avís, es veu també a Tractament */
+.pantalla-visita.amb-mapa > .addendes.addenda-oberta {
+  display: block;
+  flex: none;
+}

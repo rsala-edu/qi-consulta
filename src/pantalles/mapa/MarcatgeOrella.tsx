@@ -43,9 +43,11 @@ interface Props {
   onVeure(m: PuntMarcat): void
   /** A la cantonada del dibuix (a la visita: «⤢ Ampliar») */
   cantonada?: ReactNode
+  /** Sessió tancada: es pot mirar, però no marcar ni treure */
+  nomesLectura?: boolean
 }
 
-export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonada }: Props) {
+export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonada, nomesLectura = false }: Props) {
   const visor = useRef<ControlOrella>(null)
   const { correccions, desar, treure } = useCorreccionsOrella()
   const [costatVist, setCostatVist] = useState<CostatOrella>('E')
@@ -253,6 +255,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonad
                   type="button"
                   role="radio"
                   aria-checked={fitxa.costat === c}
+                  disabled={nomesLectura}
                   onClick={() => setFitxa({ ...fitxa, costat: c })}
                 >
                   {t.mapa.costat[c]}
@@ -267,6 +270,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonad
                   role="radio"
                   className={nomAmple(t.orella.tecnica[tec as keyof typeof t.orella.tecnica])}
                   aria-checked={fitxa.tecnica === tec}
+                  disabled={nomesLectura}
                   onClick={() => setFitxa({ ...fitxa, tecnica: tec })}
                 >
                   <span className="punt-color" style={{ background: COLOR_TECNICA[tec] }} />
@@ -276,6 +280,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonad
             </div>
             <div className="accions accions-esquerra">
               <Boto
+                disabled={nomesLectura}
                 onClick={() => {
                   setMarcats((l) => marcar(l, nouPuntMarcat(fitxa.codi, fitxa.costat, fitxa.tecnica, 'orella')))
                   setFitxa(null)
@@ -286,6 +291,7 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonad
               {jaMarcat && (
                 <Boto
                   variant="secundari"
+                  disabled={nomesLectura}
                   onClick={() => {
                     setMarcats((l) => desmarcar(l, fitxa.codi, 'orella'))
                     setFitxa(null)
@@ -322,8 +328,8 @@ export function MarcatgeOrella({ marcats, setMarcats, peticio, onVeure, cantonad
             setPestanyaPanell('punt')
             onVeure(m)
           }}
-          onTreure={(m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
-          onTreureTots={() => setMarcats([])}
+          onTreure={nomesLectura ? undefined : (m) => setMarcats((l) => desmarcar(l, m.codi, m.mapa))}
+          onTreureTots={nomesLectura ? undefined : () => setMarcats([])}
         />
         }
       />

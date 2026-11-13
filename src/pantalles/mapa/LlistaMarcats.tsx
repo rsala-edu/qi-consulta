@@ -15,8 +15,9 @@ type Ordre = 'meridia' | 'marcatge'
 interface Props {
   marcats: readonly PuntMarcat[]
   onVeure(m: PuntMarcat): void
-  onTreure(m: PuntMarcat): void
-  onTreureTots(): void
+  /** Sense: només lectura (sessió tancada), no es pot treure cap punt */
+  onTreure?(m: PuntMarcat): void
+  onTreureTots?(): void
   /** La pestanya ja diu quants n'hi ha: el títol només per als lectors de pantalla */
   titolOcult?: boolean
 }
@@ -58,7 +59,7 @@ export function LlistaMarcats({ marcats, onVeure, onTreure, onTreureTots, titolO
                 </option>
               ))}
             </select>
-            {!confirmant && (
+            {!confirmant && onTreureTots && (
               <button type="button" className="enllac-treure-tots" onClick={() => setConfirmant(true)}>
                 {m.treureTots}
               </button>
@@ -72,7 +73,7 @@ export function LlistaMarcats({ marcats, onVeure, onTreure, onTreureTots, titolO
               type="button"
               className="boto boto-principal"
               onClick={() => {
-                onTreureTots()
+                onTreureTots?.()
                 setConfirmant(false)
               }}
             >
@@ -123,6 +124,7 @@ export function LlistaMarcats({ marcats, onVeure, onTreure, onTreureTots, titolO
                             {m.costatCurt[p.costat]}
                           </span>
                         </button>
+                        {onTreure && (
                         <button
                           type="button"
                           className="treure-marcat"
@@ -132,6 +134,7 @@ export function LlistaMarcats({ marcats, onVeure, onTreure, onTreureTots, titolO
                         >
                           ×
                         </button>
+                        )}
                       </li>
                     )
                   })}

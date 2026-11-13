@@ -163,6 +163,11 @@ export const ca = {
     versioCurta: 'Versió {n}',
     veureVersio: 'Veure',
     revisar: 'Revisar la valoració',
+    /** Franja quan la valoració és de només lectura fins que es revisa */
+    lectura: '{que} de la valoració del {dia}',
+    lecturaValoracio: 'Valoració del {dia}',
+    lecturaRevisar: 'Revisa la valoració per canviar-lo',
+    lecturaRevisarLa: 'Revisa-la per canviar-la',
     fer: 'Fer la valoració inicial',
   },
   cataleg: {
@@ -719,6 +724,7 @@ export const ca = {
     confirmarFinalitzar: 'Confirmar i finalitzar',
     addendes: 'Addendes',
     novaAddenda: 'Nova addenda',
+    afegirAddendaBoto: 'Afegir una addenda',
     afegirAddenda: 'Afegir l\'addenda',
     capAddenda: 'Encara no n\'hi ha cap.',
     conflictes: 'Aquesta sessió s\'ha editat en dos dispositius alhora. Revisa els camps marcats.',
