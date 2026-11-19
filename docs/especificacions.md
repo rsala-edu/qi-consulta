@@ -281,7 +281,7 @@ Les dades de salut són categoria especial del RGPD, i la doctora n'és la respo
 - Registre d'activitats de tractament i informació al pacient sobre l'ús de les seves dades
 - Consentiment informat per a l'acupuntura (R10)
 - Conservació de la història clínica: la Llei 41/2002 obliga a guardar-la com a mínim cinc anys des de l'alta de cada procés
-- Drets d'accés, rectificació i portabilitat: l'app ha de poder exportar la fitxa d'un pacient en PDF (4D: l'«Historial complet» en PDF és a Tractaments; l'exportació de totes les dades en format llegible per màquina és preparada, sense botó encara)
+- Drets d'accés, rectificació i portabilitat: l'app ha de poder exportar la fitxa d'un pacient en PDF (4D: l'«Historial complet» en PDF és a Tractaments; «Exportar totes les dades», a la fitxa > Dades, descarrega un JSON amb totes les dades, les imatges i els documents)
 - Google Drive com a dipòsit: xifratge abans de pujar res i la clau mai a Google. És preferible un compte de Google Workspace, que inclou un acord de tractament de dades; un compte personal de Gmail no en té. Cal confirmar-ho amb el Col·legi
 
 Mentre l'app no estigui acabada i provada, el més prudent és que els pacients de pràctiques es registrin com fa el centre de pràctiques o en un programa comercial que compleixi el RGPD.

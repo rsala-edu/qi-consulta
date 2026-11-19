@@ -10,6 +10,7 @@ import { RevisioConflictes } from '../../components/RevisioConflictes'
 import type { CampEnConflicte } from '../../db/magatzem'
 import { ambValor } from '../../sincronia/fusioCamps'
 import { useCarrega } from '../../sessio/useCarrega'
+import { BotoExportar } from '../../informes/BotoExportar'
 
 export function PestanyaDades() {
   const magatzem = useMagatzem()
@@ -70,6 +71,7 @@ export function PestanyaDades() {
         <Boto variant="discret" onClick={canviarArxiu} disabled={arxivant}>
           {arxivat ? t.fitxa.desarxivar : t.fitxa.arxivar}
         </Boto>
+        <BotoExportar pacient={pacient} />
       </div>
     </section>
   )

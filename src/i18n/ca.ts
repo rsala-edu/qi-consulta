@@ -1151,6 +1151,16 @@ export const ca = {
     descartar: 'Descartar',
     rebutsN: '{n} fitxers',
   },
+  /** Dret d'accés i de portabilitat: exportar totes les dades d'un pacient */
+  exportacio: {
+    exportar: 'Exportar totes les dades',
+    ajuda: 'Un fitxer JSON amb totes les dades del pacient, les imatges i els documents (dret d\'accés i de portabilitat)',
+    preparant: 'Preparant l\'exportació…',
+    avis: 'Es descarregarà un fitxer amb totes les dades de salut d\'aquest pacient, sense xifrar: qualsevol persona que hi tingui accés el podrà llegir. Lliura\'l només al pacient (o a qui ell autoritzi) i esborra\'l després. Vols continuar?',
+    fet: 'Fitxer descarregat.',
+    falten: 'Hi falten {n} fitxers (imatges o documents) que no són en aquest dispositiu i no s\'han pogut baixar de Google Drive: torna-ho a provar amb connexió.',
+    error: 'No s\'ha pogut exportar. Torna-ho a provar.',
+  },
   /** Etapa 4D: informes en PDF i dades de la consulta */
   informes: {
     consultaTitol: 'Consulta',
@@ -1226,6 +1236,8 @@ export const ca = {
     novaAmb: 'Hi ha una versió nova: {versio}',
     buscar: 'Buscar actualitzacions',
     buscant: 'Buscant…',
+    programari: 'Programari de tercers',
+    programariDesc: 'Biblioteques incloses a l\'app (totes s\'executen al dispositiu, sense res d\'internet):',
   },
   aparenca: {
     titol: 'Aparença',

@@ -46,6 +46,33 @@ export function PantallaQuantA() {
           </Boto>
         )}
       </section>
+      <section className="panell" aria-label={q.programari}>
+        <h2>{q.programari}</h2>
+        <p className="detall">{q.programariDesc}</p>
+        <ul className="llista-programari">
+          {PROGRAMARI.map((p) => (
+            <li key={p.nom}>
+              <strong>{p.nom}</strong> · {p.llicencia}
+              {p.nota && <span className="detall"> · {p.nota}</span>}
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   )
 }
+
+/** Les biblioteques que van dins l'app i la seva llicència */
+const PROGRAMARI: readonly { nom: string; llicencia: string; nota?: string }[] = [
+  { nom: 'React', llicencia: 'MIT' },
+  { nom: 'React Router', llicencia: 'MIT' },
+  { nom: 'Dexie.js', llicencia: 'Apache 2.0' },
+  { nom: 'Three.js', llicencia: 'MIT' },
+  { nom: 'React Three Fiber i drei', llicencia: 'MIT' },
+  { nom: 'React Hook Form', llicencia: 'MIT' },
+  { nom: 'Zod', llicencia: 'MIT' },
+  { nom: 'pdf-lib', llicencia: 'MIT' },
+  { nom: 'PDF.js (Mozilla)', llicencia: 'Apache 2.0', nota: 'visor de PDF' },
+  { nom: 'heic2any', llicencia: 'MIT', nota: 'inclou libheif (LGPL 3.0), per convertir les fotos HEIC' },
+  { nom: 'Workbox', llicencia: 'MIT' },
+]
