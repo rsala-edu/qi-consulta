@@ -2,7 +2,9 @@
 // - Plantilles amb versions: «Esborrany» i «Pendent de revisió» es poden
 //   editar; en aprovar-ne una es crea una versió nova («Aprovada») que ja no
 //   es pot editar, i l'aprovada anterior del mateix tipus passa a «Retirada».
-//   Només es poden fer signar les aprovades.
+//   Mentre un tipus no té cap versió aprovada, es pot signar la pendent de
+//   revisió (o l'esborrany) per provar-la: el document porta la marca
+//   «ESBORRANY – pendent de revisió».
 // - Consentiments signats: la plantilla i la versió exactes (amb una còpia del
 //   text), les signatures i el PDF. No es poden modificar mai: només revocar
 //   (amb la data i el motiu), i queda a l'historial.
@@ -26,6 +28,8 @@ export const esquemaDadesPlantilla = z.object({
   estat: z.enum(ESTATS_PLANTILLA),
   /** Nota visible a Ajustos (p. ex. «Plantilla orientativa…») */
   nota: z.string().default(''),
+  /** Data d'aprovació (ISO); null si no està aprovada */
+  aprovadaAt: z.string().nullable().default(null),
 })
 export type DadesPlantilla = z.infer<typeof esquemaDadesPlantilla>
 export type Plantilla = Pick<Registre, 'id' | 'creatAt' | 'modificatAt'> & DadesPlantilla
@@ -43,6 +47,21 @@ export function versionsDe<P extends Pick<DadesPlantilla, 'tipus' | 'versio'>>(p
 /** La plantilla aprovada que es fa signar (null si no n'hi ha cap) */
 export function aprovadaDe<P extends Pick<DadesPlantilla, 'tipus' | 'versio' | 'estat'>>(plantilles: readonly P[], tipus: TipusConsentiment): P | null {
   return versionsDe(plantilles, tipus).find((p) => p.estat === 'aprovada') ?? null
+}
+
+/**
+ * La plantilla que es fa signar: l'aprovada o, si no n'hi ha cap, la pendent
+ * de revisió (o l'esborrany), amb «esborrany» cert perquè el document en porti
+ * la marca. null si no n'hi ha cap (totes retirades).
+ */
+export function perSignarDe<P extends Pick<DadesPlantilla, 'tipus' | 'versio' | 'estat'>>(
+  plantilles: readonly P[],
+  tipus: TipusConsentiment,
+): { plantilla: P; esborrany: boolean } | null {
+  const aprovada = aprovadaDe(plantilles, tipus)
+  if (aprovada) return { plantilla: aprovada, esborrany: false }
+  const editable = editableDe(plantilles, tipus)
+  return editable ? { plantilla: editable, esborrany: true } : null
 }
 
 /** La que es pot editar (l'esborrany o la pendent de revisió); null si totes estan aprovades o retirades */
@@ -63,7 +82,7 @@ export function aprovar(
   const delTipus = totes.filter((p) => p.tipus === plantilla.tipus)
   const versio = Math.max(0, ...delTipus.map((p) => p.versio)) + 1
   return {
-    nova: { ...plantilla, versio, data: ara, estat: 'aprovada', nota: '' },
+    nova: { ...plantilla, versio, data: ara, estat: 'aprovada', nota: '', aprovadaAt: ara },
     retirades: delTipus.filter((p) => p.estat === 'aprovada').map((p) => ({ ...p, estat: 'retirada' as const })),
   }
 }
@@ -71,7 +90,7 @@ export function aprovar(
 /** Editar una aprovada: un esborrany nou (la versió següent) a partir del seu text */
 export function nouEsborrany(base: DadesPlantilla, totes: readonly DadesPlantilla[], ara: string): DadesPlantilla {
   const versio = Math.max(0, ...totes.filter((p) => p.tipus === base.tipus).map((p) => p.versio)) + 1
-  return { ...base, versio, data: ara, estat: 'esborrany', nota: '' }
+  return { ...base, versio, data: ara, estat: 'esborrany', nota: '', aprovadaAt: null }
 }
 
 // --- Consentiments signats ------------------------------------------------------
@@ -103,6 +122,8 @@ export const esquemaDadesConsentiment = z.object({
   revocacio: z.object({ at: z.string(), motiu: z.string().trim().min(1) }).nullable(),
   /** El PDF del document signat (base64) */
   pdf: z.string(),
+  /** Signat amb una plantilla encara no aprovada: el document porta la marca «ESBORRANY» */
+  esborrany: z.boolean().default(false),
 })
 export type DadesConsentiment = z.infer<typeof esquemaDadesConsentiment>
 export type Consentiment = Registre & { pacientId: string } & DadesConsentiment

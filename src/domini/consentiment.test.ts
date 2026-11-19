@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aprovadaDe, aprovar, comprovarCanvi, editableDe, esEditable, estatDelTipus, nouEsborrany, revocar, type DadesConsentiment } from './consentiment'
+import { aprovadaDe, aprovar, perSignarDe, comprovarCanvi, editableDe, esEditable, estatDelTipus, nouEsborrany, revocar, type DadesConsentiment } from './consentiment'
 import { NOTA_ORIENTATIVA, plantillaInicial } from './plantillesInicials'
 
 const ARA = '2026-11-13T10:00:00.000Z'
@@ -39,6 +39,15 @@ describe('plantilles: versions', () => {
     expect(aprovadaDe([v1, v2], 'dades')).toBe(v2)
     expect(aprovadaDe([v1, v2], 'acupuntura')).toBeNull()
   })
+
+  it('sense cap aprovada, es fa signar la pendent marcada com a esborrany; aprovada, sense marca i amb la data', () => {
+    const v1 = plantillaInicial('imatges', ARA)
+    expect(perSignarDe([v1], 'imatges')).toEqual({ plantilla: v1, esborrany: true })
+    const v2 = aprovar(v1, [v1], '2026-11-20T09:00:00.000Z').nova
+    expect(v2.aprovadaAt).toBe('2026-11-20T09:00:00.000Z')
+    expect(perSignarDe([v1, v2], 'imatges')).toEqual({ plantilla: v2, esborrany: false })
+    expect(perSignarDe([{ ...v1, estat: 'retirada' as const }], 'imatges')).toBeNull()
+  })
 })
 
 describe('consentiments signats: només es revoquen', () => {
@@ -55,6 +64,7 @@ describe('consentiments signats: només es revoquen', () => {
     estat: 'vigent',
     revocacio: null,
     pdf: 'JVBER',
+    esborrany: false,
   }
 
   it('estat de cada tipus: pendent, vigent o revocat', () => {

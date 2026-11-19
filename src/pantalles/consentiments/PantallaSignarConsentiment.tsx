@@ -11,7 +11,7 @@ import { Camp } from '../../components/Camp'
 import { Indicador } from '../../components/Indicador'
 import { generarPdfConsentiment } from '../../consentiment/pdf'
 import { Signatura } from '../../consentiment/Signatura'
-import { aprovadaDe, RELACIONS_REPRESENTANT, TIPUS_CONSENTIMENT, type TipusConsentiment } from '../../domini/consentiment'
+import { perSignarDe, RELACIONS_REPRESENTANT, TIPUS_CONSENTIMENT, type TipusConsentiment } from '../../domini/consentiment'
 import { nomComplet } from '../../domini/pacient'
 import { araIso } from '../../domini/registre'
 import { formatar, t } from '../../i18n/t'
@@ -27,7 +27,8 @@ export function PantallaSignarConsentiment() {
   const magatzem = useMagatzem()
   const [carrega] = useCarrega(async () => {
     const [pacient, plantilles] = await Promise.all([magatzem.obtenirPacient(id), magatzem.plantillesConsentiment()])
-    return { pacient, plantilla: (TIPUS_CONSENTIMENT as readonly string[]).includes(tipus) ? aprovadaDe(plantilles, tipus as TipusConsentiment) : null }
+    const perSignar = (TIPUS_CONSENTIMENT as readonly string[]).includes(tipus) ? perSignarDe(plantilles, tipus as TipusConsentiment) : null
+    return { pacient, plantilla: perSignar?.plantilla ?? null, esborrany: perSignar?.esborrany ?? false }
   }, [magatzem, id, tipus])
   const [llegit, setLlegit] = useState(false)
   const [entes, setEntes] = useState(false)
@@ -41,7 +42,7 @@ export function PantallaSignarConsentiment() {
 
   if (carrega.estat === 'carregant') return <Indicador text={t.app.carregant} />
   if (carrega.estat === 'error' || !carrega.dades.pacient) return <p role="alert">{t.app.errorInesperat}</p>
-  const { pacient, plantilla } = carrega.dades
+  const { pacient, plantilla, esborrany } = carrega.dades
   if (!plantilla)
     return (
       <main className="pantalla pantalla-signar">
@@ -80,6 +81,7 @@ export function PantallaSignarConsentiment() {
       const pdf = await generarPdfConsentiment({
         ...base,
         pacient: nomComplet(pacient!),
+        esborrany,
         textos: {
           pacient: c.pacient,
           versio: c.versio,
@@ -89,9 +91,10 @@ export function PantallaSignarConsentiment() {
           representant: c.representant,
           signaturaDoctora: c.signaturaDoctora,
           pagina: c.pagina,
+          marcaEsborrany: c.marcaEsborrany,
         },
       })
-      await magatzem.signarConsentiment(pacient!.id, { ...base, estat: 'vigent', revocacio: null, pdf })
+      await magatzem.signarConsentiment(pacient!.id, { ...base, estat: 'vigent', revocacio: null, pdf, esborrany })
       void navegar(tornar)
     } finally {
       setDesant(false)
@@ -104,6 +107,11 @@ export function PantallaSignarConsentiment() {
       <p className="detall">
         {nomComplet(pacient)} · {c.versio} {plantilla.versio}
       </p>
+      {esborrany && (
+        <p className="avis-suau avis-esborrany" role="note">
+          {c.avisEsborrany}
+        </p>
+      )}
       <div className="text-consentiment" tabIndex={0} role="document" aria-label={plantilla.titol} onScroll={llegir}>
         {plantilla.text.split('\n').map((p, i) => (p.trim() ? <p key={i}>{p}</p> : <br key={i} />))}
       </div>

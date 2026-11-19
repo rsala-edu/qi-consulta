@@ -27,6 +27,7 @@ import {
   esquemaDadesPlantilla,
   idPlantilla,
   nouEsborrany,
+  perSignarDe,
   revocar,
   TIPUS_CONSENTIMENT,
   type Consentiment,
@@ -698,10 +699,11 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     async signarConsentiment(pacientId: string, dades: DadesConsentiment) {
       await pacientExistent(pacientId)
       const plantilla = await plantillaExistent(dades.plantillaId)
-      if (plantilla.estat !== 'aprovada') throw new Error('Només es poden fer signar plantilles aprovades')
-      if (plantilla.text !== dades.text || plantilla.versio !== dades.versio) throw new Error('El text signat ha de ser el de la plantilla aprovada')
+      const perSignar = perSignarDe(await magatzem.plantillesConsentiment(), plantilla.tipus)
+      if (perSignar?.plantilla.id !== plantilla.id) throw new Error('Aquesta plantilla no es pot fer signar (n\'hi ha una d\'aprovada o està retirada)')
+      if (plantilla.text !== dades.text || plantilla.versio !== dades.versio) throw new Error('El text signat ha de ser el de la plantilla')
       const at = araIso()
-      return guardarConsentiment(nouId(), pacientId, at, { ...dades, estat: 'vigent', revocacio: null })
+      return guardarConsentiment(nouId(), pacientId, at, { ...dades, estat: 'vigent', revocacio: null, esborrany: perSignar.esborrany })
     },
     async revocarConsentiment(id: string, motiu: string) {
       const r = await db.consentiments.get(id)
