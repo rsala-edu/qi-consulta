@@ -5648,9 +5648,10 @@ fieldset {
 /* Capçalera de la visita: «Desat» / «Desant…» en un espai fix, perquè el
    temporitzador i els botons no es moguin quan apareix o desapareix */
 .capcalera-visita .accions-visita > .detall[role='status'] {
-  display: inline-block;
+  /* Amb EstatDesat: el text i l'espai reservat («Desant…») a la mateixa cel·la */
+  display: inline-grid;
+  justify-items: end;
   min-width: 4.6em;
-  text-align: right;
   white-space: nowrap;
 }
 
@@ -6356,4 +6357,19 @@ fieldset {
 .estat-desat > span {
   grid-area: 1 / 1;
   white-space: nowrap;
+}
+
+/* Tauleta vertical i mòbil: els botons del temporitzador només amb la icona
+   (el nom és a l'aria-label i l'explicació al title), perquè el temporitzador i
+   «Finalitzar visita» càpiguen en una línia */
+@media (max-width: 900px) {
+  .capcalera-visita .controls-retencio .boto-icona.amb-text span {
+    display: none;
+  }
+
+  .capcalera-visita .controls-retencio .boto-icona.amb-text,
+  .capcalera-visita .controls-retencio .principal-retencio.amb-text {
+    min-width: 44px;
+    padding: 0 6px;
+  }
 }

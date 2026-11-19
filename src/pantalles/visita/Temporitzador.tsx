@@ -155,7 +155,7 @@ export function Temporitzador({
         <strong role="status">{formatar(v.aturada, { temps: formatTemps((retencio.segonsReals ?? 0) * 1000) })}</strong>
       ) : (
         // Reserva l'amplada del text més llarg («En pausa · …»): en posar en pausa o continuar, els botons no es mouen
-        <span className="temps-retencio" data-mida={formatar(v.enPausa, { temps: formatTemps(restant) })}>
+        <span className="temps-retencio" data-mida={formatar(v.enPausa, { temps: restant >= 600_000 ? '88:88' : '8:88' })}>
           <span>{formatar(estat === 'pausa' ? v.enPausa : v.queda, { temps: formatTemps(restant) })}</span>
         </span>
       )}
