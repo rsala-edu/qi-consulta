@@ -8,7 +8,7 @@ import { Link } from 'react-router'
 import { Boto } from '../../components/Boto'
 import { Camp } from '../../components/Camp'
 import { Indicador } from '../../components/Indicador'
-import { aprovadaDe, estatDelTipus, TIPUS_CONSENTIMENT, type Consentiment } from '../../domini/consentiment'
+import { estatDelTipus, perSignarDe, TIPUS_CONSENTIMENT, type Consentiment } from '../../domini/consentiment'
 import { descarregarPdf, nomFitxer } from '../../consentiment/document'
 import { nomComplet } from '../../domini/pacient'
 import { formatar, t } from '../../i18n/t'
@@ -38,17 +38,20 @@ export function PestanyaConsentiments() {
       {TIPUS_CONSENTIMENT.map((tipus) => {
         const estat = estatDelTipus(consentiments, tipus)
         const delTipus = consentiments.filter((x) => x.tipus === tipus)
-        const aprovada = aprovadaDe(plantilles, tipus)
+        const perSignar = perSignarDe(plantilles, tipus)
         return (
           <article key={tipus} className="panell consentiment" aria-label={c.tipus[tipus]}>
             <header className="capcalera-consentiment">
               <h3>{c.tipus[tipus]}</h3>
               <span className={`etiqueta etiqueta-consentiment-${estat}`}>{c.estats[estat]}</span>
               {estat !== 'vigent' &&
-                (aprovada ? (
-                  <Link className="boto boto-principal" to={`/pacients/${pacient.id}/consentiments/${tipus}/signar`}>
-                    {c.signar}
-                  </Link>
+                (perSignar ? (
+                  <>
+                    <Link className="boto boto-principal" to={`/pacients/${pacient.id}/consentiments/${tipus}/signar`}>
+                      {c.signar}
+                    </Link>
+                    {perSignar.esborrany && <span className="etiqueta etiqueta-esborrany">{c.pendentRevisio}</span>}
+                  </>
                 ) : (
                   <span className="detall">{c.capAprovada}</span>
                 ))}
@@ -79,6 +82,12 @@ function Document({ consentiment: x, onVeure, onRevocat }: { consentiment: Conse
       <span>
         {formatar(c.versioSignat, { versio: String(x.versio), quan: quan(x.signatAt) })} ·{' '}
         <strong>{c.estats[x.estat === 'vigent' ? 'vigent' : 'revocat']}</strong>
+        {x.esborrany && (
+          <>
+            {' '}
+            <span className="etiqueta etiqueta-esborrany">{c.signatEsborrany}</span>
+          </>
+        )}
       </span>
       {x.revocacio && <span className="detall">{formatar(c.revocatEl, { quan: quan(x.revocacio.at), motiu: x.revocacio.motiu })}</span>}
       <div className="accions accions-esquerra">
@@ -132,6 +141,7 @@ function VisorDocument({ consentiment: x, pacient, onTancar }: { consentiment: C
     <div className="fons-dialeg" onClick={(e) => e.target === e.currentTarget && onTancar()}>
       <section className="dialeg dialeg-document" role="dialog" aria-modal="true" aria-label={x.titol}>
         <article className="document-signat">
+          {x.esborrany && <p className="marca-esborrany">{c.marcaEsborrany}</p>}
           <h2>{x.titol}</h2>
           <p className="detall">
             {c.pacient}: {pacient} · {c.versio} {x.versio} · {c.data}: {quan(x.signatAt)}
