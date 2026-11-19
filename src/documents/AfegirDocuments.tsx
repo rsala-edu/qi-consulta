@@ -457,7 +457,8 @@ function FormulariDocument({
 }) {
   const [meta, setMeta] = useState<Meta>({
     tipus: 'informe',
-    titol: titolInicial,
+    // Sense nom de fitxer, el nom del tipus (es pot canviar)
+    titol: titolInicial || d.tipus.informe,
     data: avui(),
     nota: '',
     episodiId: context.episodiId,

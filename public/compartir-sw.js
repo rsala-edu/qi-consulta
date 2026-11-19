@@ -42,9 +42,10 @@ self.addEventListener('fetch', (event) => {
         const dades = await event.request.formData()
         const fitxers = dades.getAll('fitxers').filter((f) => typeof f === 'object' && f !== null && 'arrayBuffer' in f)
         await qiDesarCompartits(fitxers)
-        return Response.redirect(`${base}#/compartir`, 303)
-      } catch {
-        return Response.redirect(`${base}#/compartir?error=1`, 303)
+        return Response.redirect(new URL(`${base}#/compartir`, url.origin).href, 303)
+      } catch (e) {
+        console.error('Qi: no s\'han pogut desar els fitxers compartits', e)
+        return Response.redirect(new URL(`${base}#/compartir?error=1`, url.origin).href, 303)
       }
     })(),
   )
