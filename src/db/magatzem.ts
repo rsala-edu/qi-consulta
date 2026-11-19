@@ -38,6 +38,7 @@ import {
 import { plantillaInicial } from '../domini/plantillesInicials'
 import { EXEMPLES, esquemaDadesProtocol, type DadesProtocol, type Protocol } from '../domini/protocol'
 import { esquemaDadesFoto, type DadesFoto, type Foto } from '../domini/foto'
+import { anullar as anullarDocument, DOCUMENTS_EN_LOCAL, esquemaDadesDocument, type DadesDocument, type Document } from '../domini/document'
 import { episodisActius, esquemaDadesEpisodi, idEpisodiDeCita, nouEpisodi, senseMotiu, type DadesEpisodi, type Episodi } from '../domini/episodi'
 import {
   esEditable,
@@ -161,6 +162,20 @@ export interface Magatzem {
   desarImatgeBaixada(id: string, text: string): Promise<void>
   /** Esborrar: queda el registre (quan i per què), sense la imatge ni la miniatura */
   esborrarFoto(id: string, motiu: string): Promise<Foto>
+
+  // --- Etapa 4E: documents adjunts ---
+  documentsDe(pacientId: string): Promise<Document[]>
+  documentsDeLEpisodi(episodiId: string): Promise<Document[]>
+  /** Desa un document: les metadades (se sincronitzen) i el fitxer xifrat (es puja a Drive a part) */
+  afegirDocument(pacientId: string, dades: DadesDocument, fitxer: Uint8Array): Promise<Document>
+  /** El fitxer del document, si és en aquest dispositiu (i en marca l'ús); null si cal baixar-lo */
+  fitxerDocument(id: string): Promise<Uint8Array | null>
+  /** Un fitxer de document baixat de Drive (tal com hi era, xifrat): es guarda en local entre els recents */
+  desarFitxerDocumentBaixat(id: string, text: string): Promise<void>
+  /** Els documents (ids) que encara no s'han pujat a Drive */
+  documentsPendentsDePujar(ids: readonly string[]): Promise<Set<string>>
+  /** Anul·lar: no es mostra, però es conserven el registre (quan i per què) i el fitxer */
+  anullarDocument(id: string, motiu: string): Promise<Document>
 
   // --- Part 2: ajuntar fitxes de la mateixa persona ---
   /** Les dades del pacient i la fitxa clínica per comparar-les */
@@ -820,9 +835,82 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
     },
   })
 
+  // --- Documents adjunts (etapa 4E) ---
+
+  async function llegirDocument(r: RegistreXifrat): Promise<Document> {
+    const d = esquemaDadesDocument.parse(await desxifrarJson(clau, r.xifrat, context('documents', r.id)))
+    return { id: r.id, creatAt: r.creatAt, modificatAt: r.modificatAt, pacientId: r.pacientId!, ...d }
+  }
+
+  async function guardarDocument(id: string, pacientId: string, creatAt: string, dades: DadesDocument): Promise<Document> {
+    const d = esquemaDadesDocument.parse(dades)
+    const at = araIso()
+    await desarSencer(db, 'documents', { id, creatAt, modificatAt: at, pacientId, xifrat: await xifrarJson(clau, d, context('documents', id)) }, id)
+    return { id, creatAt, modificatAt: at, pacientId, ...d }
+  }
+
+  /**
+   * Els fitxers de documents que ja són a Drive es poden treure del dispositiu:
+   * es guarden els DOCUMENTS_EN_LOCAL usats més recentment (per obrir-los sense
+   * xarxa). Els pendents de pujar no es toquen mai.
+   */
+  async function retallarDocumentsLocals(): Promise<void> {
+    const pujats = (await db.imatges.where('pujada').equals(1).toArray()).filter((r) => r.document === 1)
+    if (pujats.length <= DOCUMENTS_EN_LOCAL) return
+    const sobrants = pujats.sort((a, b) => (b.usatAt ?? '').localeCompare(a.usatAt ?? '')).slice(DOCUMENTS_EN_LOCAL)
+    await db.imatges.bulkDelete(sobrants.map((r) => r.id))
+  }
+
+  Object.assign(magatzem, {
+    async documentsDe(pacientId: string) {
+      const registres = await db.documents.where('pacientId').equals(pacientId).toArray()
+      return (await Promise.all(registres.map(llegirDocument))).sort((a, b) => b.data.localeCompare(a.data) || b.afegitAt.localeCompare(a.afegitAt))
+    },
+    async documentsDeLEpisodi(episodiId: string) {
+      const e = await db.episodis.get(episodiId)
+      if (!e?.pacientId) return []
+      return (await magatzem.documentsDe(e.pacientId)).filter((d) => d.episodiId === episodiId)
+    },
+    async afegirDocument(pacientId: string, dades: DadesDocument, fitxer: Uint8Array) {
+      await pacientExistent(pacientId)
+      const id = nouId()
+      // Primer el fitxer (local, xifrat, pendent de pujar), després les metadades
+      await db.imatges.put({ id, pujada: 0, document: 1, usatAt: araIso(), xifrat: await xifrar(clau, new Uint8Array(fitxer), context('imatges', id)) })
+      return guardarDocument(id, pacientId, araIso(), dades)
+    },
+    async fitxerDocument(id: string) {
+      const r = await db.imatges.get(id)
+      if (!r) return null
+      try {
+        const bytes = await desxifrar(clau, r.xifrat, context('imatges', id))
+        await db.imatges.update(id, { usatAt: araIso() })
+        return bytes
+      } catch {
+        // Xifrat amb una clau d'abans (p. ex. després de recuperar les dades de Drive): es tornarà a baixar
+        return null
+      }
+    },
+    async desarFitxerDocumentBaixat(id: string, text: string) {
+      await db.imatges.put({ id, pujada: 1, document: 1, usatAt: araIso(), xifrat: JSON.parse(text) })
+      await retallarDocumentsLocals()
+    },
+    async documentsPendentsDePujar(ids: readonly string[]) {
+      const rs = await db.imatges.bulkGet([...ids])
+      return new Set(rs.filter((r) => r && r.pujada === 0).map((r) => r!.id))
+    },
+    async anullarDocument(id: string, motiu: string) {
+      const r = await db.documents.get(id)
+      if (!r) throw new Error(`No existeix el document ${id}`)
+      const d = await llegirDocument(r)
+      const { id: _i, creatAt, modificatAt: _m, pacientId, ...dades } = d
+      // El fitxer xifrat es conserva (al dispositiu i a Drive)
+      return guardarDocument(id, pacientId, creatAt, anullarDocument(dades, motiu, araIso()))
+    },
+  })
+
   // --- Ajuntar fitxes ---
 
-  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes', 'valoracions', 'consentiments', 'fotos'] as const
+  const TAULES_MOGUDES = ['episodis', 'cites', 'sessions', 'addendes', 'valoracions', 'consentiments', 'fotos', 'documents'] as const
 
   const senseMeta = <T extends { id: string; creatAt: string; modificatAt: string }>(x: T) => {
     const { id: _i, creatAt: _c, modificatAt: _m, ...resta } = x
@@ -862,7 +950,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       const { pacientId: _p, ...dades } = senseMeta(actual)
       await guardarValoracio(a, dades, dades)
     } else {
-      // Addendes, consentiments i fotos: registres sencers (només canvia el pacient)
+      // Addendes, consentiments, fotos i documents: registres sencers (només canvia el pacient)
       const r = await db.table<RegistreXifrat, string>(taula).get(id)
       if (!r || r.pacientId === a) return false
       await desarSencer(db, taula, { ...r, pacientId: a, modificatAt: araIso() }, id)
@@ -913,7 +1001,7 @@ export function crearMagatzem(db: QiDB, clau: CryptoKey): Magatzem {
       await esborrarRegistres(db, 'cites', citesTretes.map((c) => c.id))
 
       // Primer els episodis (les cites i les sessions hi apunten), després la resta
-      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [], valoracions: [], consentiments: [], fotos: [] }
+      const moguts: Ajuntament['moguts'] = { cites: [], episodis: [], sessions: [], addendes: [], valoracions: [], consentiments: [], fotos: [], documents: [] }
       for (const taula of TAULES_MOGUDES) {
         for (const id of await idsDe(taula, treuId)) if (await moure(taula, id, quedaId)) moguts[taula].push(id)
       }

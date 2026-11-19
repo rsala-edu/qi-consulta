@@ -27,11 +27,18 @@ export interface RegistreXifrat {
   versions?: DadesXifrades
 }
 
-/** Imatge sencera d'una foto (etapa 4C): xifrada; `pujada` 0 mentre no és a Drive */
+/**
+ * Fitxer sencer d'una foto (etapa 4C) o d'un document (etapa 4E): xifrat;
+ * `pujada` 0 mentre no és a Drive
+ */
 export interface RegistreImatge {
   id: string
   pujada: 0 | 1
   xifrat: DadesXifrades
+  /** (4E) És d'un document: els que ja són a Drive es poden treure del dispositiu (es guarden els oberts més recentment) */
+  document?: 1
+  /** (4E) L'última vegada que s'ha obert o afegit (ISO) */
+  usatAt?: string
 }
 
 /** Entrada de la cua de canvis pendents de pujar (una per registre: l'últim canvi) */
@@ -142,6 +149,7 @@ export type TaulaSincronitzada =
   | 'consentiments'
   | 'protocols'
   | 'fotos'
+  | 'documents'
 
 /** Registre esborrat: perquè l'esborrat també arribi als altres dispositius. */
 export interface RegistreEsborrat {
@@ -249,6 +257,7 @@ export type NomTaula =
   | 'consentiments'
   | 'protocols'
   | 'fotos'
+  | 'documents'
   | 'imatges'
 
 export class QiDB extends Dexie {
@@ -289,6 +298,8 @@ export class QiDB extends Dexie {
   fotos!: Table<RegistreXifrat, string>
   /** Les imatges senceres, xifrades: no van al diari; es pugen a Drive com a fitxers a part */
   imatges!: Table<RegistreImatge, string>
+  /** Documents adjunts: les metadades i la miniatura (se sincronitzen); el fitxer, a `imatges` (etapa 4E) */
+  documents!: Table<RegistreXifrat, string>
   /** Cua de canvis pendents de pujar a Drive (i diari propi fins que una foto el cobreix) */
   canvisPropis!: Table<CanviPropi, string>
   /** Registres de taules que aquesta versió no coneix (d'una versió més nova) */
@@ -368,6 +379,9 @@ export class QiDB extends Dexie {
     this.version(16).stores({
       fotos: 'id, pacientId',
       imatges: 'id, pujada',
+    })
+    this.version(17).stores({
+      documents: 'id, pacientId',
     })
   }
 }

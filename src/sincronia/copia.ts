@@ -48,6 +48,7 @@ export const TAULES: readonly DefinicioTaula[] = [
   { nom: 'consentiments', clau: 'id', data: 'modificatAt' },
   { nom: 'protocols', clau: 'id', data: 'modificatAt' },
   { nom: 'fotos', clau: 'id', data: 'modificatAt' },
+  { nom: 'documents', clau: 'id', data: 'modificatAt' },
 ]
 
 type Registre = Record<string, unknown>
