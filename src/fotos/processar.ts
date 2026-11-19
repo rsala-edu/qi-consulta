@@ -12,7 +12,7 @@ export interface ImatgePreparada {
   miniatura: string
 }
 
-type Origen = Blob | HTMLVideoElement
+type Origen = Blob | HTMLVideoElement | HTMLCanvasElement
 
 async function dibuixable(origen: Origen): Promise<{ font: CanvasImageSource; amplada: number; alcada: number }> {
   if (origen instanceof Blob) {
@@ -20,6 +20,7 @@ async function dibuixable(origen: Origen): Promise<{ font: CanvasImageSource; am
     const b = await createImageBitmap(origen, { imageOrientation: 'from-image' })
     return { font: b, amplada: b.width, alcada: b.height }
   }
+  if (origen instanceof HTMLCanvasElement) return { font: origen, amplada: origen.width, alcada: origen.height }
   return { font: origen, amplada: origen.videoWidth, alcada: origen.videoHeight }
 }
 
@@ -34,11 +35,12 @@ function canvas(font: CanvasImageSource, amplada: number, alcada: number): HTMLC
 const aBlob = (c: HTMLCanvasElement, qualitat: number) =>
   new Promise<Blob>((resol, falla) => c.toBlob((b) => (b ? resol(b) : falla(new Error('No s\'ha pogut codificar la imatge'))), 'image/jpeg', qualitat))
 
-export async function prepararImatge(origen: Origen): Promise<ImatgePreparada> {
+/** (4E) Els documents es desen més grans (per llegir-ne el text) i amb més qualitat */
+export async function prepararImatge(origen: Origen, opcions: { maxim?: number; qualitat?: number } = {}): Promise<ImatgePreparada> {
   const { font, amplada, alcada } = await dibuixable(origen)
-  const mida = midaReduida(amplada, alcada, COSTAT_MAXIM)
+  const mida = midaReduida(amplada, alcada, opcions.maxim ?? COSTAT_MAXIM)
   const gran = canvas(font, mida.amplada, mida.alcada)
-  const jpeg = treureExif(new Uint8Array(await (await aBlob(gran, QUALITAT_JPEG)).arrayBuffer()))
+  const jpeg = treureExif(new Uint8Array(await (await aBlob(gran, opcions.qualitat ?? QUALITAT_JPEG)).arrayBuffer()))
   const petita = midaReduida(mida.amplada, mida.alcada, COSTAT_MINIATURA)
   const miniatura = canvas(gran, petita.amplada, petita.alcada).toDataURL('image/jpeg', 0.7)
   return { jpeg, amplada: mida.amplada, alcada: mida.alcada, miniatura }

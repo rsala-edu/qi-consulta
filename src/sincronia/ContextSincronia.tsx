@@ -209,10 +209,12 @@ export function ProveidorSincronia({ children }: { children: ReactNode }) {
         const nou = { ...anterior, connectatAt: anterior?.connectatAt ?? new Date().toISOString(), ultimaCopia: r.copiaAt }
         await guardarEstatGoogle(db, nou)
         google.current = nou
-        // (4C) Les imatges de les fotos noves, com a fitxers a part (no van al diari)
-        await pujarImatgesPendents(db, driveGoogle(tokenGoogle))
-        // Canvis d'un altre dispositiu: les pantalles obertes es refresquen (revisio.tsx)
-        if (r.baixat) setRevisio((n) => n + 1)
+        // (4C, 4E) Les imatges de les fotos i els fitxers dels documents nous,
+        // com a fitxers a part (no van al diari)
+        const pujats = await pujarImatgesPendents(db, driveGoogle(tokenGoogle))
+        // Canvis d'un altre dispositiu (o fitxers que ja no estan «Pendent de
+        // pujar»): les pantalles obertes es refresquen (revisio.tsx)
+        if (r.baixat || pujats > 0) setRevisio((n) => n + 1)
         setUltimaCopia(r.copiaAt)
         setNomesLectura(r.nomesLectura)
         setError(null)

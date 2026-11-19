@@ -54,6 +54,7 @@ import { BlocMymop } from './BlocMymop'
 import { BlocPgic } from './BlocPgic'
 import { BotonsProtocols } from './ProtocolsVisita'
 import { FotosSessio } from '../../fotos/Fotos'
+import { PanellDocuments } from '../../documents/Documents'
 import { BotoInformeSessio } from '../../informes/BotonsInformes'
 import { esActivada } from '../../cataleg/motor'
 import type { Mymop } from '../../domini/escales'
@@ -481,6 +482,26 @@ function Visita({
             <div hidden={pestanya !== 'diagnostic'}>
               <PlaTractament episodi={episodi} editable={editable} onPla={setPla} />
             </div>
+          )}
+          {/* (4E) Els documents de l'episodi (p. ex. l'audiometria al costat del mòdul ORL) */}
+          {sessio.episodiId && pestanya !== 'diagnostic' && (
+            <details className="documents-visita">
+              <summary>{t.documents.documentsEpisodi}</summary>
+              <PanellDocuments
+                nomesEpisodi
+                context={{
+                  pacientId: sessio.pacientId,
+                  episodiId: sessio.episodiId,
+                  vincles: [
+                    { valor: `sessio:${sessio.id}`, text: formatar(t.documents.aquestaSessio, { n: String(sessio.numero) }) },
+                    ...(valoracions.at(-1)
+                      ? [{ valor: `valoracio:${valoracions.at(-1)!.id}`, text: formatar(t.documents.valoracio, { dia: new Date(valoracions.at(-1)!.creadaAt).toLocaleDateString('ca') }) }]
+                      : []),
+                  ],
+                  vinclePerDefecte: `sessio:${sessio.id}`,
+                }}
+              />
+            </details>
           )}
       </section>
 

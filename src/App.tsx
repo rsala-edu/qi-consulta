@@ -13,6 +13,8 @@ import { PestanyaCites } from './pantalles/fitxa-pacient/PestanyaCites'
 import { PestanyaTractaments } from './pantalles/fitxa-pacient/PestanyaTractaments'
 import { PestanyaConsentiments } from './pantalles/fitxa-pacient/PestanyaConsentiments'
 import { PestanyaFotos } from './pantalles/fitxa-pacient/PestanyaFotos'
+import { PestanyaDocuments } from './pantalles/fitxa-pacient/PestanyaDocuments'
+import { PantallaCompartir } from './pantalles/compartir/PantallaCompartir'
 import { PantallaSignarConsentiment } from './pantalles/consentiments/PantallaSignarConsentiment'
 import { PantallaAjustConsentiments } from './pantalles/ajustos/PantallaAjustConsentiments'
 import { PantallaProtocols } from './pantalles/ajustos/PantallaProtocols'
@@ -230,9 +232,11 @@ function PortaOberta() {
               <Route path="tractaments" element={<P codi="UI-FITXA-TRACTAMENTS"><PestanyaTractaments /></P>} />
               <Route path="consentiments" element={<P codi="UI-FITXA-CONSENTIMENTS"><PestanyaConsentiments /></P>} />
               <Route path="fotos" element={<P codi="UI-FITXA-FOTOS"><PestanyaFotos /></P>} />
+              <Route path="documents" element={<P codi="UI-FITXA-DOCUMENTS"><PestanyaDocuments /></P>} />
             </Route>
             <Route path="pacients/:id/consentiments/:tipus/signar" element={<P codi="UI-SIGNAR"><PantallaSignarConsentiment /></P>} />
             <Route path="mapa" element={<P codi="UI-MAPA"><PantallaProvaMapa /></P>} />
+            <Route path="compartir" element={<P codi="UI-COMPARTIR"><PantallaCompartir /></P>} />
             <Route path="ajustos" element={<P codi="UI-AJUSTOS"><PantallaAjustos /></P>} />
             <Route path="ajustos/calibratge" element={<P codi="UI-CALIBRATGE"><PantallaCalibratge /></P>} />
             <Route path="ajustos/precaucions" element={<P codi="UI-PRECAUCIONS"><PantallaPrecaucions /></P>} />

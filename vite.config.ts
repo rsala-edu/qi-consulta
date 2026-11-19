@@ -46,6 +46,14 @@ export default defineConfig({
         theme_color: '#2f5d50',
         background_color: '#f6f3ec',
         display: 'standalone',
+        // (4E) «Compartir → Qi» des d'altres apps (Android, amb la PWA
+        // instal·lada). Els navegadors que no ho admeten no mostren res
+        share_target: {
+          action: '/qi-consulta/compartir',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: { title: 'titol', text: 'text', files: [{ name: 'fitxers', accept: ['application/pdf', '.pdf', 'image/*', '.jpg', '.jpeg', '.png', '.heic', '.heif'] }] },
+        },
         icons: [
           { src: 'logo/qi-icona-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'logo/qi-icona-512.png', sizes: '512x512', type: 'image/png' },
@@ -55,7 +63,9 @@ export default defineConfig({
       },
       workbox: {
         // Tot el necessari per funcionar sense connexió va dins la precàrrega
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,glb}'],
+        globPatterns: ['**/*.{js,mjs,css,html,svg,png,woff2,glb}'],
+        // (4E) Rep els fitxers de «Compartir → Qi» (public/compartir-sw.js)
+        importScripts: ['compartir-sw.js'],
         // El fragment de Three.js i el cos 3D (GLB) han de cabre a la memòria cau
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         navigateFallback: 'index.html',

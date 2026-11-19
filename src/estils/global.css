@@ -6373,3 +6373,285 @@ fieldset {
     padding: 0 6px;
   }
 }
+
+/* --- Etapa 4E: documents adjunts --- */
+.afegir-documents {
+  border: 2px dashed transparent;
+  border-radius: var(--radi);
+  padding: 4px;
+  margin: -4px -4px 12px;
+}
+
+.afegir-documents.sobre {
+  border-color: var(--accent);
+  background: var(--accent-suau);
+}
+
+/* «o arrossega aquí…» només amb ratolí (no a la tauleta ni al mòbil) */
+@media (pointer: coarse) {
+  .nomes-punter {
+    display: none;
+  }
+}
+
+.errors-fitxers {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: var(--cinabri);
+}
+
+.avis-galeria {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+.avis-galeria p {
+  margin: 0;
+  flex: 1 1 240px;
+}
+
+.llista-documents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 10px;
+}
+
+.targeta-document {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--clar);
+  border: 1px solid var(--linia);
+  border-radius: var(--radi);
+  cursor: pointer;
+}
+
+.targeta-document:hover,
+.targeta-document:focus-visible {
+  border-color: var(--accent);
+}
+
+.miniatura-document {
+  flex: none;
+  width: 64px;
+  height: 80px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--fons);
+  color: var(--accent);
+}
+
+.miniatura-document img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.icona-document {
+  width: 40px;
+  height: 50px;
+}
+
+.text-document-adjunt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.text-document-adjunt strong {
+  overflow-wrap: anywhere;
+}
+
+.etiqueta-pendent-pujar {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: var(--accent-suau);
+  color: var(--tinta-suau);
+}
+
+.documents-anullats {
+  margin-top: 12px;
+}
+
+.documents-visita {
+  margin-top: 16px;
+}
+
+.documents-visita > summary {
+  cursor: pointer;
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+/* Escanejar i desar */
+.dialeg-escanejar {
+  width: min(760px, 100%);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+}
+
+.dialeg-escanejar .video-camera {
+  width: 100%;
+  max-height: 45dvh;
+  background: #000;
+  border-radius: var(--radi);
+}
+
+.pagines-escanejades {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagines-escanejades li {
+  position: relative;
+  width: 132px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pagines-escanejades img {
+  width: 132px;
+  height: 170px;
+  object-fit: contain;
+  background: var(--fons);
+  border: 1px solid var(--linia);
+  border-radius: 6px;
+}
+
+.numero-pagina {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  min-width: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--clar);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.accions-pagina {
+  display: flex;
+  justify-content: space-between;
+}
+
+.accions-pagina .boto {
+  min-width: 32px;
+  min-height: 36px;
+  padding: 0;
+}
+
+.fitxers-triats {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  overflow-wrap: anywhere;
+}
+
+/* Visor */
+.dialeg-document-adjunt {
+  width: min(1000px, 100%);
+  height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.capcalera-visor-document {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.capcalera-visor-document h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
+.capcalera-visor-document p {
+  margin: 2px 0 0;
+}
+
+.cos-visor-document {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--fons);
+  border-radius: var(--radi);
+  padding: 8px;
+}
+
+.pagines-pdf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pagina-pdf {
+  display: block;
+  box-shadow: 0 1px 3px rgb(31 36 33 / 0.2);
+}
+
+.imatge-document {
+  display: block;
+  max-width: none;
+}
+
+/* Mòbil: els diàlegs a tota la pantalla i els botons a tota l'amplada */
+@media (max-width: 560px) {
+  .dialeg-escanejar,
+  .dialeg-document-adjunt {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .afegir-documents .accions > .boto {
+    flex: 1 1 100%;
+  }
+
+  .pagines-escanejades li,
+  .pagines-escanejades img {
+    width: calc(50vw - 30px);
+  }
+}
+
+@media (max-width: 560px) {
+  .fons-dialeg:has(.dialeg-escanejar, .dialeg-document-adjunt) {
+    padding: 0;
+  }
+}
+
+.llista-pacients-compartir {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
