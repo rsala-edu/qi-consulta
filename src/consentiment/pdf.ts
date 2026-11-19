@@ -4,7 +4,9 @@
 
 import type { DadesConsentiment } from '../domini/consentiment'
 
-export interface DadesPdfConsentiment extends Omit<DadesConsentiment, 'pdf' | 'estat' | 'revocacio'> {
+export interface DadesPdfConsentiment extends Omit<DadesConsentiment, 'pdf' | 'estat' | 'revocacio' | 'esborrany'> {
+  /** Plantilla no aprovada: cada pàgina porta la marca (textos.marcaEsborrany) */
+  esborrany?: boolean
   /** Nom complet del pacient */
   pacient: string
   /** Textos de l'app (perquè el mòdul no depengui de la interfície) */
@@ -17,6 +19,7 @@ export interface DadesPdfConsentiment extends Omit<DadesConsentiment, 'pdf' | 'e
     representant: string
     signaturaDoctora: string
     pagina: string
+    marcaEsborrany: string
   }
 }
 
@@ -57,6 +60,7 @@ export async function generarPdfConsentiment(d: DadesPdfConsentiment): Promise<s
   doc.setTitle(textPerPdf(d.titol))
   doc.setSubject(textPerPdf(`${d.textos.versio} ${d.versio}`))
   doc.setCreator('Qi')
+  if (d.esborrany) doc.setKeywords([textPerPdf(d.textos.marcaEsborrany)])
   const normal = await doc.embedFont(StandardFonts.Helvetica)
   const negreta = await doc.embedFont(StandardFonts.HelveticaBold)
   const ample = A4[0] - 2 * MARGE
@@ -90,6 +94,10 @@ export async function generarPdfConsentiment(d: DadesPdfConsentiment): Promise<s
   }
 
   // Capçalera
+  if (d.esborrany) {
+    paragraf(d.textos.marcaEsborrany, 11, negreta)
+    y -= 4
+  }
   paragraf(d.titol, 15, negreta)
   y -= 4
   paragraf(`${d.textos.pacient}: ${d.pacient}`, 10, negreta)
@@ -122,9 +130,25 @@ export async function generarPdfConsentiment(d: DadesPdfConsentiment): Promise<s
   }
   await signatura(d.textos.signaturaDoctora, d.signaturaDoctora)
 
-  // Peu: pàgina i versió
+  // Peu: pàgina i versió; sense aprovar, la marca en diagonal a cada pàgina
   const pagines = doc.getPages()
+  const { degrees } = await import('pdf-lib')
   pagines.forEach((p, i) => {
+    if (d.esborrany) {
+      const marca = textPerPdf(d.textos.marcaEsborrany)
+      const mida = 34
+      const w = negreta.widthOfTextAtSize(marca, mida)
+      const angle = Math.PI / 5
+      p.drawText(marca, {
+        x: A4[0] / 2 - (w / 2) * Math.cos(angle),
+        y: A4[1] / 2 - (w / 2) * Math.sin(angle),
+        size: mida,
+        font: negreta,
+        color: rgb(0.75, 0.2, 0.2),
+        opacity: 0.18,
+        rotate: degrees(36),
+      })
+    }
     const peu = textPerPdf(`${d.titol} · ${d.textos.versio} ${d.versio} · ${d.textos.pagina} ${i + 1}/${pagines.length}`)
     p.drawText(peu, { x: MARGE, y: 28, size: 8, font: normal, color: rgb(0.45, 0.48, 0.46) })
   })

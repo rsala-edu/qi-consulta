@@ -37,6 +37,11 @@ export function PantallaAjustConsentiments() {
           return (
             <section key={tipus} className="panell plantilla-consentiment" aria-label={c.tipus[tipus]}>
               <h2>{c.tipus[tipus]}</h2>
+              {aprovada?.aprovadaAt && (
+                <p className="detall">
+                  {formatar(c.aprovadaEl, { dia: new Date(aprovada.aprovadaAt).toLocaleDateString('ca') })} · {c.versio} {aprovada.versio}
+                </p>
+              )}
               {editable ? (
                 <EditorPlantilla key={editable.id + editable.modificatAt} plantilla={editable} onCanviada={recarregar} />
               ) : (

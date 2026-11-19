@@ -15,6 +15,7 @@ const TEXTOS = {
   representant: 'Representant',
   signaturaDoctora: 'Signatura de la doctora',
   pagina: 'Pàgina',
+  marcaEsborrany: 'ESBORRANY – pendent de revisió',
 }
 
 describe('PDF del consentiment signat', () => {
@@ -38,6 +39,26 @@ describe('PDF del consentiment signat', () => {
     // El text sencer no hi cap en una pàgina
     expect(doc.getPageCount()).toBeGreaterThan(1)
     expect(doc.getTitle()).toBe('Acupuntura i tècniques associades')
+  })
+
+  it('amb una plantilla sense aprovar, porta la marca d\'esborrany', async () => {
+    const base = {
+      tipus: 'dades' as const,
+      plantillaId: 'plantilla-dades-v1',
+      versio: 1,
+      titol: 'Prova',
+      text: 'Text curt inventat',
+      signatAt: '2026-11-13T10:00:00.000Z',
+      signaturaPacient: PNG,
+      representant: null,
+      signaturaDoctora: PNG,
+      pacient: 'Pacient Inventat',
+      textos: TEXTOS,
+    }
+    const amb = await PDFDocument.load(base64ABytes(await generarPdfConsentiment({ ...base, esborrany: true })))
+    expect(amb.getKeywords()).toContain('ESBORRANY')
+    const sense = await PDFDocument.load(base64ABytes(await generarPdfConsentiment(base)))
+    expect(sense.getKeywords() ?? '').not.toContain('ESBORRANY')
   })
 
   it('els caràcters que les fonts estàndard no poden escriure es canvien', () => {

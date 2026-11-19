@@ -31,7 +31,19 @@ describe('consentiment informat (magatzem)', () => {
     expect(cru).not.toContain('Llei 41/2002')
   })
 
-  it('només es poden fer signar les aprovades, amb el text exacte; després només es poden revocar', async () => {
+  it('sense aprovar, la pendent es pot signar per provar-la i queda marcada com a esborrany', async () => {
+    const pacient = await magatzem.crearPacient(pacientInventat())
+    const [acup] = await magatzem.plantillesConsentiment()
+    const s = 'data:image/png;base64,iVBORw0KGgo='
+    const signat = await magatzem.signarConsentiment(pacient.id, {
+      tipus: 'acupuntura', plantillaId: acup!.id, versio: acup!.versio, titol: acup!.titol, text: acup!.text,
+      signatAt: '2026-11-13T10:00:00.000Z', signaturaPacient: s, representant: null, signaturaDoctora: s,
+      estat: 'vigent', revocacio: null, pdf: 'JVBERi0=', esborrany: false,
+    })
+    expect(signat.esborrany).toBe(true)
+  })
+
+  it('amb una aprovada, només es fa signar l\'aprovada, amb el text exacte; després només es pot revocar', async () => {
     const pacient = await magatzem.crearPacient(pacientInventat())
     const [acup] = await magatzem.plantillesConsentiment()
     const signatura = 'data:image/png;base64,iVBORw0KGgo='
@@ -48,16 +60,18 @@ describe('consentiment informat (magatzem)', () => {
       estat: 'vigent',
       revocacio: null,
       pdf: 'JVBERi0=',
+      esborrany: false,
     })
-    await expect(magatzem.signarConsentiment(pacient.id, dades(acup))).rejects.toThrow(/aprovades/)
     await magatzem.desarPlantilla(acup!.id, { ...acup!, text: `${acup!.text}\n(revisat)` })
     const aprovada = await magatzem.aprovarPlantilla(acup!.id)
     expect(aprovada).toMatchObject({ versio: 2, estat: 'aprovada' })
     await expect(magatzem.desarPlantilla(aprovada.id, { ...aprovada, text: 'canvi' })).rejects.toThrow()
     await expect(magatzem.signarConsentiment(pacient.id, { ...dades(aprovada), text: 'un altre text' })).rejects.toThrow()
+    // Amb una d'aprovada, la v1 ja no es pot fer signar
+    await expect(magatzem.signarConsentiment(pacient.id, dades(acup))).rejects.toThrow(/no es pot fer signar/)
 
     const signat = await magatzem.signarConsentiment(pacient.id, dades(aprovada))
-    expect(signat.estat).toBe('vigent')
+    expect(signat).toMatchObject({ estat: 'vigent', esborrany: false })
     expect(JSON.stringify(await db.consentiments.toArray())).not.toContain('revisat')
     const revocat = await magatzem.revocarConsentiment(signat.id, 'Ho demana (inventat)')
     expect(revocat).toMatchObject({ estat: 'revocat', revocacio: { motiu: 'Ho demana (inventat)' }, text: signat.text })
