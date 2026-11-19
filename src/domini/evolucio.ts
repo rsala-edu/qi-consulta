@@ -34,7 +34,9 @@ const sensePalpacio = (punts: Sessio['punts']): Sessio['punts'] =>
   Object.fromEntries(Object.entries(punts).filter(([, p]) => p.tecnica !== 'palpacio'))
 
 /** Minuts de retenció (null si no es van posar agulles amb el temporitzador) */
-export const minutsRetencio = (s: Pick<Sessio, 'retencio'>): number | null => (s.retencio.iniciAt ? s.retencio.minuts : null)
+/** Minuts de retenció: els reals si es van retirar les agulles amb el botó; si no, els previstos */
+export const minutsRetencio = (s: Pick<Sessio, 'retencio'>): number | null =>
+  !s.retencio.iniciAt ? null : s.retencio.segonsReals != null ? Math.round(s.retencio.segonsReals / 60) : s.retencio.minuts
 
 // --- Sèrie sessió a sessió ------------------------------------------------------
 

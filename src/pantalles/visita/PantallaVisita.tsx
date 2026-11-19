@@ -14,6 +14,7 @@ import { nomEpisodi } from '../../domini/episodi'
 import type { TipusCita } from '../../domini/cita'
 import { BarraEscala } from '../../components/BarraEscala'
 import { Boto } from '../../components/Boto'
+import { EstatDesat } from '../../components/EstatDesat'
 import { Camp } from '../../components/Camp'
 import { Indicador } from '../../components/Indicador'
 import { RevisioConflictes } from '../../components/RevisioConflictes'
@@ -32,6 +33,7 @@ import {
   esEditable,
   llistaPunts,
   mapaPunts,
+  opcioIncidencies,
   type DadesSessio,
   type Sessio,
 } from '../../domini/sessio'
@@ -370,9 +372,7 @@ function Visita({
         <div className="accions-visita">
           {/* Una sessió tancada no es desa: no hi ha res a dir */}
           {editable && (
-            <span className="detall" role="status">
-              {desant ? v.desant : pendent ? '' : v.desat}
-            </span>
+            <EstatDesat desant={desant} pendent={pendent} />
           )}
           {enCurs && editable && (
             <Boto onClick={() => setFinalitzant((f) => !f)} aria-expanded={finalitzant}>
@@ -618,22 +618,39 @@ function Visita({
                 onChange={(e) => setDades((d) => ({ ...d, tancar: { ...d.tancar, recomanacions: e.target.value } }))}
               />
             </Camp>
-            <Camp etiqueta={v.incidencies}>
-              <textarea
-                rows={3}
-                value={dades.tancar.incidencies}
-                disabled={dades.tancar.capIncidencia}
-                onChange={(e) => setDades((d) => ({ ...d, tancar: { ...d.tancar, incidencies: e.target.value } }))}
-              />
-            </Camp>
-            <label className="casella">
-              <input
-                type="checkbox"
-                checked={dades.tancar.capIncidencia}
-                onChange={(e) => setDades((d) => ({ ...d, tancar: { ...d.tancar, capIncidencia: e.target.checked } }))}
-              />
-              {v.capIncidencia}
-            </label>
+            {/* Primer, si n'hi ha hagut o no; el text només si n'hi ha hagut */}
+            <fieldset className="opcions-incidencies">
+              <legend>{v.incidencies}</legend>
+              <div className="opcions-en-fila">
+                <label className="casella">
+                  <input
+                    type="radio"
+                    name="incidencies"
+                    checked={opcioIncidencies(dades.tancar) === 'cap'}
+                    onChange={() => setDades((d) => ({ ...d, tancar: { ...d.tancar, capIncidencia: true, hiHaIncidencies: false, incidencies: '' } }))}
+                  />
+                  {v.capIncidencia}
+                </label>
+                <label className="casella">
+                  <input
+                    type="radio"
+                    name="incidencies"
+                    checked={opcioIncidencies(dades.tancar) === 'si'}
+                    onChange={() => setDades((d) => ({ ...d, tancar: { ...d.tancar, capIncidencia: false, hiHaIncidencies: true } }))}
+                  />
+                  {v.hiHaIncidencies}
+                </label>
+              </div>
+              {opcioIncidencies(dades.tancar) === 'si' && (
+                <Camp etiqueta={v.quinesIncidencies}>
+                  <textarea
+                    rows={3}
+                    value={dades.tancar.incidencies}
+                    onChange={(e) => setDades((d) => ({ ...d, tancar: { ...d.tancar, incidencies: e.target.value } }))}
+                  />
+                </Camp>
+              )}
+            </fieldset>
           </section>
         )}
       </fieldset>

@@ -6230,3 +6230,130 @@ fieldset {
   letter-spacing: 0.04em;
   text-align: center;
 }
+
+/* Ajustos > Visita: volum del so i «Provar el so» */
+.fila-volum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.fila-volum input[type='range'] {
+  flex: 1 1 200px;
+  accent-color: var(--accent);
+}
+
+/* Temporitzador: Pausa/Continuar i «Agulles retirades» amb el nom visible.
+   Pausa i Continuar fan la mateixa amplada: canviar-los no mou res */
+.controls-retencio .boto-icona.amb-text {
+  gap: 6px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.controls-retencio .principal-retencio.amb-text {
+  min-width: 8.5em;
+}
+
+.pantalla-visita.ampliat .controls-retencio .boto-icona.amb-text span {
+  display: none;
+}
+
+.pantalla-visita.ampliat .controls-retencio .principal-retencio.amb-text {
+  min-width: 36px;
+}
+
+/* Visita > Tancar: incidències (primer cap o n'hi ha hagut; el text només si n'hi ha hagut) */
+.opcions-incidencies {
+  border: 0;
+  margin: 12px 0 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.opcions-incidencies legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.opcions-incidencies .opcions-en-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.opcions-incidencies .camp {
+  margin-top: 8px;
+}
+
+/* Avisos d'estat (sessió tancada, consulta tancada aquest dia, cita en el
+   passat, fitxa arxivada, visita en curs, fitxes ajuntades, llicències…): color
+   neutre. El vermell (cinabri) queda només per als errors: role="alert",
+   .avis-error i els camps amb error. */
+.avis,
+.dialeg p.avis,
+.avis-horari,
+.avis-passat,
+.nota-llicencia {
+  color: var(--tinta-suau);
+}
+
+.avis[role='alert'],
+.dialeg p.avis[role='alert'],
+.avis-error {
+  color: var(--cinabri);
+}
+
+.avis-sessio-tancada .avis {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--accent-suau);
+  color: var(--tinta);
+}
+
+.avis-ajuntada,
+.avis-en-curs {
+  background: var(--accent-suau);
+}
+
+.avis-en-curs h2 {
+  color: var(--tinta);
+}
+
+/* El temps del temporitzador ocupa sempre l'amplada de «En pausa · mm:ss»
+   (pseudoelement invisible a la mateixa cel·la): Pausa/Continuar no es mouen */
+.temporitzador > .temps-retencio {
+  display: inline-grid;
+}
+
+.temps-retencio::before {
+  content: attr(data-mida);
+  visibility: hidden;
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.temps-retencio > span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+/* «Desant…» / «Desat»: sempre l'amplada del text més llarg */
+.estat-desat {
+  display: inline-grid;
+  justify-items: start;
+}
+
+.estat-desat::before {
+  content: attr(data-mida);
+  visibility: hidden;
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.estat-desat > span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}

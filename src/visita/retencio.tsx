@@ -4,8 +4,9 @@
 // - La visita hi registra la retenció en marxa (hora d'inici, minuts i l'id de
 //   la sessió: cap dada del pacient), que es desa a la base de dades en clar.
 // - La pantalla de bloqueig la mostra («Retenció · 12:34»), sense cap dada.
-// - En acabar, sona un so curt una sola vegada (si està activat a Ajustos >
-//   Visita), sigui on sigui l'app.
+// - En acabar, sonen tres pitits (si està activat a Ajustos > Visita), sigui on
+//   sigui l'app. Si al cap d'un minut les agulles encara no s'han retirat (ni
+//   s'ha aturat), es repeteixen una vegada.
 // - Si s'acaba amb l'app bloquejada, en desbloquejar surt una franja que ho diu
 //   i porta a la visita.
 // El temps sempre es calcula a partir de l'hora d'inici, mai amb un comptador.
@@ -15,7 +16,7 @@ import { llegirAjustosVisita } from '../db/ajustosVisita'
 import type { QiDB } from '../db/esquema'
 import { formatTemps, tempsRestant } from '../domini/sessio'
 import { formatar, t } from '../i18n/t'
-import { soCurt } from '../pantalles/visita/Temporitzador'
+import { soAvis } from './so'
 
 export interface RetencioEnMarxa {
   iniciAt: string
@@ -23,6 +24,8 @@ export interface RetencioEnMarxa {
   sessioId: string
   /** Ja ha sonat l'avís de final */
   avisat: boolean
+  /** Ja s'ha repetit (un minut després) */
+  repetit?: boolean
   /** La doctora ja ha vist que ha acabat (ha tornat a la visita) */
   vista: boolean
 }
@@ -38,6 +41,9 @@ interface ValorRetencio {
 }
 
 const Context = createContext<ValorRetencio | null>(null)
+
+/** Si les agulles encara no s'han retirat, l'avís es repeteix al cap d'un minut */
+export const REPETIR_MS = 60_000
 
 export function ProveidorRetencio({ db, children }: { db: QiDB | null; children: ReactNode }) {
   const [retencio, setRetencio] = useState<RetencioEnMarxa | null>(null)
@@ -63,13 +69,15 @@ export function ProveidorRetencio({ db, children }: { db: QiDB | null; children:
 
   const restant = retencio ? tempsRestant(retencio, ara) : null
   const enMarxa = restant !== null && restant > 0
+  /** Acabada fa menys de dos minuts i encara sense repetir l'avís: cal continuar mirant l'hora */
+  const esperantRepeticio = !!retencio && restant !== null && restant <= 0 && restant > -REPETIR_MS * 2 && !retencio.repetit
 
-  // Només per dibuixar el compte enrere (i saber quan s'acaba)
+  // Només per dibuixar el compte enrere (i saber quan s'acaba o cal repetir el so)
   useEffect(() => {
-    if (!enMarxa) return
+    if (!enMarxa && !esperantRepeticio) return
     const i = window.setInterval(() => setAra(Date.now()), 500)
     return () => window.clearInterval(i)
-  }, [enMarxa])
+  }, [enMarxa, esperantRepeticio])
   useEffect(() => {
     const tornar = () => setAra(Date.now())
     document.addEventListener('visibilitychange', tornar)
@@ -89,12 +97,19 @@ export function ProveidorRetencio({ db, children }: { db: QiDB | null; children:
     return () => void bloqueig?.release().catch(() => {})
   }, [enMarxa])
 
-  // En acabar: un so curt, una sola vegada (si s'acaba ara, no si fa estona)
+  // En acabar: tres pitits (si s'acaba ara, no si fa estona). Si al cap d'un
+  // minut continua registrada (no s'han retirat les agulles), una vegada més
   useEffect(() => {
-    if (!retencio || restant === null || restant > 0 || retencio.avisat) return
-    desar({ ...retencio, avisat: true })
-    if (!db || restant < -60_000) return
-    void llegirAjustosVisita(db).then((a) => a.so && soCurt())
+    if (!retencio || restant === null || restant > 0) return
+    const sonar = () => db && void llegirAjustosVisita(db).then((a) => a.so && soAvis(a.volum))
+    if (!retencio.avisat) {
+      const tard = restant < -REPETIR_MS
+      desar({ ...retencio, avisat: true, repetit: tard })
+      if (!tard) sonar()
+    } else if (!retencio.repetit && restant <= -REPETIR_MS) {
+      desar({ ...retencio, repetit: true })
+      if (restant > -REPETIR_MS * 2) sonar()
+    }
   }, [retencio, restant, db, desar])
 
   const registrar = useCallback<ValorRetencio['registrar']>(

@@ -148,14 +148,18 @@ describe('temporitzador', () => {
     expect(estatRetencio(r, m(33))).toBe('acabada')
     expect(iniciEquivalent(r, m(33))).toBe(iso(5))
 
-    // Aturar abans d'hora: aturada, sense registre; continuar ho desfà
-    const aturada = A.aturar(r, iso(20))
+    // «Agulles retirades» abans d'hora: tancada, sense registre, amb el temps real (15 min en marxa)
+    const aturada = A.retirar(r, iso(20))
+    expect(aturada.segonsReals).toBe(15 * 60)
     expect(estatRetencio(aturada, m(40))).toBe('aturada')
     expect(iniciEquivalent(aturada, m(40))).toBeNull()
     expect(tempsRestant(aturada, m(40))).toBe(13 * 60_000)
     const represa = A.continuar(aturada, iso(40))
     expect(estatRetencio(represa, m(41))).toBe('enMarxa')
     expect(tempsRestant(represa, m(41))).toBe(12 * 60_000)
+    expect(represa.segonsReals).toBeNull()
+    // Retirades després d'acabar: compta tot el temps posat (35 min)
+    expect(A.retirar(r, iso(40)).segonsReals).toBe(35 * 60)
 
     // Tornar a començar: els minuts sencers, i les estones d'abans es conserven
     const nova = A.tornarAComencar(r, iso(25))

@@ -80,7 +80,7 @@ interface PropsMapa {
 function CosUs(props: PropsMapa) {
   const carrega = useModelCos()
   if (carrega.estat === 'carregant') return <div className="zona-visor zona-us"><Indicador text={t.evolucio.carregantCos} /></div>
-  if (carrega.estat !== 'llest') return <div className="zona-visor zona-us"><p className="avis">{t.errorPantalla.cos3D}</p></div>
+  if (carrega.estat !== 'llest') return <div className="zona-visor zona-us"><p className="avis avis-error">{t.errorPantalla.cos3D}</p></div>
   return <CosAmbModel model={carrega.dades} {...props} />
 }
 

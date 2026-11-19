@@ -56,8 +56,10 @@ export const esquemaDadesSessio = z.object({
      * des d'aquesta. Les sessions d'abans no en tenen: un sol tram des d'iniciAt
      */
     trams: z.array(z.object({ inici: z.string(), fi: z.string().nullable(), reinici: z.boolean().optional() })).optional(),
-    /** (A7) La doctora l'ha aturat abans d'hora */
+    /** (A7) La doctora l'ha aturat; des de les correccions, «Agulles retirades»: la retenció es tanca */
     aturadaAt: z.string().nullable().optional(),
+    /** Segons reals que han estat posades les agulles (sense pauses), desats en retirar-les */
+    segonsReals: z.number().int().min(0).nullable().optional(),
   }),
   comEsta: z.object({
     canvis: z.string(),
@@ -86,7 +88,13 @@ export const esquemaDadesSessio = z.object({
     /** Si les retirades no quadren amb les posades */
     motiu: z.string(),
   }),
-  tancar: z.object({ recomanacions: z.string(), incidencies: z.string(), capIncidencia: z.boolean() }),
+  tancar: z.object({
+    recomanacions: z.string(),
+    incidencies: z.string(),
+    capIncidencia: z.boolean(),
+    /** S'ha triat «Hi ha hagut incidències» (encara que el text sigui buit) */
+    hiHaIncidencies: z.boolean().optional(),
+  }),
 })
 export type DadesSessio = z.infer<typeof esquemaDadesSessio>
 export type Sessio = Registre & { pacientId: string } & DadesSessio
@@ -223,20 +231,27 @@ const tancarUltim = (trams: Tram[], ara: string): Tram[] =>
 
 /** Les accions del temporitzador (ara: ISO) */
 export const accionsRetencio = {
-  comencar: (r: Retencio, ara: string): Retencio => ({ ...r, iniciAt: ara, trams: [{ inici: ara, fi: null }], aturadaAt: null }),
+  comencar: (r: Retencio, ara: string): Retencio => ({ ...r, iniciAt: ara, trams: [{ inici: ara, fi: null }], aturadaAt: null, segonsReals: null }),
   pausar: (r: Retencio, ara: string): Retencio => ({ ...r, trams: tancarUltim(tramsRetencio(r), ara) }),
   /** Després d'una pausa o d'aturar-lo */
   continuar: (r: Retencio, ara: string): Retencio => ({
     ...r,
     trams: [...tancarUltim(tramsRetencio(r), ara), { inici: ara, fi: null }],
     aturadaAt: null,
+    segonsReals: null,
   }),
-  aturar: (r: Retencio, ara: string): Retencio => ({ ...r, trams: tancarUltim(tramsRetencio(r), ara), aturadaAt: ara }),
+  /** «Agulles retirades»: tanca la retenció i en desa el temps real (en marxa, en pausa o acabada) */
+  retirar: (r: Retencio, ara: string): Retencio => {
+    const trams = tancarUltim(tramsRetencio(r), ara)
+    const segons = Math.round(tempsTranscorregut({ ...r, trams }, Date.parse(ara)) / 1000)
+    return { ...r, trams, aturadaAt: ara, segonsReals: segons }
+  },
   /** Torna a comptar els minuts sencers (les estones d'abans es conserven) */
   tornarAComencar: (r: Retencio, ara: string): Retencio => ({
     ...r,
     trams: [...tancarUltim(tramsRetencio(r), ara), { inici: ara, fi: null, reinici: true }],
     aturadaAt: null,
+    segonsReals: null,
   }),
   /** ±1 minut (entre 1 i 120) */
   minuts: (r: Retencio, delta: number): Retencio => ({ ...r, minuts: Math.min(120, Math.max(1, r.minuts + delta)) }),
@@ -271,3 +286,9 @@ export const esquemaDadesAddenda = z.object({
 })
 export type DadesAddenda = z.infer<typeof esquemaDadesAddenda>
 export type Addenda = Registre & { pacientId: string } & DadesAddenda
+
+/** Què s'ha triat a «Incidències»: cap, n'hi ha hagut, o encara res */
+export function opcioIncidencies(t: DadesSessio['tancar']): 'cap' | 'si' | null {
+  if (t.capIncidencia) return 'cap'
+  return t.hiHaIncidencies || t.incidencies.trim() ? 'si' : null
+}

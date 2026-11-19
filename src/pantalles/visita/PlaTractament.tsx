@@ -1,10 +1,12 @@
 // Pla de tractament de l'episodi (etapa 3B): sessions previstes, freqüència,
-// objectius, tècniques previstes i data de revisió. Es desa sol a l'episodi;
+// objectius, tècniques previstes i data de revisió (calculada a partir de la
+// freqüència i les sessions fins que la doctora la canvia a mà). Es desa sol a l'episodi;
 // les sessions previstes surten a la capçalera de la visita («Sessió 4 de 10»).
 
 import { useId, useMemo } from 'react'
+import { EstatDesat } from '../../components/EstatDesat'
 import { Xip } from '../../cataleg/components/Cataleg'
-import { FREQUENCIES_PLA, PLA_BUIT, TECNIQUES_PLA, type DadesEpisodi, type Episodi, type Pla } from '../../domini/episodi'
+import { canviarPla, FREQUENCIES_PLA, PLA_BUIT, TECNIQUES_PLA, type DadesEpisodi, type Episodi, type Pla } from '../../domini/episodi'
 import { t } from '../../i18n/t'
 import { useMagatzem } from '../../sessio/ContextSessio'
 import { useAutodesat } from './useAutodesat'
@@ -34,7 +36,7 @@ export function PlaTractament({ episodi, editable, onPla }: { episodi: Episodi; 
   )
   const pla = dades.pla ?? PLA_BUIT
   const canviar = (canvis: Partial<Pla>) => {
-    const nou = { ...pla, ...canvis }
+    const nou = canviarPla(pla, canvis, dades.dataInici)
     setDades((d) => ({ ...d, pla: nou }))
     onPla(nou)
   }
@@ -42,7 +44,7 @@ export function PlaTractament({ episodi, editable, onPla }: { episodi: Episodi; 
     <section className="pla-tractament seccio-cataleg oberta" aria-label={p.titol}>
       <div className="cos-seccio">
         <h2>
-          {p.titol} <span className="detall" role="status">{desant ? t.visita.desant : pendent ? '' : t.visita.desat}</span>
+          {p.titol} <EstatDesat desant={desant} pendent={pendent} />
         </h2>
         <div className="camp">
           <label htmlFor={`${id}-sessions`}>{p.sessions}</label>
@@ -90,7 +92,10 @@ export function PlaTractament({ episodi, editable, onPla }: { episodi: Episodi; 
           <textarea id={`${id}-objectius`} rows={3} value={pla.objectius} disabled={!editable} onChange={(e) => canviar({ objectius: e.target.value })} />
         </div>
         <div className="camp">
-          <label htmlFor={`${id}-revisio`}>{p.revisio}</label>
+          <label htmlFor={`${id}-revisio`}>
+            {p.revisio}
+            {pla.revisio && <span className="detall"> · {pla.revisioManual ? p.revisioManual : p.revisioAuto}</span>}
+          </label>
           <input
             id={`${id}-revisio`}
             type="date"

@@ -8,34 +8,16 @@
 //   el navegador ho permet, es demana que la pantalla no s'apagui (Wake Lock).
 // - En acabar: la capçalera passa a cinabri, un avís suau i un so curt (si està
 //   activat). Res de finestres que bloquegin la pantalla.
-// - (A7) Es pot posar en pausa i continuar, aturar, tornar a començar i sumar o
-//   treure un minut. Les estones en marxa es desen a la sessió (retencio.trams).
+// - (A7) Es pot posar en pausa i continuar (el mateix botó), tornar a començar i
+//   sumar o treure un minut. Les estones en marxa es desen a la sessió
+//   (retencio.trams). «Agulles retirades» tanca la retenció i en desa el temps
+//   real (retencio.segonsReals). Cada botó té una explicació breu (title).
 
 import { useEffect, useState } from 'react'
 import { Boto } from '../../components/Boto'
 import { accionsRetencio as A, estatRetencio, formatTemps, iniciEquivalent, tempsRestant, type DadesSessio } from '../../domini/sessio'
 import { formatar, t } from '../../i18n/t'
 import { useRetencio } from '../../visita/retencio'
-
-/** Un so curt i suau (sense cap fitxer: es genera amb Web Audio) */
-export function soCurt(): void {
-  try {
-    const ctx = new AudioContext()
-    const osc = ctx.createOscillator()
-    const guany = ctx.createGain()
-    osc.type = 'sine'
-    osc.frequency.value = 660
-    guany.gain.setValueAtTime(0.0001, ctx.currentTime)
-    guany.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.05)
-    guany.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2)
-    osc.connect(guany).connect(ctx.destination)
-    osc.start()
-    osc.stop(ctx.currentTime + 1.3)
-    osc.onended = () => void ctx.close()
-  } catch {
-    // Sense so (navegador sense Web Audio): l'avís visual ja hi és
-  }
-}
 
 /** Icones dels controls (SVG dins el codi: res d'internet) */
 const ICONES = {
@@ -54,13 +36,17 @@ const ICONES = {
   ),
 }
 
-/** Botó d'icona petit, amb el nom per als lectors de pantalla i com a rètol */
-function BotoIcona({ nom, icona, ...props }: { nom: string; icona: keyof typeof ICONES; onClick(): void; className?: string }) {
+/**
+ * Botó d'icona petit, amb el nom per als lectors de pantalla i una explicació
+ * breu en passar-hi el ratolí (title). Amb «ambText», el nom també es veu.
+ */
+function BotoIcona({ nom, ajuda, icona, ambText, ...props }: { nom: string; ajuda: string; icona: keyof typeof ICONES; ambText?: boolean; onClick(): void; className?: string }) {
   return (
-    <Boto variant="discret" className={`boto-icona ${props.className ?? ''}`} aria-label={nom} title={nom} onClick={props.onClick}>
+    <Boto variant="discret" className={`boto-icona${ambText ? ' amb-text' : ''} ${props.className ?? ''}`} aria-label={nom} title={ajuda} onClick={props.onClick}>
       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
         {ICONES[icona]}
       </svg>
+      {ambText && <span aria-hidden="true">{nom}</span>}
     </Boto>
   )
 }
@@ -128,6 +114,7 @@ export function Temporitzador({
           <Boto
             variant="discret"
             aria-label={v.menysMinut}
+            title={v.menysMinut}
             disabled={!editable || retencio.minuts <= 1}
             onClick={() => onCanviar(A.minuts(retencio, -1))}
           >
@@ -139,13 +126,14 @@ export function Temporitzador({
           <Boto
             variant="discret"
             aria-label={v.mesMinut}
+            title={v.mesMinut}
             disabled={!editable || retencio.minuts >= 120}
             onClick={() => onCanviar(A.minuts(retencio, 1))}
           >
             +
           </Boto>
         </div>
-        <Boto className="boto-gran" disabled={!editable} onClick={() => onCanviar(A.comencar(retencio, new Date().toISOString()))}>
+        <Boto className="boto-gran" title={v.ajudaComencar} disabled={!editable} onClick={() => onCanviar(A.comencar(retencio, new Date().toISOString()))}>
           {v.comencarRetencio}
         </Boto>
       </div>
@@ -164,15 +152,25 @@ export function Temporitzador({
       {acabada ? (
         <strong role="status">{v.acabada}</strong>
       ) : estat === 'aturada' ? (
-        <strong role="status">{v.aturada}</strong>
+        <strong role="status">{formatar(v.aturada, { temps: formatTemps((retencio.segonsReals ?? 0) * 1000) })}</strong>
       ) : (
-        <span>{formatar(estat === 'pausa' ? v.enPausa : v.queda, { temps: formatTemps(restant) })}</span>
+        // Reserva l'amplada del text més llarg («En pausa · …»): en posar en pausa o continuar, els botons no es mouen
+        <span className="temps-retencio" data-mida={formatar(v.enPausa, { temps: formatTemps(restant) })}>
+          <span>{formatar(estat === 'pausa' ? v.enPausa : v.queda, { temps: formatTemps(restant) })}</span>
+        </span>
       )}
       {editable && (
         <div className="controls-retencio" role="group" aria-label={v.controlsRetencio}>
-          {estat === 'enMarxa' && <BotoIcona nom={v.pausa} icona="pausa" className="principal-retencio" onClick={fer(A.pausar)} />}
-          {(estat === 'pausa' || estat === 'aturada') && (
-            <BotoIcona nom={v.continuar} icona="continuar" className="principal-retencio" onClick={fer(A.continuar)} />
+          {/* Pausa i Continuar són el mateix botó (no es mou de lloc) */}
+          {corrent && (
+            <BotoIcona
+              nom={estat === 'pausa' ? v.continuar : v.pausa}
+              ajuda={estat === 'pausa' ? v.ajudaContinuar : v.ajudaPausa}
+              icona={estat === 'pausa' ? 'continuar' : 'pausa'}
+              ambText
+              className="principal-retencio"
+              onClick={fer(estat === 'pausa' ? A.continuar : A.pausar)}
+            />
           )}
           {corrent && (
             <Boto
@@ -199,8 +197,8 @@ export function Temporitzador({
               +1
             </Boto>
           )}
-          {corrent && <BotoIcona nom={v.aturar} icona="aturar" onClick={fer(A.aturar)} />}
-          <BotoIcona nom={v.tornarAComencar} icona="tornar" onClick={fer(A.tornarAComencar)} />
+          {(corrent || acabada) && <BotoIcona nom={v.retirar} ajuda={v.ajudaRetirar} icona="aturar" ambText onClick={fer(A.retirar)} />}
+          <BotoIcona nom={v.tornarAComencar} ajuda={v.ajudaTornar} icona="tornar" onClick={fer(A.tornarAComencar)} />
         </div>
       )}
     </div>

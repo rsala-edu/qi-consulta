@@ -14,7 +14,7 @@ export const FREQUENCIES_PLA = ['dosSetmana', 'setmanal', 'quinzenal', 'mensual'
 export const TECNIQUES_PLA = ['acupuntura', 'electroacupuntura', 'moxa', 'ventoses', 'auriculoterapia', 'guaSha', 'tuina', 'dietetica'] as const
 
 /** Pla de tractament de l'episodi (etapa 3B) */
-export const esquemaPla = z.object({
+const objectePla = z.object({
   /** Sessions previstes (a la capçalera de la visita: «Sessió 4 de 10») */
   sessions: z.number().int().min(1).max(100).nullable(),
   frequencia: z.enum(FREQUENCIES_PLA).nullable(),
@@ -22,12 +22,59 @@ export const esquemaPla = z.object({
   tecniques: z.array(z.enum(TECNIQUES_PLA)),
   /** Dia en què es revisa el pla */
   revisio: z.string().nullable(),
+  /** La doctora ha posat la data de revisió a mà: ja no es recalcula sola */
+  revisioManual: z.boolean(),
 })
-export type Pla = z.infer<typeof esquemaPla>
-export const PLA_BUIT: Pla = { sessions: null, frequencia: null, objectius: '', tecniques: [], revisio: null }
+/** Els plans d'abans del càlcul automàtic: si tenien data, la doctora l'havia posada a mà */
+export const esquemaPla = z.preprocess(
+  (v) => (v && typeof v === 'object' && !('revisioManual' in v) ? { ...v, revisioManual: (v as { revisio?: unknown }).revisio != null } : v),
+  objectePla,
+)
+export type Pla = z.infer<typeof objectePla>
+export const PLA_BUIT: Pla = { sessions: null, frequencia: null, objectius: '', tecniques: [], revisio: null, revisioManual: false }
+
+/**
+ * Data de revisió calculada: les sessions previstes al ritme de la freqüència,
+ * a partir del dia d'inici de l'episodi (setmanal × 8 = 8 setmanes; dues per
+ * setmana × 8 = 4 setmanes; quinzenal × 8 = 16 setmanes; mensual × 8 = 8 mesos).
+ * null si falta la freqüència o les sessions.
+ */
+export function revisioCalculada(pla: Pick<Pla, 'sessions' | 'frequencia'>, dataInici: string): string | null {
+  if (!pla.sessions || !pla.frequencia || !/^\d{4}-\d{2}-\d{2}$/.test(dataInici)) return null
+  const [a, m, d] = dataInici.split('-').map(Number) as [number, number, number]
+  const data = new Date(Date.UTC(a, m - 1, d))
+  if (pla.frequencia === 'mensual') {
+    data.setUTCMonth(data.getUTCMonth() + pla.sessions)
+    // 31 de gener + 1 mes: l'últim dia de febrer, no el 3 de març
+    if (data.getUTCDate() !== d) data.setUTCDate(0)
+  } else {
+    const setmanes = pla.frequencia === 'dosSetmana' ? Math.ceil(pla.sessions / 2) : pla.frequencia === 'setmanal' ? pla.sessions : pla.sessions * 2
+    data.setUTCDate(data.getUTCDate() + setmanes * 7)
+  }
+  return data.toISOString().slice(0, 10)
+}
+
+/**
+ * Aplica un canvi al pla. Si la doctora posa la data a mà, ja no es recalcula
+ * sola; si l'esborra, torna a ser automàtica. Si no s'ha posat a mà, es
+ * recalcula (si falten dades, es manté la que hi havia).
+ */
+export function canviarPla(pla: Pla, canvis: Partial<Pla>, dataInici: string): Pla {
+  const nou = { ...pla, ...canvis }
+  if ('revisio' in canvis && canvis.revisio != null) return { ...nou, revisioManual: true }
+  if ('revisio' in canvis) return { ...nou, revisioManual: false, revisio: revisioCalculada(nou, dataInici) }
+  if (nou.revisioManual) return nou
+  return { ...nou, revisio: revisioCalculada(nou, dataInici) ?? nou.revisio }
+}
+
+/** Primera lletra en majúscula (el motiu de l'episodi, en mostrar-lo i en desar-lo) */
+export const ambMajuscula = (s: string): string => {
+  const t = s.trim()
+  return t ? t.charAt(0).toLocaleUpperCase('ca') + t.slice(1) : t
+}
 
 export const esquemaDadesEpisodi = z.object({
-  motiu: z.string().trim().max(200),
+  motiu: z.string().trim().max(200).transform(ambMajuscula),
   /** Dia d'inici («2026-11-02») */
   dataInici: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   estat: z.enum(ESTATS_EPISODI),
@@ -47,7 +94,7 @@ export const idEpisodiDeCita = (citaId: string) => `episodi-${citaId}`
 export const MOTIU_PER_DEFECTE = 'Primera visita'
 
 export function nouEpisodi(motiu: string, dataInici: string): DadesEpisodi {
-  return { motiu: motiu.trim() || MOTIU_PER_DEFECTE, dataInici, estat: 'actiu', dataFinal: null, notaFinal: '', pla: null }
+  return { motiu: ambMajuscula(motiu) || MOTIU_PER_DEFECTE, dataInici, estat: 'actiu', dataFinal: null, notaFinal: '', pla: null }
 }
 
 /** L'episodi encara no té cap motiu de veritat (es va obrir amb una cita sense motiu) */
@@ -59,8 +106,8 @@ export const senseMotiu = (motiu: string) => !motiu.trim() || motiu.trim() === M
  * de les cites de l'episodi que en tingui.
  */
 export function nomEpisodi(episodi: Pick<DadesEpisodi, 'motiu'>, motiusCites: readonly string[] = []): string {
-  if (!senseMotiu(episodi.motiu)) return episodi.motiu.trim()
-  return motiusCites.map((m) => m.trim()).find((m) => !senseMotiu(m)) ?? ''
+  if (!senseMotiu(episodi.motiu)) return ambMajuscula(episodi.motiu)
+  return ambMajuscula(motiusCites.map((m) => m.trim()).find((m) => !senseMotiu(m)) ?? '')
 }
 
 /** Els episodis actius d'un pacient, del més recent al més antic */

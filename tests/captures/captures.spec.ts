@@ -138,7 +138,7 @@ test('Visita', async ({ page }) => {
   await expect(page.locator('.retencio-bloqueig')).toBeVisible()
   await capturar(page, 'bloqueig-retencio')
   await page.clock.fastForward('25:00')
-  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció acabada')
+  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció completa')
   await capturar(page, 'bloqueig-retencio-acabada')
   await page.getByLabel('Contrasenya', { exact: true }).fill(P)
   await page.getByRole('button', { name: 'Desbloquejar' }).click()

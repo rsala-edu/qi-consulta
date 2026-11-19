@@ -123,10 +123,10 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   // S'acaba (mentrestant, l'app s'ha bloquejat sola: la pantalla de bloqueig ho
   // mostra); en desbloquejar, la capçalera en cinabri, sense cap finestra
   await page.clock.fastForward('28:30')
-  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció acabada')
+  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció completa')
   await page.getByLabel('Contrasenya', { exact: true }).fill(P)
   await page.getByRole('button', { name: 'Desbloquejar' }).click()
-  await expect(capcalera(page).getByRole('timer')).toContainText('Retenció acabada')
+  await expect(capcalera(page).getByRole('timer')).toContainText('Retenció completa')
   await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
 
   // Finalitzar: si les agulles retirades no quadren, cal el motiu
@@ -183,16 +183,20 @@ test('visita completa: començar, com està, tractament, temporitzador, agulles,
   await expect(episodi.getByRole('link', { name: /^Sessió 1 · .*escala 7, 2 punts/ })).toBeVisible()
 })
 
-/** Compta els sons que fa l'app (Web Audio) */
+/** Compta els avisos sonors que fa l'app (Web Audio): cada avís, tres pitits */
 async function comptarSons(page: Page) {
   await page.addInitScript(() => {
-    const w = window as unknown as { __sons: number; AudioContext: unknown }
+    const w = window as unknown as { __sons: number; __pitits: number; AudioContext: unknown }
     w.__sons = 0
+    w.__pitits = 0
     w.AudioContext = class {
       currentTime = 0
       destination = {}
+      constructor() {
+        w.__sons += 1
+      }
       createOscillator() {
-        return { type: '', frequency: { value: 0 }, connect: (x: unknown) => x, start: () => (w.__sons += 1), stop() {}, onended: null }
+        return { type: '', frequency: { value: 0 }, connect: (x: unknown) => x, start: () => (w.__pitits += 1), stop() {}, onended: null }
       }
       createGain() {
         return { gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect: (x: unknown) => x }
@@ -204,6 +208,7 @@ async function comptarSons(page: Page) {
   })
 }
 const sons = (page: Page) => page.evaluate(() => (window as unknown as { __sons: number }).__sons)
+const pitits = (page: Page) => page.evaluate(() => (window as unknown as { __pitits: number }).__pitits)
 
 test('retenció amb l\'app bloquejada: el temporitzador es veu sense cap dada, en acabar sona i s\'avisa, i en desbloquejar es veu que ha acabat', async ({
   page,
@@ -222,13 +227,17 @@ test('retenció amb l\'app bloquejada: el temporitzador es veu sense cap dada, e
   await expect(page.getByText(/Aina|Provencal|Lumbàlgia/)).toHaveCount(0)
   await page.clock.fastForward('10:00')
   await expect(temps).toHaveText(/^Retenció · 1[78]:\d\d$/)
-  // S'acaba amb l'app bloquejada: avís visual i un sol so
+  // S'acaba amb l'app bloquejada: avís visual i tres pitits; com que les
+  // agulles no s'han retirat, es repeteixen una sola vegada al cap d'un minut
   await page.clock.fastForward('18:30')
-  await expect(temps).toHaveText('Retenció acabada')
+  await expect(temps).toHaveText('Retenció completa')
   await expect(temps).toHaveClass(/acabada/)
   await expect.poll(() => sons(page)).toBe(1)
-  await page.clock.fastForward('02:00')
-  expect(await sons(page)).toBe(1)
+  expect(await pitits(page)).toBe(3)
+  await page.clock.fastForward('01:05')
+  await expect.poll(() => sons(page)).toBe(2)
+  await page.clock.fastForward('03:00')
+  expect(await sons(page)).toBe(2)
 
   // En desbloquejar es veu clarament que ha acabat, i porta a la visita
   await page.getByLabel('Contrasenya', { exact: true }).fill(P)
@@ -240,10 +249,10 @@ test('retenció amb l\'app bloquejada: el temporitzador es veu sense cap dada, e
   await page.getByLabel('Contrasenya', { exact: true }).fill(P)
   await page.getByRole('button', { name: 'Desbloquejar' }).click()
   await menu(page, 'Pacients').click()
-  expect(await sons(page)).toBe(1)
+  expect(await sons(page)).toBe(2)
 })
 
-test('A7: temporitzador controlable: pausa, continuar, ±1 min, aturar i tornar a començar; es manté en sortir i tornar a la visita', async ({ page }) => {
+test('temporitzador: Pausa i Continuar (el mateix botó, el temps no avança), ±1 min, «Agulles retirades» amb el temps real i tornar a començar; es manté en sortir i tornar a la visita', async ({ page }) => {
   await comptarSons(page)
   await entrar(page)
   // Bloqueig als 30 minuts (cap salt del rellotge hi arriba)
@@ -259,8 +268,20 @@ test('A7: temporitzador controlable: pausa, continuar, ±1 min, aturar i tornar 
   await page.clock.fastForward('10:00')
   await expect(rellotge).toContainText(/Queden 1[78]:\d\d/)
 
-  // Pausa: el temps no corre, i la pantalla de bloqueig no en mostra cap
+  // Cada botó té una explicació en passar-hi el ratolí
+  await expect(controls.getByRole('button', { name: 'Pausa' })).toHaveAttribute('title', /el temps no avança/)
+  await expect(controls.getByRole('button', { name: 'Tornar a començar' })).toHaveAttribute('title', /.+/)
+  await expect(controls.getByRole('button', { name: 'Agulles retirades' })).toHaveAttribute('title', /temps real/)
+  await expect(controls.getByRole('button', { name: 'Un minut més' })).toHaveAttribute('title', /.+/)
+
+  // Pausa: el mateix botó passa a dir «Continuar» (sense moure's); el temps
+  // no corre, i la pantalla de bloqueig no en mostra cap
+  const caixaPausa = (await controls.getByRole('button', { name: 'Pausa' }).boundingBox())!
   await controls.getByRole('button', { name: 'Pausa' }).click()
+  await expect(controls.getByRole('button', { name: 'Pausa' })).toHaveCount(0)
+  const caixaContinuar = (await controls.getByRole('button', { name: 'Continuar' }).boundingBox())!
+  expect(Math.abs(caixaContinuar.x - caixaPausa.x)).toBeLessThan(1)
+  expect(Math.abs(caixaContinuar.width - caixaPausa.width)).toBeLessThan(1)
   const enPausa = (await rellotge.textContent())!.match(/En pausa · (\d+:\d\d)/)![1]
   await page.clock.fastForward('05:00')
   await expect(rellotge).toContainText(`En pausa · ${enPausa}`)
@@ -284,12 +305,19 @@ test('A7: temporitzador controlable: pausa, continuar, ±1 min, aturar i tornar 
   await comencarVisita(page)
   await expect(rellotge).toContainText(/Queden 1[56]:\d\d/)
 
-  // Aturar: «Retenció aturada», no sona ni es veu a la pantalla de bloqueig
-  await controls.getByRole('button', { name: 'Aturar' }).click()
-  await expect(rellotge).toContainText('Retenció aturada')
+  // «Agulles retirades»: tanca la retenció amb el temps real (sense la pausa:
+  // ~12 min); no sona ni es veu a la pantalla de bloqueig, i no es pot continuar
+  await controls.getByRole('button', { name: 'Agulles retirades' }).click()
+  await expect(rellotge).toContainText(/Agulles retirades · 1[12]:\d\d/)
+  await expect(controls.getByRole('button', { name: 'Continuar' })).toHaveCount(0)
+  await expect(controls.getByRole('button', { name: 'Pausa' })).toHaveCount(0)
   await page.clock.fastForward('20:00')
   await expect(capcalera(page)).not.toHaveClass(/retencio-acabada/)
   expect(await sons(page)).toBe(0)
+  // El temps real queda desat: en tornar a la visita, el mateix
+  await menu(page, 'Pacients').click()
+  await comencarVisita(page)
+  await expect(rellotge).toContainText(/Agulles retirades · 1[12]:\d\d/)
 
   // Tornar a començar: els minuts sencers; en acabar, sona un cop
   await controls.getByRole('button', { name: 'Tornar a començar' }).click()
@@ -297,12 +325,13 @@ test('A7: temporitzador controlable: pausa, continuar, ±1 min, aturar i tornar 
   await page.clock.fastForward('28:30')
   await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
   await expect.poll(() => sons(page)).toBe(1)
+  await expect(rellotge).toContainText('Retenció completa')
   // Acabada: es pot allargar un minut
   await controls.getByRole('button', { name: 'Un minut més' }).click()
   await expect(rellotge).toContainText(/Queden 0:[0-3]\d/)
 })
 
-test('retenció acabada amb l\'app oberta: la capçalera passa a cinabri, sona un cop i no surt cap franja', async ({ page }) => {
+test('retenció completa amb l\'app oberta: la capçalera ho marca, sonen tres pitits, no surt cap franja i, retirades les agulles, no es repeteix', async ({ page }) => {
   await comptarSons(page)
   await entrar(page)
   // Bloqueig als 30 minuts: la retenció (28) s'acaba amb l'app oberta
@@ -314,10 +343,16 @@ test('retenció acabada amb l\'app oberta: la capçalera passa a cinabri, sona u
   await comencarVisita(page)
   await capcalera(page).getByRole('button', { name: 'Agulles posades: començar' }).click()
   await page.clock.fastForward('28:30')
-  await expect(capcalera(page).getByRole('timer')).toContainText('Retenció acabada')
+  await expect(capcalera(page).getByRole('timer')).toContainText('Retenció completa')
   await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
   await expect.poll(() => sons(page)).toBe(1)
+  expect(await pitits(page)).toBe(3)
   await expect(page.locator('.franja-retencio')).toHaveCount(0)
+  // Retirades abans del minut: el so ja no es repeteix
+  await capcalera(page).getByRole('button', { name: 'Agulles retirades' }).click()
+  await expect(capcalera(page).getByRole('timer')).toContainText(/Agulles retirades · 28:[23]\d/)
+  await page.clock.fastForward('02:00')
+  expect(await sons(page)).toBe(1)
 })
 
 test('si s\'acaba amb l\'app bloquejada i es desbloqueja en una altra pantalla, la franja ho diu i porta a la visita', async ({ page }) => {
@@ -329,7 +364,7 @@ test('si s\'acaba amb l\'app bloquejada i es desbloqueja en una altra pantalla, 
   // Se'n va a una altra pantalla i l'app es bloqueja
   await menu(page, 'Agenda').click()
   await page.clock.fastForward('29:00')
-  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció acabada')
+  await expect(page.locator('.retencio-bloqueig')).toHaveText('Retenció completa')
   await page.getByLabel('Contrasenya', { exact: true }).fill(P)
   await page.getByRole('button', { name: 'Desbloquejar' }).click()
   const franja = page.locator('.franja-retencio')
@@ -337,6 +372,43 @@ test('si s\'acaba amb l\'app bloquejada i es desbloqueja en una altra pantalla, 
   await franja.getByRole('button', { name: 'Tornar a la visita' }).click()
   await expect(capcalera(page)).toHaveClass(/retencio-acabada/)
   await expect(franja).toHaveCount(0)
+})
+
+test('incidències: primer «Cap incidència» o «Hi ha hagut incidències»; el text només amb incidències, i es desa', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Dídac', 'Incidència Inventat')
+  await novaCita(page, 'Dídac', '2026-11-04', '10:00', 'cervicàlgia')
+  await comencarVisita(page)
+  await pestanya(page, 'Tancar').click()
+  const grup = page.getByRole('group', { name: 'Reaccions o incidències' })
+  const cap = grup.getByRole('radio', { name: 'Cap incidència' })
+  const hiHa = grup.getByRole('radio', { name: 'Hi ha hagut incidències' })
+  const text = grup.getByLabel('Quines incidències o reaccions')
+  // Encara res triat: cap camp de text
+  await expect(cap).not.toBeChecked()
+  await expect(hiHa).not.toBeChecked()
+  await expect(text).toHaveCount(0)
+  // En desar («Desant…» → «Desat»), res de la capçalera es mou
+  const finalitzarBoto = capcalera(page).getByRole('button', { name: 'Finalitzar visita' })
+  const abans = (await finalitzarBoto.boundingBox())!
+  await hiHa.check()
+  await text.fill('Petit hematoma a LI4 (inventat)')
+  // L'indicador sempre reserva l'amplada de «Desant…»
+  await expect(capcalera(page).locator('.estat-desat')).toHaveAttribute('data-mida', 'Desant…')
+  await expect(capcalera(page).locator('.estat-desat')).toHaveText('Desat')
+  expect((await finalitzarBoto.boundingBox())!.x).toBeCloseTo(abans.x, 0)
+  // «Cap incidència»: l'espai desapareix del tot (i el text es treu)
+  await cap.check()
+  await expect(text).toHaveCount(0)
+  await hiHa.check()
+  await expect(text).toHaveValue('')
+  await text.fill('Mareig lleu (inventat)')
+  // El motiu de l'episodi, amb majúscula
+  await expect(capcalera(page)).toContainText('Cervicàlgia')
+  await finalitzar(page, 0)
+  await pestanya(page, 'Tancar').click()
+  await expect(hiHa).toBeChecked()
+  await expect(text).toHaveValue('Mareig lleu (inventat)')
 })
 
 test('24 hores després de finalitzar, la sessió és de només lectura i s\'hi poden afegir addendes', async ({ page }) => {

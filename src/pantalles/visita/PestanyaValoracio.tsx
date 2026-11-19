@@ -4,6 +4,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Boto } from '../../components/Boto'
+import { EstatDesat } from '../../components/EstatDesat'
 import { RevisioConflictes } from '../../components/RevisioConflictes'
 import { GrupCataleg, type Especials } from '../../cataleg/components/Cataleg'
 import { etiquetaCami } from '../../cataleg/index'
@@ -112,7 +113,7 @@ export function PestanyaValoracio({
             : sessio.numero === 1
               ? v.primeraVisita
               : v.capValoracio}
-          {editable && <span role="status"> · {desant ? t.visita.desant : pendent ? '' : darrera || creada ? t.visita.desat : ''}</span>}
+          {editable && <EstatDesat className="" prefix=" · " desant={desant} pendent={pendent} desat={!!(darrera || creada)} />}
         </p>
         {valoracions.length > 1 && (
           <label className="camp camp-en-linia">

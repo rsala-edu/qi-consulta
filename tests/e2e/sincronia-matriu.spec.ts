@@ -510,7 +510,8 @@ test('h2) Drive respon 429 i 503: es torna a provar sol, cada cop esperant més,
     await pc1.page.clock.runFor(espera)
     await expect.poll(() => peticionsDe(mon, 'pc1').length).toBeGreaterThan(abans)
   }
-  await expect.poll(() => pujades(mon, pc1)).toBeGreaterThan(n)
+  // Amb la màquina carregada (tanda completa), la pujada final pot trigar més de 20 s
+  await expect.poll(() => pujades(mon, pc1), { timeout: 45_000 }).toBeGreaterThan(n)
   await expect(pindola(pc1.page)).toHaveAttribute('aria-label', 'Drive: al dia')
   expect(mon.errors).toEqual([])
 })
