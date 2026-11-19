@@ -176,6 +176,11 @@ function FerFoto({ onCancellar, onDesar }: { onCancellar(): void; onDesar(img: I
 function useImatge(id: string): { url: string | null; estat: 'carregant' | 'llest' | 'no' } {
   const magatzem = useMagatzem()
   const { driveImatges } = useSincronia()
+  // Sense dependre de la funció (canvia amb cada estat de la sincronia)
+  const drive = useRef(driveImatges)
+  useEffect(() => {
+    drive.current = driveImatges
+  }, [driveImatges])
   const [r, setR] = useState<{ url: string | null; estat: 'carregant' | 'llest' | 'no' }>({ url: null, estat: 'carregant' })
   useEffect(() => {
     let viu = true
@@ -183,7 +188,7 @@ function useImatge(id: string): { url: string | null; estat: 'carregant' | 'lles
     void (async () => {
       let jpeg = await magatzem.imatgeDe(id)
       if (!jpeg) {
-        const d = driveImatges()
+        const d = drive.current()
         const text = d ? await baixarImatge(d, id).catch(() => null) : null
         if (text) {
           await magatzem.desarImatgeBaixada(id, text)
@@ -198,7 +203,7 @@ function useImatge(id: string): { url: string | null; estat: 'carregant' | 'lles
       viu = false
       if (url) URL.revokeObjectURL(url)
     }
-  }, [id, magatzem, driveImatges])
+  }, [id, magatzem])
   return r
 }
 

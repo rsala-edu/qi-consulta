@@ -21,14 +21,20 @@ const d = t.documents
 export function useFitxerDocument(id: string): { bytes: Uint8Array | null; estat: 'carregant' | 'llest' | 'no' } {
   const magatzem = useMagatzem()
   const { driveImatges } = useSincronia()
+  // La funció canvia cada vegada que canvia l'estat de la sincronia: si fos una
+  // dependència, el fitxer es tornaria a llegir (i el PDF a dibuixar) a cada canvi
+  const drive = useRef(driveImatges)
+  useEffect(() => {
+    drive.current = driveImatges
+  }, [driveImatges])
   const [r, setR] = useState<{ bytes: Uint8Array | null; estat: 'carregant' | 'llest' | 'no' }>({ bytes: null, estat: 'carregant' })
   useEffect(() => {
     let viu = true
     void (async () => {
       let bytes = await magatzem.fitxerDocument(id)
       if (!bytes) {
-        const drive = driveImatges()
-        const text = drive ? await baixarImatge(drive, id).catch(() => null) : null
+        const d = drive.current()
+        const text = d ? await baixarImatge(d, id).catch(() => null) : null
         if (text) {
           await magatzem.desarFitxerDocumentBaixat(id, text)
           bytes = await magatzem.fitxerDocument(id)
@@ -39,7 +45,7 @@ export function useFitxerDocument(id: string): { bytes: Uint8Array | null; estat
     return () => {
       viu = false
     }
-  }, [id, magatzem, driveImatges])
+  }, [id, magatzem])
   return r
 }
 
