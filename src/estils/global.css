@@ -6050,3 +6050,20 @@ fieldset {
 .barra-tractament .boto-protocols {
   flex: none;
 }
+
+/* Plantilles i documents pendents de revisió (marca d'esborrany) */
+.etiqueta-esborrany {
+  background: color-mix(in srgb, var(--serie-2, #a86f12) 16%, transparent);
+  color: var(--tinta);
+  border: 1px dashed var(--serie-2, #a86f12);
+}
+
+.marca-esborrany {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border: 2px dashed var(--serie-2, #a86f12);
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}

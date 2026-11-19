@@ -129,5 +129,5 @@ export const PLANTILLES_INICIALS: Record<TipusConsentiment, Pick<DadesPlantilla,
 }
 
 export function plantillaInicial(tipus: TipusConsentiment, ara: string): DadesPlantilla {
-  return { tipus, ...PLANTILLES_INICIALS[tipus], versio: 1, data: ara, estat: 'pendent', nota: NOTA_ORIENTATIVA }
+  return { tipus, ...PLANTILLES_INICIALS[tipus], versio: 1, data: ara, estat: 'pendent', nota: NOTA_ORIENTATIVA, aprovadaAt: null }
 }

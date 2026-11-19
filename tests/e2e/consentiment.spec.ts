@@ -28,6 +28,7 @@ async function aprovarAcupuntura(page: Page) {
   await text.fill((await text.inputValue()).replace('[NOM I COGNOMS DE LA DOCTORA]', 'Dra. Inventada Prova'))
   await acup.getByRole('button', { name: /^Aprovar/ }).click()
   await expect(acup).toContainText('v2 · Aprovada')
+  await expect(acup).toContainText(/Aprovada el .* · Versió 2/)
   await expect(acup.getByLabel('Text')).toHaveCount(0)
   await expect(acup.getByRole('button', { name: 'Editar (crea un esborrany nou)' })).toBeVisible()
 }
@@ -75,13 +76,13 @@ test('consentiment d\'acupuntura: aprovar la plantilla, signar a la tauleta, veu
   await capcalera(page).getByRole('button', { name: 'Finalitzar visita' }).click()
   await page.getByRole('region', { name: 'Finalitzar visita' }).getByRole('button', { name: 'Confirmar i finalitzar' }).click()
 
-  // La plantilla encara no està aprovada: no es pot signar
+  // La plantilla encara no està aprovada: es pot provar, marcada com a pendent de revisió
   await menu(page, 'Pacients').click()
   await page.getByRole('link', { name: /Aina Consentiment Inventada/ }).click()
   await page.getByRole('link', { name: 'Consentiments' }).click()
   const acup = page.getByRole('article', { name: 'Acupuntura i tècniques associades' })
-  await expect(acup.locator('.etiqueta')).toHaveText('Pendent')
-  await expect(acup).toContainText('encara no està aprovada')
+  await expect(acup.locator('.etiqueta').first()).toHaveText('Pendent')
+  await expect(acup.locator('.etiqueta-esborrany')).toHaveText('Plantilla pendent de revisió')
 
   await aprovarAcupuntura(page)
   await menu(page, 'Pacients').click()
@@ -90,8 +91,9 @@ test('consentiment d\'acupuntura: aprovar la plantilla, signar a la tauleta, veu
   await acup.getByRole('link', { name: 'Signar' }).click()
   await signarAcupuntura(page)
 
-  // Vigent, amb el document a l'historial
-  await expect(acup.locator('.etiqueta')).toHaveText('Vigent')
+  // Vigent, amb el document a l'historial (sense marca d'esborrany)
+  await expect(acup.locator('.etiqueta').first()).toHaveText('Vigent')
+  await expect(acup.locator('.etiqueta-esborrany')).toHaveCount(0)
   await expect(acup.getByRole('list', { name: 'Historial' }).getByRole('listitem')).toHaveCount(1)
   await expect(acup).toContainText('Versió 2 · signat el')
   await acup.getByRole('button', { name: 'Veure el document' }).click()
@@ -122,4 +124,24 @@ test('consentiment d\'acupuntura: aprovar la plantilla, signar a la tauleta, veu
   await expect(acup).toContainText('Ho demana la pacient (inventat)')
   await expect(acup.getByRole('button', { name: 'Revocar' })).toHaveCount(0)
   await expect(acup.getByRole('link', { name: 'Signar' })).toBeVisible()
+})
+
+test('plantilla pendent de revisió: es pot provar i el document porta la marca «ESBORRANY»', async ({ page }) => {
+  await entrar(page)
+  await nouPacient(page, 'Bernat', 'Esborrany Inventat')
+  await page.getByRole('link', { name: 'Consentiments' }).click()
+  const dades = page.getByRole('article', { name: 'Tractament de dades de salut' })
+  await expect(dades.locator('.etiqueta-esborrany')).toHaveText('Plantilla pendent de revisió')
+  await dades.getByRole('link', { name: 'Signar' }).click()
+  await expect(page.getByRole('note')).toContainText('ESBORRANY – pendent de revisió')
+  const text = page.getByRole('document', { name: 'Tractament de dades de salut' })
+  await text.evaluate((e) => e.scrollTo(0, e.scrollHeight))
+  await page.getByRole('checkbox', { name: /He llegit i entès/ }).check()
+  await signar(page, page.getByRole('img', { name: /^Signatura del pacient/ }))
+  await signar(page, page.getByRole('img', { name: /^Signatura de la doctora/ }))
+  await page.getByRole('button', { name: 'Desar el consentiment signat' }).click()
+  await expect(dades.locator('.etiqueta').first()).toHaveText('Vigent')
+  await expect(dades.getByRole('list', { name: 'Historial' })).toContainText('Esborrany')
+  await dades.getByRole('button', { name: 'Veure el document' }).click()
+  await expect(page.getByRole('dialog', { name: 'Tractament de dades de salut' }).locator('.marca-esborrany')).toHaveText('ESBORRANY – pendent de revisió')
 })
